@@ -6,7 +6,7 @@ pub fn create_project(user_project_path: String) -> Result<(), fs_extra::error::
   let current_dir = env::current_dir()?;
 
   // Create the full path to the user specified path
-  let full_path = current_dir.join(user_project_path);
+  let _full_path = current_dir.join(user_project_path);
 
   // Create user specified path
   fs::create_dir_all("../../test/test_project_output")?;

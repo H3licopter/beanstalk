@@ -1,0 +1,93 @@
+#title “Beanstalk Documentation”
+#date “2024-2-4”
+#page {:
+
+# Variables
+Equals '=' is used for variable assignment. And colon : is used to indicate initialisation. If a variable is assigned a value with a colon rather than the equals symbol it becomes immutable.
+
+# Static Assignment
+{code="bs":
+    my_brain: string = “Dumb”
+    number_4: int = 69 --type is inferred as i64
+    my_brain := “thing” -- dynamically infer the type at compile time
+}
+
+Variables assigned a type will have a zero value depending on the type (numbers without an assignment become 0. A string without assignment is an empty string). 
+
+{code="bs":
+    uselessness: int --value is 0
+
+    thing :: a_collection -- Immutable reference
+    thing := a_collection -- mutable reference
+    thing := a_collection.copy() -- deep copy, inherits type
+
+    number: int = 30.0
+    number_copy := number 
+}
+
+# Immutable Variables
+
+{code="bs":
+    -- Int constant (type inferred at compile time)
+    self_worth :: 0
+
+    -- Float constant
+    my_iq :: 0.0
+
+    best_number: int : 69
+
+    -- Int constant evaluated at compile time
+    weird_num :: 69^420
+}
+
+If you are creating a variable and want it to be formatted over multiple lines, you must terminate it with a semicolon.
+
+{code="bs":
+    -- Multi-line statement, must be terminated with a semicolon
+    coolArray: int[]: 
+        0, 1, 2, 
+        3, 4, 5, 
+        6, 7, 8;
+
+    do_thing: ():
+    state = STATE.paused;
+}
+
+# Data Types
+All data type keywords contain methods from the standard library for common manipulation of types. 
+The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
+
+| TYPES | DESCRIPTION | ZERO VALUE |
+| -------- | -------- | --------   |
+| int     | Data 2   | 0           |  
+| float   | Data 5   | 0           |  
+| decimal | Data 8   | 0           |  
+| string  | Data 11  | ""          |  
+| rune    | Data 14  | 0           |
+| bool    | Data 17  | false       |
+| scene   | Data 20  | []          |
+| []      | Data 23  | []          |
+| choice  | Data 26  |  error      |
+| type    | Data 29  | error       |
+| error   | Data 32  | error       |
+
+Type will operate as a generic when specified as the type of a function arg. 
+It's also used for creating Objects and choices, using the same syntax as creating constant variables.
+
+# Strings
+String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
+
+“Double quotes for a utf8 string literal”
+
+Curly braces are used to add expressions into the string. 
+
+“9 is {5 + 4}” -- 9 is 9
+
+“9 `“is” {5 + 4}`” -- 9 “is” {5 + 4}
+
+Backticks are used for RAW strings and escaping special characters in strings. Anything inside of the backticks including newlines and curly braces will become part of the string. To escape a backtick it must be preceded with a backslash \.
+
+# Runes
+Rune characters are equivalent to Int32 but are their own specific type. 
+
+cool_emoji : rune: 😂

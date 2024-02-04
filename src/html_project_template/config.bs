@@ -5,7 +5,7 @@
 
 -- Website Defaults
 #url "localhost:3069"
-#title "Website Title"
+#default_title "Website Title"
 #description "Website Description"
 #page_type "website"
 #favicons "./dist/images/favicons"

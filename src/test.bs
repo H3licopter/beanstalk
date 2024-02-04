@@ -1,0 +1,22 @@
+-- Test template file
+rand_num := 123
+another_rand_num :: 42.69
+
+sumNumbers : float(num1, num2) :
+    => num1 += num2 !err:
+        print("Error: ", err)
+        => 0.0
+;
+
+sumNumbers(randNum, anotherRandNum)
+
+for n := 69 to 0 as n -= 1 : print("lel");
+
+--
+Multiline Comment
+--
+
+#page {:
+
+# Some template stuff
+{: nested markdown element}

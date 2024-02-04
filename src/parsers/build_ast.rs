@@ -13,7 +13,7 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
       }
 
       // New Function or Variable declaration
-      Token::Variable(name) => {
+      Token::Variable(_name) => {
         current_token_index += 1;
       }
 

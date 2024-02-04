@@ -2,9 +2,9 @@ use crate::{settings::get_meta_config, ast::AstNode};
 use super::generate_html::create_html_boilerplate;
 
 // Parse ast into valid JS, HTML and CSS
-pub fn parse(ast: Vec<AstNode>) -> String {
+pub fn parse(_ast: Vec<AstNode>) -> String {
   let js = String::new();
-  let wasm = String::new();
+  let _wasm = String::new();
   let html = String::new();
   let css = String::new();
 

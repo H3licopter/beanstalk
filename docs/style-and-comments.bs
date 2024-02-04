@@ -1,0 +1,31 @@
+#title “Beanstalk Documentation”
+#date “2024-2-4”
+#page {:
+
+# Style Guide
+The recommended style guide is:
+- snake_case for variables
+- camelCase for functions
+- PascalCase for objects
+- SCREAMING_SNAKE_CASE for Choices
+- kebab-case for file names
+
+Scope is closed using a newline in the case of inline statements, and a semicolon ; in all other cases. 
+The only exception is templates using curly braces to determine scope. 
+
+The scope is usually closed with the semicolon on the final line of that scope. 
+If multiple scopes are closing at once, the semicolons then have their own line to make it visually clearer which scopes are closing.
+
+# Comments
+Comments use a double minus sign '--'. 
+
+If you put a newline immediately after a comment mark, the comment will become multi line and must be closed with - again. 
+Comments are read by the compiler and can be nested.
+
+-- normal comment
+
+--
+Multiline comment
+
+Woo
+--
