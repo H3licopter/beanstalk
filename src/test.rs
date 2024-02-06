@@ -7,7 +7,7 @@ use crate::parsers;
 pub fn test_build() -> Result<(), Box<dyn Error>> {
     // Read content from a test file
     println!("READNING TEST FILE");
-    let content = fs::read_to_string("/test.bs")?;
+    let content = fs::read_to_string("src/test.bs")?;
     
     // Tokenize File
     println!("TOKENIZING FILE");

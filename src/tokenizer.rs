@@ -16,13 +16,6 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
     tokens
 }
 
-// Checking if the variable name it valid
-fn is_valid_identifier(s: &str) -> bool {
-    // Check if the string is a valid identifier (variable name)
-    s.chars().next().map_or(false, |c| c.is_alphabetic() || c == '_') &&
-        s.chars().all(|c| c.is_alphanumeric() || c == '_')
-}
-
 fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode) -> Token {
     let mut current_char: char = chars.next().unwrap_or('\0');
 
@@ -319,7 +312,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode)
 
     if current_char.is_alphabetic() {
         token_value.push(current_char);
-        keyword_or_variable(&mut token_value, chars, tokenize_mode);
+        return keyword_or_variable(&mut token_value, chars, tokenize_mode);
     }
 
     Token::EOF
@@ -392,10 +385,17 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
     }
     
     if is_valid_identifier(&token_value) {
-        return Token::Variable(token_value.clone());
+        return Token::Variable(token_value.to_string());
     } else {
         return Token::Error(format!("Invalid variable name: {}", token_value));
     }
+}
+
+// Checking if the variable name it valid
+fn is_valid_identifier(s: &str) -> bool {
+    // Check if the string is a valid identifier (variable name)
+    s.chars().next().map_or(false, |c| c.is_alphabetic() || c == '_') &&
+        s.chars().all(|c| c.is_alphanumeric() || c == '_')
 }
 
 // Create string of markdown content, only escaping when a closed curly brace is found
