@@ -1,0 +1,25 @@
+#title “Beanstalk Documentation”
+#date “2024-2-5”
+#page {:
+
+# Choices (enums)
+Choices are created by setting a variable type as an choice. 
+Choices are written in screaming snake case. 
+Each choice can have a specified data type associated with it that allows you to easily store and access values equal to that Choice.
+
+{code="bs":
+    STATE: choice: 
+        Paused,
+        Running,
+        ErrorMessage: String,
+        Person: Person;
+
+
+    now := STATE[Running]
+
+    if now is STATE[Running]:
+        thing := STATE[Person(
+            name = “Cringelord”
+        )];
+    ;
+}

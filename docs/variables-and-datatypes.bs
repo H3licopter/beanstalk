@@ -57,19 +57,20 @@ If you are creating a variable and want it to be formatted over multiple lines, 
 All data type keywords contain methods from the standard library for common manipulation of types. 
 The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
 
-| TYPES | DESCRIPTION | ZERO VALUE |
-| -------- | -------- | --------   |
-| int     | Data 2   | 0           |  
-| float   | Data 5   | 0           |  
-| decimal | Data 8   | 0           |  
-| string  | Data 11  | ""          |  
-| rune    | Data 14  | 0           |
-| bool    | Data 17  | false       |
-| scene   | Data 20  | []          |
-| []      | Data 23  | []          |
-| choice  | Data 26  |  error      |
-| type    | Data 29  | error       |
-| error   | Data 32  | error       |
+{table 3:
+    {: Type} {: Description} {: Zero Value}
+    {: int} {xcol: These numerical types are 64 bit by default but support custom sizes} {xcol: 0}
+    {: float} 
+    {: decimal} {: A precise number of any size. Memory inefficiency and slower calculation speeds in ex change for precision}
+    {: string} {: UTF-8} {: ""}
+    {: rune} {: Unicode char (rune) is like an Int32} {: 0}
+    {: bool} {: Including true and false as types} {: false}
+    {: scene} {: The templating syntax of Beanstalk} {xcol: []}
+    {: []} {: Collection}
+    {: choice} {: Rust style enums} {xcol 2: error}
+    {: type} {: For creating new objects}
+    {: error} {: Contains a string detailing the error}
+}
 
 Type will operate as a generic when specified as the type of a function arg. 
 It's also used for creating Objects and choices, using the same syntax as creating constant variables.

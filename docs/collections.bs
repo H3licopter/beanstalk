@@ -1,0 +1,98 @@
+#title “Beanstalk Documentation”
+#date “2024-2-5”
+#page {:
+
+# Collections
+Each type of collection has a slightly different syntax, but the type is always appended with square brackets [] to let the compiler know that the variable is a collection of data. All collections, including objects have their properties accessed using square brackets.
+
+All methods and traits are accessed using the dot syntax instead, properties are not accessed this way. 
+Anonymous collection literals can be created by just using regular brackets with values in them, creating a Lambda that returns those values.
+
+## Objects
+An object can be a collection of properties and methods that also acts as an interface for new types. 
+
+Properties can be accessed on the object the same as any other collection, by using square brackets. 
+Methods are accessed differently, using the dot syntax. 
+
+When you create a new object, you are also creating a new type that can be used to define the shape of other new objects and what default properties and methods those new objects will have.
+
+When you assign an immutable object (created with colons rather than colon then equals) to another object, the old object will automatically replace any mutable overlapping properties without changing any existing ones that have not been specified. 
+By default, trying to add or extend any properties or methods this way will throw a type error. If the object is mutable, then assigning it to another object will just overwrite matching properties and ignore everything else without throwing an error.
+
+Objects can also contain other objects. The object can refer to its current instance using the self keyword. 
+
+Creating a new object is done by using the Type keyword when initializing the type. 
+
+{code="bs":
+    Person: type: 
+    incremenAge: int(a: int): self[age] += a,
+    name :: “Gary”,
+    age := 69,
+    occupation :: “Grave Digger”;
+
+    Bob: Person: 
+    name :: “Bob”,
+    age := 42,
+    occupation :: “Web Developer”;
+}
+
+Accessing fields on structs works the same as Arrays, available properties become visible when opening a new square bracket. Methods and traits are always accessed using the dot syntax instead.
+
+{code="bs":
+    Person[name] -- returns “Gary”
+    Bob.incrementAge(1) -- returns 43
+    Tuples
+    Tuples are the simplest form of collection. They are an immutable set of values. A tuple can is created by assigning a constant variable without any specified type more than 1 value separated by commas. These values can optionally have a type definition. 
+
+    -- tuple, looks the same as initializing multiple values to one variable
+    tuple :: 
+    1, 
+    float: 3, 
+    6, 
+    "random string", 
+    false;
+
+    print(immutable_tuple[2]) -- 6
+}
+
+## Arrays
+The same syntax but with mutable variables creates a fixed size array of fixed type that automatically infers the type and size from the assignment.
+
+{code="bs":
+    -- Array of fixed size and type determined by assignment. Size and type of the array cannot be changed. In this case the array must always contain two floats
+    vect := 4.0, -3.0
+}
+
+Specifying the type allows for dynamically sized arrays. You can omit the type in the array to infer it at compile time. 
+
+{code="bs":
+    -- Dynamically sized string array, type inferred as s8 at compile time
+    fears: []: “The Unknown”, “Compiler Errors”, “Imposter's Syndrome” 
+
+    Elements cannot be removed, only overwritten in fixed size arrays. 
+
+    integers: int[] -- Creates an empty, dynamically sized array that can only contain integers
+
+    -- 
+    An array of UTF-8 strings with a fixed size of 69 elements
+    Fills unassigned indexes of the array with the type's default value of empty string.
+    Attempting to remove elements from fixed size arrays will result in an error
+    --
+    fears: string[69] = “Javascript”, “C++”, “Cobol”
+    fears[0] -- returns ‘Javascript'
+    fears[69] -- returns out of bounds error, 69 is the number of elements, so 68 is the last element in the array
+
+
+    bad_things[30] -- returns ? (None)
+
+    -- A dynamically sized array that can contain strings, booleans and integers. These types are inferred from the assignment at compile time. Only these types will be acceptable. 
+    cool: []: “Beanstalk”, “Beans”, false, 0
+}
+
+## Array Slices
+Slices are references to a subset of an existing array. To create a slice, you create a new variable and assign it to an existing array, but you can specify a range of elements that the slice can reference. 
+
+{code="bs":
+    array_slice := big_old_array[32 to 49]
+    array_slice[0] -- returns the 32nd element of big_old_array
+}

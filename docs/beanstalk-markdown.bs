@@ -27,5 +27,5 @@ If the file is not part of the pages directory, you can use #content or #compone
     # component
     { blue: can now use “component_name” as a scene property across the project }
 
-    The scene will be automatically closed if it reaches the end of the file. So files that are entirely the content of a scene don’t have to be indented.
+    The scene will be automatically closed if it reaches the end of the file. So files that are entirely the content of a scene don't have to be indented.
 }

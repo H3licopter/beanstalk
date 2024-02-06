@@ -8,7 +8,7 @@ The recommended style guide is:
 - camelCase for functions
 - PascalCase for objects
 - SCREAMING_SNAKE_CASE for Choices
-- kebab-case for file names
+- kebab-case for file names and styles
 
 Scope is closed using a newline in the case of inline statements, and a semicolon ; in all other cases. 
 The only exception is templates using curly braces to determine scope. 

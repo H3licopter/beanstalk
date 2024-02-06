@@ -1,0 +1,31 @@
+#title “Beanstalk Documentation”
+#date “2024-2-5”
+#page {:
+
+# Keywords
+
+## Logical Operators
+The 'is' keyword is used to check equality. Not ==. The ‘and / ‘or’ keywords are used for logical and / or and 'not' is used to invert a truthy value to falsy or vice versa.
+
+Only false, ! and ? are falsy values. Any other check with an if statement will return true. 
+
+## Bitwise operations
+band –Bitwise and
+bor  –Bitwise or
+bnot  –Bitwise not
+xor  –Bitwise xor
+bshift  –Bitwise signed right shift
+zshift –Bitwise zero fill right shift
+lshift –Bitwise zero fill left shift
+
+{table 3:
+    {: Operator} {: Description} {: Precedence}
+    {: **} {: Exponents} {xcol: 8}
+    {: //} {: Roots}
+    {: *} {: Multiplication} {xcol 3: 7}
+    {: /} {: Division}
+    {: %} {: Modulo (truncated)}
+    {: %%} {: Remainder (floored)}
+    {: +} {: Sum} {xcol: 6}
+    {: -} {: Subtraction}
+}
