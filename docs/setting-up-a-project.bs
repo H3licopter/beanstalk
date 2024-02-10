@@ -1,4 +1,4 @@
-#title “Beanstalk Documentation”
+#title “Starting a Beanstalk Project"
 #date “2024-2-4”
 #page {:
 

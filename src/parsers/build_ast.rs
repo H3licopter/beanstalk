@@ -1,38 +1,48 @@
 use crate::{ast::AstNode, Token};
 
 pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
-  let mut ast = Vec::new();
-  let mut current_token_index = start_index;
+    let mut ast = Vec::new();
+    let mut  i = start_index;
 
-  while current_token_index < tokens.len() {
-    match &tokens[current_token_index] {
-      
-      Token::Comment(value) => {
-        ast.push(AstNode::Comment(value.clone()));
-        current_token_index += 1;
-      }
+    while i < tokens.len() {
+        match &tokens[i] {
+            Token::Comment(value) => {
+                ast.push(AstNode::Comment(value.clone()));
+            }
 
-      // New Function or Variable declaration
-      Token::Variable(_name) => {
-        current_token_index += 1;
-      }
+            // New Function or Variable declaration
+            Token::Variable(name) => {
 
-      // Pure Expression or Lambda
-      Token::OpenBracket => {
-        current_token_index += 1;
-      }
+                // If already initialised, return a reference ast node
+                if tokens
+                    .iter()
+                    .rev()
+                    .skip(tokens.len() - i - 1)
+                    .any(|t| t == &Token::Variable(name.clone())) {
+                        ast.push(AstNode::Ref());
+                    }
+                
+                
+                i += 1;
+                match tokens[i] {
+                    // Parse Type definition
+                    Token::Initialise => {
 
-      Token::Return => {
-        current_token_index += 1;
-      }
+                    }
 
-      // End of Function or Variable declaration
-      // Or stuff that hasn't been implemented yet
-      _ => {
-        current_token_index += 1;
-      }
+                    _ => ()
+                }
+            }
+
+            // Or stuff that hasn't been implemented yet
+            _ => {
+            
+            }
+        }
+
+        i += 1;
+        
     }
-  }
 
-  (ast, current_token_index)
+    (ast, i)
 }

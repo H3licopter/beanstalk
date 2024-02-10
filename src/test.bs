@@ -1,22 +1,11 @@
--- Test template file
-rand_num := 123
-another_rand_num :: 42.69
+-- Test code comment
 
-sumNumbers : float(num1, num2) :
-    => num1 += num2 !err:
-        print("Error: ", err)
-        => 0.0
-;
+concatStrings : string(str1, str2) : str1 + str2
 
-sumNumbers(randNum, anotherRandNum)
-
-for n := 69 to 0 as n -= 1 : print("lel");
-
---
-Multiline Comment
---
-
-#page {:
-
-# Some template stuff
-{: nested markdown element}
+{:
+    # Some template stuff
+    {: 
+        nested markdown element
+        {: nested level 2}
+    }
+}

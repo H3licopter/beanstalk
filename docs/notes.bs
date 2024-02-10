@@ -1,0 +1,21 @@
+#title “Language Notes”
+#date “2024-2-5”
+#page {:
+
+# Development Notes:
+- Should scenes have closing keywords instead? so it's more obvious where a scene is closed, 
+or does this not matter in practice?
+
+# Future Extensions
+## Reserved Keywords
+Reserved keywords and symbols to be potentially implemented in the future:
+
+@ - HTTP and sockets, server communication etc. 
+defer
+& - HTTP and sockets, server communication etc. 
+<< - Concurrency Channel
+>> - Concurrency Channel
+class - potentially for object oriented stuff or to just meme on programmers trying to use classes
+constructor - potentially for object oriented stuff or to just meme on programmers trying to use classes
+Concurrency, Channels and Async
+Borrowing heavily from Go, but the << syntax is used to get a value from a channel. A new channel is created using the >> syntax

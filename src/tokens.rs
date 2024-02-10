@@ -1,4 +1,4 @@
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum TokenizeMode {
     Normal,
     Markdown,
@@ -131,8 +131,8 @@ pub enum Token {
     CloseArray,
 
     // Scenes
-    CurlyOpen,
-    CurlyClose,
+    SceneOpen,
+    SceneClose,
     SceneKeyword(String),
     Markdown(String),
     Href,

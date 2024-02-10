@@ -1,4 +1,4 @@
-#title “Beanstalk Documentation”
+#title “Collections”
 #date “2024-2-5”
 #page {:
 
@@ -25,32 +25,34 @@ Creating a new object is done by using the Type keyword when initializing the ty
 
 {code="bs":
     Person: type: 
-    incremenAge: int(a: int): self[age] += a,
-    name :: “Gary”,
-    age := 69,
-    occupation :: “Grave Digger”;
+        incremenAge: int(a: int): self[age] += a,
+        name :: “Gary”,
+        age := 69,
+        occupation :: “Grave Digger”;
 
     Bob: Person: 
-    name :: “Bob”,
-    age := 42,
-    occupation :: “Web Developer”;
+        name :: “Bob”,
+        age := 42,
+        occupation :: “Web Developer”;
 }
 
 Accessing fields on structs works the same as Arrays, available properties become visible when opening a new square bracket. Methods and traits are always accessed using the dot syntax instead.
 
+## Tuples
+Tuples are the simplest form of collection. They are an immutable set of values. A tuple can is created by assigning a constant variable without any specified type more than 1 value separated by commas. These values can optionally have a type definition. 
+
 {code="bs":
     Person[name] -- returns “Gary”
     Bob.incrementAge(1) -- returns 43
-    Tuples
-    Tuples are the simplest form of collection. They are an immutable set of values. A tuple can is created by assigning a constant variable without any specified type more than 1 value separated by commas. These values can optionally have a type definition. 
+
 
     -- tuple, looks the same as initializing multiple values to one variable
     tuple :: 
-    1, 
-    float: 3, 
-    6, 
-    "random string", 
-    false;
+        1, 
+        float: 3, 
+        6, 
+        "random string", 
+        false;
 
     print(immutable_tuple[2]) -- 6
 }
@@ -64,12 +66,12 @@ The same syntax but with mutable variables creates a fixed size array of fixed t
 }
 
 Specifying the type allows for dynamically sized arrays. You can omit the type in the array to infer it at compile time. 
+Elements cannot be removed, only overwritten in fixed size arrays. 
 
 {code="bs":
     -- Dynamically sized string array, type inferred as s8 at compile time
     fears: []: “The Unknown”, “Compiler Errors”, “Imposter's Syndrome” 
 
-    Elements cannot be removed, only overwritten in fixed size arrays. 
 
     integers: int[] -- Creates an empty, dynamically sized array that can only contain integers
 

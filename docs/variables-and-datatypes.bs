@@ -1,4 +1,4 @@
-#title “Beanstalk Documentation”
+#title “Variables and Datatypes”
 #date “2024-2-4”
 #page {:
 
@@ -26,7 +26,6 @@ Variables assigned a type will have a zero value depending on the type (numbers 
 }
 
 # Immutable Variables
-
 {code="bs":
     -- Int constant (type inferred at compile time)
     self_worth :: 0
@@ -84,7 +83,9 @@ Curly braces are used to add expressions into the string.
 
 “9 is {5 + 4}” -- 9 is 9
 
-“9 `“is” {5 + 4}`” -- 9 “is” {5 + 4}
+`9 “is” {5 + 4}` -- 9 “is” {5 + 4}
+
+"string literal with \{curly braces} in it that is escaped" 
 
 Backticks are used for RAW strings and escaping special characters in strings. Anything inside of the backticks including newlines and curly braces will become part of the string. To escape a backtick it must be preceded with a backslash \.
 

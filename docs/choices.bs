@@ -1,4 +1,4 @@
-#title “Beanstalk Documentation”
+#title “Choices (enums)”
 #date “2024-2-5”
 #page {:
 

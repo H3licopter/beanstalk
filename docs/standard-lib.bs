@@ -1,0 +1,67 @@
+#title “Standard Library”
+#date “2024-2-5”
+#page {:
+
+# Standard Library
+Standard library in Beanstalk comprises a large number of functions added to the global scope that are automatically added to projects, but can be explicitly excluded using the #exclude directive.
+
+## HTML project standard library
+When starting a new HTML project, Beanstalk will implicitly import relevant scene properties and global keywords. Other keywords that are added into the global scope include:
+
+*Global keywords:*
+- print
+- window
+
+## Scene Properties:
+
+### Style
+{table 2:
+    {: Property} {: Description}
+    
+    {: style}
+    {: theme}
+    {: size}
+    {: img}
+    {: pad}
+    {: space}
+    {: rgb}
+    {: hex}
+    {: code}
+}
+
+### Interactive 
+{table 2:
+    {: Property} {: Description}
+
+    {: input}
+    {: audio}
+    {: video}
+    {: click}
+    {: form}
+    {: option}
+    {: dropdown}
+}
+
+### HTTP 
+{table 2:
+    {: Property} {: Description}
+
+    {: post}
+    {: get}
+    {: delete}
+    {: swap}
+}
+
+### Dynamic
+{table 2: 
+    {: Property} {: Description}
+
+    {: slot}
+    {: canvas}
+}
+
+
+
+
+
+

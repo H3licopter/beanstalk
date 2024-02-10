@@ -6,21 +6,23 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut chars: Peekable<Chars<'_>> = source_code.chars().peekable();
     let mut tokenize_mode: TokenizeMode = TokenizeMode::Normal;
+    let mut md_nesting_level: &mut i64 = &mut 0;
 
-    let mut token: Token = get_next_token(&mut chars, &mut tokenize_mode);
+    let mut token: Token = get_next_token(&mut chars, &mut tokenize_mode, &mut md_nesting_level);
     while token != Token::EOF {
         tokens.push(token);
-        token = get_next_token(&mut chars, &mut tokenize_mode);
+        token = get_next_token(&mut chars, &mut tokenize_mode, &mut md_nesting_level);
     }
 
     tokens
 }
 
-fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode) -> Token {
-    let mut current_char: char = chars.next().unwrap_or('\0');
+fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode, md_nesting_level: &mut i64) -> Token {
+    let mut current_char = chars.next().unwrap_or('\0');
+    if current_char == '\0' { return Token::EOF; }
 
     if tokenize_mode == &TokenizeMode::Markdown {
-        return tokenize_markdown(chars, tokenize_mode);
+        return tokenize_markdown(chars, md_nesting_level);
     }
 
     // Newlines must be tokenized for inline statements and scenes
@@ -28,6 +30,23 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode)
     // Skip whitespace
     while current_char.is_whitespace() {
         current_char = chars.next().unwrap_or('\0');
+    }
+
+    // SCENES
+    // Starts a new Scene Tree Node
+    if current_char == '{' {
+        if tokenize_mode == &TokenizeMode::Normal || tokenize_mode == &TokenizeMode::Markdown {
+            *tokenize_mode = TokenizeMode::SceneHead;
+        }
+        return Token::SceneOpen
+    }
+    if current_char == '}' {
+        if md_nesting_level > &mut 1 {
+            *tokenize_mode = TokenizeMode::Markdown;
+        } else {
+            *tokenize_mode = TokenizeMode::Normal;
+        }
+        return Token::SceneClose
     }
 
     let mut token_value: String = String::new();
@@ -83,10 +102,8 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode)
     if current_char == ':' {
         if tokenize_mode == &TokenizeMode::SceneHead {
             *tokenize_mode = TokenizeMode::Markdown;
-        } else {
-            return Token::Error(format!("Invalid token: {}", current_char));
         }
-        return Token::Initialise 
+        return Token::Initialise
     }
 
     // Comments / Subtraction
@@ -138,8 +155,6 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode)
                         }
                     }
                 }
-
-
 
             // Subtraction
             } else if next_char == '=' {
@@ -255,18 +270,6 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode)
     if current_char == '[' { return Token::OpenArray }
     if current_char == ']' { return Token::CloseArray }
 
-    // Scenes
-    // Puts Tokenizer into SceneHead mode
-    if current_char == '{' { 
-        if tokenize_mode == &TokenizeMode::Normal {
-            *tokenize_mode = TokenizeMode::SceneHead;
-        } else {
-            return Token::Error(format!("Invalid token: {}", current_char));
-        }
-        return Token::CurlyOpen 
-    }
-    if current_char == '}' { return Token::CurlyClose }
-
     if current_char == '@' { return Token::Href }
     
     //Meta. Compile time things, configuration and metaprogramming
@@ -315,7 +318,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode)
         return keyword_or_variable(&mut token_value, chars, tokenize_mode);
     }
 
-    Token::EOF
+    Token::Error("Invalid Token Used".to_string())
 }
 
 // Nested function because may need multiple searches for variables.
@@ -399,13 +402,23 @@ fn is_valid_identifier(s: &str) -> bool {
 }
 
 // Create string of markdown content, only escaping when a closed curly brace is found
-fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode) -> Token {
+fn tokenize_markdown(chars: &mut Peekable<Chars>, md_nesting_level: &mut i64) -> Token {
     let mut markdown_content = String::new();
     while let Some(&next_char) = chars.peek() {
+        // Check for end of markdown or additional nesting
+
+        if next_char == '\0' { 
+            return Token::EOF
+        }
         if next_char == '}' {
             chars.next();
-            *tokenize_mode = TokenizeMode::Normal;
+            *md_nesting_level -= 1;
             break;
+        } else if next_char == '{' {
+            *md_nesting_level += 1;
+            break;
+
+        // Parse special markdown syntaxes
         } else {
             markdown_content.push(chars.next().unwrap());
         }

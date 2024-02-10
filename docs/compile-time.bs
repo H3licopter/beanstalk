@@ -1,0 +1,12 @@
+#title “Compile Time”
+#date “2024-2-5”
+#page {:
+
+# Compile Time
+The # symbol can be used to tell the compiler various extra commands and access more keywords. 
+
+## – Will execute the following code at compile time only up until the scope is closed with another double hash
+#export – Will prevent imports from accessing a function
+#global – Makes the contents of the current file globally accessible across the project.
+#defer – Defers the execution of the following expression or statement until the end of the containing function’s scope
+

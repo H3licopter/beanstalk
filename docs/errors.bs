@@ -1,0 +1,44 @@
+#title “Errors”
+#date “2024-2-5”
+#page {:
+
+# Error Handling
+Errors are treated as values. Any function can return an error as its last return value. 
+
+The ! operator can append any statement or expression and create a new scope to catch and handle errors by checking if the previous expression or function returned an error as its last value. 
+
+This is a shorthand for the error != nil syntax in Go.
+
+You can give the error a variable name and open a new scope with a colon to handle the error. If the error handling returns a value, the expression or function that returned the error will return that value instead.
+
+If an error happens in a function, any values will be assigned their zero value if assignment fails. 
+
+Errors can be explicitly passed up the call stack by using a ! without returning a value.
+
+Double bang !! will force the program to panic and halt if the previous expression or function call returns an error.
+
+{code="bs":
+  – Always returns a string even if an error is thrown by getNetworkRequest()
+  – The program will print the error and continue 
+  getURL: string(): 
+  -> getNetworkRequest() !err:
+  print(“Error getting network request, using backup string. {err}”)
+  -> “example.com”;
+  ;
+
+  – Returns an error to the calling function, just providing information about the error.
+  getURL: string(): 
+  getNetworkRequest() !: print(“Network Request Error”)
+
+  – Default case in the case that getURL returns an error as one of its values.
+  dodgyFunction: string(wow: string, bad_stuff: string):
+    getURL() !: => “example.com”
+
+  – Allowing the function to return a zero value and an error
+  dodgyFunction: string?(wow: string, bad_stuff: string):
+    => getURL() !?
+}
+
+
+
+
