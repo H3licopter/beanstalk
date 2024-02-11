@@ -353,13 +353,17 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
             if token_value == "or" { return Token::Or }
 
             // Data Types
-            if token_value == "int" { return Token::IntType }
-            if token_value == "string" { return Token::StringType }
-            if token_value == "float" { return Token::FloatType }
-            if token_value == "bool" { return Token::BoolType }
-            if token_value == "type" { return Token::TypeType }
-            if token_value == "true" { return Token::True }
-            if token_value == "false" { return Token::False }
+            match token_value.as_str() {
+                "int" => return Token::Type(token_value.to_string()),
+                "float" => return Token::Type(token_value.to_string()),
+                "string" => return Token::Type(token_value.to_string()),
+                "rune" => return Token::Type(token_value.to_string()),
+                "bool" => return Token::Type(token_value.to_string()),
+                "decimal" => return Token::Type(token_value.to_string()),
+                "scene" => return Token::Type(token_value.to_string()),
+                _ => {}    
+            
+            }
 
             // only bother tokenizing / reserving these keywords if inside of a scene head
             if tokenize_mode == &TokenizeMode::SceneHead {

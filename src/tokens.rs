@@ -58,14 +58,7 @@ pub enum Token {
     As, // For default args in functions
 
     // Type Declarations
-    IntType,
-    FloatType,
-    StringType,
-    Enum,
-    RuneType,
-    BoolType,
-    NoneType, // for "?" data type
-    TypeType,
+    Type(String),
 
     True,
     False,
