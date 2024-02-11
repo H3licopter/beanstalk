@@ -28,27 +28,27 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
 
                     // check type or infer type
                     i += 1;
-                    let mut type_name = "int";
+                    let mut type_name = "function";
                     match &tokens[i] {
-                        // Infer type (CONSTANT)
+                        // Infer type (CONSTANT VARIABLE)
                         Token::Initialise => {
 
                         }
-                        // Infer type (MUTABLE)
+                        // Infer type (MUTABLE VARIABLE)
                         Token::Assign => {
 
                         }
                         // Type Declaration
                         Token::Type(token_type) => {
                             if &tokens[i + 1] == &Token::OpenBracket {
-                                type_name = "function";
+                                new_function(tokens, i);
                             } else {
                                 type_name = token_type; 
                             }
                         }
 
                         Token::OpenBracket => {
-                            type_name = "function";
+                            new_function(tokens, i);
                         }
 
                         _ => {
@@ -70,4 +70,41 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
     }
 
     (ast, i)
+}
+
+fn new_function(tokens: &Vec<Token>, start_index: usize) -> (AstNode, usize) {
+    let mut i = start_index;
+    let mut function_name = String::new();
+    let mut function_args = Vec::new();
+
+    // Get function name
+    match &tokens[i] {
+        Token::Variable(name) => {
+            function_name = name.clone();
+        }
+        _ => {
+            return (AstNode::Error("Expected function name".to_string()), i);
+        }
+    }
+
+    // Get function args
+    i += 1;
+    if &tokens[i] != &Token::OpenBracket {
+        return (AstNode::Error("Expected '(' for function args".to_string()), i);
+    }
+
+    i += 1;
+    while &tokens[i] != &Token::CloseBracket {
+        match &tokens[i] {
+            Token::Variable(name) => {
+                function_args.push(AstNode::VariableDeclaration(name.clone(), Box::new(AstNode::Ref("".to_string()))));
+            }
+            _ => {
+                return (AstNode::Error("Expected variable name for function args".to_string()), i);
+            }
+        }
+        i += 1;
+    }
+
+    (AstNode::Function(function_name, function_args), i)
 }

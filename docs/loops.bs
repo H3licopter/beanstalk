@@ -7,35 +7,40 @@ Only 1 keyword for loops ‘for’.
 
 Using the ‘in’ keyword, you can specify an integer, float or collection to iterate through or define a new integer, float or collection. 
 
-Finally, if your iterator is not a collection, you can add the ‘as’ keyword to specify how the iterator will mutate for each step of the loop.
+The 'to' keyword defines a range for the loop.
+
+Finally, you can add the ‘as’ keyword to specify how the iterator will mutate for each step of the loop.
 
 {code="bs": 
-    -- Basic python style loop
     for thing in things:
     print(‘ye’);
 
     -- While style loop
     thing = 2
     for thing < 5:
-    print(num)
-    thing += 1;
+        print(num)
+        thing += 1
+    ;
 
-    --  Defining the iterator, use the ‘to’  keyword when going through a range rather than a collection
-    for n to 5: cringe(i)
+    --  Defining the iterator, use the ‘to’ keyword to define a range
+    for n in 0 to 5: cringe(i)
 
     -- loop also using the ‘as’ keyword to describe how the new iterator will change each loop
-    for n := 5 to 0 as n -= 1:
-    cringe(i);
+    for n in 12 to 0 as -1:
+        cringe(i)
+    ;
 
     for i to text_array.length:
-    print(text_array[i]);
+        print(text_array[i])
+    ;
 
     --- infinite loop
-    for p is true: print(“:(“)
+    for p is true: print(":(")
 
     --- for loop as an assignment expression
     me: string = for fact in fact_array:
-    if fact is “not cool”:
-    return fact;
-    “cool”;
+        if fact is “not cool”:
+            => fact
+        ;
+    ;
 }

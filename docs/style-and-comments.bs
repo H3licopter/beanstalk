@@ -10,6 +10,8 @@ The recommended style guide is:
 - SCREAMING_SNAKE_CASE for Choices
 - kebab-case for file names and styles
 
+4 spaces are recommended for indentation.
+
 Scope is closed using a newline in the case of inline statements, and a semicolon ; in all other cases. 
 The only exception is templates using curly braces to determine scope. 
 
