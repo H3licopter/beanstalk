@@ -36,9 +36,11 @@ pub enum Token {
     Variable(String),
     StringLiteral(String),
     RawStringLiteral(String),
-    CharacterLiteral(char),
+    RuneLiteral(char),
     IntLiteral(i64),
     FloatLiteral(f64),
+    DecLiteral(f64), // Will eventually be some bignum type thing
+    BoolLiteral(bool),
     
     // Stucture of Syntax
     Newline,
@@ -52,16 +54,29 @@ pub enum Token {
     Initialise, // :
     Assign, // =
 
-    // Functions
+    // Scope
     OpenBracket,
     CloseBracket,
+    CollectionOpen,
+    CollectionClose,
+    SceneOpen,
+    SceneClose,
+
+    //Functions
     As, // For default args in functions
 
     // Type Declarations
-    Type(String),
-
+    TypeInt,
+    TypeFloat,
+    TypeDecimal,
+    TypeString,
+    TypeRune,
+    TypeBool,
     True,
     False,
+    TypeScene,
+    TypeCollection,
+    TypeObject,
 
     // Errors
     Bang,
@@ -124,9 +139,6 @@ pub enum Token {
     CloseArray,
 
     // Scenes
-    SceneOpen,
-    SceneClose,
-    SceneKeyword(String),
     Markdown(String),
     Href,
 

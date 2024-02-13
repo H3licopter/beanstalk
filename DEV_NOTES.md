@@ -1,5 +1,4 @@
 # Development Notes
-- work on config structures
 - Objects are stripped of methods when parsed into JSON or protobuf format
 - Support for SPA solutions, or MPA focused only?
 - Print styles?

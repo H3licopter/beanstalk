@@ -5,8 +5,18 @@ pub enum AstNode {
     Error(String),
     Comment(String),
     Function(String, Vec<AstNode>),
-    VariableDeclaration(String, Box<AstNode>),
+    VarDeclaration(String, Box<AstNode>),
+    ConstDeclaration(String, Box<AstNode>),
     Ref(String),
+
+    // Literals
+    StringLiteral(String),
+    RawStringLiteral(String),
+    RuneLiteral(char),
+    IntLiteral(i64),
+    FloatLiteral(f64),
+    DecLiteral(f64), // Will eventually be some bignum type thing
+    BoolLiteral(bool),
 
     //Expressions
     UnaryExpression(String, Box<AstNode>),

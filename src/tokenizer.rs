@@ -78,7 +78,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
         let char_token = chars.next();
         if let Some(&char_after_next) = chars.peek() {
             if char_after_next == '\'' && char_token.is_some() {
-                return Token::CharacterLiteral(char_token.unwrap());
+                return Token::RuneLiteral(char_token.unwrap());
             }
         }
     }
@@ -149,19 +149,18 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
                         while let Some(ch) = chars.next() {
                             if ch == '\n' {
                                 return Token::Comment(token_value);
-                            } else {
-                                token_value.push(ch);
                             }
+                            token_value.push(ch);
                         }
                     }
                 }
 
             // Subtraction
-            } else if next_char == '=' {
-                chars.next();
-                return Token::SubtractionAssign;
             } else {
-                // Subtraction operator
+                if next_char == '=' {
+                    chars.next();
+                    return Token::SubtractionAssign;
+                }
                 return Token::Subtraction;
             }
         }
@@ -354,13 +353,15 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
 
             // Data Types
             match token_value.as_str() {
-                "int" => return Token::Type(token_value.to_string()),
-                "float" => return Token::Type(token_value.to_string()),
-                "string" => return Token::Type(token_value.to_string()),
-                "rune" => return Token::Type(token_value.to_string()),
-                "bool" => return Token::Type(token_value.to_string()),
-                "decimal" => return Token::Type(token_value.to_string()),
-                "scene" => return Token::Type(token_value.to_string()),
+                "int" => return Token::TypeInt,
+                "float" => return Token::TypeFloat,
+                "string" => return Token::TypeString,
+                "rune" => return Token::TypeRune,
+                "bool" => return Token::TypeBool,
+                "decimal" => return Token::TypeDecimal, 
+                "scene" => return Token::TypeScene,
+                "collection" => return Token::TypeCollection,
+                "object" => return Token::TypeObject,
                 _ => {}    
             
             }
