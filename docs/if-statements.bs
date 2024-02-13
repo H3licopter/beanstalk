@@ -1,40 +1,56 @@
-#title “If Statements"
-#date “2024-2-5”
+#title "If Statements"
+#date "2024-2-5"
 #page {:
 
 # If Statements
 
 {code: 
     v := 1
-    if v is not 1: print(“wow”)
+    if v is not 1 ( print("wow") )
 
-    if 4 / 2 is 1:
+    if 4 / 2 is 1 (
         k += 1
-    ;
-
-    -- If as a ternary expression
-    v := if thing is true: 0 else 2
+    )
 
     -- If as an assignment expression
-    if v := getValue() is 0: v = 1
+    if v := getValue() is 0 ( 
+        v = 1 
+    ) else (
+        v = 12
+    )
 
-    if thing: doThing() else dontDoThing()
+    if thing ( 
+        doThing() 
+    ) else ( 
+        dontDoThing() 
+    )
 }
 
 # Pattern Matching
-The equivalent of a match syntax in Beanstalk is using | to separate potential matches. "else" is used as a catch if there are no previous matches.
+The equivalent of a match syntax in Beanstalk is creating a new scope after the is keyword. Each potential match can return a value using the return arrow. "else" is used as a catch if there are no previous matches.
 
 {code:
-    content := if some_int is
-        0: "beans" |
-        1 or 2: "burgers" |
-        3: "chips" |
-        4: "Multiple 
-            lines of nonsense" |
-        else "who cares"
-    ;
+    content := if some_int is (
+        0 => "beans"
+        1 or 2 => "burgers"
+        < 9 => ("multiple 
+            lines of nonsense")
+        ) else (
+            => "who cares"
+        )
 
-    status_msg: string():
-        if state is STATE.running: => "yay" | STATE.crashed: => "uh oh"
-    ;
+    status_msg: string(): if state is (
+        STATE.running => "yay"
+        STATE.crashed => "uh oh"
+    )
+
+    if time is (
+        < 100: doThing()
+        > 99: doSomeOtherThing()
+        < 0: (
+            doThing()
+            doMoreThanOneThing()
+        )
+    )
+
 }

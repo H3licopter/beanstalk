@@ -1,5 +1,5 @@
-#title “Functions”
-#date “2024-2-5”
+#title "Functions"
+#date "2024-2-5"
 #page {:
 
 # Functions
@@ -9,58 +9,56 @@ Brackets are what tells the compiler that you are creating a function. Any non-i
 
 Functions have an explicit return. Multiple expressions (or values) can be chained together at the end of the function with commas so it can return multiple values. You must assign the same or less variables to the return values of a function, any additional values the function returns that are not assigned can be ignored.
 
-Instead of a “return” keyword, Beanstalk uses a big arrow => to return the result of the following expression. 
+Instead of a "return" keyword, Beanstalk uses a big arrow => to return the result of the following expression. 
 
 {code="bs":
-  concatThings: string(a: string, b: string): 
-  => a + b
-  ;
+    concatThings : string(a: string, b: string): (
+        => a + b
+    )
 
-  myself := concatThings(a as “I am ”, b as “really cool”)
+    myself := concatThings(a as "I am ", b as "really cool")
 
-  sideEffectsTime: ():
-    beans = “tasty”
-  ;
+    sideEffectsTime : () : (
+        beans = "tasty"
+    )
 
-  inlineSideEffect: (): state = ”beans”
+    inlineSideEffect : () : state = "beans"
 
-  --
-  With default args and implicit return.
-  --
-  addNumbers: (a: int = 1, b: int = 1): => a + b 
-  --
-  Calling the function but passing in params by value (creating a copy).
-  --
-  addNumbers(a as num1, b as num1)
+    -- With default args and implicit return of int
+    addNumbers : (a: int = 1, b: int = 1) : => a + b
 
-  – named args access (optional)
-  result: int = addNumbers(a as 3, b as 16)
+    -- named args access (optional)
+    result : int = addNumbers(a as 3, b as 16)
 }
-
-
 
 # Methods
 Method chaining is a core part of how data can be transformed in Beanstalk. The standard library imports methods that will extend certain data types.
 
-You can also create methods that can be used to manipulate particular data types or objects you have created without them having to be built-in methods that belong to those objects. These traits can be paired to any number of types to enable method chaining in the scope of your file or entire project. 
+You can't directly add methods to structs. Methods are instead created similarly to functions but will impliment themselves on the specified types.
 
-Create a new method trait by only defining one or more types as an argument in a new function. The types or objects listed will implement the method.
+Create a new method by using the Self keyword as the name of an argument. To impliment the method on one or more types, specify them as types of the Self argument.
 
 {code="bs":
-  incrementInt: (int, float): self += 1
+    incrementInt: (self: int | float): => self += 1
 
-  number := 0
-  number.incrementIInt() -- 1
+    number := 0
+    number.incrementInt() -- 1
 
-  #import “rng”
-  randomizeAge: (person): self.age = int.rng(0 as min, 100 as max)
+    randomizeAge: (self: person): self.age = int.rng(0 as min, 100 as max)
 }
 
 # Explicit Function Overloading
 Function overloading is explicit in Beanstalk, all functions must have unique names. But you can still have function overloading by grouping functions together. This is to maintain type safety and code clarity.
 
-By creating a new variable and setting it equal to a list of functions inside of brackets, you can create an overloaded function that will automatically call the correct function depending on the arguments passed into it.
+By creating a new variable and setting it equal to a list of functions using the combine symbol |. you can create an overloaded function that will automatically call the correct function depending on the arguments passed into it.
 
 {code="bs":
-  toString :: ( intToString(), floatToString(), decimalToString() ) 
+    toString :: intToString | floatToString | decimalToString
+
+    -- Can wrap in brackets for multi-line
+    toString :: (
+        intToString | 
+        floatToString | 
+        decimalToString
+    )
 }

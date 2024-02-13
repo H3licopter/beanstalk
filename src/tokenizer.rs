@@ -92,7 +92,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
     if current_char == '=' { return Token::Assign }
     if current_char == ',' { return Token::Comma }
     if current_char == '.' { return Token::Dot }
-    if current_char == ';' { return Token::CloseScope }
+    if current_char == ';' { return Token::Semicolon }
 
     //Error handling
     if current_char == '!' { return Token::Bang }
@@ -184,12 +184,12 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
             if next_char == '*' {
                 chars.next();
                 return Token::Exponentiation;
-            } else if next_char == '=' {
-                chars.next();
-                return Token::MultiplicationAssign;
-            } else {
-                return Token::Multiplication;
             }
+            if next_char == '=' {
+                    chars.next();
+                    return Token::MultiplicationAssign;
+                }
+            return Token::Multiplication;
         }
     }
     if current_char == '/' {
@@ -203,12 +203,12 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
                     }
                 }
                 return Token::Root;
-            } else if next_char == '=' {
+            }
+            if next_char == '=' {
                 chars.next();
                 return Token::DivisionAssign;
-            } else {
-                return Token::Division;
             }
+            return Token::Division;
         }
     }
     if current_char == '%' {
@@ -216,7 +216,8 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
             if next_char == '=' {
                 chars.next();
                 return Token::ModulusAssign;
-            } else if next_char == '%' {
+            }
+            if next_char == '%' {
                 chars.next();
                 if let Some(&next_next_char) = chars.peek() {
                     if next_next_char == '=' {
@@ -225,9 +226,8 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
                     }
                 }
                 return Token::Remainder;
-            } else {
-                return Token::Modulus;
             }
+            return Token::Modulus;
         }
     }
     if current_char == '^' { 
@@ -292,19 +292,19 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
             if next_char.is_numeric() {
                 token_value.push(chars.next().unwrap());
 
-             // Check for dot to determine if it's a float
-            } else if next_char == '.' {
-                // It's a float
-                token_value.push(chars.next().unwrap());  // Collect the dot
-                while let Some(&next_char) = chars.peek() {
+            // Check for dot to determine if it's a float
+            } else {
+                if next_char == '.' {
+                    token_value.push(chars.next().unwrap());
+                    while let Some(&next_char) = chars.peek() {
                     if next_char.is_numeric() {
                         token_value.push(chars.next().unwrap());
                     } else {
                         break;
                     }
                 }
-                return Token::FloatLiteral(token_value.parse::<f64>().unwrap());
-            } else {
+                    return Token::FloatLiteral(token_value.parse::<f64>().unwrap());
+                }
                 break;
             }
         }
@@ -321,7 +321,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
     Token::Error("Invalid Token Used".to_string())
 }
 
-// Nested function because may need multiple searches for variables.
+// Nested function because may need multiple searches for variables
 fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>, tokenize_mode: &mut TokenizeMode) -> Token  {
 
     // Match variables or keywords
@@ -393,9 +393,9 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
     
     if is_valid_identifier(&token_value) {
         return Token::Variable(token_value.to_string());
-    } else {
-        return Token::Error(format!("Invalid variable name: {}", token_value));
     }
+    
+    Token::Error(format!("Invalid variable name: {}", token_value))
 }
 
 // Checking if the variable name it valid
@@ -418,14 +418,12 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, md_nesting_level: &mut i64) ->
             chars.next();
             *md_nesting_level -= 1;
             break;
-        } else if next_char == '{' {
-            *md_nesting_level += 1;
-            break;
-
-        // Parse special markdown syntaxes
-        } else {
-            markdown_content.push(chars.next().unwrap());
         }
+        if next_char == '{' {
+                *md_nesting_level += 1;
+                break;
+            }
+        markdown_content.push(chars.next().unwrap());
     }
 
     Token::Markdown(markdown_content)

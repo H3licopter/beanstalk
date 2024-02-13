@@ -42,7 +42,7 @@ pub enum Token {
     
     // Stucture of Syntax
     Newline,
-    CloseScope, // ;
+    Semicolon,
 
     // Basic Grammar
     Comma,

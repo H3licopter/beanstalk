@@ -1,5 +1,5 @@
-#title “Loops"
-#date “2024-2-5”
+#title "Loops"
+#date "2024-2-5"
 #page {:
 
 # Loops
@@ -12,35 +12,34 @@ The 'to' keyword defines a range for the loop.
 Finally, you can add the ‘as’ keyword to specify how the iterator will mutate for each step of the loop.
 
 {code="bs": 
-    for thing in things:
-    print(‘ye’);
+    for thing in things (
+        print(‘ye’)
+    )
 
     -- While style loop
     thing = 2
-    for thing < 5:
+    for thing < 5 (
         print(num)
         thing += 1
-    ;
+    )
 
     --  Defining the iterator, use the ‘to’ keyword to define a range
-    for n in 0 to 5: cringe(i)
+    for n in 0 to 5 ( cringe(i) ) 
 
     -- loop also using the ‘as’ keyword to describe how the new iterator will change each loop
-    for n in 12 to 0 as -1:
+    for n in 12 to 0 as -1 (
         cringe(i)
-    ;
+    )
 
-    for i to text_array.length:
+    for i to text_array.length (
         print(text_array[i])
-    ;
+    )
 
     --- infinite loop
     for p is true: print(":(")
 
     --- for loop as an assignment expression
-    me: string = for fact in fact_array:
-        if fact is “not cool”:
-            => fact
-        ;
-    ;
+    me: string = for fact in fact_array (
+        if fact is "not cool" (=> fact)
+    )
 }

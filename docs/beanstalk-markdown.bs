@@ -1,12 +1,12 @@
-#title “Beanstalk Markdown"
-#date “2024-2-4”
+#title "Beanstalk Markdown"
+#date "2024-2-4"
 #page {:
 
 Beanstalk uses [extended markdown syntax](https://www.markdownguide.org/cheat-sheet/) 
 Without the ability to write raw HTML, instead curly brackets with Beanstalk scene syntax are used.
 
-To create a default export of the file that the compiler will render into an HTML if the file is part of the “pages” directory, 
-create a Scene after the “page” decorator. You can set the title of the page on the page property. 
+To create a default export of the file that the compiler will render into an HTML if the file is part of the "pages" directory, 
+create a Scene after the "page" decorator. You can set the title of the page on the page property. 
 If the file is not part of the pages directory, you can use #content or #component to make importing the scene into other files easy.
 
 {code="bs":
@@ -22,10 +22,10 @@ If the file is not part of the pages directory, you can use #content or #compone
 
     You can also use the #component directive, which will create a scene for the remainder of the file. This will automatically make the scene available as a component globally across the rest of the project, so explicit imports are not required.
 
-    #component “component_name”
+    #component "component_name"
 
     # component
-    { blue: can now use “component_name” as a scene property across the project }
+    { blue: can now use "component_name" as a scene property across the project }
 
     The scene will be automatically closed if it reaches the end of the file. So files that are entirely the content of a scene don't have to be indented.
 }

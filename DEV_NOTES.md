@@ -1,8 +1,9 @@
-# Development Notes:
-- Should scenes have closing keywords instead? so it's more obvious where a scene is closed, 
-or does this not matter in practice?
-- Strict types? Like string match constraints or number range types
-
+# Development Notes
+- work on config structures
+- Objects are stripped of methods when parsed into JSON or protobuf format
+- Support for SPA solutions, or MPA focused only?
+- Print styles?
+- Handling no JS browsers?
 
 # Future Stuff
 @ - HTTP and sockets, server communication etc. 

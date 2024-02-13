@@ -1,13 +1,11 @@
-#title “Errors”
-#date “2024-2-5”
+#title "Errors"
+#date "2024-2-5"
 #page {:
 
 # Error Handling
 Errors are treated as values. Any function can return an error as its last return value. 
 
-The ! operator can append any statement or expression and create a new scope to catch and handle errors by checking if the previous expression or function returned an error as its last value. 
-
-This is a shorthand for the error != nil syntax in Go.
+The ! operator can append any statement or expression and create a new scope to catch and handle errors by checking if the previous expression or function returned an error as its last value.
 
 You can give the error a variable name and open a new scope with a colon to handle the error. If the error handling returns a value, the expression or function that returned the error will return that value instead.
 
@@ -18,27 +16,34 @@ Errors can be explicitly passed up the call stack by using a ! without returning
 Double bang !! will force the program to panic and halt if the previous expression or function call returns an error.
 
 {code="bs":
-  – Always returns a string even if an error is thrown by getNetworkRequest()
-  – The program will print the error and continue 
-  getURL: string(): 
-  -> getNetworkRequest() !err:
-  print(“Error getting network request, using backup string. {err}”)
-  -> “example.com”;
-  ;
+    -- Always returns a string even if an error is thrown by getNetworkRequest()
+    -- The program will print the error and continue 
+    getURL : string() : (
+        => getNetworkRequest() !(
+            print("Network Request Error: {error}")
+            => "example.com"
+        )
+    )
 
-  – Returns an error to the calling function, just providing information about the error.
-  getURL: string(): 
-  getNetworkRequest() !: print(“Network Request Error”)
+    -- Returns an error to the calling function, just providing information about the error
+    getURL : string() : (
+        => getNetworkRequest() !(
+            print("Network Request Error: {error}")
+        )
+    )
 
-  – Default case in the case that getURL returns an error as one of its values.
-  dodgyFunction: string(wow: string, bad_stuff: string):
-    getURL() !: => “example.com”
+    -- Default case in the case getURL returns an error
+    -- The function specifies it can return an error so no explicit error handling is needed inside
+    dodgyFunction: string, error () : => getURL()
 
-  – Allowing the function to return a zero value and an error
-  dodgyFunction: string?(wow: string, bad_stuff: string):
-    => getURL() !?
+    -- The compiler will give a warning about unhandled error cases inside this function
+    callingFunction : () : (
+        thing := dodgyFunction()
+    )
+
+    -- Unless an error is specified as a return value of the calling function, it must be handled
+    -- Here is an example handling the error inline
+    callingFunction : () : (
+        thing := dodgyFunction() ! => "default_thing"
+    )
 }
-
-
-
-

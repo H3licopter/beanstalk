@@ -1,58 +1,61 @@
-#title “Collections”
-#date “2024-2-5”
+#title "Collections"
+#date "2024-2-5"
 #page {:
 
 # Collections
-Each type of collection has a slightly different syntax, but the type is always appended with square brackets [] to let the compiler know that the variable is a collection of data. All collections, including objects have their properties accessed using square brackets.
+Each type of collection has a slightly different syntax, but the type is always appended with square brackets [] to let the compiler know that the variable is a collection of data. All collections, including Objects have their properties accessed using square brackets.
 
 All methods and traits are accessed using the dot syntax instead, properties are not accessed this way. 
 Anonymous collection literals can be created by just using regular brackets with values in them, creating a Lambda that returns those values.
 
 ## Objects
-An object can be a collection of properties and methods that also acts as an interface for new types. 
+An Object can be a collection of properties that also act as a type for new Objects. 
 
-Properties can be accessed on the object the same as any other collection, by using square brackets. 
+Properties can be accessed on the Object the same as any other collection, by using square brackets. 
 Methods are accessed differently, using the dot syntax. 
 
-When you create a new object, you are also creating a new type that can be used to define the shape of other new objects and what default properties and methods those new objects will have.
+When you create a new Object, you are also creating a new type that can be used to define the shape of other new Objects and what default properties those new Objects will have. Methods for Objects are defined outside of the Object definition.
 
-When you assign an immutable object (created with colons rather than colon then equals) to another object, the old object will automatically replace any mutable overlapping properties without changing any existing ones that have not been specified. 
-By default, trying to add or extend any properties or methods this way will throw a type error. If the object is mutable, then assigning it to another object will just overwrite matching properties and ignore everything else without throwing an error.
+When you assign a Object to another Object, the old Object will automatically replace any mutable overlapping properties without changing any existing ones that have not been specified. No additional properties or methods will be inherited.
 
-Objects can also contain other objects. The object can refer to its current instance using the self keyword. 
+Objects can also contain other Objects and refer to its current instance using the Self keyword.
 
-Creating a new object is done by using the Type keyword when initializing the type. 
+You can create a new Object by using the keyword 'type' as a type parameter, then defining it's properties inside of square brackets. 
+You can also create a new instance of an exisitng Object by using the Object's name as a type parameter.
+
+To create an optional property, you can use the ? symbol after the property name. This allows for new instances of the Object to be created without the property being assigned a value. The property will be assigned the default value of the type when the original Object was created.
 
 {code="bs":
-    Person: type: 
-        incremenAge: int(a: int): self[age] += a,
-        name :: “Gary”,
+    -- Object definition with default values
+    Person : type : [
+        name :: "Gary",
         age := 69,
-        occupation :: “Grave Digger”;
+        occupation? :: "Grave Digger"
+    ]
 
-    Bob: Person: 
-        name :: “Bob”,
-        age := 42,
-        occupation :: “Web Developer”;
+    -- Creating a new instance of the same Object
+    Bob : Person : [
+        name :: "Bob",
+        age := 42
+    ]
 }
 
-Accessing fields on structs works the same as Arrays, available properties become visible when opening a new square bracket. Methods and traits are always accessed using the dot syntax instead.
+Accessing fields on Objects works the same as Arrays, available properties become visible when opening a new square bracket. Methods are always accessed using the dot syntax instead.
 
 ## Tuples
 Tuples are the simplest form of collection. They are an immutable set of values. A tuple can is created by assigning a constant variable without any specified type more than 1 value separated by commas. These values can optionally have a type definition. 
 
 {code="bs":
-    Person[name] -- returns “Gary”
+    Person[name] -- returns "Gary"
     Bob.incrementAge(1) -- returns 43
 
-
-    -- tuple, looks the same as initializing multiple values to one variable
-    tuple :: 
+    tuple :: [
         1, 
-        float: 3, 
+        decimal: 3, 
         6, 
         "random string", 
-        false;
+        false
+    ]
 
     print(immutable_tuple[2]) -- 6
 }
@@ -62,7 +65,7 @@ The same syntax but with mutable variables creates a fixed size array of fixed t
 
 {code="bs":
     -- Array of fixed size and type determined by assignment. Size and type of the array cannot be changed. In this case the array must always contain two floats
-    vect := 4.0, -3.0
+    vect := [4.0, -3.0]
 }
 
 Specifying the type allows for dynamically sized arrays. You can omit the type in the array to infer it at compile time. 
@@ -70,25 +73,24 @@ Elements cannot be removed, only overwritten in fixed size arrays.
 
 {code="bs":
     -- Dynamically sized string array, type inferred as s8 at compile time
-    fears: []: “The Unknown”, “Compiler Errors”, “Imposter's Syndrome” 
+    fears : [] = ["The Unknown", "Compiler Errors", "Imposter's Syndrome"]
 
 
-    integers: int[] -- Creates an empty, dynamically sized array that can only contain integers
+    -- Creates an empty, dynamically sized array that can only contain integers
+    integers: int[]
 
     -- 
-    An array of UTF-8 strings with a fixed size of 69 elements
+    A mutable array of UTF-8 strings with a fixed size of 69 elements
     Fills unassigned indexes of the array with the type's default value of empty string.
     Attempting to remove elements from fixed size arrays will result in an error
     --
-    fears: string[69] = “Javascript”, “C++”, “Cobol”
+    fears: string[69] = ["Javascript", "C++", "Cobol"]
     fears[0] -- returns ‘Javascript'
     fears[69] -- returns out of bounds error, 69 is the number of elements, so 68 is the last element in the array
-
-
-    bad_things[30] -- returns ? (None)
+    fears[30] -- returns an empty string ""
 
     -- A dynamically sized array that can contain strings, booleans and integers. These types are inferred from the assignment at compile time. Only these types will be acceptable. 
-    cool: []: “Beanstalk”, “Beans”, false, 0
+    cool: []: ["Beanstalk", "Beans", false, 0]
 }
 
 ## Array Slices
