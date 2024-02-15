@@ -55,16 +55,19 @@ fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> Ast
             Token::Markdown(md_content) => {
                 // Skip token if empty markdown
                 if !md_content.is_empty() {
-                    let parsed_markdown = markdown::to_html_with_options(md_content, &markdown::Options::gfm());
+                    let html = markdown::to_html(md_content);
+                    scene.push(AstNode::HTML(html));
 
-                    match parsed_markdown {
-                        Ok(html) => {
-                            scene.push(AstNode::HTML(html));
-                        }
-                        Err(_) => {
-                            scene.push(AstNode::Error("Error parsing markdown".to_string()));
-                        }
-                    }
+                    // GFM Style markdown parsing?
+                    // let parsed_markdown = markdown::to_html_with_options(md_content, &markdown::Options::gfm());
+                    // match parsed_markdown {
+                    //     Ok(html) => {
+                    //         scene.push(AstNode::HTML(html));
+                    //     }
+                    //     Err(_) => {
+                    //         scene.push(AstNode::Error("Error parsing markdown".to_string()));
+                    //     }
+                    // }
                 }
             }
 

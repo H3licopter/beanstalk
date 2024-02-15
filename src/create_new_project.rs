@@ -9,12 +9,14 @@ pub fn create_project(user_project_path: String) -> Result<(), fs_extra::error::
   let _full_path = current_dir.join(user_project_path);
 
   // Create user specified path
-  fs::create_dir_all("../../test/test_project_output")?;
+  fs::create_dir_all("../test_project_output")?;
 
   let options = CopyOptions::new(); // Default options
 
   // Copy project directory from /output folder to user specified path
-  copy("output/html_project_template", "../../test/test_project_output", &options)?;
+  copy("src/html_project_template", "../test_project_output", &options)?;
+
+  println!("Project created at: {:?}", _full_path);
 
   Ok(())
 }

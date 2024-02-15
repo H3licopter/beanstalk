@@ -80,21 +80,27 @@ fn collect_user_input() -> Command {
                     return Command::Build(string.to_string());
                 },
                 _=> {
-                    return Command::Build("../../".to_string());
+                    // Return current working directory path
+                    return Command::Build("".to_string());
                 }
             }
         },
         Some("test") => {
             return Command::Test;
         },
-        _ => println!("Invalid command"),
+        _ => {
+            println!("Building test project....");
+            build::build("test".to_string());
+        }
     }
 
     // Help is default case if no command is entered
     // Display possible commands
-    println!("Possible commands:");
-    println!("new html");
-    println!("build");
+    // println!("Possible commands:");
+    // println!("new html");
+    // println!("build");
+    // println!("test");
+    // println!("build test");
 
     collect_user_input()
 }

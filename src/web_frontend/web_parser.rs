@@ -11,16 +11,40 @@ pub fn parse(ast: Vec<AstNode>) -> String {
     // Parse HTML
     for node in ast {
         match node {
-            AstNode::HTML(html_content) => {
-                html.push_str(&html_content);
+            AstNode::Scene(scene) => {
+                let scene_html = parse_scene(scene);
+                html.push_str(scene_html.as_str());
             }
         
-            _ => {}
+            _ => {
+                println!("unknown AST node found");
+            }
         }
     }
 
-  create_html_boilerplate(get_meta_config())
-    .replace("page-js", &js)
-    .replace("page-template", &html)
-    .replace("page-css", &css)
+    create_html_boilerplate(get_meta_config())
+        .replace("page-js", &js)
+        .replace("page-template", &html)
+        .replace("page-css", &css)
+}
+
+
+fn parse_scene(scene: Vec<AstNode>) -> String {
+    let mut html = String::new();
+
+    for node in scene {
+        match node {
+            AstNode::HTML(html_content) => {
+                html.push_str(&html_content);
+            }
+            AstNode::Scene(scene) => {
+                html.push_str(parse_scene(scene).as_str());
+            }
+            _ => {
+                println!("unknown AST node found");
+            }
+        }
+    }
+
+    html
 }

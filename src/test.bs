@@ -1,7 +1,7 @@
 {:
     # Some template stuff
+    attempting to write normal text in here lel
 
-    A paragraph with some text.
     {: 
         nested markdown element
         {: nested level 2}

@@ -443,8 +443,6 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
     }
 
     while let Some(next_char) = chars.peek() {
-        println!("Next markdown char: {}", next_char);
-
         if next_char == &'\0' { 
             *tokenize_mode = TokenizeMode::Normal;
             break;
@@ -452,7 +450,6 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
 
         if next_char == &'}' {
             *scene_nesting_level -= 1;
-            println!("Scene nesting level: {}", scene_nesting_level);
             if *scene_nesting_level == 0 {
                 *tokenize_mode = TokenizeMode::Normal;
             } else {
