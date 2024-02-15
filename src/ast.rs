@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 #[derive(Debug)]
 pub enum AstNode {
     // Basics
@@ -7,7 +6,10 @@ pub enum AstNode {
     Function(String, Vec<AstNode>),
     VarDeclaration(String, Box<AstNode>),
     ConstDeclaration(String, Box<AstNode>),
+    
+    // References to existing variables
     Ref(String),
+    FunctionCall(String, Vec<AstNode>),
 
     // Literals
     StringLiteral(String),
@@ -17,6 +19,10 @@ pub enum AstNode {
     FloatLiteral(f64),
     DecLiteral(f64), // Will eventually be some bignum type thing
     BoolLiteral(bool),
+    Collection(Vec<AstNode>),
+    Scene(Vec<AstNode>),
+
+    HTML(String),
 
     //Expressions
     UnaryExpression(String, Box<AstNode>),

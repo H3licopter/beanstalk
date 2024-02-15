@@ -1,11 +1,12 @@
--- Test code comment
-
-concatStrings : string(str1, str2) : str1 + str2
-
 {:
     # Some template stuff
+
+    A paragraph with some text.
     {: 
         nested markdown element
         {: nested level 2}
     }
+
+
+    A paragraph at the end of the opening scene.
 }

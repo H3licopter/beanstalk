@@ -139,6 +139,7 @@ pub enum Token {
     CloseArray,
 
     // Scenes
+    SceneHead(Vec<Token>),
     Markdown(String),
     Href,
 

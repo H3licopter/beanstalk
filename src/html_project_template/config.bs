@@ -2,7 +2,7 @@
     name: "html_project",
     version: "0.1.0",
     description: "",
-    main: "src/main.bs",
+    main: "src/home.bean",
     author: "",
     license: "MIT"
 ]

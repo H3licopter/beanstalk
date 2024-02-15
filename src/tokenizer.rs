@@ -6,23 +6,23 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut chars: Peekable<Chars<'_>> = source_code.chars().peekable();
     let mut tokenize_mode: TokenizeMode = TokenizeMode::Normal;
-    let mut md_nesting_level: &mut i64 = &mut 0;
+    let mut scene_nesting_level: &mut i64 = &mut 0;
 
-    let mut token: Token = get_next_token(&mut chars, &mut tokenize_mode, &mut md_nesting_level);
+    let mut token: Token = get_next_token(&mut chars, &mut tokenize_mode, &mut scene_nesting_level);
     while token != Token::EOF {
         tokens.push(token);
-        token = get_next_token(&mut chars, &mut tokenize_mode, &mut md_nesting_level);
+        token = get_next_token(&mut chars, &mut tokenize_mode, &mut scene_nesting_level);
     }
 
     tokens
 }
 
-fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode, md_nesting_level: &mut i64) -> Token {
+fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode, scene_nesting_level: &mut i64) -> Token {
     let mut current_char = chars.next().unwrap_or('\0');
     if current_char == '\0' { return Token::EOF; }
 
     if tokenize_mode == &TokenizeMode::Markdown {
-        return tokenize_markdown(chars, md_nesting_level);
+        return tokenize_markdown(chars, scene_nesting_level, tokenize_mode);
     }
 
     // Newlines must be tokenized for inline statements and scenes
@@ -35,18 +35,9 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
     // SCENES
     // Starts a new Scene Tree Node
     if current_char == '{' {
-        if tokenize_mode == &TokenizeMode::Normal || tokenize_mode == &TokenizeMode::Markdown {
-            *tokenize_mode = TokenizeMode::SceneHead;
-        }
-        return Token::SceneOpen
-    }
-    if current_char == '}' {
-        if md_nesting_level > &mut 1 {
-            *tokenize_mode = TokenizeMode::Markdown;
-        } else {
-            *tokenize_mode = TokenizeMode::Normal;
-        }
-        return Token::SceneClose
+        *scene_nesting_level += 1;
+        *tokenize_mode = TokenizeMode::SceneHead;
+        return tokenize_scenehead(chars, tokenize_mode, scene_nesting_level);
     }
 
     let mut token_value: String = String::new();
@@ -56,9 +47,8 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
         while let Some(ch) = chars.next() {
             if ch == '"' {
                 return Token::StringLiteral(token_value);
-            } else {
-                token_value.push(ch);
             }
+            token_value.push(ch);
         }
     }
 
@@ -67,9 +57,8 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
         while let Some(ch) = chars.next() {
             if ch == '`' {
                 return Token::RawStringLiteral(token_value);
-            } else {
-                token_value.push(ch);
             }
+            token_value.push(ch);
         }
     }
 
@@ -246,9 +235,8 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
             if next_char == '=' {
                 chars.next();
                 return Token::GreaterThanOrEqual;
-            } else {
-                return Token::GreaterThan;
             }
+            return Token::GreaterThan;
         }
     }
     if current_char == '<' {
@@ -256,9 +244,8 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
             if next_char == '=' {
                 chars.next();
                 return Token::LessThanOrEqual;
-            } else {
-                return Token::LessThan;
             }
+            return Token::LessThan;
         }
     }
 
@@ -406,26 +393,76 @@ fn is_valid_identifier(s: &str) -> bool {
         s.chars().all(|c| c.is_alphanumeric() || c == '_')
 }
 
-// Create string of markdown content, only escaping when a closed curly brace is found
-fn tokenize_markdown(chars: &mut Peekable<Chars>, md_nesting_level: &mut i64) -> Token {
-    let mut markdown_content = String::new();
-    while let Some(&next_char) = chars.peek() {
-        // Check for end of markdown or additional nesting
+fn tokenize_scenehead(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode, scene_nesting_level: &mut i64) -> Token {
+    let mut scene_head: Vec<Token> = Vec::new();
+    let mut token_value = String::new();
 
-        if next_char == '\0' { 
-            return Token::EOF
-        }
-        if next_char == '}' {
-            chars.next();
-            *md_nesting_level -= 1;
+    while let Some(next_char) = chars.peek() {
+        if next_char == &'\0' { 
             break;
         }
-        if next_char == '{' {
-                *md_nesting_level += 1;
-                break;
+        if next_char == &':' { 
+            *tokenize_mode = TokenizeMode::Markdown;
+            chars.next();
+            break;
+        }
+        if next_char == &'}' {
+            if *scene_nesting_level == 0 {
+                *tokenize_mode = TokenizeMode::Normal;
+            } else {
+                *tokenize_mode = TokenizeMode::Markdown;
             }
+            return Token::SceneHead(scene_head);
+        }
+
+        if next_char.is_alphabetic() {
+            token_value.push(next_char.clone());
+            scene_head.push(keyword_or_variable(&mut token_value, chars, tokenize_mode));
+        }
+    }
+
+    Token::SceneHead(scene_head)
+}
+
+// Create string of markdown content, only escaping when a closed curly brace is found
+// Any Beanstalk specific extensions to Markdown will need to be implimented here
+fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64, tokenize_mode: &mut TokenizeMode) -> Token {
+    let mut markdown_content = String::new();
+
+    //Ignore whitespace at start of markdown
+    while let Some(next_char) = chars.peek() {
+        if next_char.is_whitespace() {
+            chars.next();
+        } else {
+            break;
+        }
+    }
+
+    while let Some(next_char) = chars.peek() {
+
+        if next_char == &'\0' { 
+            *tokenize_mode = TokenizeMode::Normal;
+            break;
+        }
+
+        if next_char == &'}' {
+            *scene_nesting_level -= 1;
+            if *scene_nesting_level == 0 {
+                *tokenize_mode = TokenizeMode::Normal;
+            } else {
+                *tokenize_mode = TokenizeMode::Markdown;
+            }
+            return Token::SceneClose;
+        }
+        if next_char == &'{' {
+            *scene_nesting_level += 1;
+            *tokenize_mode = TokenizeMode::SceneHead;
+            break;
+        }
+
         markdown_content.push(chars.next().unwrap());
     }
 
+    if markdown_content.is_empty() { return Token::SceneClose; }
     Token::Markdown(markdown_content)
 }

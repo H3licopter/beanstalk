@@ -80,7 +80,7 @@ fn collect_user_input() -> Command {
                     return Command::Build(string.to_string());
                 },
                 _=> {
-                    return Command::Build("".to_string());
+                    return Command::Build("../../".to_string());
                 }
             }
         },
@@ -96,7 +96,7 @@ fn collect_user_input() -> Command {
     println!("new html");
     println!("build");
 
-    return collect_user_input();
+    collect_user_input()
 }
 
 fn check_if_valid_directory_path(path: &str) -> bool {

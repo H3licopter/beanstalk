@@ -5,6 +5,7 @@ use crate::tokens::Token;
 use crate::parsers;
 
 pub fn test_build() -> Result<(), Box<dyn Error>> {
+    
     // Read content from a test file
     println!("READNING TEST FILE");
     let content = fs::read_to_string("src/test.bs")?;
