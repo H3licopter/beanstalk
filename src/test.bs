@@ -5,8 +5,11 @@
     {: 
         nested markdown element
         {: nested level 2}
+
+        some bullshit
     }
 
-
     A paragraph at the end of the opening scene.
+
+    {: a final extra nested scene}
 }

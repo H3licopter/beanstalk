@@ -53,14 +53,17 @@ fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> Ast
                 scene.push(nested_scene);
             }
             Token::Markdown(md_content) => {
-                let parsed_markdown = markdown::to_html_with_options(md_content, &markdown::Options::gfm());
+                // Skip token if empty markdown
+                if !md_content.is_empty() {
+                    let parsed_markdown = markdown::to_html_with_options(md_content, &markdown::Options::gfm());
 
-                match parsed_markdown {
-                    Ok(html) => {
-                        scene.push(AstNode::HTML(html));
-                    }
-                    Err(_) => {
-                        scene.push(AstNode::Error("Error parsing markdown".to_string()));
+                    match parsed_markdown {
+                        Ok(html) => {
+                            scene.push(AstNode::HTML(html));
+                        }
+                        Err(_) => {
+                            scene.push(AstNode::Error("Error parsing markdown".to_string()));
+                        }
                     }
                 }
             }
