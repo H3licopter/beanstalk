@@ -7,6 +7,10 @@ pub fn parse(ast: Vec<AstNode>) -> String {
     let _wasm = String::new();
     let mut html = String::new();
     let css = String::new();
+    let mut page_title = String::new();
+
+    let config = get_meta_config();
+
 
     // Parse HTML
     for node in ast {
@@ -14,6 +18,19 @@ pub fn parse(ast: Vec<AstNode>) -> String {
             AstNode::Scene(scene) => {
                 let scene_html = parse_scene(scene);
                 html.push_str(scene_html.as_str());
+            }
+            AstNode::Title(value) => {
+                page_title = value;
+
+                if config.auto_site_title {
+                    page_title += &(" | ".to_owned() + &config.site_title.clone());
+                }
+            }
+            AstNode::Page => {
+
+            }
+            AstNode::Date(_value) => {
+                // Eventually a way to get date information about the page
             }
         
             _ => {
@@ -26,14 +43,19 @@ pub fn parse(ast: Vec<AstNode>) -> String {
         .replace("page-js", &js)
         .replace("page-template", &html)
         .replace("page-css", &css)
+        .replace("page-title", &page_title)
 }
 
 
 fn parse_scene(scene: Vec<AstNode>) -> String {
     let mut html = String::new();
+    let mut properties = "span".to_string();
 
     for node in scene {
         match node {
+            AstNode::ElementProperties(value) => {
+                properties = value;
+            }
             AstNode::HTML(html_content) => {
                 html.push_str(&html_content);
             }
@@ -46,5 +68,6 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
         }
     }
 
-    html
+    // Wrap html output in correct tag and return
+    format!("<{}>{}</{}>", properties, html, properties)
 }

@@ -1,9 +1,7 @@
 # Beanstalk
-  A statically typed programming and templating language designed for idiots like me and you. Centralize your logic, markup, styling and content for websites, webapps and servers. 
+  A statically typed programming language designed for building UIs and static webpages. Centralize your logic, markup, styling and content for websites, webapps and servers. 
 
-  Imagine if HTML, CSS and JS were combined into one language with all the hindsight of modern web development and language design.
-
-  Cutting through the web development BS one .bs file at a time.
+  Cutting through web development BS one .bs file at a time.
 
 ---
 

@@ -1,8 +1,9 @@
 use crate::{ast::AstNode, Token};
+use super::create_scene_node::new_scene;
 
 pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
     let mut ast = Vec::new();
-    let mut  i = start_index;
+    let mut i = start_index;
 
     while i < tokens.len() {
         match &tokens[i] {
@@ -17,6 +18,42 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
             // New Function or Variable declaration or reference
             Token::Variable(name) => {
                 ast.push(new_variable(name, tokens, &mut i));
+            }
+
+            // HTML
+            Token::Page => {
+                match &tokens[i + 1] {
+                    Token::SceneHead(_value) => {
+                        ast.push(AstNode::Page);
+                    }
+                    _ => {
+                        ast.push(AstNode::Error("#Page must have a scene as a argument".to_string()));
+                    }
+                }
+            }
+
+            Token::Title => {
+                i += 1;
+                match &tokens[i] {
+                    Token::StringLiteral(value) => {
+                        ast.push(AstNode::Title(value.clone()));
+                    }
+                    _ => {
+                        ast.push(AstNode::Error("Title must have a valid string as a argument".to_string()));
+                    }
+                }
+            }
+
+            Token::Date => {
+                i += 1;
+                match &tokens[i] {
+                    Token::StringLiteral(value) => {
+                        ast.push(AstNode::Date(value.clone()));
+                    }
+                    _ => {
+                        ast.push(AstNode::Error("Date must have a valid string as a argument".to_string()));
+                    }
+                }
             }
 
             Token::Newline => {
@@ -34,55 +71,6 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
 
     (ast, i)
 }
-
-
-// Recursive function to parse scenes
-fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
-    let mut scene = Vec::new();
-    *i += 1;
-
-    // parse scene head properties to determine how scene body is parsed
-
-    while *i < tokens.len() {
-        match &tokens[*i] {
-            Token::SceneClose => {
-                return AstNode::Scene(scene)
-            }
-            Token::SceneHead(_) => {
-                let nested_scene = new_scene(scene_head, tokens, i);
-                scene.push(nested_scene);
-            }
-            Token::Markdown(md_content) => {
-                // Skip token if empty markdown
-                if !md_content.is_empty() {
-                    let html = markdown::to_html(md_content);
-                    scene.push(AstNode::HTML(html));
-
-                    // GFM Style markdown parsing?
-                    // let parsed_markdown = markdown::to_html_with_options(md_content, &markdown::Options::gfm());
-                    // match parsed_markdown {
-                    //     Ok(html) => {
-                    //         scene.push(AstNode::HTML(html));
-                    //     }
-                    //     Err(_) => {
-                    //         scene.push(AstNode::Error("Error parsing markdown".to_string()));
-                    //     }
-                    // }
-                }
-            }
-
-            // Scene head keywords and expressions
-
-            _ => {
-                scene.push(AstNode::Error("Invalid Token Used".to_string()));
-            }
-        }
-        *i += 1;
-    }
-
-    AstNode::Scene(scene)
-}
-
 
 
 fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {

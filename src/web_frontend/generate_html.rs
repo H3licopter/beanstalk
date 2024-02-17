@@ -8,7 +8,6 @@ pub fn create_html_boilerplate(meta_tags: HTMLMeta) -> String {
   let file = fs::read_to_string("src/web_frontend/boilerplate.html");
   match file {
     Ok(html) => { boilerplate = html
-      .replace("page-title", &meta_tags.page_title)
       .replace("page-description", &meta_tags.page_description)
       .replace("site-url", &meta_tags.site_url)
       .replace("page-url", &meta_tags.page_url)

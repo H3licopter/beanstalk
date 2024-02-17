@@ -3,6 +3,7 @@ use std::fs;
 use crate::tokenizer;
 use crate::tokens::Token;
 use crate::parsers;
+use crate::web_frontend::web_parser;
 
 pub fn test_build() -> Result<(), Box<dyn Error>> {
     
@@ -19,6 +20,10 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     println!("CREATING AST");
     let ast = parsers::build_ast::new_ast(&tokens, 0).0;
     println!("AST: {:?}", ast);
+
+    println!("CREATING HTML OUTPUT");
+    let html_output = web_parser::parse(ast);
+    println!("HTML: {:?}", html_output);
 
     Ok(())
 }

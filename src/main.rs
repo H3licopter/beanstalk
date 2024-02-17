@@ -9,6 +9,7 @@ mod test;
 mod create_new_project;
 mod parsers {
     pub mod build_ast;
+    mod create_scene_node;
 }
 mod web_frontend {
     pub mod web_parser;
@@ -30,6 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Command::Test => {
             println!("Testing...");
             test::test_build()?;
+            collect_user_input();
         }
     }
 
@@ -90,7 +92,7 @@ fn collect_user_input() -> Command {
         },
         _ => {
             println!("Building test project....");
-            build::build("test".to_string());
+            let _ = build::build("test".to_string());
         }
     }
 

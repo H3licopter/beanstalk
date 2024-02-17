@@ -1,4 +1,4 @@
-#project = [
+#project [
     name: "html_project",
     version: "0.1.0",
     description: "",
@@ -7,7 +7,7 @@
     license: "MIT"
 ]
 
-#config = [
+#config [
     title: "Website Title",
     description: "Website Description",
     url: "localhost:3069",

@@ -55,9 +55,28 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
 
     let mut token_value: String = String::new();
 
+    //Meta. Compile time things, configuration and metaprogramming
+    if current_char == '#' {
+        *tokenize_mode = TokenizeMode::Meta;
+
+        if chars.peek() == Some(&'#') {
+            chars.next();
+            return Token::Comptime;
+        }
+
+        //Get compiler directive token
+        return keyword_or_variable(&mut token_value, chars, tokenize_mode);
+    }
+
     // Check for string literals
     if current_char == '"' {
         while let Some(ch) = chars.next() {
+            // Check for escape characters
+            if ch == '\\' {
+                if let Some(next_char) = chars.next() {
+                    token_value.push(next_char);
+                }
+            }
             if ch == '"' {
                 return Token::StringLiteral(token_value);
             }
@@ -262,16 +281,6 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
     if current_char == ']' { return Token::CloseArray }
 
     if current_char == '@' { return Token::Href }
-    
-    //Meta. Compile time things, configuration and metaprogramming
-    if current_char == '#' {
-        if chars.peek() == Some(&'#') {
-            chars.next();
-            *tokenize_mode = TokenizeMode::Meta;
-            return Token::Comptime;
-        }
-        return Token::Hash
-    }
 
     if current_char == '~' { return Token::Bitwise }
 
@@ -360,6 +369,7 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
 
             // only bother tokenizing / reserving these keywords if inside of a scene head
             if tokenize_mode == &TokenizeMode::SceneHead {
+                if token_value == "rgb" { return Token::Rgb }
                 if token_value == "slot" { return Token::Slot }
                 if token_value == "img" { return Token::Img }
             }
@@ -376,14 +386,14 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
                 // HTML project settings
                 if token_value == "page" { return Token::Page }
                 if token_value == "component" { return Token::Component }
-                if token_value == "url" { return Token::Url }
-                if token_value == "favicons" { return Token::Favicons }
+                if token_value == "date" { return Token::Date }
+                if token_value == "title" { return Token::Title }
             }
 
             break;
         }
     }
-    
+
     if is_valid_identifier(&token_value) {
         return Token::Variable(token_value.to_string());
     }
@@ -400,29 +410,9 @@ fn is_valid_identifier(s: &str) -> bool {
 
 fn tokenize_scenehead(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode, scene_nesting_level: &mut i64) -> Token {
     let mut scene_head: Vec<Token> = Vec::new();
-    let mut token_value = String::new();
 
-    while let Some(next_char) = chars.peek() {
-        if next_char == &'\0' { break; }
-
-        if next_char == &':' {
-            *tokenize_mode = TokenizeMode::Markdown;
-            break;
-        }
-
-        if next_char == &'}' {
-            if *scene_nesting_level == 0 {
-                *tokenize_mode = TokenizeMode::Normal;
-            } else {
-                *tokenize_mode = TokenizeMode::Markdown;
-            }
-            return Token::SceneHead(scene_head);
-        }
-
-        if next_char.is_alphabetic() {
-            token_value.push(next_char.clone());
-            scene_head.push(keyword_or_variable(&mut token_value, chars, tokenize_mode));
-        }
+    while tokenize_mode == &TokenizeMode::SceneHead {
+        scene_head.push(get_next_token(chars, tokenize_mode, scene_nesting_level));
     }
 
     Token::SceneHead(scene_head)
@@ -448,6 +438,11 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
             break;
         }
 
+        //Remove whitespace after newlines
+        if next_char == &'\n' {
+            break;
+        }
+
         if next_char == &'}' {
             *scene_nesting_level -= 1;
             if *scene_nesting_level == 0 {
@@ -466,5 +461,5 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
         markdown_content.push(chars.next().unwrap());
     }
 
-    Token::Markdown(markdown_content)
+    Token::Markdown(markdown_content.trim_end().to_owned())
 }

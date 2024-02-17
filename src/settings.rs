@@ -4,7 +4,7 @@ pub enum Config {
   Main(String),
   Locale(String),
   Url(String),
-  Title(String),
+  SiteTitle(String),
   Description(String),
   PageType(String),
   Favicons(String),
@@ -12,7 +12,7 @@ pub enum Config {
   PageXLargeImage(String),
 }
 pub struct HTMLMeta {
-  pub page_title: String,
+  pub site_title: String,
   pub page_description: String,
   pub site_url: String,
   pub page_url: String,
@@ -27,12 +27,13 @@ pub struct HTMLMeta {
   pub favicons_folder_url: String,
   pub theme_color_light: String,
   pub theme_color_dark: String,
+  pub auto_site_title: bool,
 }
 
 pub fn get_meta_config() -> HTMLMeta {
   let default_meta = HTMLMeta {
-    page_title: String::from("Website Title"),
-    page_description: String::from("Website Title"),
+    site_title: String::from("Website Title"),
+    page_description: String::from("Website Description"),
     site_url: String::from("localhost:3069"),
     page_url: String::from(""),
     page_og_title: String::from(""),
@@ -46,6 +47,7 @@ pub fn get_meta_config() -> HTMLMeta {
     favicons_folder_url: String::from("favicons"),
     theme_color_light: String::from("#fafafa"),
     theme_color_dark: String::from("#101010"),
+    auto_site_title: true,
   };
   default_meta
 }

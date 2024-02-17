@@ -21,8 +21,13 @@ pub enum AstNode {
     BoolLiteral(bool),
     Collection(Vec<AstNode>),
     Scene(Vec<AstNode>),
-
+    
+    // HTML
     HTML(String),
+    ElementProperties(String),
+    Page,
+    Title(String),
+    Date(String),
 
     //Expressions
     UnaryExpression(String, Box<AstNode>),

@@ -9,7 +9,7 @@ pub enum TokenizeMode {
 #[derive(PartialEq, Debug)]
 pub enum Token {
     // For Compiler
-    Hash, // Single hash for compiler directives
+    Directive(String), // Single hash
     Comptime, // Double hash for comptime
     Meta(Vec<Token>), // Everthing to be executed at compile time
     Error(String),
@@ -24,8 +24,8 @@ pub enum Token {
     Main,
     Page,
     Component,
-    Url,
-    Favicons,
+    Title,
+    Date,
 
     // Basic syntax
     Comment(String),
@@ -150,5 +150,6 @@ pub enum Token {
     Slot, // Injection point for additional template nesting 
     Img,
     Span,
+    Rgb
 
 }

@@ -1,15 +1,10 @@
-{:
-    # Some template stuff
-    attempting to write normal text in here lel
+#title "Test Page"
+#date "2024-2-5"
+#page {:
 
-    {: 
-        nested markdown element
-        {: nested level 2}
+# Some template stuff
+Attempting to write normal text in here lel
 
-        some bullshit
-    }
-
-    A paragraph at the end of the opening scene.
-
-    {: a final extra nested scene}
+{rgb(255, 0, 0): 
+    red text!
 }
