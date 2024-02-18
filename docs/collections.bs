@@ -25,7 +25,7 @@ You can also create a new instance of an exisitng Object by using the Object's n
 
 To create an optional property, you can use the ? symbol after the property name. This allows for new instances of the Object to be created without the property being assigned a value. The property will be assigned the default value of the type when the original Object was created.
 
-{code="bs":
+{raw:
     -- Object definition with default values
     Person : type : [
         name :: "Gary",
@@ -45,7 +45,7 @@ Accessing fields on Objects works the same as Arrays, available properties becom
 ## Tuples
 Tuples are the simplest form of collection. They are an immutable set of values. A tuple can is created by assigning a constant variable without any specified type more than 1 value separated by commas. These values can optionally have a type definition. 
 
-{code="bs":
+{raw:
     Person[name] -- returns "Gary"
     Bob.incrementAge(1) -- returns 43
 
@@ -63,7 +63,7 @@ Tuples are the simplest form of collection. They are an immutable set of values.
 ## Arrays
 The same syntax but with mutable variables creates a fixed size array of fixed type that automatically infers the type and size from the assignment.
 
-{code="bs":
+{raw:
     -- Array of fixed size and type determined by assignment. Size and type of the array cannot be changed. In this case the array must always contain two floats
     vect := [4.0, -3.0]
 }
@@ -71,7 +71,7 @@ The same syntax but with mutable variables creates a fixed size array of fixed t
 Specifying the type allows for dynamically sized arrays. You can omit the type in the array to infer it at compile time. 
 Elements cannot be removed, only overwritten in fixed size arrays. 
 
-{code:
+{raw:
     -- Dynamically sized string array, type inferred as s8 at compile time
     fears : [] = ["The Unknown", "Compiler Errors", "Imposter's Syndrome"]
 
@@ -96,7 +96,7 @@ Elements cannot be removed, only overwritten in fixed size arrays.
 ## Array Slices
 Slices are references to a subset of an existing array. To create a slice, you create a new variable and assign it to an existing array, but you can specify a range of elements that the slice can reference. 
 
-{code:
+{raw:
     array_slice := big_old_array[32 to 49]
     array_slice[0] -- returns the 32nd element of big_old_array
 }

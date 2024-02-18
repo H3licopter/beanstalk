@@ -22,7 +22,7 @@ There is also a /dependencies folder which contains all the libraries and depend
 Using compiler directives, the config file specifies all the default behavior for the project. 
 Most of the compiler directives are objects that already have their structure specified. The config file is also written in Beanstalk and looks a bit like this:
 
-{code: 
+{raw: 
     #project "html"
     #main "./src/main.bs"
     #title "Definitely not a scam website"
@@ -33,7 +33,7 @@ Most of the compiler directives are objects that already have their structure sp
 # Imports
 The import keyword can be accessed from the # symbol and will accept strings to paths for other modules or libraries you want to import into your project. 
 
-{code:
+{raw:
     #import "some_lib_maker/crazy_lib"
 }
 
@@ -41,6 +41,6 @@ Beanstalk imports its entire standard library of built in functions by default.
 But you can also exclude the default libraries by using the exclude compiler command. 
 You can also use this to bypass the directory based routing of the compiler.
 
-{code:
+{raw:
     #exclude "standard"
 }

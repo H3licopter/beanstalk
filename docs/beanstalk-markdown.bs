@@ -8,7 +8,7 @@ To create a default export of the file that the compiler will render into an HTM
 create a Scene after the "page" decorator. You can set the title of the page on the page property. 
 If the file is not part of the pages directory, you can use #content or #component to make importing the scene into other files easy.
 
-{code:
+{raw:
     #page {:
 
     # A Heading

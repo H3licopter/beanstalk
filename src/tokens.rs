@@ -2,6 +2,7 @@
 pub enum TokenizeMode {
     Normal,
     Markdown,
+    RawMarkdown,
     SceneHead,
     Meta,
 }
@@ -151,7 +152,7 @@ pub enum Token {
     Video,
     Span,
     Rgb,
-    Code,
+    Raw,
 
     Slot, // Injection point for additional template nesting 
 

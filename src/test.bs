@@ -1,14 +1,45 @@
-#title "Test Page"
-#date "2024-2-5"
+#title "Scenes"
+#date "2024-2-4"
 #page {:
 
-# Some template stuff
-Attempting to write normal text in here lel
-IN SAME PARAGRAPH
+# Scenes
+Beanstalk has its own markup language. Elements are defined using keywords and can be given an ID using an $ symbol. The element is automatically the equivalent of a div if a specific element is not defined and the element is on its own. If the element is created inline with surrounding markdown or without a space separating it from surrounding markdown, it will become a span.
 
-in new paraqraph
+Scenes describe the state of the UI. If you create an immutable scene with :: then it cannot change at runtime, otherwise any changes to mutable variables used inside the template will be automatically tracked and updated (like signals).
 
-### Smaller header
-This should be inline {rgb(255, 0, 0): red text! }
+Scenes use curly braces and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
 
-{code: let meme = "meme";}
+{raw: 
+    { head_of_element: content of element (markdown / more templates) }
+
+    reactiveVariable := "some text"
+    changeText: (text: string): reactiveVariable = text
+
+    $grid_id -- An element from a scene (getting the element’s ID)
+    Scene_example[grid_id] -- Another way to get an element from a scene, by getting the child of a parent scene.
+
+    scene_component_example := { theme=example_theme:
+
+    { img "images/meme.jpg", style "big-img crap-border", 
+        click (reactiveVariable = "WOW")
+    }
+
+    # A Cool Table
+    { $grid_id, style "grid":
+        Some grid text
+        { reactiveVariable }
+        [here's a link!](site_link)
+    }
+
+    { for i to text_array.length: { text_array[i] } }
+
+    { style "big-text", if not text.isBlank():
+        { text: plus some extra text in the same element as the variable text }
+    }
+
+    { imported_bs_markdown }
+        { slot="main content" }
+    }
+}
+
+Some stuff atewr the giant dump of raw code block

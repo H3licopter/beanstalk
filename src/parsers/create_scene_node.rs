@@ -58,9 +58,14 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                         j += 7;
                     }
                 }
-                Token::Code => {
-                    scene_wrapping_tag = "code".to_string();
+
+                // Will escape all characters until the final curly brace
+                // Will be formatted as a pre tag but can eventually be formatted with additional styles
+                Token::Raw => {
+                    scene_wrapping_tag = "pre".to_string();
                 }
+
+                
                 _ => {
                     scene.push(AstNode::Error(
                         format!("Invalid Token Used inside Scene Head: '{:?}'", &scene_head[j])));
@@ -101,6 +106,12 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 while starting_newlines > 0 {
                     md_to_parse = format!("\n{}", md_to_parse);
                     starting_newlines -= 1;
+                }
+
+                if scene_wrapping_tag == "pre" {
+                    md_to_parse = md_to_parse
+                        .replace("{{", r#"\{"#)
+                        .replace("}}", r#"\}"#);
                 }
 
                 scene.push(AstNode::HTML(md_to_parse));

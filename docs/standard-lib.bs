@@ -26,7 +26,7 @@ When starting a new HTML project, Beanstalk will implicitly import relevant scen
     {: space}
     {: rgb}
     {: hex}
-    {: code}
+    {: raw}
 }
 
 ### Interactive 

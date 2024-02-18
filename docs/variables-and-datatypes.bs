@@ -6,7 +6,7 @@
 Equals '=' is used for variable assignment. And colon : is used to indicate initialisation. If a variable is assigned a value with a colon rather than the equals symbol it becomes immutable.
 
 # Static Assignment
-{code:
+{raw:
     my_brain : string = "Dumb"
 
     --type is inferred as i64
@@ -21,7 +21,7 @@ Variables initialised with a type but no assignment will have a zero value depen
 If an error occurs during assignment of a variable, 
 the zero value will be used and an error will be created as an additional value that must be handled during the assignement or passed up the callstack.
 
-{code:
+{raw:
     uselessness: int --value is 0
 
     thing :: a_collection -- Immutable reference
@@ -33,7 +33,7 @@ the zero value will be used and an error will be created as an additional value 
 }
 
 # Immutable Variables
-{code:
+{raw:
     -- Int constant (type inferred at compile time)
     self_worth :: 0
 
@@ -48,7 +48,7 @@ the zero value will be used and an error will be created as an additional value 
 
 If you are creating a non-collection variable and need it to be formatted over multiple lines, you can wrap the value in brackets
 
-{code:
+{raw:
     var1, var2, var3, var4 : int : (
         4 + 5 + 6 + 7 + 8 + 9 + 10
     )
@@ -83,13 +83,17 @@ String is the keyword for string types in Beanstalk. Double quotes are automatic
 
 Curly braces are used to add expressions into the string. 
 
-"9 is {5 + 4}" -- 9 is 9
+{raw:
+    "9 is {5 + 4}" -- 9 is 9
+}
 
 Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 
 "string literal with \{curly braces} in it that is escaped" 
 
-`9 "is" {5 + 4}` -- 9 "is" {5 + 4}
+{raw:
+    `9 "is" {5 + 4}` -- 9 "is" {5 + 4}
+}
 
 # Runes
 Rune characters are equivalent to Int32 but are their own specific type. 
@@ -102,6 +106,9 @@ Variables can also have additional contraints about their types, allowing only v
 These constraints can be added to the type portion of the variable assignemnt.
 Doing this allows a small, clean syntax for handling invalid inputs using Beanstalks error handling.
 
-person_age : int 0 to 120 = $age_input.value !(
-    print("Invalid age input: {error}")
-)
+
+{raw:
+    person_age : int 0 to 120 = $age_input.value !(
+        print("Invalid age input: {error}")
+    )
+}

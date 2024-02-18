@@ -1,4 +1,5 @@
-use super::tokens::{Token, TokenizeMode}; // Import the Token enum from the tokens module
+use super::tokens::{Token, TokenizeMode};
+// Import the Token enum from the tokens module
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -20,6 +21,10 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
 fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode, scene_nesting_level: &mut i64) -> Token {
     let mut current_char = chars.next().unwrap_or('\0');
     if current_char == '\0' { return Token::EOF; }
+
+    if tokenize_mode == &TokenizeMode::RawMarkdown {
+        return tokenize_raw_markdown(chars, scene_nesting_level, tokenize_mode);
+    }
 
     if current_char == '}' {
         return Token::SceneClose;
@@ -371,7 +376,24 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
             if tokenize_mode == &TokenizeMode::SceneHead {
                 if token_value == "rgb" { return Token::Rgb }
                 if token_value == "img" { return Token::Img }
-                if token_value == "code" { return Token::Code }
+                if token_value == "raw" {
+                    while let Some(next_char) = chars.next() {
+                        if !next_char.is_whitespace() {
+                            match next_char {
+                                ':' => {
+                                    chars.next();
+                                    *tokenize_mode = TokenizeMode::RawMarkdown;
+                                    return Token::Raw
+                                }
+                                _ => {
+                                    return Token::Error("Must have a colon after raw declaration".to_string());
+                                }
+                            }
+                        } else {
+                            chars.next();
+                        }
+                    }
+                }
                 if token_value == "video" { return Token::Video }
                 if token_value == "slot" { return Token::Slot }
             }
@@ -444,6 +466,47 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
         if next_char == &'{' {
             *tokenize_mode = TokenizeMode::SceneHead;
             break;
+        }
+
+        markdown_content.push(chars.next().unwrap());
+    }
+
+    Token::Markdown(markdown_content.to_owned())
+}
+
+// Needs to find where the last closing curly bracket is first and escape all curly brackets until the last one
+// Cannot have any nested scenes inside of code blocks
+fn tokenize_raw_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64, tokenize_mode: &mut TokenizeMode) -> Token {
+    let mut markdown_content = String::new();
+    let mut scene_open_count = 1;
+    
+    while let Some(next_char) = chars.peek() {
+        if next_char == &'\0' { 
+            *tokenize_mode = TokenizeMode::Normal;
+            break;
+        }
+
+        if next_char == &'}' {
+            scene_open_count -= 1;
+
+            if scene_open_count == 0 {
+                *scene_nesting_level -= 1;
+                if *scene_nesting_level == 0 {
+                    *tokenize_mode = TokenizeMode::Normal;
+                } else {
+                    *tokenize_mode = TokenizeMode::Markdown;
+                }
+                break;
+            }
+        }
+
+        if next_char == &'{' {
+            scene_open_count += 1;
+
+            if scene_open_count == 0 {
+                *tokenize_mode = TokenizeMode::SceneHead;
+                break;
+            }
         }
 
         markdown_content.push(chars.next().unwrap());

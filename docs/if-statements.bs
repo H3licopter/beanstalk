@@ -4,7 +4,7 @@
 
 # If Statements
 
-{code: 
+{raw: 
     v := 1
     if v is not 1 ( print("wow") )
 
@@ -29,7 +29,7 @@
 # Pattern Matching
 The equivalent of a match syntax in Beanstalk is creating a new scope after the is keyword. Each potential match can return a value using the return arrow. "else" is used as a catch if there are no previous matches.
 
-{code:
+{raw:
     content := if some_int is (
         0 => "beans"
         1 or 2 => "burgers"
