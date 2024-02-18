@@ -5,6 +5,11 @@
 # Some template stuff
 Attempting to write normal text in here lel
 
-{rgb(255, 0, 0): 
-    red text!
+### Smaller header
+
+
+This should be inline {rgb(255, 0, 0): red text!}
+
+{code: 
+    let meme = "meme";
 }

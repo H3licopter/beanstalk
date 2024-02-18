@@ -9,7 +9,7 @@ Scenes describe the state of the UI. If you create an immutable scene with :: th
 
 Scenes use curly braces and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
 
-{code="bs": 
+{code: 
     { head_of_element: content of element (markdown / more templates) }
 
     reactiveVariable := "some text"

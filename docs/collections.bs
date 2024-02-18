@@ -71,7 +71,7 @@ The same syntax but with mutable variables creates a fixed size array of fixed t
 Specifying the type allows for dynamically sized arrays. You can omit the type in the array to infer it at compile time. 
 Elements cannot be removed, only overwritten in fixed size arrays. 
 
-{code="bs":
+{code:
     -- Dynamically sized string array, type inferred as s8 at compile time
     fears : [] = ["The Unknown", "Compiler Errors", "Imposter's Syndrome"]
 
@@ -96,7 +96,7 @@ Elements cannot be removed, only overwritten in fixed size arrays.
 ## Array Slices
 Slices are references to a subset of an existing array. To create a slice, you create a new variable and assign it to an existing array, but you can specify a range of elements that the slice can reference. 
 
-{code="bs":
+{code:
     array_slice := big_old_array[32 to 49]
     array_slice[0] -- returns the 32nd element of big_old_array
 }

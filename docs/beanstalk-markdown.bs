@@ -2,14 +2,13 @@
 #date "2024-2-4"
 #page {:
 
-Beanstalk uses [extended markdown syntax](https://www.markdownguide.org/cheat-sheet/) 
-Without the ability to write raw HTML, instead curly brackets with Beanstalk scene syntax are used.
+Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to create a scene. Scenes are parsed and rendered into HTML.
 
 To create a default export of the file that the compiler will render into an HTML if the file is part of the "pages" directory, 
 create a Scene after the "page" decorator. You can set the title of the page on the page property. 
 If the file is not part of the pages directory, you can use #content or #component to make importing the scene into other files easy.
 
-{code="bs":
+{code:
     #page {:
 
     # A Heading

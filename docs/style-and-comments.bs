@@ -24,10 +24,12 @@ Comments use a double minus sign '--'.
 If you put a newline immediately after a comment mark, the comment will become multi line and must be closed with - again. 
 Comments are read by the compiler and can be nested.
 
--- normal comment
+{code:
+    -- normal comment
 
---
-Multiline comment
+    --
+    Multiline comment
 
-Woo
---
+    Woo
+    --
+}

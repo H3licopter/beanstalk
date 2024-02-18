@@ -370,8 +370,10 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
             // only bother tokenizing / reserving these keywords if inside of a scene head
             if tokenize_mode == &TokenizeMode::SceneHead {
                 if token_value == "rgb" { return Token::Rgb }
-                if token_value == "slot" { return Token::Slot }
                 if token_value == "img" { return Token::Img }
+                if token_value == "code" { return Token::Code }
+                if token_value == "video" { return Token::Video }
+                if token_value == "slot" { return Token::Slot }
             }
             
             // Compiler directives
@@ -423,14 +425,17 @@ fn tokenize_scenehead(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeM
 fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64, tokenize_mode: &mut TokenizeMode) -> Token {
     let mut markdown_content = String::new();
 
-    //Ignore whitespace at start of markdown
-    while let Some(next_char) = chars.peek() {
-        if next_char.is_whitespace() {
-            chars.next();
-        } else {
-            break;
-        }
-    }
+    //Ignore whitespace at start of markdown but keep track of newlines
+    // while let Some(next_char) = chars.peek() {
+    //     if next_char == &'\n' {
+    //         markdown_content.push(next_char.to_owned());
+    //     }
+    //     if next_char.is_whitespace() {
+    //         chars.next();
+    //     } else {
+    //         break;
+    //     }
+    // }
 
     while let Some(next_char) = chars.peek() {
         if next_char == &'\0' { 
@@ -461,5 +466,5 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
         markdown_content.push(chars.next().unwrap());
     }
 
-    Token::Markdown(markdown_content.trim_end().to_owned())
+    Token::Markdown(markdown_content.to_owned())
 }

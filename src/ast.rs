@@ -1,3 +1,5 @@
+use std::string;
+
 #[derive(Debug)]
 pub enum AstNode {
     // Basics
@@ -23,8 +25,9 @@ pub enum AstNode {
     Scene(Vec<AstNode>),
     
     // HTML
-    HTML(String),
-    ElementProperties(String),
+    HTML(String, String), // Tag, Content
+    ElementProperties(String, String), // Tag, Properties
+    Gap,
     Page,
     Title(String),
     Date(String),

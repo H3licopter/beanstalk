@@ -11,7 +11,7 @@ The 'to' keyword defines a range for the loop.
 
 Finally, you can add the ‘as’ keyword to specify how the iterator will mutate for each step of the loop.
 
-{code="bs": 
+{code: 
     for thing in things (
         print(‘ye’)
     )

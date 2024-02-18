@@ -12,7 +12,9 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
     If scene head is empty, use a div if the scenehead is after two or more newlines,
     Otherwise, use a span. ElementProperties should be at start of scene.
     */
-    let mut properties = "span".to_string();
+    let mut properties = String::new();
+    let mut scene_tag = "span".to_string();
+
     if !scene_head.is_empty() {
         let mut j = 0;
         while j < scene_head.len() {
@@ -51,17 +53,22 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                         }
 
                         properties += &format!(" style=\"color:rgb({},{},{})\"", red, green, blue);
+                        
+                        j += 7;
                     }
                 }
+                Token::Code => {
+                    scene_tag = "code".to_string();
+                }
                 _ => {
-                    scene.push(AstNode::Error("Invalid Token Used".to_string()));
+                    scene.push(AstNode::Error(format!("Invalid Token Used inside Scene Head: '{:?}'", &scene_head[j])));
                 }
             }
             j += 1;
         }
     }
 
-    scene.push(AstNode::ElementProperties(properties));
+    scene.push(AstNode::ElementProperties(properties, scene_tag));
 
     while *i < tokens.len() {
         match &tokens[*i] {
@@ -78,26 +85,61 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             Token::Markdown(md_content) => {
                 // Skip token if empty markdown
                 if !md_content.is_empty() {
-                    let html = markdown::to_html(md_content);
-                    scene.push(AstNode::HTML(html));
+                    // Parse markdown to HTML
+                    let mut tag: String = String::new();
 
-                    // GFM Style markdown parsing?
-                    // let parsed_markdown = markdown::to_html_with_options(md_content, &markdown::Options::gfm());
-                    // match parsed_markdown {
-                    //     Ok(html) => {
-                    //         scene.push(AstNode::HTML(html));
-                    //     }
-                    //     Err(_) => {
-                    //         scene.push(AstNode::Error("Error parsing markdown".to_string()));
-                    //     }
-                    // }
+                    // Add breaks for each newline at the start of the markdown segment
+                    let mut newlines = 0;
+                    for c in md_content.chars() {
+                        if c == '\n' {
+                            newlines += 1;
+                        } else { break; }
+                    }
+
+                    let mut content = md_content.trim_start().to_string();
+
+                    // Add heading tags if markdown starts with #
+                    if content.starts_with("#") {
+                        let mut hashes = 0;
+                        for c in content.chars() {
+                            if c == '#' {
+                                hashes += 1;
+                            } else {
+                                content = content.trim_start_matches("#").to_owned();
+                                break;
+                            }
+                        }
+                        
+                        tag = format!("h{}", hashes);
+                    }
+
+                    match Some(&tokens[*i - 1]) {
+                        Some(Token::Markdown(md)) => {
+                            if md.is_empty() && tag.is_empty() {
+                                tag = "p".to_string();
+                            }
+                        }
+                        _ => {}
+                    }
+
+                    if tag.is_empty() {
+                        if newlines >= 2 {
+                            tag = "p".to_string();
+                        } else {
+                            tag = "span".to_string();
+                        }
+                    }
+                    let formatted_tag = format!("<{}>", tag.clone());
+
+
+                    scene.push(AstNode::HTML(tag, format!("{}{}", formatted_tag, content)));
+                } else {
+                    scene.push(AstNode::Gap);
                 }
             }
 
-            // Scene head keywords and expressions
-
             _ => {
-                scene.push(AstNode::Error("Invalid Token Used".to_string()));
+                scene.push(AstNode::Error("Invalid Syntax Used Inside scene body".to_string()));
             }
         }
 
@@ -105,4 +147,18 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
     }
 
     AstNode::Scene(scene)
+}
+
+fn get_closing_tag(element: &str) -> String {
+    let index = element.char_indices().rev().find(|c| c.1 == '/');
+
+    match index {
+        Some((i, _)) => {
+            let tag = element.split_at(i + 1)
+                .1
+                .replace(">", "");
+            tag
+        }
+        None => { String::new() }
+    }
 }

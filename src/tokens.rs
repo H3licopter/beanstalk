@@ -147,9 +147,13 @@ pub enum Token {
     Dollar,
 
     //HTML element keywords
-    Slot, // Injection point for additional template nesting 
     Img,
+    Video,
     Span,
-    Rgb
+    Rgb,
+    Code,
+
+    Slot, // Injection point for additional template nesting 
+
 
 }

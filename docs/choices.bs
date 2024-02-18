@@ -7,7 +7,7 @@ Choices are created by setting a variable type as an choice.
 Choices are written in screaming snake case. 
 Each choice can have a specified data type associated with it that allows you to easily store and access values equal to that Choice.
 
-{code="bs":
+{code:
     STATE: choice: 
         Paused,
         Running,

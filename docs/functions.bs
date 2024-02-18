@@ -11,7 +11,7 @@ Functions have an explicit return. Multiple expressions (or values) can be chain
 
 Instead of a "return" keyword, Beanstalk uses a big arrow => to return the result of the following expression. 
 
-{code="bs":
+{code:
     concatThings : string(a: string, b: string): (
         => a + b
     )
@@ -52,7 +52,7 @@ Function overloading is explicit in Beanstalk, all functions must have unique na
 
 By creating a new variable and setting it equal to a list of functions using the combine symbol |. you can create an overloaded function that will automatically call the correct function depending on the arguments passed into it.
 
-{code="bs":
+{code:
     toString :: intToString | floatToString | decimalToString
 
     -- Can wrap in brackets for multi-line

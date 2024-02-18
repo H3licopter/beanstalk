@@ -3,7 +3,7 @@
 #page {:
 
 # Standard Library
-Standard library in Beanstalk comprises a large number of functions added to the global scope that are automatically added to projects, but can be explicitly excluded using the #exclude directive.
+Standard library in Beanstalk comprises methods and scene properties. The standard library is automatically added to projects, but can be explicitly excluded using the #exclude directive.
 
 ## HTML project standard library
 When starting a new HTML project, Beanstalk will implicitly import relevant scene properties and global keywords. Other keywords that are added into the global scope include:
