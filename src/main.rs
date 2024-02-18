@@ -10,6 +10,7 @@ mod create_new_project;
 mod parsers {
     pub mod build_ast;
     mod create_scene_node;
+    pub mod markdown_parser;
 }
 mod web_frontend {
     pub mod web_parser;

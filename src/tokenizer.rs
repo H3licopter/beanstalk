@@ -425,26 +425,9 @@ fn tokenize_scenehead(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeM
 fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64, tokenize_mode: &mut TokenizeMode) -> Token {
     let mut markdown_content = String::new();
 
-    //Ignore whitespace at start of markdown but keep track of newlines
-    // while let Some(next_char) = chars.peek() {
-    //     if next_char == &'\n' {
-    //         markdown_content.push(next_char.to_owned());
-    //     }
-    //     if next_char.is_whitespace() {
-    //         chars.next();
-    //     } else {
-    //         break;
-    //     }
-    // }
-
     while let Some(next_char) = chars.peek() {
         if next_char == &'\0' { 
             *tokenize_mode = TokenizeMode::Normal;
-            break;
-        }
-
-        //Remove whitespace after newlines
-        if next_char == &'\n' {
             break;
         }
 

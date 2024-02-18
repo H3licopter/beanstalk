@@ -22,12 +22,10 @@ pub enum AstNode {
     DecLiteral(f64), // Will eventually be some bignum type thing
     BoolLiteral(bool),
     Collection(Vec<AstNode>),
-    Scene(Vec<AstNode>),
+    Scene(Vec<AstNode>), // Scene, Properties
     
     // HTML
-    HTML(String, String), // Tag, Content
-    ElementProperties(String, String), // Tag, Properties
-    Gap,
+    HTML(String), // Content
     Page,
     Title(String),
     Date(String),
