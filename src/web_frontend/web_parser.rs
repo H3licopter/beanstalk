@@ -11,7 +11,6 @@ pub fn parse(ast: Vec<AstNode>) -> String {
 
     let config = get_meta_config();
 
-
     // Parse HTML
     for node in ast {
         match node {
@@ -63,13 +62,25 @@ fn parse_scene(scene: Vec<AstNode>) -> ( String, bool ) {
                     inline = true;
                 }
             }
-            AstNode::HTML(content_tag, html_content) => {
+            AstNode::HTML(content_tag, mut html_content) => {
+
+                if content_tag.starts_with('h') {
+                    inline = false;
+                    tag = content_tag.clone();
+                }
+
+                if content_tag.is_empty() && tag != "p" && !inline {
+                    html_content = format!("<p>{}", &html_content);
+                    tag = "p".to_string();
+                }
+
                 // If the new tag is different from the last tag, 
                 // And tag is not empty, close the last tag
                 if tag != content_tag && !tag.is_empty() {
                     html.push_str(&format!("</{}>", tag));
+                    tag = content_tag.clone();
                 }
-                tag = content_tag;
+
                 html.push_str(&html_content);
             }
             AstNode::Scene(scene) => {
@@ -78,13 +89,14 @@ fn parse_scene(scene: Vec<AstNode>) -> ( String, bool ) {
                 // Otherwise just parse it into this one
                 let new_scene = parse_scene(scene);
                 if new_scene.1 {
-                    html.push_str(&format!("{}</{}>", &new_scene.0, tag));
-                } else {
                     html.push_str(&new_scene.0);
+                } else {
+                    html.push_str(&format!("<div>{}</div>", &new_scene.0));
                 }
             }
             AstNode::Gap => {
-                // html.push_str(&format!("</{}>", tag));
+                html.push_str(&format!("</{}>", tag));
+                tag = String::new();
                 inline = false;
             }
             _ => {

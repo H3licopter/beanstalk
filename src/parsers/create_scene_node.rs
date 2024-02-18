@@ -83,59 +83,47 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::Markdown(md_content) => {
-                // Skip token if empty markdown
-                if !md_content.is_empty() {
-                    // Parse markdown to HTML
-                    let mut tag: String = String::new();
+                // Parse markdown to HTML
+                let mut tag: String = String::new();
 
-                    // Add breaks for each newline at the start of the markdown segment
-                    let mut newlines = 0;
-                    for c in md_content.chars() {
-                        if c == '\n' {
-                            newlines += 1;
-                        } else { break; }
-                    }
+                // // Add breaks for each newline at the start of the markdown segment
+                // let mut newlines = 0;
+                // for c in md_content.chars() {
+                //     if c == '\n' {
+                //         newlines += 1;
+                //     } else { break; }
+                // }
 
-                    let mut content = md_content.trim_start().to_string();
+                let mut content = md_content.trim_start().to_string();
 
-                    // Add heading tags if markdown starts with #
-                    if content.starts_with("#") {
-                        let mut hashes = 0;
-                        for c in content.chars() {
-                            if c == '#' {
-                                hashes += 1;
-                            } else {
-                                content = content.trim_start_matches("#").to_owned();
-                                break;
-                            }
-                        }
-                        
-                        tag = format!("h{}", hashes);
-                    }
-
-                    match Some(&tokens[*i - 1]) {
-                        Some(Token::Markdown(md)) => {
-                            if md.is_empty() && tag.is_empty() {
-                                tag = "p".to_string();
-                            }
-                        }
-                        _ => {}
-                    }
-
-                    if tag.is_empty() {
-                        if newlines >= 2 {
-                            tag = "p".to_string();
-                        } else {
-                            tag = "span".to_string();
-                        }
-                    }
-                    let formatted_tag = format!("<{}>", tag.clone());
-
-
-                    scene.push(AstNode::HTML(tag, format!("{}{}", formatted_tag, content)));
-                } else {
+                if content.is_empty() {
                     scene.push(AstNode::Gap);
+                    *i += 1;
+                    continue;
                 }
+
+                // Add heading tags if markdown starts with #
+                if content.starts_with("#") {
+                    let mut hashes = 0;
+                    for c in content.chars() {
+                        if c == '#' {
+                            hashes += 1;
+                        } else {
+                            content = content.trim_start_matches("#").to_owned();
+                            break;
+                        }
+                    }
+                    
+                    tag = format!("h{}", hashes);
+                }
+
+                let mut formatted_tag = String::new();
+                if !tag.is_empty() {
+                    formatted_tag = format!("<{}>", tag);
+                }
+
+
+                scene.push(AstNode::HTML(tag, format!("{}{}", formatted_tag, content)));
             }
 
             _ => {
