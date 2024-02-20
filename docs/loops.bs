@@ -3,17 +3,17 @@
 #page {:
 
 # Loops
-Only 1 keyword for loops ‘for’. 
+Only 1 keyword for loops "for". 
 
-Using the ‘in’ keyword, you can specify an integer, float or collection to iterate through or define a new integer, float or collection. 
+Using the "in" keyword, you can specify an integer, float or collection to iterate through or define a new integer, float or collection. 
 
 The 'to' keyword defines a range for the loop.
 
-Finally, you can add the ‘as’ keyword to specify how the iterator will mutate for each step of the loop.
+Finally, you can add the "as" keyword to specify how the iterator will mutate for each step of the loop.
 
 {raw: 
     for thing in things (
-        print(‘ye’)
+        print("ye")
     )
 
     -- While style loop
@@ -23,10 +23,10 @@ Finally, you can add the ‘as’ keyword to specify how the iterator will mutat
         thing += 1
     )
 
-    --  Defining the iterator, use the ‘to’ keyword to define a range
+    --  Defining the iterator, use the "to" keyword to define a range
     for n in 0 to 5 ( cringe(i) ) 
 
-    -- loop also using the ‘as’ keyword to describe how the new iterator will change each loop
+    -- loop also using the "as" keyword to describe how the new iterator will change each loop
     for n in 12 to 0 as -1 (
         cringe(i)
     )

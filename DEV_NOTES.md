@@ -1,11 +1,42 @@
-# Development Notes
+# TO DO
+## GENERAL
+- Tidy up code a bit and prep for isolated task to create a function to manage precedence and parse maths expressions in the language.
+- make #page immediately switch the rest of the file to a scene.
+
+## HTML
+- Add most common HTML elements to the base language:
+  - links
+  - img
+  - audio, video
+  - lists
+  - form, input, button, select, option, textarea
+  - tables
+  - header, footer, main, section, article, aside, nav
+- custom markdown parsing
+
+## CSS
+- Compile [custom pico css style](https://picocss.com/docs/sass) for the base of the CSS framework, remove pico- from the class names
+- Figure out if direct Tailwind integration is possible. Maybe just use a style if this works? Otherwise create custom utility classes, if even needed.
+
+## JS / WASM
+- Create WASM bindings for the DOM
+
+## SYNTAX
+- Change function declaration syntax to: 
+
+coolFunc: (args) => returnType: (
+
+)
+
+
+## Notes
 - Objects are stripped of methods when parsed into JSON or protobuf format
 - Support forany SPA solutions, or MPA focused only? (Probably just MPA)
 - Print styles?
 - Handling no JS browsers? - Allow for no js sites, just pure templates into HTML stuff?
 - Uses rust markdown parser for parsing markdown into GFM markdown (Github Flavored Markdown)
 
-# Future Stuff
+## Future Stuff
 @ - HTTP and sockets, server communication etc. 
 defer
 ^ - pointers
