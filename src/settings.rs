@@ -44,7 +44,7 @@ pub fn get_meta_config() -> HTMLMeta {
     page_type: String::from("website"),
     page_twitter_large_image: String::from(""),
     page_canonical_url: String::from(""),
-    favicons_folder_url: String::from("favicons"),
+    favicons_folder_url: String::from("./images/favicons"),
     theme_color_light: String::from("#fafafa"),
     theme_color_dark: String::from("#101010"),
     auto_site_title: true,

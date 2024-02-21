@@ -13,7 +13,7 @@
     url: "localhost:3069",
     locale: "en_US",
     page_type: "website",
-    favicons: "./dist/images/favicons",
+    favicons: "./images/favicons",
     default_image: "./dist/images/default.png",
     page_x_large_image: "./dist/images/x_default.jpg"
 ]

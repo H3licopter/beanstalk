@@ -3,40 +3,64 @@
 #page {:
 
 # Collections
-Each type of collection has a slightly different syntax, but the type is always appended with square brackets [] to let the compiler know that the variable is a collection of data. All collections, including Objects have their properties accessed using square brackets.
+Collections of data in Beanstalk are created using square brackets. The type of the collection is inferred from the assignment. All collections have their data accessed using square brackets.
 
-All methods and traits are accessed using the dot syntax instead, properties are not accessed this way. 
-Anonymous collection literals can be created by just using regular brackets with values in them, creating a Lambda that returns those values.
+## Collection Prototype
+- Properties cannot be changed or added, as prototypes are compile time evaluated. Becomes a prototype with default values for new structs.
+- Values assigned to a prototype become the zero value of that property if it isn't assigned. 
+- Setting properties as constants means that when the properties are set on new struct using the prototype, they are also constants. 
+- If you don't set an explicit zero value on a property, any new structs created with the prototype MUST assign a value to it.
 
-## Objects
-An Object can be a collection of properties that also act as a type for new Objects. 
+Vec :: [
+    x : float = 0,
+    y : float = 0,
+]
 
-Properties can be accessed on the Object the same as any other collection, by using square brackets. 
-Methods are accessed differently, using the dot syntax. 
+### Adding a method to the prototype
+move_x : ( this: Vec ) : (
+    this.x, this.y = 0
+)
 
-When you create a new Object, you are also creating a new type that can be used to define the shape of other new Objects and what default properties those new Objects will have. Methods for Objects are defined outside of the Object definition.
+### Default values from Prototype
+If Vec did not assign zero values for the properties, this would throw an error as values for x and y would have to be provided.
 
-When you assign a Object to another Object, the old Object will automatically replace any mutable overlapping properties without changing any existing ones that have not been specified. No additional properties or methods will be inherited.
+emptyVec : Vec
 
-Objects can also contain other Objects and refer to its current instance using the Self keyword.
 
-You can create a new Object by using the keyword 'type' as a type parameter, then defining it's properties inside of square brackets. 
-You can also create a new instance of an exisitng Object by using the Object's name as a type parameter.
+## Named Collection
+A named collection is like a Struct in other languages. It is a collection of properties and methods.
 
-To create an optional property, you can use the ? symbol after the property name. This allows for new instances of the Object to be created without the property being assigned a value. The property will be assigned the default value of the type when the original Object was created.
+Properties can be accessed on the named collection the same as any other collection, by using square brackets. Methods are accessed differently, using a dot instead. 
+
+New struct from prototype. Will inherit any methods implemented for those structs.
+
+coordinates : Vec = [
+    x = 3.45,
+    y = 7.93
+]
+
+A new struct without a prototype
+new_struct := [
+    thing :: 0,
+    another_thing := 3
+]
+
+
+Named Collections can also contain other named collectios and refer to its current instance using the "this" keyword.
+
 
 {raw:
     -- Object definition with default values
-    Person : type : [
-        name :: "Gary",
+    Person :: [
+        name: string,
         age := 69,
-        occupation? :: "Grave Digger"
+        occupation := "Grave Digger"
     ]
 
     -- Creating a new instance of the same Object
     Bob : Person : [
-        name :: "Bob",
-        age := 42
+        name = "Bob",
+        age = 42
     ]
 }
 
@@ -49,7 +73,7 @@ Tuples are the simplest form of collection. They are an immutable set of values.
     Person[name] -- returns "Gary"
     Bob.incrementAge(1) -- returns 43
 
-    tuple :: [
+    tuple : [] : [
         1, 
         decimal: 3, 
         6, 
@@ -61,15 +85,20 @@ Tuples are the simplest form of collection. They are an immutable set of values.
 }
 
 ## Arrays
-The same syntax but with mutable variables creates a fixed size array of fixed type that automatically infers the type and size from the assignment.
+Collections created without named properties become arrays. All arrays must contain the same datatype.
 
-{raw:
-    -- Array of fixed size and type determined by assignment. Size and type of the array cannot be changed. In this case the array must always contain two floats
-    vect := [4.0, -3.0]
-}
+- Mutable arrays are dynamically sized (behave like slices) and their values can be mutated
+array := [ 3, 4, 5 ]
 
-Specifying the type allows for dynamically sized arrays. You can omit the type in the array to infer it at compile time. 
-Elements cannot be removed, only overwritten in fixed size arrays. 
+- By specifying a size for the array, you can initialise a fixed size array.
+- Zero values will be added for each element that is not yet assigned to the array.
+array : [420] = [ 3, 4, 5 ]
+
+- Constant arrays cannot have their values mutated, but can have them removed or added dynamically by default. 
+array :: [ 2, 8, 9 ]
+
+- Create a fixed size immutable array and infer the fixed size from the assignment. 
+tuple_example : [] : [ "really cool", "programming language" ]
 
 {raw:
     -- Dynamically sized string array, type inferred as s8 at compile time
