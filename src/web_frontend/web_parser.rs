@@ -26,9 +26,6 @@ pub fn parse(ast: Vec<AstNode>) -> String {
                     page_title += &(" | ".to_owned() + &config.site_title.clone());
                 }
             }
-            AstNode::Page => {
-
-            }
             AstNode::Date(_value) => {
                 // Eventually a way to get date information about the page
             }

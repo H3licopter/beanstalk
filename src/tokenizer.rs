@@ -70,7 +70,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
         }
 
         //Get compiler directive token
-        return keyword_or_variable(&mut token_value, chars, tokenize_mode);
+        return keyword_or_variable(&mut token_value, chars, tokenize_mode, scene_nesting_level);
     }
 
     // Check for string literals
@@ -320,14 +320,14 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
 
     if current_char.is_alphabetic() {
         token_value.push(current_char);
-        return keyword_or_variable(&mut token_value, chars, tokenize_mode);
+        return keyword_or_variable(&mut token_value, chars, tokenize_mode, scene_nesting_level);
     }
 
     Token::Error("Invalid Token Used".to_string())
 }
 
 // Nested function because may need multiple searches for variables
-fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>, tokenize_mode: &mut TokenizeMode) -> Token  {
+fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>, tokenize_mode: &mut TokenizeMode, scene_nesting_level: &mut i64) -> Token  {
 
     // Match variables or keywords
     while let Some(&next_char) = chars.peek() {
@@ -408,7 +408,12 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
                 if token_value == "main" { return Token::Main }
 
                 // HTML project settings
-                if token_value == "page" { return Token::Page }
+                if token_value == "page" {
+                    *scene_nesting_level += 1;
+                    *tokenize_mode = TokenizeMode::SceneHead;
+                    return tokenize_scenehead(chars, tokenize_mode, scene_nesting_level);
+                }
+
                 if token_value == "component" { return Token::Component }
                 if token_value == "date" { return Token::Date }
                 if token_value == "title" { return Token::Title }

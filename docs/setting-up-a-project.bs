@@ -1,6 +1,6 @@
 #title "Starting a Beanstalk Project"
 #date "2024-2-4"
-#page {:
+---
 
 # Setting up a Project
 The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 

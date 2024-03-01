@@ -1,6 +1,6 @@
 #title "Loops"
 #date "2024-2-5"
-#page {:
+---
 
 # Loops
 Only 1 keyword for loops "for". 

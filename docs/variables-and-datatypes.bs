@@ -1,6 +1,6 @@
 #title "Variables and Datatypes"
 #date "2024-2-4"
-#page {:
+---
 
 # Variables
 Equals '=' is used for variable assignment. And colon : is used to indicate initialisation. If a variable is assigned a value with a colon rather than the equals symbol it becomes immutable.
@@ -52,6 +52,10 @@ If you are creating a non-collection variable and need it to be formatted over m
     var1, var2, var3, var4 : int : (
         4 + 5 + 6 + 7 + 8 + 9 + 10
     )
+
+    var1, var2 : int : 420
+
+    var3, var4 := "cool", "beans"
 }
 
 # Data Types
@@ -61,7 +65,7 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 {table 3:
     {: Type} {: Description} {: Zero Value}
     {: int} {xcol: These numerical types are 64 bit by default but support custom sizes} {xcol: 0}
-    {: float} 
+    {: number } 
     {: decimal} {: A precise number of any size. Memory inefficiency and slower calculation speeds in ex change for precision}
     {: string} {: UTF-8} {: ""}
     {: rune} {: Unicode char (rune) is like an Int32} {: 0}

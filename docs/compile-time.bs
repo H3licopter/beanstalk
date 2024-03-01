@@ -1,6 +1,6 @@
 #title "Compile Time"
 #date "2024-2-5"
-#page {:
+---
 
 # Compile Time
 The # symbol can be used to tell the compiler various extra commands and access more keywords. 

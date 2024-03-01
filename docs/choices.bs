@@ -1,6 +1,6 @@
 #title “Choices (enums)”
 #date “2024-2-5”
-#page {:
+---
 
 # Choices (enums)
 Choices are created by setting a variable type as an choice. 
@@ -8,18 +8,16 @@ Choices are written in screaming snake case.
 Each choice can have a specified data type associated with it that allows you to easily store and access values equal to that Choice.
 
 {raw:
-    STATE: choice: 
+    STATE : choice : (
         Paused,
         Running,
         ErrorMessage: String,
-        Person: Person;
+        Person: Person
+    )
 
+    now := STATE.Running
 
-    now := STATE[Running]
-
-    if now is STATE[Running]:
-        thing := STATE[Person(
-            name = “Cringelord”
-        )];
-    ;
+    if now is STATE.Running (
+        now = STATE.Paused
+    )
 }

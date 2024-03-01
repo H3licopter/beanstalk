@@ -1,6 +1,6 @@
 #title "Commends and Code Style"
 #date "2024-2-4"
-#page {:
+---
 
 # Style Guide
 The recommended style guide is:
@@ -12,11 +12,8 @@ The recommended style guide is:
 
 4 spaces are recommended for indentation.
 
-Scope is closed using a newline in the case of inline statements, and a semicolon ; in all other cases. 
-The only exception is templates using curly braces to determine scope. 
-
-The scope is usually closed with the semicolon on the final line of that scope. 
-If multiple scopes are closing at once, the semicolons then have their own line to make it visually clearer which scopes are closing.
+A scoped block of code is defined with regular brackets. 
+Commas are not needed for seperating items in a list, and can be used in numbers for readability.
 
 # Comments
 Comments use a double minus sign '--'. 

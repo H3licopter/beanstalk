@@ -35,6 +35,9 @@ pub enum Token {
 
     // Variables
     Variable(String),
+
+    // Literals
+    TypeInference,
     StringLiteral(String),
     RawStringLiteral(String),
     RuneLiteral(char),

@@ -1,4 +1,4 @@
-use std::string;
+use crate::Token;
 
 #[derive(Debug)]
 pub enum AstNode {
@@ -14,24 +14,12 @@ pub enum AstNode {
     FunctionCall(String, Vec<AstNode>),
 
     // Literals
-    StringLiteral(String),
-    RawStringLiteral(String),
-    RuneLiteral(char),
-    IntLiteral(i64),
-    FloatLiteral(f64),
-    DecLiteral(f64), // Will eventually be some bignum type thing
-    BoolLiteral(bool),
+    Literal(Token),
     Collection(Vec<AstNode>),
     Scene(Vec<AstNode>), // Scene, Properties
     
     // HTML
     HTML(String), // Content
-    Page,
     Title(String),
     Date(String),
-
-    //Expressions
-    UnaryExpression(String, Box<AstNode>),
-    BinaryExpression(String, Box<AstNode>, Box<AstNode>),
-    
 }

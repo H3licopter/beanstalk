@@ -22,11 +22,9 @@
 - Create WASM bindings for the DOM
 
 ## SYNTAX
-- Change function declaration syntax to: 
-
-coolFunc: (args) => returnType: (
-
-)
+- curly braces for blocks of statements and braces for any expressions? anon function becomes just curly braces?
+- think about making commas ignorable, does it work?
+- Scene syntax is just triple dash muliline comment. So the parent scene is just a mutliline style comment.
 
 
 ## Notes

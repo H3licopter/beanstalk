@@ -1,6 +1,6 @@
 #title "Scenes"
 #date "2024-2-4"
-#page {:
+---
 
 # Scenes
 Beanstalk has its own markup language. Elements are defined using keywords and can be given an ID using an $ symbol. The element is automatically the equivalent of a div if a specific element is not defined and the element is on its own. If the element is created inline with surrounding markdown or without a space separating it from surrounding markdown, it will become a span.
@@ -10,6 +10,8 @@ Scenes describe the state of the UI. If you create an immutable scene with :: th
 Scenes use curly braces and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
 
 {raw: 
+    ---
+
     { head_of_element: content of element (markdown / more templates) }
 
     reactiveVariable := "some text"
@@ -38,7 +40,9 @@ Scenes use curly braces and have predefined properties that will affect the beha
     }
 
     { imported_bs_markdown }
-        { slot="main content" }
+        { slot "main content" }
     }
+
+    ---
 }
 

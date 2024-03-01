@@ -1,6 +1,6 @@
 #title "Errors"
 #date "2024-2-5"
-#page {:
+---
 
 # Error Handling
 Errors are treated as values. Any function can return an error as its last return value. 
@@ -18,23 +18,23 @@ Double bang !! will force the program to panic and halt if the previous expressi
 {raw:
     -- Always returns a string even if an error is thrown by getNetworkRequest()
     -- The program will print the error and continue 
-    getURL : string() : (
-        => getNetworkRequest() !(
+    getURL : () -> string : (
+        -> getNetworkRequest() !(
             print("Network Request Error: {error}")
-            => "example.com"
+            -> "example.com"
         )
     )
 
     -- Returns an error to the calling function, just providing information about the error
     getURL : string() : (
-        => getNetworkRequest() !(
+        -> getNetworkRequest() !(
             print("Network Request Error: {error}")
         )
     )
 
     -- Default case in the case getURL returns an error
     -- The function specifies it can return an error so no explicit error handling is needed inside
-    dodgyFunction: string, error () : => getURL()
+    dodgyFunction: () -> string, error  : -> getURL()
 
     -- The compiler will give a warning about unhandled error cases inside this function
     callingFunction : () : (
@@ -44,6 +44,6 @@ Double bang !! will force the program to panic and halt if the previous expressi
     -- Unless an error is specified as a return value of the calling function, it must be handled
     -- Here is an example handling the error inline
     callingFunction : () : (
-        thing := dodgyFunction() ! => "default_thing"
+        thing := dodgyFunction() ! -> "default_thing"
     )
 }

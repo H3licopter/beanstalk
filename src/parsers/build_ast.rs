@@ -1,5 +1,5 @@
 use crate::{ast::AstNode, Token};
-use super::create_scene_node::new_scene;
+use super::{create_scene_node::new_scene, parse_expression::{parse_expression, parse_math_exp, NumberType}};
 
 pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
     let mut ast = Vec::new();
@@ -18,18 +18,6 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
             // New Function or Variable declaration or reference
             Token::Variable(name) => {
                 ast.push(new_variable(name, tokens, &mut i));
-            }
-
-            // HTML
-            Token::Page => {
-                match &tokens[i + 1] {
-                    Token::SceneHead(_value) => {
-                        ast.push(AstNode::Page);
-                    }
-                    _ => {
-                        ast.push(AstNode::Error("#Page must have a scene as a argument".to_string()));
-                    }
-                }
             }
 
             Token::Title => {
@@ -89,20 +77,18 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     *i += 1;
 
     // Variable Properties
-    let mut type_declaration = Token::Error("Can't figure out datatype".to_string());
+    let mut type_declaration = Token::TypeInference;
     let mut var_is_const = true;
     let mut bracket_nesting = 0;
 
     match &tokens[*i] {
         
         // Infer type (CONSTANT VARIABLE)
-        Token::Initialise => { 
-            type_declaration = infer_datatype(&tokens[*i + 1]) 
-        }
+        Token::Initialise => {}
+
         // Infer type (MUTABLE VARIABLE)
         Token::Assign => { 
             var_is_const = false;
-            type_declaration = infer_datatype(&tokens[*i + 1])
         }
         
         // Explicit Type Declarations
@@ -126,90 +112,17 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 
     // Get value of variable
     *i += 1;
+    
     // Check if value is wrapped in brackets and move on until first value is found
     while &tokens[*i] == &Token::OpenBracket {
         bracket_nesting += 1;
         *i += 1;
     }
 
-    match &tokens[*i] {
-        // Check if value is a reference to another variable or function call
-        Token::Variable(value) => {
-            
-            if is_reference(tokens, i, value) {
-                
-                // Check if is function call
-                if &tokens[*i + 1] == &Token::OpenBracket {
-                    
-                    // Read function args
-                    let mut args = Vec::new();
-                    *i += 2;
-                    while &tokens[*i] != &Token::CloseBracket {
-
-                        // TO DO, CHECK IS VALID ARGUMENT
-                        args.push(new_variable(value, tokens, i));
-                        
-                        *i += 1;
-                        // Make sure a comma is serperating args
-                        if &tokens[*i] == &Token::Comma {
-                            *i += 1;
-                        } else {
-                            return AstNode::Error("Expected ',' to seperate function args".to_string());
-                        }
-                    }
-                     
-                    return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::FunctionCall(value.clone(), args)));
-                }
-
-                return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::Ref(value.clone())));
-            }
-        }
-
-        Token::StringLiteral(value) => {
-            return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::StringLiteral(value.clone())));
-        }
-
-        Token::RawStringLiteral(value) => {
-            return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::RawStringLiteral(value.clone())));
-        }
-
-        Token::RuneLiteral(value) => {
-            return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::RuneLiteral(value.clone())));
-        }
-
-        Token::IntLiteral(value) => {
-            return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::IntLiteral(value.clone())));
-        }
-
-        Token::FloatLiteral(value) => {
-            return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::FloatLiteral(value.clone())));
-        }
-
-        Token::DecLiteral(value) => {
-            return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::DecLiteral(value.clone())));
-        }
-
-        Token::BoolLiteral(value) => {
-            return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::BoolLiteral(value.clone())));
-        }
-
-        Token::CollectionOpen => {
-            return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::Collection(vec![])));
-        }
-
-        Token::SceneOpen => {
-            return AstNode::VarDeclaration(name.clone(), Box::new(AstNode::Scene(vec![])));
-        }
-
-        _ => {
-            return AstNode::Error("Invalid Assignment for Variable, must be assigned wih a valid datatype".to_string());
-        }
-    }
+    let var_value = parse_expression(tokens, i, bracket_nesting, &type_declaration);
 
     AstNode::Error("Invalid variable assignment".to_string())
 }
-
-
 
 // TO DO - SOME PLACEHOLDER CODE FOR FUNCTION DECLARATION
 fn new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
@@ -251,7 +164,7 @@ fn new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 
 
 // Check if variable name has been used earlier in the vec of tokens, if it has return true
-fn is_reference(tokens: &Vec<Token>, i: &usize, name: &String) -> bool {
+pub fn is_reference(tokens: &Vec<Token>, i: &usize, name: &String) -> bool {
     for j in (0..=*i -1).rev() {
         if let Token::Variable(value) = &tokens[j] {
             if value == name {

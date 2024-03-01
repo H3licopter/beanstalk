@@ -1,16 +1,18 @@
 #title "Beanstalk Markdown"
 #date "2024-2-4"
-#page {:
+---
 
-Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to create a scene. Scenes are parsed and rendered into HTML.
+Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to create a scene. Scenes are parsed and rendered into HTML or XML.
 
-To create a default export of the file that the compiler will render into an HTML if the file is part of the "pages" directory, 
-create a Scene after the "page" decorator. You can set the title of the page on the page property. 
-If the file is not part of the pages directory, you can use #content or #component to make importing the scene into other files easy.
+The first scene you create will become the default export of the file if it isn't named. 
+You create a parent scene by using a triple dash and starting the scene on a newline.
+
+You can specify a name for the scene by naming it on the same line as the triple dash. This will allow you to export multiple scenes into other files.
+
+To close the parent scene, you can use the triple dash again on a newline.
 
 {raw:
-    #page {:
-
+    ---
     # A Heading
 
     Some text that has a [link](www.example.com) inside it.
