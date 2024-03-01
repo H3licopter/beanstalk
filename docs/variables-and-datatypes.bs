@@ -116,3 +116,18 @@ Doing this allows a small, clean syntax for handling invalid inputs using Beanst
         print("Invalid age input: {error}")
     )
 }
+
+# Unit Types
+Number types can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
+
+The first unit in the operation will be used if no unit type is set in the number type.
+
+#unit m = 0
+#unit cm = m * 0.01
+#unit mm = cm * 0.1
+
+width : float = 5m * 230cm
+-- result is 5.23
+
+height : float cm = 3m * 2m
+-- result is 500
