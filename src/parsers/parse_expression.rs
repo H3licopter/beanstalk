@@ -1,9 +1,39 @@
 use crate::{ast::AstNode, Token};
 use super::build_ast::is_reference;
 
-// Returns the result of the expression at compile time
+enum Operator {
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Root,
+    Modulus,
+    Exponent,
+    And,
+    Or,
+    Not,
+    Equal,
+    NotEqual,
+    GreaterThan,
+    LessThan,
+    GreaterThanOrEqual,
+    LessThanOrEqual,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseNot,
+    BitwiseXor,
+    BitwiseShiftLeft,
+    BitwiseShiftRight,
+}
+
+enum Expression {
+    Unary(Operator, Token), // Operator, Value
+    Binary(Operator, Token, Token), // Operator, LHS value, RHS value
+}
+
+// Returns the result of the expression for compile time evaluation
 pub fn parse_expression(tokens: &Vec<Token>, i: &mut usize, bracket_nesting: i32, type_declaration: &Token) -> AstNode {
-    let mut expression = AstNode::Literal(Token::IntLiteral(0));
+    let mut expr = AstNode::Literal(Token::IntLiteral(0));
 
     match &tokens[*i] {
         // Check if name is a reference to another variable or function call
@@ -36,7 +66,7 @@ pub fn parse_expression(tokens: &Vec<Token>, i: &mut usize, bracket_nesting: i32
 
         // Check if is a literal
         Token::StringLiteral(string) => {
-            expression = AstNode::Literal(Token::StringLiteral(string.clone()));
+            expr = AstNode::Literal(Token::StringLiteral(string.clone()));
         }
 
         _ => {
@@ -44,13 +74,13 @@ pub fn parse_expression(tokens: &Vec<Token>, i: &mut usize, bracket_nesting: i32
         }
     }
 
-  expression
+    expr
 }
 
 pub enum NumberType {
   Int(i32),
   Float(f64),
-  Decimal(Vec<i8>),
+  Decimal(Vec<char>),
 }
 
 pub fn parse_math_exp(tokens: &Vec<AstNode>, i: &mut usize, bracket_nesting: i32) -> NumberType {

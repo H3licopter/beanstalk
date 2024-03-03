@@ -1,23 +1,13 @@
-#title "Scenes"
+#title "Test File"
 #date "2024-2-4"
-#page {:
-
-# Scenes
-Beanstalk has its own markup language. 
-Elements are defined using keywords and can be given an ID using an $ symbol. 
-The element is automatically the equivalent of a div if a specific element is not defined and the element is on its own. 
-If the element is created inline with surrounding markdown or without a space separating it from surrounding markdown, it will become a span. 
+---
+# Heading
+some text content that is basically markdown.
 
 ## Subheading
-Scenes describe the state of the UI. 
-If you create an immutable scene with :: then it cannot change at runtime, 
-otherwise any changes to mutable variables used inside the template will be automatically tracked and updated (like signals).
+more text content that is basically markdown. But this time we've got an inline element {: wooo inline text}. Followed by a div element.
 
-Scenes use curly braces and have predefined properties that will affect the behavior of the Scene. 
-The properties in scenes are imported via the standard library depending on the project configuration.
+{: This should be inside a div. TO DO}
 
-Some stuff atewr the giant dump of raw code block.
+### H3 heading
 
-[link](https://www.google.com)
-
-{: "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png"}

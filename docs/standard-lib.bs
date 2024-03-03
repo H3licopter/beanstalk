@@ -60,6 +60,13 @@ When starting a new HTML project, Beanstalk will implicitly import relevant scen
     {: canvas}
 }
 
+### Comments
+{table 2: 
+    {: Property} {: Description}
+
+    {: comment}
+}
+
 
 
 

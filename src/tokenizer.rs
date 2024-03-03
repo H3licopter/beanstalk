@@ -35,7 +35,10 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
     }
 
     // Newlines must be tokenized for inline statements and scenes
-    if current_char == '\n' { return Token::Newline }
+    if current_char == '\n' {
+        return Token::Newline 
+    }
+
     // Skip whitespace
     while current_char.is_whitespace() {
         current_char = chars.next().unwrap_or('\0');
@@ -60,7 +63,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
 
     let mut token_value: String = String::new();
 
-    //Meta. Compile time things, configuration and metaprogramming
+    //Meta. Compile time things
     if current_char == '#' {
         *tokenize_mode = TokenizeMode::Meta;
 
@@ -124,7 +127,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
     if current_char == '!' { return Token::Bang }
     if current_char == '?' { return Token::QuestionMark }
 
-    // Comments / Subtraction
+    // Comments / Subtraction / Scene Head
     if current_char == '-' {
         if let Some(&next_char) = chars.peek() {
             
@@ -152,24 +155,18 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
                     } else if next_next_char == '-' {
                         chars.next();
                         chars.next();
-                        // Document comment
-                        while let Some(ch) = chars.next() {
-                            token_value.push(ch);
-                            if token_value.ends_with("---") {
-                                return Token::DocComment(
-                                    token_value
-                                    .trim_end_matches("\n---")
-                                    .to_string());
-                            }
+                        // New Parent Scene
+                        *scene_nesting_level += 1;
+                        *tokenize_mode = TokenizeMode::Markdown;
+                        return tokenize_scenehead(chars, tokenize_mode, scene_nesting_level);
+                    }
+                    
+                    // Inline Comment
+                    while let Some(ch) = chars.next() {
+                        if ch == '\n' {
+                            return Token::Comment(token_value);
                         }
-                    } else {
-                        // Inline Comment
-                        while let Some(ch) = chars.next() {
-                            if ch == '\n' {
-                                return Token::Comment(token_value);
-                            }
-                            token_value.push(ch);
-                        }
+                        token_value.push(ch);
                     }
                 }
 
@@ -453,6 +450,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
     let mut markdown_content = String::new();
 
     while let Some(next_char) = chars.peek() {
+        
         if next_char == &'\0' { 
             *tokenize_mode = TokenizeMode::Normal;
             break;

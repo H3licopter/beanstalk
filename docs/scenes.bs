@@ -5,7 +5,9 @@
 # Scenes
 Beanstalk has its own markup language. Elements are defined using keywords and can be given an ID using an $ symbol. The element is automatically the equivalent of a div if a specific element is not defined and the element is on its own. If the element is created inline with surrounding markdown or without a space separating it from surrounding markdown, it will become a span.
 
-Scenes describe the state of the UI. If you create an immutable scene with :: then it cannot change at runtime, otherwise any changes to mutable variables used inside the template will be automatically tracked and updated (like signals).
+Scenes describe both the content and state of the UI. If you create an immutable scene with :: then it cannot change at runtime, otherwise any changes to mutable variables used inside the template will be automatically tracked and updated (like signals).
+
+You can specify a name for the scene by naming it on the same line as the triple dash. This will allow you to export multiple scenes into other files.
 
 Scenes use curly braces and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
 
@@ -43,6 +45,10 @@ Scenes use curly braces and have predefined properties that will affect the beha
         { slot "main content" }
     }
 
-    ---
+
+    {comment: 
+        This scene will continue for the rest of the file,
+        unless an extra closing curly brace is added.
+    }
 }
 
