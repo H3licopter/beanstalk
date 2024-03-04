@@ -5,9 +5,23 @@
 some text content that is basically markdown.
 
 ## Subheading
-more text content that is basically markdown. But this time we've got an inline element {: wooo inline text}. Followed by a div element.
+More text content that is basically markdown. But this time we've got an inline element {: wooo inline text, should be wrapped in a span}. Followed by a div element.
 
-{: This should be inside a div. TO DO}
+{: This should be inside a div or just a new p tag. TO DO! }
+
+This paragraph has a single newline in the middle of it right here
+and this next now should be in the same paragraph.
 
 ### H3 heading
+underscores should make a horizontal line. Like this:
+____________________________________________________
+
+#### Dotted Underline
+................
+
+#### Normal Underline
+----------------
+
+Underlining is only for headings.
+
 

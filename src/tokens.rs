@@ -3,7 +3,7 @@ pub enum TokenizeMode {
     Normal,
     Markdown,
     RawMarkdown,
-    SceneHead,
+    SceneHead(bool), //Inline?
     Meta,
 }
 
@@ -143,17 +143,23 @@ pub enum Token {
     CloseArray,
 
     // Scenes
-    SceneHead(Vec<Token>),
-    Markdown(String),
+    SceneHead(Vec<Token>, bool), // Scene head properties, inline?
+    SceneBody(Vec<Token>),
     Href,
 
     // HTTP
     Dollar,
 
-    //HTML element keywords
+    //HTML element stuff
+    //markdown inferred elements
+    P(String),
+    Heading(u8, String), // Max heading size should be 10 or something
+    Empty,
+    Pre(String), // Content inside raw elements. Might change to not be a format tag in the future
+
+    // named tags
     Img,
     Video,
-    Span,
     Rgb,
     Raw,
 

@@ -1,7 +1,7 @@
 use crate::{ast::AstNode, Token};
 
 // Recursive function to parse scenes
-pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
+pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, inline: &bool) -> AstNode {
     let mut scene = Vec::new();
     *i += 1;
 
@@ -9,12 +9,17 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
         Parse scene head properties to get any styles or other properties
         Produce a string that will be inserted into the HTML tag
         This includes the type of element, styles and other stuff
-        If scene head is empty, use a div if the scenehead is after two or more newlines,
-        Otherwise, use a span. 
     */
-    let mut properties = String::new();
-    let mut scene_wrapping_tag = "span".to_string();
 
+    let mut properties = String::new();
+    let scene_wrapping_tag = if *inline { 
+        "span".to_string()
+    } else { 
+        "div".to_string() 
+    };
+
+
+    // Look at all the possible properties that can be added to the scene head
     if !scene_head.is_empty() {
         let mut j = 0;
         while j < scene_head.len() {
@@ -61,10 +66,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
                 // Will escape all characters until the final curly brace
                 // Will be formatted as a pre tag but can eventually be formatted with additional styles
-                Token::Raw => {
-                    scene_wrapping_tag = "pre".to_string();
-                }
-
+                Token::Raw => {}
                 
                 _ => {
                     scene.push(AstNode::Error(
@@ -78,44 +80,37 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
     while *i < tokens.len() {
         match &tokens[*i] {
+
             Token::SceneClose => {
-                scene.insert(0, AstNode::HTML(format!("{{{} {}}}", scene_wrapping_tag, properties)));
-                scene.push(AstNode::HTML(format!("{{/{}}}", scene_wrapping_tag)));
+                scene.insert(0, AstNode::HTML(format!("<{} {}>", scene_wrapping_tag, properties)));
+                scene.push(AstNode::HTML(format!("</{}>", scene_wrapping_tag)));
                 return AstNode::Scene(scene);
             }
 
-            Token::SceneHead(new_scenehead) => {
-                let nested_scene = new_scene(new_scenehead, tokens, i);
+            Token::SceneHead(new_scenehead, inline) => {
+                let nested_scene = new_scene(new_scenehead, tokens, i, &inline);
                 scene.push(nested_scene);
             }
 
-            Token::Markdown(md_content) => {
-                let mut starting_newlines = 0;
-                
-                // trim out non-newline whitespace at start of each scene of markdown
-                for c in md_content.chars() {
-                    if c == '\n' {
-                        starting_newlines += 1;
-                    }
-                }
-        
-                let mut md_to_parse = md_content.trim_start().to_string();
-                if md_to_parse.is_empty() {
-                    starting_newlines += 1;
-                }
-                while starting_newlines > 0 {
-                    md_to_parse = format!("\n{}", md_to_parse);
-                    starting_newlines -= 1;
-                }
-
-                if scene_wrapping_tag == "pre" {
-                    md_to_parse = md_to_parse
-                        .replace("{{", r#"\{"#)
-                        .replace("}}", r#"\}"#);
-                }
-
-                scene.push(AstNode::HTML(md_to_parse));
+            Token::P(content) => {
+                scene.push(AstNode::HTML(
+                    format!("<p>{}</p>", content)
+                ));
             }
+
+            Token::Heading(size, content) => {
+                scene.push(AstNode::HTML(
+                    format!("<h{}>{}</h{}>", size.to_string(), content, size.to_string())
+                ));
+            }
+
+            Token::Pre(content) => {
+                scene.push(AstNode::HTML(content
+                    .replace("{{", r#"\{"#)
+                    .replace("}}", r#"\}"#)));
+            }
+
+            Token::Empty => {}
 
             _ => {
                 scene.push(AstNode::Error("Invalid Syntax Used Inside scene body".to_string()));

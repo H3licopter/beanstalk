@@ -33,10 +33,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Command::Test => {
             println!("Testing...");
             test::test_build()?;
-            collect_user_input();
         }
     }
-
+    
+    main()?;
     Ok(())
 }
 enum Command {

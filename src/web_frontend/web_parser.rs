@@ -36,11 +36,6 @@ pub fn parse(ast: Vec<AstNode>) -> String {
         }
     }
 
-    html = parse_markdown_to_html(&html)
-        .replace("{/", "</")
-        .replace("{", "<")
-        .replace("}", ">");
-
     create_html_boilerplate(get_meta_config())
         .replace("page-js", &js)
         .replace("page-template", &html)
