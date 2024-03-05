@@ -508,11 +508,13 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
             match token {
                 Token::P(_) => {
                     if previous_newlines > 1 {
+                        content.push('\n');
                         break;
                     }
                 }
                 Token::Heading(_, _) => {
                     if previous_newlines > 0 {
+                        content.push('\n');
                         break;
                     }
                 }

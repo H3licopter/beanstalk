@@ -1,7 +1,7 @@
 use crate::{ast::AstNode, Token};
 
 // Recursive function to parse scenes
-pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, inline: &bool) -> AstNode {
+pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, inline: bool) -> AstNode {
     let mut scene = Vec::new();
     *i += 1;
 
@@ -12,7 +12,26 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, in
     */
 
     let mut properties = String::new();
-    let scene_wrapping_tag = if *inline { 
+
+    let mut is_inline = inline;
+    match &tokens[*i - 2] {
+        Token::Empty => {
+            is_inline = false;
+        }
+        Token::P(content) => {
+            if content.ends_with("\n\n") {
+                is_inline = false;
+            }
+        }
+        Token::Heading(_, content) => {
+            if content.ends_with("\n\n") {
+                is_inline = false;
+            }
+        }
+        _ => {}
+    }
+
+    let scene_wrapping_tag = if is_inline { 
         "span".to_string()
     } else { 
         "div".to_string() 
@@ -70,7 +89,8 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, in
                 
                 _ => {
                     scene.push(AstNode::Error(
-                        format!("Invalid Token Used inside Scene Head: '{:?}'", &scene_head[j])));
+                        format!("Invalid Token Used inside Scene Head: '{:?}'", &scene_head[j])
+                    ));
                 }
             }
 
@@ -88,7 +108,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, in
             }
 
             Token::SceneHead(new_scenehead, inline) => {
-                let nested_scene = new_scene(new_scenehead, tokens, i, &inline);
+                let nested_scene = new_scene(new_scenehead, tokens, i, inline.clone());
                 scene.push(nested_scene);
             }
 
