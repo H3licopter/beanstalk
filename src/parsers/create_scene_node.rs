@@ -1,7 +1,7 @@
 use crate::{ast::AstNode, Token};
 
 // Recursive function to parse scenes
-pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, inline: bool) -> AstNode {
+pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut scene = Vec::new();
     *i += 1;
 
@@ -13,23 +13,27 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, in
 
     let mut properties = String::new();
 
-    let mut is_inline = inline;
-    match &tokens[*i - 2] {
-        Token::Empty => {
-            is_inline = false;
-        }
+    let previous_element = &tokens[*i - 2];
+    let mut extra_closing_tag = String::new();
+    let is_inline = match previous_element {
+        Token::Empty => { false }
         Token::P(content) => {
-            if content.ends_with("\n\n") {
-                is_inline = false;
+            if content.ends_with("\n\n") { false } else {
+                extra_closing_tag = "</p>".to_string();
+                true
             }
         }
-        Token::Heading(_, content) => {
-            if content.ends_with("\n\n") {
-                is_inline = false;
+        Token::Heading(size, content) => {
+            if content.ends_with("\n\n") { false } else { 
+                let tag = format!("</h{}>", size).to_string();
+                extra_closing_tag = tag.to_string();
+                true 
             }
         }
-        _ => {}
-    }
+        _ => {
+            false
+        }
+    };
 
     let scene_wrapping_tag = if is_inline { 
         "span".to_string()
@@ -103,18 +107,32 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, in
 
             Token::SceneClose => {
                 scene.insert(0, AstNode::HTML(format!("<{} {}>", scene_wrapping_tag, properties)));
-                scene.push(AstNode::HTML(format!("</{}>", scene_wrapping_tag)));
+                scene.push(AstNode::HTML(format!("</{}>{}", scene_wrapping_tag, extra_closing_tag)));
                 return AstNode::Scene(scene);
             }
 
-            Token::SceneHead(new_scenehead, inline) => {
-                let nested_scene = new_scene(new_scenehead, tokens, i, inline.clone());
+            Token::SceneHead(new_scenehead) => {
+                let nested_scene = new_scene(&new_scenehead, tokens, i);
                 scene.push(nested_scene);
             }
 
             Token::P(content) => {
                 scene.push(AstNode::HTML(
-                    format!("<p>{}</p>", content)
+                    if !is_inline {
+                        // If the next token is a new inline scene, don't close the tag
+                        match &tokens[*i + 1] {
+                            Token::SceneHead(_) => {
+                                if content.ends_with("\n\n") {
+                                    format!("<p>{}</p>", content)
+                                } else {
+                                    format!("<p>{}", content)
+                                }
+                            }
+                            _ => format!("<p>{}</p>", content)
+                        }
+                    } else {
+                        format!("{}", content)
+                    }
                 ));
             }
 

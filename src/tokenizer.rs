@@ -48,7 +48,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
     // Check if going into markdown mode
     if current_char == ':' {
         match tokenize_mode {
-            TokenizeMode::SceneHead(_) => {
+            TokenizeMode::SceneHead => {
                 *tokenize_mode = TokenizeMode::Markdown;
                 return Token::Initialise
             }
@@ -63,11 +63,11 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
     if current_char == '{' {
         *scene_nesting_level += 1;
         match tokenize_mode {
-            TokenizeMode::SceneHead(is_inline) => {
-                *tokenize_mode = TokenizeMode::SceneHead(*is_inline);
+            TokenizeMode::SceneHead => {
+                *tokenize_mode = TokenizeMode::SceneHead;
             }
             _ => {
-                *tokenize_mode = TokenizeMode::SceneHead(false);
+                *tokenize_mode = TokenizeMode::SceneHead;
             }
         }
         return tokenize_scenehead(chars, tokenize_mode, scene_nesting_level);
@@ -382,7 +382,7 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
 
             // only bother tokenizing / reserving these keywords if inside of a scene head
             match tokenize_mode {
-                TokenizeMode::SceneHead(_) => {
+                TokenizeMode::SceneHead => {
                     if token_value == "rgb" { return Token::Rgb }
                     if token_value == "img" { return Token::Img }
                     if token_value == "raw" {
@@ -441,14 +441,9 @@ fn is_valid_identifier(s: &str) -> bool {
 fn tokenize_scenehead(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode, scene_nesting_level: &mut i64) -> Token {
     let mut scene_head: Vec<Token> = Vec::new();
 
-    let inline_scene = match tokenize_mode {
-        TokenizeMode::SceneHead(is_inline) => *is_inline,
-        _ => false
-    };
-
     while chars.peek().is_some() {
         match tokenize_mode {
-            TokenizeMode::SceneHead(_) => {
+            TokenizeMode::SceneHead => {
                 scene_head.push(get_next_token(chars, tokenize_mode, scene_nesting_level));
             }
             _ => {
@@ -457,7 +452,7 @@ fn tokenize_scenehead(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeM
         }
     }
 
-    Token::SceneHead(scene_head, inline_scene)
+    Token::SceneHead(scene_head)
 }
 
 // Create string of markdown content, only escaping when a closed curly brace is found
@@ -535,7 +530,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
         }
 
         if next_char == &'{' {
-            *tokenize_mode = TokenizeMode::SceneHead(previous_newlines < 2);
+            *tokenize_mode = TokenizeMode::SceneHead;
             break;
         }
 
@@ -604,7 +599,7 @@ fn tokenize_raw_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut 
             scene_open_count += 1;
 
             if scene_open_count == 0 {
-                *tokenize_mode = TokenizeMode::SceneHead(true);
+                *tokenize_mode = TokenizeMode::SceneHead;
                 break;
             }
         }

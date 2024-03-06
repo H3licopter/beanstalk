@@ -3,7 +3,7 @@ pub enum TokenizeMode {
     Normal,
     Markdown,
     RawMarkdown,
-    SceneHead(bool), //Inline?
+    SceneHead, //Inline?
     Meta,
 }
 
@@ -143,7 +143,7 @@ pub enum Token {
     CloseArray,
 
     // Scenes
-    SceneHead(Vec<Token>, bool), // Scene head properties, inline?
+    SceneHead(Vec<Token>), // Scene head properties, inline?
     SceneBody(Vec<Token>),
     Href,
 

@@ -11,8 +11,8 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
                 ast.push(AstNode::Comment(value.clone()));
             }
 
-            Token::SceneHead(scene_head, inline) => {
-                ast.push(new_scene(scene_head, tokens, &mut i, *inline));
+            Token::SceneHead(scene_head) => {
+                ast.push(new_scene(scene_head, tokens, &mut i));
             }
 
             // New Function or Variable declaration or reference

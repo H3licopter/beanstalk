@@ -1,6 +1,7 @@
 # TO DO
 ## GENERAL
 - Tidy up code a bit and prep for isolated task to create a function to manage precedence and parse maths expressions in the language.
+- Finish inline scene support for Headings
 - make #page immediately switch the rest of the file to a scene.
 
 ## HTML
