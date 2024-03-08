@@ -20,6 +20,7 @@ pub enum AstNode {
     
     // HTML
     HTML(String), // Content
+    Inline(String), // The type of element the inline content is wrapped in
     Title(String),
     Date(String),
 }

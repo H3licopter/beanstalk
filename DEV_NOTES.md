@@ -1,8 +1,7 @@
 # TO DO
 ## GENERAL
+- Have AST stage analyse tags to see what needs to be closed or removed from the HTML (possibiliy TAG node?)
 - Tidy up code a bit and prep for isolated task to create a function to manage precedence and parse maths expressions in the language.
-- Finish inline scene support for Headings
-- make #page immediately switch the rest of the file to a scene.
 
 ## HTML
 - Add most common HTML elements to the base language:

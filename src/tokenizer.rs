@@ -15,18 +15,28 @@ pub fn tokenize(source_code: &str) -> Vec<Token> {
         token = get_next_token(&mut chars, &mut tokenize_mode, &mut scene_nesting_level);
     }
 
+    tokens.push(token);
     tokens
 }
 
 fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode, scene_nesting_level: &mut i64) -> Token {
     let mut current_char = chars.next().unwrap_or('\0');
-    if current_char == '\0' { return Token::EOF; }
+
+    if current_char == '\0' {
+        return Token::EOF; 
+    }
 
     if tokenize_mode == &TokenizeMode::RawMarkdown {
         return tokenize_raw_markdown(chars, scene_nesting_level, tokenize_mode);
     }
 
     if current_char == '}' {
+        *scene_nesting_level -= 1;
+        if *scene_nesting_level == 0 {
+            *tokenize_mode = TokenizeMode::Normal;
+        } else {
+            *tokenize_mode = TokenizeMode::Markdown;
+        }
         return Token::SceneClose;
     }
 
@@ -36,7 +46,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
 
     // Newlines must be tokenized for inline statements and scenes
     if current_char == '\n' {
-        return Token::Newline 
+        return Token::Newline;
     }
 
     // Skip whitespace
@@ -47,15 +57,10 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
     // Initialisation
     // Check if going into markdown mode
     if current_char == ':' {
-        match tokenize_mode {
-            TokenizeMode::SceneHead => {
-                *tokenize_mode = TokenizeMode::Markdown;
-                return Token::Initialise
-            }
-            _ => {
-                return Token::Initialise
-            }
+        if tokenize_mode == &TokenizeMode::SceneHead {
+            *tokenize_mode = TokenizeMode::Markdown;
         }
+        return Token::Initialise;
     }
 
     // SCENES
@@ -331,7 +336,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
         return keyword_or_variable(&mut token_value, chars, tokenize_mode);
     }
 
-    Token::Error("Invalid Token Used".to_string())
+    Token::Error(format!("Invalid Token Used. Token: {}", current_char))
 }
 
 // Nested function because may need multiple searches for variables
@@ -441,13 +446,15 @@ fn is_valid_identifier(s: &str) -> bool {
 fn tokenize_scenehead(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode, scene_nesting_level: &mut i64) -> Token {
     let mut scene_head: Vec<Token> = Vec::new();
 
-    while chars.peek().is_some() {
-        match tokenize_mode {
-            TokenizeMode::SceneHead => {
-                scene_head.push(get_next_token(chars, tokenize_mode, scene_nesting_level));
-            }
-            _ => {
-                break;
+    while tokenize_mode == &TokenizeMode::SceneHead {
+        match chars.peek() {
+            Some(':') => { break; }
+            Some('}') => { break; }
+            None => { break; }
+            Some('\0') => { break; }
+            Some(_) => {
+                let next_token = get_next_token(chars, tokenize_mode, scene_nesting_level);
+                scene_head.push(next_token);
             }
         }
     }
@@ -463,14 +470,14 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
 
     // Check initial space before characters to determine type of element
     // Skip whitespace but count initial newlines
-    while let Some(next_char) = chars.peek() {
+    // while let Some(next_char) = chars.peek() {
 
-        if !next_char.is_whitespace() {
-            break;
-        }
+    //     if !next_char.is_whitespace() {
+    //         break;
+    //     }
 
-        chars.next();
-    }
+    //     chars.next();
+    // }
 
     if chars.peek() == Some(&'#') {
         let mut heading_count = 0;
@@ -520,12 +527,6 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
         }
 
         if next_char == &'}' {
-            *scene_nesting_level -= 1;
-            if *scene_nesting_level == 0 {
-                *tokenize_mode = TokenizeMode::Normal;
-            } else {
-                *tokenize_mode = TokenizeMode::Markdown;
-            }
             break;
         }
 
