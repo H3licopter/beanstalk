@@ -1,4 +1,4 @@
-use crate::{ast::AstNode, settings::get_meta_config, Token};
+use crate::{ast::AstNode, parsers::util::count_newlines_at_end_of_string, settings::get_meta_config, Token};
 use super::generate_html::create_html_boilerplate;
 
 // Parse ast into valid JS, HTML and CSS
@@ -61,21 +61,22 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
                         html.push_str(collect_closing_tags(&mut closing_tags).as_str());
                         html.push_str(&format!("<p>{}", value));
 
-                        closing_tags.push("</p>".to_string());
+                        if count_newlines_at_end_of_string(&value) > 1 {
+                            html.push_str("</p>");
+                        } else {
+                            closing_tags.push("</p>".to_string());
+                        }
                     }
 
                     Token::Heading(size, value) => {
                         html.push_str(collect_closing_tags(&mut closing_tags).as_str());
                         html.push_str(&format!("<h{}>{}", size, value));
 
-                        closing_tags.push(format!("</h{}>", size));
-                    }
-                    
-                    Token::A(href, content) => {
-                        html.push_str(collect_closing_tags(&mut closing_tags).as_str());
-                        html.push_str(&format!("<a href=\"{}\">{}", href, content));
-
-                        closing_tags.push("</a>".to_string());
+                        if count_newlines_at_end_of_string(&value) > 0 {
+                            html.push_str(&format!("</h{}>", size));
+                        } else {
+                            closing_tags.push(format!("</h{}>", size));
+                        }
                     }
 
                     _ => {}

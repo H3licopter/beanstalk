@@ -386,6 +386,7 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
             // only bother tokenizing / reserving these keywords if inside of a scene head
             match tokenize_mode {
                 TokenizeMode::SceneHead => {
+                    if token_value == "link" { return Token::A }
                     if token_value == "rgb" { return Token::Rgb }
                     if token_value == "img" { return Token::Img }
                     if token_value == "raw" {
@@ -508,7 +509,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMo
                 }
                 _ => {}
             }
-        } else {
+        } else if !next_char.is_whitespace() {
             previous_newlines = 0;
         }
 

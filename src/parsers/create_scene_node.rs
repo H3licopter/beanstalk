@@ -1,5 +1,12 @@
 use crate::{ast::AstNode, Token};
 
+use super::util::count_newlines_at_end_of_string;
+
+struct Element {
+    tag: String,
+    properties: String,
+}
+
 // Recursive function to parse scenes
 pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut scene = Vec::new();
@@ -11,14 +18,31 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
         This includes the type of element, styles and other stuff
     */
 
-    let mut properties = String::new();
-    let mut scene_wrapping_tag = "".to_string();
+    let mut scene_wrapping_tags: Vec<Element> = Vec::new();
 
     // Look at all the possible properties that can be added to the scene head
     let mut j = 0;
 
     while j < scene_head.len() {
         match scene_head[j] {
+
+            Token::A => {
+                j += 1;
+                let href = match &scene_head[j] {
+                    Token::StringLiteral(value) => {
+                        format!("\"https://{}\"", value)
+                    }
+                    _ => {
+                        scene.push(AstNode::Error("No string literal provided for a href".to_string()));
+                        "".to_string()
+                    }
+                };
+                scene_wrapping_tags.push(Element {
+                    tag: "a".to_string(),
+                    properties: format!("href={}", href)
+                });
+            }
+            
             Token::Rgb => {
                 if j + 7 >= scene_head.len() {
                     scene.push(AstNode::Error("RGB values not formatted correctly. \nShould look like: rgb(0, 0, 0)".to_string()));
@@ -51,8 +75,10 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                         }
                     }
 
-                    scene_wrapping_tag = "span".to_string();
-                    properties += &format!("style=\'color:rgb({},{},{})\' ", red, green, blue);
+                    scene_wrapping_tags.push(Element {
+                        tag: "span".to_string(),
+                        properties: format!("style=\'color:rgb({},{},{})\' ", red, green, blue)
+                    });
                     
                     j += 7;
                 }
@@ -70,8 +96,17 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                     }
                 };
 
-                scene_wrapping_tag = "img".to_string();
-                properties += &format!("src={}", src);
+                if !check_if_inline(tokens, *i) {
+                    scene_wrapping_tags.push(Element {
+                        tag: "div".to_string(),
+                        properties: format!("src={}", src)
+                    });
+                }
+
+                scene_wrapping_tags.push(Element {
+                    tag: "img".to_string(),
+                    properties: format!("src={}", src)
+                });
             }
 
             // Will escape all characters until the final curly brace
@@ -138,13 +173,11 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
         *i += 1;
     }
 
-    if !properties.is_empty() && scene_wrapping_tag.is_empty() {
-        scene_wrapping_tag = "span".to_string();
-    }
-
-    if !scene_wrapping_tag.is_empty() {
-        scene.insert(0, AstNode::SceneTag(format!("<{} {}>", scene_wrapping_tag, properties)));
-        scene.push(AstNode::SceneTag(format!("</{}>", scene_wrapping_tag)));
+    if !scene_wrapping_tags.is_empty() {
+        for element in scene_wrapping_tags.iter().rev() {
+            scene.insert(0, AstNode::SceneTag(format!("<{} {}>", element.tag, element.properties)));
+            scene.push(AstNode::SceneTag(format!("</{}>", element.tag)));
+        }
     }
 
     AstNode::Scene(scene)
@@ -172,10 +205,10 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     match previous_element {
         Token::Empty => { false }
         Token::P(content) => {
-            if content.ends_with("\n\n") { false } else { true }
+            if count_newlines_at_end_of_string(content) > 1 { false } else { true }
         }
         Token::Heading(_, content) => {
-            if content.ends_with("\n") { false } else { true }
+            if count_newlines_at_end_of_string(content) > 0 { false } else { true }
         }
         _ => {
             false

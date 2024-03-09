@@ -4,6 +4,6 @@ Here is an example of a file in Beanstalk. Elements can be easily nested {rgb(17
 
 New P
 
-{ img "images/default.png" }
+{ img "images/default.png" } gonna put some stupid text here.
 
-test
+test {link "www.google.com": cool link} in the middle of some text. 

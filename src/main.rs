@@ -11,6 +11,7 @@ mod parsers {
     pub mod build_ast;
     mod create_scene_node;
     pub mod parse_expression;
+    pub mod util;
 }
 mod web_frontend {
     pub mod web_parser;

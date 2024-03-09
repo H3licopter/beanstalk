@@ -1,6 +1,6 @@
 # TO DO
 ## GENERAL
-- Have AST stage analyse tags to see what needs to be closed or removed from the HTML (possibiliy TAG node?)
+- Fix lack of space after an inline scene
 - Tidy up code a bit and prep for isolated task to create a function to manage precedence and parse maths expressions in the language.
 
 ## HTML
