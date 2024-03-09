@@ -19,8 +19,8 @@ pub enum AstNode {
     Scene(Vec<AstNode>), // Scene, Properties
     
     // HTML
-    Block(Token), // Block HTML element content
-    Inline(Token), // Inline HTML content
+    Element(Token), // HTML element content
+    SceneTag(String), // Scene wrapping tag
 
     // SCENE META DATA
     Title(String),

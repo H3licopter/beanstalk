@@ -14,18 +14,19 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     // Tokenize File
     println!("TOKENIZING FILE\n");
     let tokens: Vec<Token> = tokenizer::tokenize(&content);
-    println!("TOKENS:\n");
-    println!("{:?}", tokens);
-
+    
+    println!("TOKENS:");
+    for token in &tokens {
+        println!("{:?}", token);
+    }
     println!("\n");
-
 
     // Create AST
     println!("CREATING AST\n");
     let ast: Vec<crate::ast::AstNode> = parsers::build_ast::new_ast(&tokens, 0).0;
-    println!("AST:\n");
+    
+    println!("AST:");
     println!("{:?}", ast);
-
     println!("\n");
 
     println!("CREATING HTML OUTPUT\n");

@@ -3,3 +3,7 @@
 Here is an example of a file in Beanstalk. Elements can be easily nested {rgb(175,0,0): inline } and compiles into a web page!
 
 New P
+
+{ img "images/default.png" }
+
+test

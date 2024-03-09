@@ -152,6 +152,7 @@ pub enum Token {
 
     //HTML element stuff
     //markdown inferred elements
+    Span(String),
     P(String),
     Heading(u8, String), // Max heading size should be 10 or something
     Empty,
@@ -159,7 +160,7 @@ pub enum Token {
 
     // named tags
     A(String, String), // href, content 
-    Img,
+    Img, // src, alt
     Video,
     Rgb,
     Raw,

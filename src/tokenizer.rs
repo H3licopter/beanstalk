@@ -30,18 +30,21 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
         return tokenize_raw_markdown(chars, scene_nesting_level, tokenize_mode);
     }
 
-    if current_char == '}' {
-        *scene_nesting_level -= 1;
-        if *scene_nesting_level == 0 {
-            *tokenize_mode = TokenizeMode::Normal;
-        } else {
-            *tokenize_mode = TokenizeMode::Markdown;
+    if current_char == '{' {
+        *scene_nesting_level += 1;
+        match tokenize_mode {
+            TokenizeMode::SceneHead => {
+                return Token::Error("Cannot have nested scenes inside of a scene head, must be inside the scene body".to_string());
+            }
+            _ => {
+                *tokenize_mode = TokenizeMode::SceneHead;
+            }
         }
-        return Token::SceneClose;
+        return tokenize_scenehead(chars, tokenize_mode, scene_nesting_level);
     }
 
-    if tokenize_mode == &TokenizeMode::Markdown {
-        return tokenize_markdown(chars, scene_nesting_level, tokenize_mode);
+    if tokenize_mode == &TokenizeMode::Markdown && current_char != '}' {
+        return tokenize_markdown(chars, tokenize_mode);
     }
 
     // Newlines must be tokenized for inline statements and scenes
@@ -63,19 +66,14 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
         return Token::Initialise;
     }
 
-    // SCENES
-    // Starts a new Scene Tree Node
-    if current_char == '{' {
-        *scene_nesting_level += 1;
-        match tokenize_mode {
-            TokenizeMode::SceneHead => {
-                *tokenize_mode = TokenizeMode::SceneHead;
-            }
-            _ => {
-                *tokenize_mode = TokenizeMode::SceneHead;
-            }
+    if current_char == '}' {
+        *scene_nesting_level -= 1;
+        if *scene_nesting_level == 0 {
+            *tokenize_mode = TokenizeMode::Normal;
+        } else {
+            *tokenize_mode = TokenizeMode::Markdown;
         }
-        return tokenize_scenehead(chars, tokenize_mode, scene_nesting_level);
+        return Token::SceneClose;
     }
 
     let mut token_value: String = String::new();
@@ -447,15 +445,12 @@ fn tokenize_scenehead(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeM
     let mut scene_head: Vec<Token> = Vec::new();
 
     while tokenize_mode == &TokenizeMode::SceneHead {
-        match chars.peek() {
-            Some(':') => { break; }
-            Some('}') => { break; }
-            None => { break; }
-            Some('\0') => { break; }
-            Some(_) => {
-                let next_token = get_next_token(chars, tokenize_mode, scene_nesting_level);
-                scene_head.push(next_token);
+        let next_token = get_next_token(chars, tokenize_mode, scene_nesting_level);
+        match next_token {
+            Token::EOF | Token::Initialise | Token::SceneClose => { 
+                break;
             }
+            _ => {scene_head.push(next_token);}
         }
     }
 
@@ -464,7 +459,7 @@ fn tokenize_scenehead(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeM
 
 // Create string of markdown content, only escaping when a closed curly brace is found
 // Any Beanstalk specific extensions to Markdown will need to be implimented here
-fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64, tokenize_mode: &mut TokenizeMode) -> Token {
+fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode) -> Token {
     let mut content = String::new(); // To keep track of current chars being parsed
     let mut token: Token = Token::P(String::new());
 
@@ -477,6 +472,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
                 heading_count += 1;
                 continue;
             }
+
             if next_char == ' ' {
                 token = Token::Heading(heading_count, String::new());
                 break;
@@ -485,6 +481,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
             for _ in 0..heading_count {
                 content.push('#');
             }
+
             break;
         }
     }
@@ -515,12 +512,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
             previous_newlines = 0;
         }
 
-        if next_char == &'}' {
-            break;
-        }
-
-        if next_char == &'{' {
-            *tokenize_mode = TokenizeMode::SceneHead;
+        if next_char == &'}' || next_char == &'{' {
             break;
         }
 
@@ -556,7 +548,6 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
             Token::Error("Invalid Markdown Element".to_string())
         }
     }
-
 }
 
 // Needs to find where the last closing curly bracket is first and escape all curly brackets until the last one
