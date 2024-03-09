@@ -158,6 +158,7 @@ pub enum Token {
     Pre(String), // Content inside raw elements. Might change to not be a format tag in the future
 
     // named tags
+    A(String, String), // href, content 
     Img,
     Video,
     Rgb,

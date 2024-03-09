@@ -13,35 +13,6 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
     let mut properties = String::new();
 
-    let previous_element = if *i > 1 { &tokens[*i - 2] } else { &Token::Empty };
-    
-    let is_inline = match previous_element {
-        Token::Empty => { false }
-        Token::P(content) => {
-            if content.ends_with("\n\n") { false } else {
-                scene.push(AstNode::Inline("</p>".to_string()));
-                true
-            }
-        }
-        Token::Heading(size, content) => {
-            if content.ends_with("\n\n") { false } else { 
-                let tag = format!("</h{}>", size).to_string();
-                scene.push(AstNode::Inline(tag.to_string()));
-                true 
-            }
-        }
-        _ => {
-            false
-        }
-    };
-
-    let mut scene_wrapping_tag = if is_inline { 
-        "span".to_string()
-    } else { 
-        "div".to_string() 
-    };
-
-
     // Look at all the possible properties that can be added to the scene head
     let mut j = 0;
 
@@ -97,7 +68,6 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                     }
                 };
 
-                scene_wrapping_tag = "img".to_string();
                 properties += &format!("src={}", src);
             }
 
@@ -119,8 +89,6 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
         match &tokens[*i] {
 
             Token::SceneClose | Token::EOF => {
-                scene.insert(0, AstNode::HTML(format!("<{} {}>", scene_wrapping_tag, properties)));
-                scene.push(AstNode::HTML(format!("</{}>", scene_wrapping_tag)));
                 break;
             }
 
@@ -130,49 +98,31 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::P(content) => {
-                scene.push(AstNode::HTML(
-                    if !is_inline {
-                        // If the next token is a new inline scene, don't close the tag
-                        match &tokens[*i + 1] {
-                            Token::SceneHead(_) => {
-                                if content.ends_with("\n\n") {
-                                    format!("<p>{}</p>", content)
-                                } else {
-                                    format!("<p>{}", content)
-                                }
-                            }
-                            _ => format!("<p>{}</p>", content)
-                        }
+                scene.push(
+                    if !check_if_inline(tokens, *i) {
+                        AstNode::Block(Token::P(content.to_string()))
                     } else {
-                        content.to_string()
+                        AstNode::Inline(Token::P(content.to_string()))
                     }
-                ));
+                );
             }
 
             Token::Heading(size, content) => {
-                scene.push(AstNode::HTML(
-                    if !is_inline {
-                        // If the next token is a new inline scene, don't close the tag
-                        match &tokens[*i + 1] {
-                            Token::SceneHead(_) => {
-                                if content.ends_with("\n\n") {
-                                    format!("<h{}>{}</h{}>", size.to_string(), content, size.to_string())
-                                } else {
-                                    format!("<h{}>{}", size.to_string(), content)
-                                }
-                            }
-                            _ => format!("<h{}>{}</h{}>", size.to_string(), content, size.to_string())
-                        }
+                scene.push(
+                    if !check_if_inline(tokens, *i) {
+                        AstNode::Block(Token::Heading(*size, content.to_string()))
                     } else {
-                        content.to_string() 
+                        AstNode::Inline(Token::Heading(*size, content.to_string()))
                     }
-                ));
+                );
             }
 
             Token::Pre(content) => {
-                scene.push(AstNode::HTML(content
-                    .replace("{{", r#"\{"#)
-                    .replace("}}", r#"\}"#)));
+                scene.push(AstNode::Block(Token::Pre(
+                    content
+                        .replace("{{", r#"\{"#)
+                        .replace("}}", r#"\}"#)
+                    )));
             }
 
             Token::Empty | Token::Initialise => {}
@@ -185,38 +135,55 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
         *i += 1;
     }
 
-    // ADDING CLOSING TAG ONLY IF NEEDED
-    // If the scene is inline, check if it is inbetween two of the same elements or if it is the last element
-    match scene.first() {
-        Some(AstNode::Inline(closing_tag)) => {
-            let next_element = if *i < tokens.len() { &tokens[*i] } else { &Token::Empty };
-            match next_element {
-                Token::P(_) => {
-                    if closing_tag.contains("p") {
-                       return AstNode::Scene(scene)
-                    }
-                }
-                Token::Heading(size, _) => {
-                    if closing_tag.contains(&format!("h{}", size)) {
-                        return AstNode::Scene(scene)
-                    }
-                }
-                _ => {
-                    scene.push(AstNode::HTML(closing_tag.to_string()))
-                }
-            }
-        }
-        _ => {}
-    }
-
     AstNode::Scene(scene)
 }
 
+fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
 
-// // Add breaks for each newline at the start of the markdown segment
-// let mut newlines = 0;
-// for c in md_content.chars() {
-//     if c == '\n' {
-//         newlines += 1;
-//     } else { break; }
-// }
+    let current_element = &tokens[i];
+
+    // Iterate back through tokens to find the last token that isn't Initialise, Scenehead or Sceneclose
+    let mut previous_element = &Token::Empty;
+    let mut j = i - 1;
+    while j > 0 {
+        match &tokens[j] {
+            Token::Initialise | Token::SceneHead(_) | Token::SceneClose => {
+                j -= 1;
+            }
+            _ => {
+                previous_element = &tokens[j];
+                break;
+            }
+        }
+    }
+
+    // If the current element is the same as the previous element
+    // It doesn't have 2 newlines ending it and it can be inlined
+    // Then return true
+    match previous_element {
+        Token::Empty => { false }
+        Token::P(content) => {
+            match current_element {
+                Token::P(_) => {
+                    if content.ends_with("\n\n") { false } else { true }
+                }
+                _ => {
+                    false
+                }
+            }
+        }
+        Token::Heading(_, content) => {
+            match current_element {
+                Token::Heading(_, _) => {
+                    if content.ends_with("\n\n") { false } else { true }
+                }
+                _ => {
+                    false
+                }
+            }
+        }
+        _ => {
+            false
+        }
+    }
+}

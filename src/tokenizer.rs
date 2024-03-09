@@ -468,17 +468,6 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64,
     let mut content = String::new(); // To keep track of current chars being parsed
     let mut token: Token = Token::P(String::new());
 
-    // Check initial space before characters to determine type of element
-    // Skip whitespace but count initial newlines
-    // while let Some(next_char) = chars.peek() {
-
-    //     if !next_char.is_whitespace() {
-    //         break;
-    //     }
-
-    //     chars.next();
-    // }
-
     if chars.peek() == Some(&'#') {
         let mut heading_count = 0;
 
