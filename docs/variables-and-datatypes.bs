@@ -1,7 +1,6 @@
 #title "Variables and Datatypes"
 #date "2024-2-4"
 ---
-
 # Variables
 Equals '=' is used for variable assignment. And colon : is used to indicate initialisation. If a variable is assigned a value with a colon rather than the equals symbol it becomes immutable.
 
@@ -16,7 +15,8 @@ Equals '=' is used for variable assignment. And colon : is used to indicate init
     my_brain := "thing" 
 }
 
-*There is no such thing as Nil or Null in Beanstalk.*
+**There is no such thing as Nil or Null in Beanstalk.**
+
 Variables initialised with a type but no assignment will have a zero value depending on the type.
 If an error occurs during assignment of a variable, 
 the zero value will be used and an error will be created as an additional value that must be handled during the assignement or passed up the callstack.
@@ -122,12 +122,16 @@ Number types can be appended with special unit types. These can represent a real
 
 The first unit in the operation will be used if no unit type is set in the number type.
 
-#unit m = 0
-#unit cm = m * 0.01
-#unit mm = cm * 0.1
+{raw:
 
-width : float = 5m * 230cm
--- result is 5.23
+    #unit m = 0
+    #unit cm = m * 0.01
+    #unit mm = cm * 0.1
 
-height : float cm = 3m * 2m
--- result is 500
+    width : float = 5m * 230cm
+    -- result is 5.23
+
+    height : float cm = 3m * 2m
+    -- result is 500
+
+}

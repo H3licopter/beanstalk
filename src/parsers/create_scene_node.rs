@@ -111,7 +111,26 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
             // Will escape all characters until the final curly brace
             // Will be formatted as a pre tag but can eventually be formatted with additional styles
-            Token::Raw => {}
+            Token::Raw => {                
+                j += 1;
+
+                let mut arg = "".to_string();
+                if scene_head.len() > j {
+                    arg = match &scene_head[j] {
+                        Token::StringLiteral(value) => {
+                            format!("\"{}\"", value)
+                        }
+                        _ => {
+                            "".to_string()
+                        }
+                    };
+                }
+
+                scene_wrapping_tags.push(Element {
+                    tag: "div".to_string(),
+                    properties: format!("{}{}", "class=bs-raw", if !arg.is_empty() {format!("-{}", arg)} else {"".to_string()})
+                });
+            }
             
             _ => {
                 scene.push(AstNode::Error(
@@ -155,12 +174,12 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 );
             }
 
+            Token::Em(strength, content) => {
+                scene.push(AstNode::Element(Token::Em(*strength, content.to_string())));
+            }
+
             Token::Pre(content) => {
-                scene.push(AstNode::Element(Token::Pre(
-                    content
-                        .replace("{{", r#"\{"#)
-                        .replace("}}", r#"\}"#)
-                    )));
+                scene.push(AstNode::Element(Token::Pre(content.to_string())));
             }
 
             Token::Empty | Token::Initialise => {}
@@ -189,9 +208,26 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     let mut j = i - 1;
     while j > 0 {
         match &tokens[j] {
-            Token::Initialise | Token::SceneHead(_) | Token::SceneClose => {
+
+            // Ignore these tokens
+            Token::Initialise | Token::SceneClose => {
                 j -= 1;
             }
+
+            // Check if the previous scenehead has any tags that can be inlined
+            Token::SceneHead(tags) => {
+                if tags.len() > 0 {
+                    match tags[0] {
+                        Token::A => {
+                            previous_element = &tags[0];
+                            break;
+                        }
+                        _ => {}
+                    }
+                }
+                j -= 1;
+            }
+
             _ => {
                 previous_element = &tokens[j];
                 break;
@@ -210,6 +246,10 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
         Token::Heading(_, content) => {
             if count_newlines_at_end_of_string(content) > 0 { false } else { true }
         }
+        Token::Em(_, content) => {
+            if count_newlines_at_end_of_string(content) > 0 { false } else { true }
+        }
+        Token::A => { true }
         _ => {
             false
         }

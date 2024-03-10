@@ -79,6 +79,33 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
                         }
                     }
 
+                    Token::Em(strength, value) => {
+                        match strength {
+                            1 => {
+                                html.push_str(&format!("<em>{}</em>", value));
+                            }
+                            2 => {
+                                html.push_str(&format!("<strong>{}</strong>", value));
+                            }
+                            3 => {
+                                html.push_str(&format!("<strong><em>{}</em></strong>", value));
+                            }
+                            _ => {
+                                html.push_str(&format!("<strong><em>{}</em></strong>", value));
+                            }
+                        };
+
+                        if count_newlines_at_end_of_string(&value) > 1 {
+                            html.push_str(collect_closing_tags(&mut closing_tags).as_str());
+                        }
+                    }
+
+                    Token::Pre(value) => {
+                        html.push_str(collect_closing_tags(&mut closing_tags).as_str());
+                        html.push_str(&format!("<pre>{}", value));
+                        closing_tags.push("</pre>".to_string());
+                    }
+
                     _ => {}
                 };
             }

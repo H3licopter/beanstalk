@@ -1,9 +1,23 @@
 ---
 # TEST FILE
-Here is an example of a file in Beanstalk. Elements can be easily nested {rgb(175,0,0): inline } and compiles into a web page!
+Here is an example of a file in Beanstalk. Elements can be easily nested { rgb(175,0,0): inline } and compiled into a web page! *inline em*
 
-New P
+***BOLD TEXT TEST***
 
-{ img "images/default.png" } gonna put some stupid text here.
+{ img "images/default.png" } gonna put some stupid text here. next to the image.
 
-test {link "www.google.com": cool link} in the middle of some text. 
+test 
+
+{ link "www.google.com": cool link } in the middle of some text. 
+
+Here is a block of code:
+
+{ raw:
+    my_brain : string = "Dumb"
+
+    --type is inferred as i64
+    number_4 : int = 69 
+
+    -- dynamically infer the type at compile time
+    my_brain := "thing" 
+}

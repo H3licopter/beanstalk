@@ -155,6 +155,7 @@ pub enum Token {
     Span(String),
     P(String),
     Heading(u8, String), // Max heading size should be 10 or something
+    Em(u8, String), // Strength of emphasis: 1: italic, 2: Bold, 3: Italic and bold
     Empty,
     Pre(String), // Content inside raw elements. Might change to not be a format tag in the future
 
