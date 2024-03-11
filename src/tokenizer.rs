@@ -497,60 +497,11 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMo
         }
     }
 
-    // EM
-    if chars.peek() == Some(&'*') {
-        println!("Next Char: {:?}", chars.peek());
-
-        let mut asterisk_count = 0;
-
-        while let Some(next_char) = chars.peek() {
-            if next_char == &'*' {
-                asterisk_count += 1;
-                if asterisk_count > 7 { 
-                    token = Token::Em(asterisk_count, String::new());
-                    break;
-                }
-                
-                chars.next();
-                continue;
-            }
-
-            if asterisk_count > 0 {
-                token = Token::Em(asterisk_count, String::new());
-            }
-
-            break;
-        }
-    }
-
     // Loop through the elements content until hitting a condition that
     // breaks out of the element
     let mut previous_newlines = 0;
     let mut previous_astrixes = 0;
     while let Some(next_char) = chars.peek() {
-
-        // If the next character is an asterisk, 
-        // check if it's the end of the emphasis or the start of a new one
-        if next_char == &'*' {
-            previous_astrixes += 1;
-            match token {
-                Token::Em(strength, _) => {
-                    if previous_astrixes == strength {
-                        content.truncate(content.len() - previous_astrixes as usize + 1);
-                        break;
-                    }
-                }
-                Token::P(_) => {
-                    if previous_astrixes == 3 {
-                        content.truncate(content.len() - 3);
-                        break;
-                    }
-                }
-                _ => {}
-            }
-        } else {
-            previous_astrixes = 0;
-        }
 
         if next_char == &'\n' {
             previous_newlines += 1;
@@ -605,18 +556,6 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMo
             }
 
             Token::Heading(count, content)
-        }
-
-        Token::Em(strength, _) => {
-            if content.trim().is_empty() {
-                let mut p_content = String::new();
-                for _ in 0..strength {
-                    p_content.push('*');
-                }
-                return Token::P(p_content);
-            }
-
-            Token::Em(strength, content)
         }
 
         _ => {

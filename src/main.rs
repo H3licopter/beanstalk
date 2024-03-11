@@ -1,4 +1,5 @@
 use std::{io::{self, Write}, fs, path::Path};
+use std::time::{Duration, Instant};
 
 mod tokenizer;
 mod tokens;
@@ -27,8 +28,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("Creating new HTML project...");
         },
         Command::Build(path) => {
+            let start = Instant::now();
             build::build(path)?;
+            let duration = start.elapsed();
             println!("Building project...");
+            println!("Project built in: {:?}", duration);
         },
         Command::Test => {
             println!("Testing...");
@@ -94,7 +98,7 @@ fn collect_user_input() -> Command {
         },
         _ => {
             println!("Building test project....");
-            let _ = build::build("test".to_string());
+            return Command::Build("test".to_string());
         }
     }
 

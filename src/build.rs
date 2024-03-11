@@ -36,7 +36,5 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     let mut file = fs::File::create(output_path + "index.html")?;
     file.write_all(html_output.as_bytes())?;
 
-    println!("Project built!");
-
     Ok(())
 }

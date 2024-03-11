@@ -2,6 +2,7 @@
 ## GENERAL
 - Try making the spaces after an inline element significant rather than at the end of the element. HTML automatically parses them out.
 - Tidy up code a bit and prep for isolated task to create a function to manage precedence and parse maths expressions in the language.
+- Add in memory safety net for recursive function calls, or use a better pattern e.g tail recursion.
 
 ## HTML
 - Add most common HTML elements to the base language:

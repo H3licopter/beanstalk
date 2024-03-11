@@ -155,27 +155,25 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::P(content) => {
+                let parsed_content = add_tags(&mut content.clone(), &mut 0);
                 scene.push(
                     if !check_if_inline(tokens, *i) {
-                        AstNode::Element(Token::P(content.to_string()))
+                        AstNode::Element(Token::P(parsed_content))
                     } else {
-                        AstNode::Element(Token::Span(content.to_string()))
+                        AstNode::Element(Token::Span(parsed_content))
                     }
                 );
             }
 
             Token::Heading(size, content) => {
+                let parsed_content = add_tags(&mut content.clone(), &mut 0);
                 scene.push(
                     if !check_if_inline(tokens, *i) {
-                        AstNode::Element(Token::Heading(*size, content.to_string()))
+                        AstNode::Element(Token::Heading(*size, parsed_content))
                     } else {
-                        AstNode::Element(Token::Span(content.to_string()))
+                        AstNode::Element(Token::Span(parsed_content))
                     }
                 );
-            }
-
-            Token::Em(strength, content) => {
-                scene.push(AstNode::Element(Token::Em(*strength, content.to_string())));
             }
 
             Token::Pre(content) => {
@@ -246,12 +244,91 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
         Token::Heading(_, content) => {
             if count_newlines_at_end_of_string(content) > 0 { false } else { true }
         }
-        Token::Em(_, content) => {
-            if count_newlines_at_end_of_string(content) > 0 { false } else { true }
-        }
         Token::A => { true }
         _ => {
             false
         }
     }
+}
+
+// Loop through and replace all Markdown formatting with correct tags
+fn add_tags(content: &mut String, i: &mut usize) -> String {
+    while *i < content.len() - 1 {
+        let should_continue = add_em_tags(content, i);
+        if !should_continue {
+            break;
+        }
+        *i += 1;
+    }
+
+    content.to_string()
+}
+
+// 1 aserisk = <em>
+// 2 asterisks = <strong>
+// 3 asterisks = <strong><em>
+// 4+ asterisks = <b> (will have a custom very bold style for the tag in the future)
+fn add_em_tags(content: &mut String, i: &mut usize) -> bool {
+    let mut open_index: usize = 0;
+    let mut close_index: usize = 0;
+    let mut asterisk_open_count = 0;
+    let mut asterisk_close_count = 0;
+
+    // Get starting index of asterisks and determine strength of emphasis
+    while let Some(char) = content.chars().nth(*i) {
+        if char == '*' {
+            asterisk_open_count += 1;
+        } else {
+            open_index = *i;
+            break;
+        }
+        *i += 1;
+    }
+
+    // Check if asterisk_count is found at any point later in the content
+    // And remeber the index.
+    while let Some(char) = content.chars().nth(*i) {
+        if char == '*' {
+            asterisk_close_count += 1;
+        } else if asterisk_close_count == asterisk_open_count {
+            close_index = *i;
+            break;
+        }
+        *i += 1;
+    }
+
+    // If close count is equal to open count, then emphasis is valid
+    if asterisk_open_count == asterisk_close_count && asterisk_open_count > 0 {
+
+        let emphasis_open = match asterisk_open_count {
+            1 => "<em>",
+            2 => "<strong>",
+            3 => "<strong><em>",
+            _ => "<b>"
+        };
+        let emphasis_close = match asterisk_open_count {
+            1 => "</em>",
+            2 => "</strong>",
+            3 => "</em></strong>",
+            _ => "</b>"
+        };
+
+        // Replace asterisks with emphasis tags
+        content.replace_range(
+            open_index - asterisk_open_count..open_index,
+            emphasis_open
+        );
+
+        let new_close_index = close_index + emphasis_open.len() - asterisk_open_count;
+        content.replace_range(
+            new_close_index - asterisk_open_count..new_close_index,
+            emphasis_close
+        );
+    }
+
+    if *i > content.len() - 1 || !content.contains('*') {
+        return false
+    }
+
+    true
 }
