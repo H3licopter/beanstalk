@@ -164,6 +164,7 @@ pub enum Token {
     Video,
     Rgb,
     Raw,
+    Code,
 
     Slot, // Injection point for additional template nesting 
 

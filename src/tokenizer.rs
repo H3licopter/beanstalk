@@ -27,7 +27,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
     }
 
     if tokenize_mode == &TokenizeMode::RawMarkdown {
-        return tokenize_raw_markdown(chars, scene_nesting_level, tokenize_mode);
+        return tokenize_raw_markdown(chars, tokenize_mode);
     }
 
     if current_char == '{' {
@@ -389,13 +389,16 @@ fn keyword_or_variable(token_value: &mut String, chars: &mut Peekable<Chars<'_>>
                     if token_value == "link" { return Token::A }
                     if token_value == "rgb" { return Token::Rgb }
                     if token_value == "img" { return Token::Img }
-                    if token_value == "raw" {
+                    if token_value == "raw" || token_value == "code" {
                         while let Some(next_char) = chars.next() {
                             if !next_char.is_whitespace() {
                                 match next_char {
                                     ':' => {
                                         chars.next();
                                         *tokenize_mode = TokenizeMode::RawMarkdown;
+                                        if token_value == "code" { 
+                                            return Token::Code
+                                        } 
                                         return Token::Raw
                                     }
                                     _ => {
@@ -491,6 +494,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMo
             
             for _ in 0..heading_count {
                 content.push('#');
+                content.push(next_char);
             }
 
             break;
@@ -500,7 +504,6 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMo
     // Loop through the elements content until hitting a condition that
     // breaks out of the element
     let mut previous_newlines = 0;
-    let mut previous_astrixes = 0;
     while let Some(next_char) = chars.peek() {
 
         if next_char == &'\n' {
@@ -566,7 +569,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMo
 
 // Needs to find where the last closing curly bracket is first and escape all curly brackets until the last one
 // Cannot have any nested scenes inside of code blocks
-fn tokenize_raw_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut i64, tokenize_mode: &mut TokenizeMode) -> Token {
+fn tokenize_raw_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode) -> Token {
     let mut markdown_content = String::new();
     let mut scene_open_count = 1;
     
@@ -592,5 +595,5 @@ fn tokenize_raw_markdown(chars: &mut Peekable<Chars>, scene_nesting_level: &mut 
         markdown_content.push(chars.next().unwrap());
     }
 
-    Token::Pre(markdown_content.to_string())
+    Token::P(markdown_content.to_string())
 }

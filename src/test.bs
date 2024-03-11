@@ -1,3 +1,5 @@
+#date "2021-09-01"
+#title "Test File"
 ---
 # TEST FILE
 Here is an example of a file in Beanstalk. Elements can be easily nested { rgb(175,0,0): inline } and compiled into a web page! *inline em*
@@ -6,9 +8,9 @@ Here is an example of a file in Beanstalk. Elements can be easily nested { rgb(1
 
 { img "images/default.png" } gonna put some stupid text here. next to the image.
 
-test 
+testing some ^superscript tags^
 
-{ link "www.google.com": cool link } in the middle of some text. 
+{ link "google.com": cool link } in the middle of some text. 
 
 Here is a block of code:
 
@@ -25,9 +27,12 @@ Here is a block of code:
 # Compile Time
 The # symbol can be used to tell the compiler various extra commands and access more keywords. 
 
-## – Will execute the following code at compile time only up until the scope is closed with another double hash
+{raw: ## } – Will execute the following code at compile time only up until the scope is closed with another double hash
+
 #export – Will prevent imports from accessing a function
+
 #global – Makes the contents of the current file globally accessible across the project.
+
 #defer – Defers the execution of the following expression or statement until the end of the containing function’s scope
 
 # Collections

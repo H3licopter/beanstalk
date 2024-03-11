@@ -96,13 +96,6 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                     }
                 };
 
-                if !check_if_inline(tokens, *i) {
-                    scene_wrapping_tags.push(Element {
-                        tag: "div".to_string(),
-                        properties: format!("src={}", src)
-                    });
-                }
-
                 scene_wrapping_tags.push(Element {
                     tag: "img".to_string(),
                     properties: format!("src={}", src)
@@ -111,7 +104,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
             // Will escape all characters until the final curly brace
             // Will be formatted as a pre tag but can eventually be formatted with additional styles
-            Token::Raw => {                
+            Token::Raw | Token::Code => {                
                 j += 1;
 
                 let mut arg = "".to_string();
@@ -131,6 +124,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                     properties: format!("{}{}", "class=bs-raw", if !arg.is_empty() {format!("-{}", arg)} else {"".to_string()})
                 });
             }
+            
             
             _ => {
                 scene.push(AstNode::Error(
@@ -253,11 +247,14 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
 
 // Loop through and replace all Markdown formatting with correct tags
 fn add_tags(content: &mut String, i: &mut usize) -> String {
+    
     while *i < content.len() - 1 {
-        let should_continue = add_em_tags(content, i);
-        if !should_continue {
-            break;
-        }
+        if !add_em_tags(content, i) {break;}
+        *i += 1;
+    }
+
+    while *i < content.len() - 1 {
+        if !add_superscript_tags(content, i) {break;}
         *i += 1;
     }
 
@@ -330,5 +327,53 @@ fn add_em_tags(content: &mut String, i: &mut usize) -> bool {
         return false
     }
 
+    true
+}
+
+fn add_superscript_tags(content: &mut String, i: &mut usize) -> bool {
+    let mut open_index: usize = 0;
+    let mut close_index: usize = 0;
+
+    // Get starting index
+    while let Some(char) = content.chars().nth(*i) {
+        if char == '^' {
+            open_index = *i;
+            break;
+        }
+        *i += 1;
+    }
+
+    if open_index == 0 {
+        return false
+    }
+
+    // Get closing index
+    while let Some(char) = content.chars().nth(*i) {
+        if char == '^' {
+            close_index = *i;
+            break;
+        }
+        *i += 1;
+    }
+
+    if close_index == 0 {
+        return false
+    }
+
+    // Replace carets with sup tags
+    content.replace_range(
+        open_index..open_index + 1,
+        "<sup>"
+    );
+    content.replace_range(
+        close_index..close_index, 
+        "</sup>"
+    );
+
+    true
+}
+
+fn add_footnotes(content: &mut String, i: &mut usize) -> bool {
+    
     true
 }
