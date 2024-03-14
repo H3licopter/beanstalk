@@ -1,5 +1,5 @@
 use crate::{ast::AstNode, parsers::util::count_newlines_at_end_of_string, settings::get_meta_config, Token};
-use super::generate_html::create_html_boilerplate;
+use super::{generate_html::create_html_boilerplate, markdown_parser::add_tags};
 
 // Parse ast into valid JS, HTML and CSS
 pub fn parse(ast: Vec<AstNode>) -> String {
@@ -52,36 +52,36 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
             AstNode::Element(token) => {
                 match token {
 
-                    Token::Span(value) => {
-                        html.push_str(&format!("<span>{}", value));
+                    Token::Span(content) => {
+                        html.push_str(&format!("<span>{}", add_tags(&mut content.clone(), &mut 0)));
                         closing_tags.push("</span>".to_string());
                     }
 
-                    Token::P(value) => {
+                    Token::P(content) => {
                         html.push_str(collect_closing_tags(&mut closing_tags).as_str());
-                        html.push_str(&format!("<p>{}", value));
+                        html.push_str(&format!("<p>{}", add_tags(&mut content.clone(), &mut 0)));
 
-                        if count_newlines_at_end_of_string(&value) > 1 {
+                        if count_newlines_at_end_of_string(&content) > 1 {
                             html.push_str("</p>");
                         } else {
                             closing_tags.push("</p>".to_string());
                         }
                     }
 
-                    Token::Heading(size, value) => {
+                    Token::Heading(size, content) => {
                         html.push_str(collect_closing_tags(&mut closing_tags).as_str());
-                        html.push_str(&format!("<h{}>{}", size, value));
+                        html.push_str(&format!("<h{}>{}", size, add_tags(&mut content.clone(), &mut 0)));
 
-                        if count_newlines_at_end_of_string(&value) > 0 {
+                        if count_newlines_at_end_of_string(&content) > 0 {
                             html.push_str(&format!("</h{}>", size));
                         } else {
                             closing_tags.push(format!("</h{}>", size));
                         }
                     }
 
-                    Token::Pre(value) => {
+                    Token::Pre(content) => {
                         html.push_str(collect_closing_tags(&mut closing_tags).as_str());
-                        html.push_str(&format!("<pre>{}", value));
+                        html.push_str(&format!("<pre>{}", content));
                         closing_tags.push("</pre>".to_string());
                     }
 

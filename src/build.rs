@@ -3,7 +3,7 @@ use std::{fs, io::prelude::Write};
 use crate::tokenizer;
 use crate::tokens::Token;
 use crate::parsers;
-use crate::web_frontend::web_parser;
+use crate::html_output::web_parser;
 
 #[allow(unused_variables)]
 pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {

@@ -1,5 +1,5 @@
 use std::{io::{self, Write}, fs, path::Path};
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 mod tokenizer;
 mod tokens;
@@ -14,8 +14,9 @@ mod parsers {
     pub mod parse_expression;
     pub mod util;
 }
-mod web_frontend {
+mod html_output {
     pub mod web_parser;
+    mod markdown_parser;
     mod generate_html;
 }
 pub use tokens::Token;

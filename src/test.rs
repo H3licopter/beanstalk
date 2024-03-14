@@ -3,7 +3,7 @@ use std::fs;
 use crate::tokenizer;
 use crate::tokens::Token;
 use crate::parsers;
-use crate::web_frontend::web_parser;
+use crate::html_output::web_parser;
 
 pub fn test_build() -> Result<(), Box<dyn Error>> {
     

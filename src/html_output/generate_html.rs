@@ -5,7 +5,7 @@ pub fn create_html_boilerplate(meta_tags: HTMLMeta) -> String {
   let mut boilerplate = String::new();
   
   // Add basic HTML boilerplate to output
-  let file = fs::read_to_string("src/web_frontend/boilerplate.html");
+  let file = fs::read_to_string("src/html_output/boilerplate.html");
   match file {
     Ok(html) => { boilerplate = html
       .replace("page-description", &meta_tags.page_description)

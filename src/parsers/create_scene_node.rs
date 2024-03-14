@@ -1,5 +1,4 @@
 use crate::{ast::AstNode, Token};
-
 use super::util::count_newlines_at_end_of_string;
 
 struct Element {
@@ -24,7 +23,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
     let mut j = 0;
 
     while j < scene_head.len() {
-        match scene_head[j] {
+        match &scene_head[j] {
 
             Token::A => {
                 j += 1;
@@ -102,9 +101,13 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 });
             }
 
+            Token::StringLiteral(string_content) => {
+                scene.push(AstNode::Element(Token::Span(string_content.to_string())));
+            }
+
             // Will escape all characters until the final curly brace
             // Will be formatted as a pre tag but can eventually be formatted with additional styles
-            Token::Raw | Token::Code => {                
+            Token::Raw | Token::Code => {              
                 j += 1;
 
                 let mut arg = "".to_string();
@@ -149,23 +152,21 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::P(content) => {
-                let parsed_content = add_tags(&mut content.clone(), &mut 0);
                 scene.push(
                     if !check_if_inline(tokens, *i) {
-                        AstNode::Element(Token::P(parsed_content))
+                        AstNode::Element(Token::P(content.clone()))
                     } else {
-                        AstNode::Element(Token::Span(parsed_content))
+                        AstNode::Element(Token::Span(content.clone()))
                     }
                 );
             }
 
             Token::Heading(size, content) => {
-                let parsed_content = add_tags(&mut content.clone(), &mut 0);
                 scene.push(
                     if !check_if_inline(tokens, *i) {
-                        AstNode::Element(Token::Heading(*size, parsed_content))
+                        AstNode::Element(Token::Heading(*size, content.clone()))
                     } else {
-                        AstNode::Element(Token::Span(parsed_content))
+                        AstNode::Element(Token::Span(content.clone()))
                     }
                 );
             }
@@ -214,6 +215,10 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
                             previous_element = &tags[0];
                             break;
                         }
+                        Token::StringLiteral(_) => {
+                            previous_element = &tags[0];
+                            break;
+                        }
                         _ => {}
                     }
                 }
@@ -232,148 +237,17 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     // Then return true
     match previous_element {
         Token::Empty => { false }
-        Token::P(content) => {
+        
+        Token::P(content) | Token::Span(content) => {
             if count_newlines_at_end_of_string(content) > 1 { false } else { true }
         }
+        
         Token::Heading(_, content) => {
             if count_newlines_at_end_of_string(content) > 0 { false } else { true }
         }
-        Token::A => { true }
-        _ => {
-            false
-        }
+        
+        Token::A | Token::StringLiteral(_) => { true }
+        
+        _ => { false }
     }
-}
-
-// Loop through and replace all Markdown formatting with correct tags
-fn add_tags(content: &mut String, i: &mut usize) -> String {
-    
-    while *i < content.len() - 1 {
-        if !add_em_tags(content, i) {break;}
-        *i += 1;
-    }
-
-    while *i < content.len() - 1 {
-        if !add_superscript_tags(content, i) {break;}
-        *i += 1;
-    }
-
-    content.to_string()
-}
-
-// 1 aserisk = <em>
-// 2 asterisks = <strong>
-// 3 asterisks = <strong><em>
-// 4+ asterisks = <b> (will have a custom very bold style for the tag in the future)
-fn add_em_tags(content: &mut String, i: &mut usize) -> bool {
-    let mut open_index: usize = 0;
-    let mut close_index: usize = 0;
-    let mut asterisk_open_count = 0;
-    let mut asterisk_close_count = 0;
-
-    // Get starting index of asterisks and determine strength of emphasis
-    while let Some(char) = content.chars().nth(*i) {
-        if char == '*' {
-            asterisk_open_count += 1;
-        } else {
-            open_index = *i;
-            break;
-        }
-        *i += 1;
-    }
-
-    // Check if asterisk_count is found at any point later in the content
-    // And remeber the index.
-    while let Some(char) = content.chars().nth(*i) {
-        if char == '*' {
-            asterisk_close_count += 1;
-        } else if asterisk_close_count == asterisk_open_count {
-            close_index = *i;
-            break;
-        }
-        *i += 1;
-    }
-
-    // If close count is equal to open count, then emphasis is valid
-    if asterisk_open_count == asterisk_close_count && asterisk_open_count > 0 {
-
-        let emphasis_open = match asterisk_open_count {
-            1 => "<em>",
-            2 => "<strong>",
-            3 => "<strong><em>",
-            _ => "<b>"
-        };
-        let emphasis_close = match asterisk_open_count {
-            1 => "</em>",
-            2 => "</strong>",
-            3 => "</em></strong>",
-            _ => "</b>"
-        };
-
-        // Replace asterisks with emphasis tags
-        content.replace_range(
-            open_index - asterisk_open_count..open_index,
-            emphasis_open
-        );
-
-        let new_close_index = close_index + emphasis_open.len() - asterisk_open_count;
-        content.replace_range(
-            new_close_index - asterisk_open_count..new_close_index,
-            emphasis_close
-        );
-    }
-
-    if *i > content.len() - 1 || !content.contains('*') {
-        return false
-    }
-
-    true
-}
-
-fn add_superscript_tags(content: &mut String, i: &mut usize) -> bool {
-    let mut open_index: usize = 0;
-    let mut close_index: usize = 0;
-
-    // Get starting index
-    while let Some(char) = content.chars().nth(*i) {
-        if char == '^' {
-            open_index = *i;
-            break;
-        }
-        *i += 1;
-    }
-
-    if open_index == 0 {
-        return false
-    }
-
-    // Get closing index
-    while let Some(char) = content.chars().nth(*i) {
-        if char == '^' {
-            close_index = *i;
-            break;
-        }
-        *i += 1;
-    }
-
-    if close_index == 0 {
-        return false
-    }
-
-    // Replace carets with sup tags
-    content.replace_range(
-        open_index..open_index + 1,
-        "<sup>"
-    );
-    content.replace_range(
-        close_index..close_index, 
-        "</sup>"
-    );
-
-    true
-}
-
-fn add_footnotes(content: &mut String, i: &mut usize) -> bool {
-    
-    true
 }
