@@ -16,7 +16,8 @@ pub enum AstNode {
     // Literals
     Literal(Token),
     Collection(Vec<AstNode>),
-    Scene(Vec<AstNode>), // Scene, Properties
+    ParentScene(Vec<AstNode>),
+    Scene(Vec<AstNode>),
     
     // HTML
     Element(Token), // HTML element content

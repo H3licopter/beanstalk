@@ -125,8 +125,3 @@ fn add_superscript_tags(content: &mut String, i: &mut usize) -> bool {
 
   true
 }
-
-fn add_footnotes(content: &mut String, i: &mut usize) -> bool {
-
-  true
-}

@@ -47,11 +47,6 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
         return tokenize_markdown(chars, tokenize_mode);
     }
 
-    // Newlines must be tokenized for inline statements and scenes
-    if current_char == '\n' {
-        return Token::Newline;
-    }
-
     // Skip whitespace
     while current_char.is_whitespace() {
         current_char = chars.next().unwrap_or('\0');
@@ -90,6 +85,7 @@ fn get_next_token(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode,
         //Get compiler directive token
         return keyword_or_variable(&mut token_value, chars, tokenize_mode);
     }
+
 
     // Check for string literals
     if current_char == '"' {
@@ -451,13 +447,18 @@ fn tokenize_scenehead(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeM
     while tokenize_mode == &TokenizeMode::SceneHead {
         let next_token = get_next_token(chars, tokenize_mode, scene_nesting_level);
         match next_token {
-            Token::EOF | Token::Initialise | Token::SceneClose => { 
+            Token::EOF | Token::Initialise => {
                 break;
             }
-            _ => {scene_head.push(next_token);}
+            Token::SceneClose => {
+                scene_head.push(next_token);
+                break;
+            }
+            _ => {
+                scene_head.push(next_token);
+            }
         }
     }
-
     Token::SceneHead(scene_head)
 }
 
@@ -469,6 +470,12 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMo
 
     //Ignore starting whitespace
     while let Some(next_char) = chars.peek() {
+        if next_char == &'\n' {
+            content.push('\n');
+            chars.next();
+            continue;
+        }
+        
         if next_char.is_whitespace() {
             chars.next();
         } else {

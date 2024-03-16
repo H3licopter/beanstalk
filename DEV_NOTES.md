@@ -1,5 +1,7 @@
 # TO DO
 ## GENERAL
+- Parent scene issue, need to make the check_if_inline function undetstand when it hits a parent scene.
+- Add 'alt' attribute to images.
 - Try making the spaces after an inline element significant rather than at the end of the element. HTML automatically parses them out.
 - Tidy up code a bit and prep for isolated task to create a function to manage precedence and parse maths expressions in the language.
 - Add in memory safety net for recursive function calls, or use a better pattern e.g tail recursion.
@@ -7,7 +9,6 @@
 ## HTML
 - Markdown things to add:
   - Underlining
-  - footnotes
   - strikethroughs
 - Add most common HTML elements to the base language:
   - audio, video

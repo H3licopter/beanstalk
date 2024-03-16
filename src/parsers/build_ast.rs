@@ -12,7 +12,7 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
             }
 
             Token::SceneHead(scene_head) => {
-                ast.push(new_scene(scene_head, tokens, &mut i));
+                ast.push(new_scene(scene_head, tokens, &mut i, true));
             }
 
             // New Function or Variable declaration or reference

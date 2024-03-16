@@ -143,6 +143,7 @@ pub enum Token {
     CloseArray,
 
     // Scenes
+    ParentScene,
     SceneHead(Vec<Token>), // Scene head properties, inline?
     SceneBody(Vec<Token>),
     Href,

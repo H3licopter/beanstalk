@@ -1,5 +1,5 @@
 use crate::{ast::AstNode, Token};
-use super::util::count_newlines_at_end_of_string;
+use super::util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string};
 
 struct Element {
     tag: String,
@@ -7,7 +7,7 @@ struct Element {
 }
 
 // Recursive function to parse scenes
-pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
+pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, parent_scene: bool) -> AstNode {
     let mut scene = Vec::new();
     *i += 1;
 
@@ -18,12 +18,19 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
     */
 
     let mut scene_wrapping_tags: Vec<Element> = Vec::new();
+    let mut scene_open: bool = true;
 
     // Look at all the possible properties that can be added to the scene head
     let mut j = 0;
 
     while j < scene_head.len() {
         match &scene_head[j] {
+
+            Token::SceneClose => {
+                scene_open = false;
+                *i -= 1;
+                break;
+            }
 
             Token::A => {
                 j += 1;
@@ -139,7 +146,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
         j += 1;
     }
 
-    while *i < tokens.len() {
+    while *i < tokens.len() && scene_open {
         match &tokens[*i] {
 
             Token::SceneClose | Token::EOF => {
@@ -147,7 +154,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::SceneHead(new_scenehead) => {
-                let nested_scene = new_scene(&new_scenehead, tokens, i);
+                let nested_scene = new_scene(&new_scenehead, tokens, i, false);
                 scene.push(nested_scene);
             }
 
@@ -196,6 +203,16 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 }
 
 fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
+    match &tokens[i] {
+        Token::P(content) => {
+            if count_newlines_at_start_of_string(content) > 0 { return false }
+        }
+        Token::Heading(_, content) => {
+            if count_newlines_at_start_of_string(content) > 0 { return false }
+        }
+        _ => {}
+    }
+
     // Iterate back through tokens to find the last token that isn't Initialise, Scenehead or Sceneclose
     let mut previous_element = &Token::Empty;
     let mut j = i - 1;
@@ -232,6 +249,8 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
         }
     }
 
+    println!("Previous Element: {:?}", previous_element);
+
     // If the current element is the same as the previous element
     // It doesn't have 2 newlines ending it and it can be inlined
     // Then return true
@@ -248,6 +267,9 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
         
         Token::A | Token::StringLiteral(_) => { true }
         
-        _ => { false }
+        _ => {
+            println!("Previous Element: {:?}", previous_element); 
+            false 
+        }
     }
 }
