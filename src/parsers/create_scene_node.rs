@@ -1,5 +1,5 @@
-use crate::{ast::AstNode, Token};
 use super::util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string};
+use crate::{ast::AstNode, Token};
 
 struct Element {
     tag: String,
@@ -7,15 +7,9 @@ struct Element {
 }
 
 // Recursive function to parse scenes
-pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, parent_scene: bool) -> AstNode {
+pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut scene = Vec::new();
     *i += 1;
-
-    /*
-        Parse scene head properties to get any styles or other properties
-        Produce a string that will be inserted into the HTML tag
-        This includes the type of element, styles and other stuff
-    */
 
     let mut scene_wrapping_tags: Vec<Element> = Vec::new();
     let mut scene_open: bool = true;
@@ -25,7 +19,6 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, pa
 
     while j < scene_head.len() {
         match &scene_head[j] {
-
             Token::SceneClose => {
                 scene_open = false;
                 *i -= 1;
@@ -39,19 +32,24 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, pa
                         format!("\"https://{}\"", value)
                     }
                     _ => {
-                        scene.push(AstNode::Error("No string literal provided for a href".to_string()));
+                        scene.push(AstNode::Error(
+                            "No string literal provided for a href".to_string(),
+                        ));
                         "".to_string()
                     }
                 };
                 scene_wrapping_tags.push(Element {
                     tag: "a".to_string(),
-                    properties: format!("href={}", href)
+                    properties: format!("href={}", href),
                 });
             }
-            
+
             Token::Rgb => {
                 if j + 7 >= scene_head.len() {
-                    scene.push(AstNode::Error("RGB values not formatted correctly. \nShould look like: rgb(0, 0, 0)".to_string()));
+                    scene.push(AstNode::Error(
+                        "RGB values not formatted correctly. \nShould look like: rgb(0, 0, 0)"
+                            .to_string(),
+                    ));
                 } else {
                     let mut red = 0;
                     match &scene_head[j + 2] {
@@ -83,9 +81,9 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, pa
 
                     scene_wrapping_tags.push(Element {
                         tag: "span".to_string(),
-                        properties: format!("style=\'color:rgb({},{},{})\' ", red, green, blue)
+                        properties: format!("style=\'color:rgb({},{},{})\' ", red, green, blue),
                     });
-                    
+
                     j += 7;
                 }
             }
@@ -97,14 +95,16 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, pa
                         format!("\"{}\"", value)
                     }
                     _ => {
-                        scene.push(AstNode::Error("No string literal provided for img src".to_string()));
+                        scene.push(AstNode::Error(
+                            "No string literal provided for img src".to_string(),
+                        ));
                         "".to_string()
                     }
                 };
 
                 scene_wrapping_tags.push(Element {
                     tag: "img".to_string(),
-                    properties: format!("src={}", src)
+                    properties: format!("src={}", src),
                 });
             }
 
@@ -114,7 +114,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, pa
 
             // Will escape all characters until the final curly brace
             // Will be formatted as a pre tag but can eventually be formatted with additional styles
-            Token::Raw | Token::Code => {              
+            Token::Raw | Token::Code => {
                 j += 1;
 
                 let mut arg = "".to_string();
@@ -123,23 +123,33 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, pa
                         Token::StringLiteral(value) => {
                             format!("\"{}\"", value)
                         }
-                        _ => {
-                            "".to_string()
-                        }
+                        _ => "".to_string(),
                     };
                 }
 
                 scene_wrapping_tags.push(Element {
                     tag: "div".to_string(),
-                    properties: format!("{}{}", "class=bs-raw", if !arg.is_empty() {format!("-{}", arg)} else {"".to_string()})
+                    properties: format!(
+                        "{}{}",
+                        "class=bs-raw",
+                        if !arg.is_empty() {
+                            format!("-{}", arg)
+                        } else {
+                            "".to_string()
+                        }
+                    ),
                 });
             }
-            
-            
+
+            Token::ParentScene => {
+                // Useful for wrapping the scene in <main> or unwrapped if it's a component
+            }
+
             _ => {
-                scene.push(AstNode::Error(
-                    format!("Invalid Token Used inside Scene Head: '{:?}'", &scene_head[j])
-                ));
+                scene.push(AstNode::Error(format!(
+                    "Invalid Token Used inside Scene Head: '{:?}'",
+                    &scene_head[j]
+                )));
             }
         }
 
@@ -148,34 +158,29 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, pa
 
     while *i < tokens.len() && scene_open {
         match &tokens[*i] {
-
             Token::SceneClose | Token::EOF => {
                 break;
             }
 
             Token::SceneHead(new_scenehead) => {
-                let nested_scene = new_scene(&new_scenehead, tokens, i, false);
+                let nested_scene = new_scene(&new_scenehead, tokens, i);
                 scene.push(nested_scene);
             }
 
             Token::P(content) => {
-                scene.push(
-                    if !check_if_inline(tokens, *i) {
-                        AstNode::Element(Token::P(content.clone()))
-                    } else {
-                        AstNode::Element(Token::Span(content.clone()))
-                    }
-                );
+                scene.push(if !check_if_inline(tokens, *i) {
+                    AstNode::Element(Token::P(content.clone()))
+                } else {
+                    AstNode::Element(Token::Span(content.clone()))
+                });
             }
 
             Token::Heading(size, content) => {
-                scene.push(
-                    if !check_if_inline(tokens, *i) {
-                        AstNode::Element(Token::Heading(*size, content.clone()))
-                    } else {
-                        AstNode::Element(Token::Span(content.clone()))
-                    }
-                );
+                scene.push(if !check_if_inline(tokens, *i) {
+                    AstNode::Element(Token::Heading(*size, content.clone()))
+                } else {
+                    AstNode::Element(Token::Span(content.clone()))
+                });
             }
 
             Token::Pre(content) => {
@@ -185,7 +190,9 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, pa
             Token::Empty | Token::Initialise => {}
 
             _ => {
-                scene.push(AstNode::Error("Invalid Syntax Used Inside scene body".to_string()));
+                scene.push(AstNode::Error(
+                    "Invalid Syntax Used Inside scene body".to_string(),
+                ));
             }
         }
 
@@ -194,7 +201,10 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, pa
 
     if !scene_wrapping_tags.is_empty() {
         for element in scene_wrapping_tags.iter().rev() {
-            scene.insert(0, AstNode::SceneTag(format!("<{} {}>", element.tag, element.properties)));
+            scene.insert(
+                0,
+                AstNode::SceneTag(format!("<{} {}>", element.tag, element.properties)),
+            );
             scene.push(AstNode::SceneTag(format!("</{}>", element.tag)));
         }
     }
@@ -203,12 +213,18 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, pa
 }
 
 fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
+
+    // If the element itself starts with Newlines, it should not be inlined
     match &tokens[i] {
         Token::P(content) => {
-            if count_newlines_at_start_of_string(content) > 0 { return false }
+            if count_newlines_at_start_of_string(content) > 0 {
+                return false;
+            }
         }
         Token::Heading(_, content) => {
-            if count_newlines_at_start_of_string(content) > 0 { return false }
+            if count_newlines_at_start_of_string(content) > 0 {
+                return false;
+            }
         }
         _ => {}
     }
@@ -218,7 +234,6 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     let mut j = i - 1;
     while j > 0 {
         match &tokens[j] {
-
             // Ignore these tokens
             Token::Initialise | Token::SceneClose => {
                 j -= 1;
@@ -236,6 +251,9 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
                             previous_element = &tags[0];
                             break;
                         }
+                        Token::ParentScene => {
+                            return false;
+                        }
                         _ => {}
                     }
                 }
@@ -249,27 +267,33 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
         }
     }
 
-    println!("Previous Element: {:?}", previous_element);
-
     // If the current element is the same as the previous element
     // It doesn't have 2 newlines ending it and it can be inlined
     // Then return true
     match previous_element {
-        Token::Empty => { false }
-        
+        Token::Empty => false,
+
         Token::P(content) | Token::Span(content) => {
-            if count_newlines_at_end_of_string(content) > 1 { false } else { true }
+            if count_newlines_at_end_of_string(content) > 1 {
+                false
+            } else {
+                true
+            }
         }
-        
+
         Token::Heading(_, content) => {
-            if count_newlines_at_end_of_string(content) > 0 { false } else { true }
+            if count_newlines_at_end_of_string(content) > 0 {
+                false
+            } else {
+                true
+            }
         }
-        
-        Token::A | Token::StringLiteral(_) => { true }
-        
+
+        Token::A | Token::StringLiteral(_) => true,
+
         _ => {
-            println!("Previous Element: {:?}", previous_element); 
-            false 
+            println!("Previous Element: {:?}", previous_element);
+            false
         }
     }
 }

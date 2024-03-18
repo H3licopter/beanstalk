@@ -1,6 +1,6 @@
 # TO DO
 ## GENERAL
-- Parent scene issue, need to make the check_if_inline function undetstand when it hits a parent scene.
+- Square bracket scene test?
 - Add 'alt' attribute to images.
 - Try making the spaces after an inline element significant rather than at the end of the element. HTML automatically parses them out.
 - Tidy up code a bit and prep for isolated task to create a function to manage precedence and parse maths expressions in the language.
@@ -26,7 +26,6 @@
 - Create WASM bindings for the DOM
 
 ## SYNTAX
-- curly braces for blocks of statements and braces for any expressions? anon function becomes just curly braces?
 - think about making commas ignorable, does it work?
 - Scene syntax is just triple dash muliline comment. So the parent scene is just a mutliline style comment.
 

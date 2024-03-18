@@ -1,9 +1,9 @@
-use std::error::Error;
-use std::{fs, io::prelude::Write};
+use crate::html_output::web_parser;
+use crate::parsers;
 use crate::tokenizer;
 use crate::tokens::Token;
-use crate::parsers;
-use crate::html_output::web_parser;
+use std::error::Error;
+use std::{fs, io::prelude::Write};
 
 #[allow(unused_variables)]
 pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
@@ -26,7 +26,7 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     // Check for compiler directives or config settings
 
     // Create AST
-    let ast = parsers::build_ast::new_ast(&tokens, 0).0;    
+    let ast = parsers::build_ast::new_ast(&tokens, 0).0;
 
     // Parse Tokens into code output
     let html_output = web_parser::parse(ast);

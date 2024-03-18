@@ -1,5 +1,7 @@
-use crate::{ast::AstNode, parsers::util::count_newlines_at_end_of_string, settings::get_meta_config, Token};
 use super::{generate_html::create_html_boilerplate, markdown_parser::add_tags};
+use crate::{
+    ast::AstNode, parsers::util::count_newlines_at_end_of_string, settings::get_meta_config, Token,
+};
 
 // Parse ast into valid JS, HTML and CSS
 pub fn parse(ast: Vec<AstNode>) -> String {
@@ -27,7 +29,7 @@ pub fn parse(ast: Vec<AstNode>) -> String {
             AstNode::Date(_value) => {
                 // Eventually a way to get date information about the page
             }
-        
+
             _ => {
                 println!("unknown AST node found");
             }
@@ -41,17 +43,14 @@ pub fn parse(ast: Vec<AstNode>) -> String {
         .replace("page-title", &page_title)
 }
 
-
 fn parse_scene(scene: Vec<AstNode>) -> String {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
 
     for node in scene {
         match node {
-
             AstNode::Element(token) => {
                 match token {
-
                     Token::Span(content) => {
                         html.push_str(&format!("<span>{}", add_tags(&mut content.clone(), &mut 0)));
                         closing_tags.push("</span>".to_string());
@@ -70,7 +69,11 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
 
                     Token::Heading(size, content) => {
                         html.push_str(collect_closing_tags(&mut closing_tags).as_str());
-                        html.push_str(&format!("<h{}>{}", size, add_tags(&mut content.clone(), &mut 0)));
+                        html.push_str(&format!(
+                            "<h{}>{}",
+                            size,
+                            add_tags(&mut content.clone(), &mut 0)
+                        ));
 
                         if count_newlines_at_end_of_string(&content) > 0 {
                             html.push_str(&format!("</h{}>", size));
@@ -117,7 +120,7 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
 
 fn collect_closing_tags(closing_tags: &mut Vec<String>) -> String {
     let mut tags = String::new();
-    
+
     closing_tags.reverse();
     while let Some(tag) = closing_tags.pop() {
         tags.push_str(&tag);

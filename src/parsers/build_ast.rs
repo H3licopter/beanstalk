@@ -1,5 +1,8 @@
+use super::{
+    create_scene_node::new_scene,
+    parse_expression::{parse_expression, parse_math_exp, NumberType},
+};
 use crate::{ast::AstNode, Token};
-use super::{create_scene_node::new_scene, parse_expression::{parse_expression, parse_math_exp, NumberType}};
 
 pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
     let mut ast = Vec::new();
@@ -12,7 +15,7 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
             }
 
             Token::SceneHead(scene_head) => {
-                ast.push(new_scene(scene_head, tokens, &mut i, true));
+                ast.push(new_scene(scene_head, tokens, &mut i));
             }
 
             // New Function or Variable declaration or reference
@@ -27,7 +30,9 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
                         ast.push(AstNode::Title(value.clone()));
                     }
                     _ => {
-                        ast.push(AstNode::Error("Title must have a valid string as a argument".to_string()));
+                        ast.push(AstNode::Error(
+                            "Title must have a valid string as a argument".to_string(),
+                        ));
                     }
                 }
             }
@@ -39,7 +44,9 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
                         ast.push(AstNode::Date(value.clone()));
                     }
                     _ => {
-                        ast.push(AstNode::Error("Date must have a valid string as a argument".to_string()));
+                        ast.push(AstNode::Error(
+                            "Date must have a valid string as a argument".to_string(),
+                        ));
                     }
                 }
             }
@@ -60,9 +67,7 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
     (ast, i)
 }
 
-
 fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
-    
     // If already initialised, return a reference ast node
     if is_reference(tokens, i, name) {
         return AstNode::Ref(name.clone());
@@ -70,7 +75,9 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 
     *i += 1;
     if &tokens[*i] != &Token::Initialise {
-        return AstNode::Error("Expected ':' for initialising. Variable does not yet exsist".to_string());
+        return AstNode::Error(
+            "Expected ':' for initialising. Variable does not yet exsist".to_string(),
+        );
     }
 
     // Check type or infer type
@@ -82,37 +89,57 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut bracket_nesting = 0;
 
     match &tokens[*i] {
-        
         // Infer type (CONSTANT VARIABLE)
         Token::Initialise => {}
 
         // Infer type (MUTABLE VARIABLE)
-        Token::Assign => { 
+        Token::Assign => {
             var_is_const = false;
         }
-        
+
         // Explicit Type Declarations
-        Token::TypeInt => { type_declaration = Token::TypeInt; }
-        Token::TypeFloat => { type_declaration = Token::TypeFloat; }
-        Token::TypeString => { type_declaration = Token::TypeString; }
-        Token::TypeCollection => { type_declaration = Token::TypeCollection; }
-        Token::TypeObject => { type_declaration = Token::TypeObject; }
-        Token::TypeRune => { type_declaration = Token::TypeRune; }
-        Token::TypeDecimal => { type_declaration = Token::TypeDecimal;}
-        Token::TypeBool => { type_declaration = Token::TypeBool; }
-        Token::TypeScene => { type_declaration = Token::TypeScene; }
-        
+        Token::TypeInt => {
+            type_declaration = Token::TypeInt;
+        }
+        Token::TypeFloat => {
+            type_declaration = Token::TypeFloat;
+        }
+        Token::TypeString => {
+            type_declaration = Token::TypeString;
+        }
+        Token::TypeCollection => {
+            type_declaration = Token::TypeCollection;
+        }
+        Token::TypeObject => {
+            type_declaration = Token::TypeObject;
+        }
+        Token::TypeRune => {
+            type_declaration = Token::TypeRune;
+        }
+        Token::TypeDecimal => {
+            type_declaration = Token::TypeDecimal;
+        }
+        Token::TypeBool => {
+            type_declaration = Token::TypeBool;
+        }
+        Token::TypeScene => {
+            type_declaration = Token::TypeScene;
+        }
+
         // Function with implicit return type
-        Token::OpenBracket => { return new_function(tokens, i) }
+        Token::OpenBracket => return new_function(tokens, i),
 
         _ => {
-            return AstNode::Error("Expected either type definition or another ':' or '=' for initialising".to_string())
+            return AstNode::Error(
+                "Expected either type definition or another ':' or '=' for initialising"
+                    .to_string(),
+            )
         }
     }
 
     // Get value of variable
     *i += 1;
-    
+
     // Check if value is wrapped in brackets and move on until first value is found
     while &tokens[*i] == &Token::OpenBracket {
         bracket_nesting += 1;
@@ -149,7 +176,10 @@ fn new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     while &tokens[*i] != &Token::CloseBracket {
         match &tokens[*i] {
             Token::Variable(name) => {
-                function_args.push(AstNode::VarDeclaration(name.clone(), Box::new(AstNode::Ref("".to_string()))));
+                function_args.push(AstNode::VarDeclaration(
+                    name.clone(),
+                    Box::new(AstNode::Ref("".to_string())),
+                ));
             }
             _ => {
                 return AstNode::Error("Expected variable name for function args".to_string());
@@ -161,33 +191,31 @@ fn new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     AstNode::Function(function_name, function_args)
 }
 
-
-
 // Check if variable name has been used earlier in the vec of tokens, if it has return true
 pub fn is_reference(tokens: &Vec<Token>, i: &usize, name: &String) -> bool {
-    for j in (0..=*i -1).rev() {
+    for j in (0..=*i - 1).rev() {
         if let Token::Variable(value) = &tokens[j] {
             if value == name {
-                return true
+                return true;
             }
         }
     }
     false
 }
 
-
-
 fn infer_datatype(value: &Token) -> Token {
     match value {
-        Token::StringLiteral(_) => { Token::TypeString }
-        Token::RawStringLiteral(_) => { Token::TypeString }
-        Token::RuneLiteral(_) => { Token::TypeRune }
-        Token::IntLiteral(_) => { Token::TypeInt }
-        Token::FloatLiteral(_) => { Token::TypeFloat }
-        Token::BoolLiteral(_) => { Token::TypeBool }
-        Token::DecLiteral(_) => { Token::TypeDecimal }
-        Token::CollectionOpen => { Token::TypeCollection }
-        Token::SceneOpen => { Token::TypeScene }
-        _ => { Token::Error("Invalid Assignment for Variable, must be assigned wih a valid datatype".to_string()) }
+        Token::StringLiteral(_) => Token::TypeString,
+        Token::RawStringLiteral(_) => Token::TypeString,
+        Token::RuneLiteral(_) => Token::TypeRune,
+        Token::IntLiteral(_) => Token::TypeInt,
+        Token::FloatLiteral(_) => Token::TypeFloat,
+        Token::BoolLiteral(_) => Token::TypeBool,
+        Token::DecLiteral(_) => Token::TypeDecimal,
+        Token::CollectionOpen => Token::TypeCollection,
+        Token::SceneOpen => Token::TypeScene,
+        _ => Token::Error(
+            "Invalid Assignment for Variable, must be assigned wih a valid datatype".to_string(),
+        ),
     }
 }

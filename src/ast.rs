@@ -8,7 +8,7 @@ pub enum AstNode {
     Function(String, Vec<AstNode>),
     VarDeclaration(String, Box<AstNode>),
     ConstDeclaration(String, Box<AstNode>),
-    
+
     // References to existing variables
     Ref(String),
     FunctionCall(String, Vec<AstNode>),
@@ -16,11 +16,10 @@ pub enum AstNode {
     // Literals
     Literal(Token),
     Collection(Vec<AstNode>),
-    ParentScene(Vec<AstNode>),
     Scene(Vec<AstNode>),
-    
+
     // HTML
-    Element(Token), // HTML element content
+    Element(Token),   // HTML element content
     SceneTag(String), // Scene wrapping tag
 
     // SCENE META DATA

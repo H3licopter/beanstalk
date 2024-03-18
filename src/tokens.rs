@@ -11,8 +11,8 @@ pub enum TokenizeMode {
 pub enum Token {
     // For Compiler
     Directive(String), // Single hash
-    Comptime, // Double hash for comptime
-    Meta(Vec<Token>), // Everthing to be executed at compile time
+    Comptime,          // Double hash for comptime
+    Meta(Vec<Token>),  // Everthing to be executed at compile time
     Error(String),
     EOF, // End of file
 
@@ -45,7 +45,7 @@ pub enum Token {
     FloatLiteral(f64),
     DecLiteral(f64), // Will eventually be some bignum type thing
     BoolLiteral(bool),
-    
+
     // Stucture of Syntax
     Newline,
     Semicolon,
@@ -56,7 +56,7 @@ pub enum Token {
 
     // Declarations
     Initialise, // :
-    Assign, // =
+    Assign,     // =
 
     // Scope
     OpenBracket,
@@ -103,7 +103,7 @@ pub enum Token {
     ExponentiationAssign,
     RootAssign,
     RemainderAssign,
-    
+
     // Logical Operators
     And,
     Or,
@@ -160,14 +160,12 @@ pub enum Token {
     Pre(String), // Content inside raw elements. Might change to not be a format tag in the future
 
     // named tags
-    A, // href, content 
+    A,   // href, content
     Img, // src, alt
     Video,
     Rgb,
     Raw,
     Code,
 
-    Slot, // Injection point for additional template nesting 
-
-
+    Slot, // Injection point for additional template nesting
 }

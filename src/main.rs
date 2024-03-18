@@ -1,13 +1,17 @@
-use std::{io::{self, Write}, fs, path::Path};
 use std::time::Instant;
+use std::{
+    fs,
+    io::{self, Write},
+    path::Path,
+};
 
-mod tokenizer;
-mod tokens;
-mod settings;
 mod ast;
 mod build;
-mod test;
 mod create_new_project;
+mod settings;
+mod test;
+mod tokenizer;
+mod tokens;
 mod parsers {
     pub mod build_ast;
     mod create_scene_node;
@@ -15,9 +19,9 @@ mod parsers {
     pub mod util;
 }
 mod html_output {
-    pub mod web_parser;
-    mod markdown_parser;
     mod generate_html;
+    mod markdown_parser;
+    pub mod web_parser;
 }
 pub use tokens::Token;
 
@@ -27,20 +31,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Command::NewHTMLProject(path) => {
             create_new_project::create_project(path)?;
             println!("Creating new HTML project...");
-        },
+        }
         Command::Build(path) => {
             let start = Instant::now();
             build::build(path)?;
             let duration = start.elapsed();
             println!("Building project...");
             println!("Project built in: {:?}", duration);
-        },
+        }
         Command::Test => {
             println!("Testing...");
             test::test_build()?;
         }
     }
-    
+
     main()?;
     Ok(())
 }
@@ -55,10 +59,7 @@ fn collect_user_input() -> Command {
     print!("Enter compiler command: ");
     io::stdout().flush().unwrap(); // Make sure the prompt is immediately displayed
     io::stdin().read_line(&mut input).unwrap();
-    let args: Vec<String> = input
-        .split_whitespace()
-        .map(String::from)
-        .collect();
+    let args: Vec<String> = input.split_whitespace().map(String::from).collect();
 
     match args.get(0).map(String::as_str) {
         Some("new") => {
@@ -71,32 +72,32 @@ fn collect_user_input() -> Command {
                             if check_if_valid_directory_path(string) {
                                 return Command::NewHTMLProject(string.to_string());
                             }
-                        },
-                        _=> {
+                        }
+                        _ => {
                             return Command::NewHTMLProject("".to_string());
                         }
                     }
-                },
+                }
                 _ => {
                     println!("Invalid project type");
                 }
             }
-        },
+        }
         Some("build") => {
             match args.get(1).map(String::as_str) {
                 Some(string) => {
                     // Check if path is valid, if not, throw error
                     return Command::Build(string.to_string());
-                },
-                _=> {
+                }
+                _ => {
                     // Return current working directory path
                     return Command::Build("".to_string());
                 }
             }
-        },
+        }
         Some("test") => {
             return Command::Test;
-        },
+        }
         _ => {
             println!("Building test project....");
             return Command::Build("test".to_string());

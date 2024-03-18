@@ -1,9 +1,8 @@
 pub fn count_newlines_at_end_of_string(s: &str) -> usize {
     let mut count = 0;
     for c in s.chars().rev() {
-
         if c == '\n' {
-        count += 1;
+            count += 1;
             continue;
         }
 
@@ -22,7 +21,7 @@ pub fn count_newlines_at_start_of_string(s: &str) -> usize {
 
     for c in s.chars() {
         if c == '\n' {
-        count += 1;
+            count += 1;
             continue;
         }
         break;
