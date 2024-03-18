@@ -63,7 +63,7 @@ pub enum Token {
     OpenCollection,
     CloseCollection,
     SceneOpen,
-    SceneClose,
+    SceneClose(u32), // Keeps track of the spaces following the scene
 
     //Functions
     As, // For default args in functions

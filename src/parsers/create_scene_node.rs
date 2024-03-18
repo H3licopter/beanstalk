@@ -19,7 +19,10 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
     while j < scene_head.len() {
         match &scene_head[j] {
-            Token::SceneClose => {
+            Token::SceneClose(spaces) => {
+                for _ in 0..*spaces {
+                    scene.push(AstNode::Space);
+                }
                 scene_open = false;
                 *i -= 1;
                 break;
@@ -129,7 +132,14 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
     while *i < tokens.len() && scene_open {
         match &tokens[*i] {
-            Token::SceneClose | Token::EOF => {
+            Token::EOF => {
+                break;
+            }
+
+            Token::SceneClose(spaces) => {
+                for _ in 0..*spaces {
+                    scene.push(AstNode::Space);
+                }
                 break;
             }
 
@@ -209,7 +219,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     while j > 0 {
         match &tokens[j] {
             // Ignore these tokens
-            Token::Initialise | Token::SceneClose => {
+            Token::Initialise | Token::SceneClose(_) => {
                 j -= 1;
             }
 

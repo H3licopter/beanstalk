@@ -1,5 +1,6 @@
 # TO DO
 ## GENERAL
+- Bug with lots of newlines in nested scene, will not wrap all the scene elements in the scene tag correctly.
 - Switch collections to using curly brace syntax. All access is done via dot operator.
 - Other datatypes can be inserted directly into scenes. Raw strings, numbers etc.
 - Add 'alt' attribute to images.

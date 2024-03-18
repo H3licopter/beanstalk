@@ -23,12 +23,11 @@ fn get_next_token(
     tokenize_mode: &mut TokenizeMode,
     scene_nesting_level: &mut i64,
 ) -> Token {
-    let mut current_char = chars.next().unwrap_or('\0');
+    let mut current_char = match chars.next() {
+        Some(ch) => ch,
+        None => return Token::EOF,
+    };
     let mut token_value: String = String::new();
-
-    if current_char == '\0' {
-        return Token::EOF;
-    }
 
     // Check for raw strings (backticks)
     // Also used in scenes for raw outputs
@@ -55,12 +54,36 @@ fn get_next_token(
     }
 
     if tokenize_mode == &TokenizeMode::Markdown && current_char != ']' {
-        return tokenize_markdown(chars, tokenize_mode);
+        return tokenize_markdown(chars, &mut current_char);
     }
 
     // Skip whitespace
     while current_char.is_whitespace() {
-        current_char = chars.next().unwrap_or('\0');
+        current_char = match chars.next() {
+            Some(ch) => ch,
+            None => return Token::EOF,
+        };
+    }
+
+    if current_char == ']' {
+        *scene_nesting_level -= 1;
+        if *scene_nesting_level == 0 {
+            *tokenize_mode = TokenizeMode::Normal;
+            return Token::SceneClose(0);
+        }
+
+        *tokenize_mode = TokenizeMode::Markdown;
+
+        // Track spaces after the scene close
+        let mut spaces_after_scene = 0;
+        while let Some(ch) = chars.peek() {
+            if !ch.is_whitespace() || ch == &'\n' {
+                break;
+            }
+            spaces_after_scene += 1;
+            chars.next();
+        }
+        return Token::SceneClose(spaces_after_scene);
     }
 
     // Initialisation
@@ -70,16 +93,6 @@ fn get_next_token(
             *tokenize_mode = TokenizeMode::Markdown;
         }
         return Token::Initialise;
-    }
-
-    if current_char == ']' {
-        *scene_nesting_level -= 1;
-        if *scene_nesting_level == 0 {
-            *tokenize_mode = TokenizeMode::Normal;
-        } else {
-            *tokenize_mode = TokenizeMode::Markdown;
-        }
-        return Token::SceneClose;
     }
 
     //Meta. Compile time things
@@ -511,7 +524,7 @@ fn tokenize_scenehead(
             Token::EOF | Token::Initialise => {
                 break;
             }
-            Token::SceneClose => {
+            Token::SceneClose(_) => {
                 scene_head.push(next_token);
                 break;
             }
@@ -525,43 +538,48 @@ fn tokenize_scenehead(
 
 // Create string of markdown content, only escaping when a closed curly brace is found
 // Any Beanstalk specific extensions to Markdown will need to be implimented here
-fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMode) -> Token {
+fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> Token {
     let mut content = String::new(); // To keep track of current chars being parsed
     let mut token: Token = Token::P(String::new());
 
-    //Ignore starting whitespace
-    while let Some(next_char) = chars.peek() {
-        if next_char == &'\n' {
+    //Ignore starting whitespace (except newlines)
+    while current_char.is_whitespace() {
+        if current_char == &'\n' {
+            if content.ends_with("\n\n") {
+                return Token::Empty;
+            }
             content.push('\n');
-            chars.next();
-            continue;
         }
 
-        if next_char.is_whitespace() {
-            chars.next();
-        } else {
-            break;
-        }
+        *current_char = match chars.next() {
+            Some(ch) => ch,
+            None => return Token::EOF,
+        };
     }
 
     // HEADINGS
-    if chars.peek() == Some(&'#') {
-        let mut heading_count = 0;
+    if current_char == &'#' {
+        let mut heading_count = 1;
 
-        while let Some(next_char) = chars.next() {
-            if next_char == '#' {
+        loop {
+            *current_char = match chars.next() {
+                Some(ch) => ch,
+                None => return Token::EOF,
+            };
+
+            if current_char == &'#' {
                 heading_count += 1;
                 continue;
             }
 
-            if next_char == ' ' {
+            if current_char == &' ' {
                 token = Token::Heading(heading_count, String::new());
                 break;
             }
 
             for _ in 0..heading_count {
                 content.push('#');
-                content.push(next_char);
+                content.push(current_char.clone());
             }
 
             break;
@@ -573,42 +591,37 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMo
     let mut previous_newlines = 0;
 
     let mut parse_raw = false;
-    while let Some(next_char) = chars.peek() {
+    loop {
         // Parsing Raw String inside of Markdown
         if parse_raw {
-            // Escape Character inside raw string
-            if next_char == &'\\' {
-                chars.next();
-                match chars.next() {
-                    Some('`') => {
-                        content.push('`');
-                        chars.next();
-                        continue;
-                    }
-                    _ => {
-                        content.push('\\');
-                    }
-                };
-
-                continue;
+            match current_char {
+                // Escape character for backticks in raw strings
+                '\\' => {
+                    match chars.next() {
+                        Some('`') => {
+                            content.push('`');
+                        }
+                        _ => {
+                            content.push('\\');
+                        }
+                    };
+                }
+                '`' => {
+                    parse_raw = false;
+                }
+                _ => {
+                    content.push(current_char.clone());
+                }
             }
-            if next_char == &'`' {
-                parse_raw = false;
-                chars.next();
-                continue;
-            }
-            content.push(next_char.clone());
-            chars.next();
             continue;
         }
 
-        if next_char == &'`' {
+        if current_char == &'`' {
             parse_raw = true;
-            chars.next();
             continue;
         }
 
-        if next_char == &'\n' {
+        if current_char == &'\n' {
             previous_newlines += 1;
             match token {
                 Token::P(_) => {
@@ -625,23 +638,28 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, tokenize_mode: &mut TokenizeMo
                 }
                 _ => {}
             }
-        } else if !next_char.is_whitespace() {
+        } else if !current_char.is_whitespace() {
             previous_newlines = 0;
         }
 
-        if next_char == &']' || next_char == &'[' {
-            break;
-        }
+        content.push(current_char.clone());
 
-        if next_char == &'\0' {
-            *tokenize_mode = TokenizeMode::Normal;
-            break;
+        match chars.peek() {
+            Some(&ch) => {
+                if ch == ']' {
+                    content = content.trim_end().to_string();
+                    println!("Content: {}", content);
+                    break;
+                } else if ch == '[' {
+                    break;
+                } else {
+                    *current_char = chars.next().unwrap();
+                }
+            }
+            None => {
+                break;
+            }
         }
-
-        content.push(match chars.next() {
-            Some(ch) => ch,
-            None => break,
-        });
     }
 
     // Return relevant token

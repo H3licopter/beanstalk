@@ -101,6 +101,10 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
                 html.push_str(&tag);
             }
 
+            AstNode::Space => {
+                html.push_str("&nbsp;");
+            }
+
             AstNode::Error(value) => {
                 println!("Error: {}", value);
             }

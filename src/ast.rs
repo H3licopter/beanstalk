@@ -21,6 +21,7 @@ pub enum AstNode {
 
     // HTML
     Element(Token),   // HTML element content
+    Space,            // Add a space at front of element
     SceneTag(String), // Scene wrapping tag
 
     // SCENE META DATA

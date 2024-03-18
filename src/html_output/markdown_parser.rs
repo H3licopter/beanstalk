@@ -1,5 +1,10 @@
 // Loop through and replace all Markdown formatting with correct tags
+// Also make sure to escape reserved HTML characters
 pub fn add_tags(content: &mut String, i: &mut usize) -> String {
+    *content = content
+        .replace('<', "&lt;")
+        .replace('>', "&gt;");
+    
     while *i < content.len() - 1 {
         if !add_em_tags(content, i) {
             break;
@@ -14,7 +19,7 @@ pub fn add_tags(content: &mut String, i: &mut usize) -> String {
         *i += 1;
     }
 
-    content.to_string()
+    content.trim_start().to_string()
 }
 
 // 1 aserisk = <em>
