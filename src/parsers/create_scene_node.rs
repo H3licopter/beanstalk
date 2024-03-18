@@ -108,37 +108,8 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 });
             }
 
-            Token::StringLiteral(string_content) => {
+            Token::StringLiteral(string_content) | Token::RawStringLiteral(string_content) => {
                 scene.push(AstNode::Element(Token::Span(string_content.to_string())));
-            }
-
-            // Will escape all characters until the final curly brace
-            // Will be formatted as a pre tag but can eventually be formatted with additional styles
-            Token::Raw | Token::Code => {
-                j += 1;
-
-                let mut arg = "".to_string();
-                if scene_head.len() > j {
-                    arg = match &scene_head[j] {
-                        Token::StringLiteral(value) => {
-                            format!("\"{}\"", value)
-                        }
-                        _ => "".to_string(),
-                    };
-                }
-
-                scene_wrapping_tags.push(Element {
-                    tag: "div".to_string(),
-                    properties: format!(
-                        "{}{}",
-                        "class=bs-raw",
-                        if !arg.is_empty() {
-                            format!("-{}", arg)
-                        } else {
-                            "".to_string()
-                        }
-                    ),
-                });
             }
 
             Token::ParentScene => {
@@ -183,6 +154,10 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 });
             }
 
+            Token::RawStringLiteral(content) => {
+                scene.push(AstNode::Element(Token::Span(content.to_string())));
+            }
+
             Token::Pre(content) => {
                 scene.push(AstNode::Element(Token::Pre(content.to_string())));
             }
@@ -213,7 +188,6 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 }
 
 fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
-
     // If the element itself starts with Newlines, it should not be inlined
     match &tokens[i] {
         Token::P(content) => {

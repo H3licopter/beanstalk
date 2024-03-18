@@ -1,5 +1,5 @@
-#title “Choices (enums)”
-#date “2024-2-5”
+#title "Choices (enums)"
+#date "2024-2-5"
 ---
 
 # Choices (enums)
@@ -7,7 +7,7 @@ Choices are created by setting a variable type as an choice.
 Choices are written in screaming snake case. 
 Each choice can have a specified data type associated with it that allows you to easily store and access values equal to that Choice.
 
-{raw:
+`
     STATE : choice : (
         Paused,
         Running,
@@ -20,4 +20,4 @@ Each choice can have a specified data type associated with it that allows you to
     if now is STATE.Running (
         now = STATE.Paused
     )
-}
+`

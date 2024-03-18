@@ -1,6 +1,7 @@
 use crate::Token;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum AstNode {
     // Basics
     Error(String),

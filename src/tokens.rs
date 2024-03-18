@@ -2,8 +2,7 @@
 pub enum TokenizeMode {
     Normal,
     Markdown,
-    RawMarkdown,
-    SceneHead, //Inline?
+    SceneHead,
     Meta,
 }
 
@@ -61,8 +60,8 @@ pub enum Token {
     // Scope
     OpenBracket,
     CloseBracket,
-    CollectionOpen,
-    CollectionClose,
+    OpenCollection,
+    CloseCollection,
     SceneOpen,
     SceneClose,
 
@@ -137,10 +136,6 @@ pub enum Token {
     Match,
     When,
     Defer,
-
-    // Arrays
-    OpenArray,
-    CloseArray,
 
     // Scenes
     ParentScene,

@@ -1,6 +1,7 @@
 # TO DO
 ## GENERAL
-- Square bracket scene test?
+- Switch collections to using curly brace syntax. All access is done via dot operator.
+- Other datatypes can be inserted directly into scenes. Raw strings, numbers etc.
 - Add 'alt' attribute to images.
 - Try making the spaces after an inline element significant rather than at the end of the element. HTML automatically parses them out.
 - Tidy up code a bit and prep for isolated task to create a function to manage precedence and parse maths expressions in the language.
@@ -32,7 +33,7 @@
 
 ## Notes
 - Objects are stripped of methods when parsed into JSON or protobuf format
-- Support forany SPA solutions, or MPA focused only? (Probably just MPA)
+- Support for SPA solutions, or MPA focused only? (Probably just MPA)
 - Print styles?
 - Handling no JS browsers? - Allow for no js sites, just pure templates into HTML stuff?
 - Uses rust markdown parser for parsing markdown into GFM markdown (Github Flavored Markdown)

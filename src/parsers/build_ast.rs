@@ -1,7 +1,4 @@
-use super::{
-    create_scene_node::new_scene,
-    parse_expression::{parse_expression, parse_math_exp, NumberType},
-};
+use super::{create_scene_node::new_scene, parse_expression::parse_expression};
 use crate::{ast::AstNode, Token};
 
 pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
@@ -85,7 +82,7 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 
     // Variable Properties
     let mut type_declaration = Token::TypeInference;
-    let mut var_is_const = true;
+    let mut _var_is_const = true;
     let mut bracket_nesting = 0;
 
     match &tokens[*i] {
@@ -94,7 +91,7 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 
         // Infer type (MUTABLE VARIABLE)
         Token::Assign => {
-            var_is_const = false;
+            _var_is_const = false;
         }
 
         // Explicit Type Declarations
@@ -146,20 +143,20 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
         *i += 1;
     }
 
-    let var_value = parse_expression(tokens, i, bracket_nesting, &type_declaration);
+    let _var_value = parse_expression(tokens, i, bracket_nesting, &type_declaration);
 
     AstNode::Error("Invalid variable assignment".to_string())
 }
 
 // TO DO - SOME PLACEHOLDER CODE FOR FUNCTION DECLARATION
 fn new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
-    let mut function_name = String::new();
+    let mut _function_name = String::new();
     let mut function_args = Vec::new();
 
     // Get function name
     match &tokens[*i] {
         Token::Variable(name) => {
-            function_name = name.clone();
+            _function_name = name.clone();
         }
         _ => {
             return AstNode::Error("Expected function name".to_string());
@@ -188,7 +185,7 @@ fn new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
         *i += 1;
     }
 
-    AstNode::Function(function_name, function_args)
+    AstNode::Function(_function_name, function_args)
 }
 
 // Check if variable name has been used earlier in the vec of tokens, if it has return true
@@ -203,7 +200,7 @@ pub fn is_reference(tokens: &Vec<Token>, i: &usize, name: &String) -> bool {
     false
 }
 
-fn infer_datatype(value: &Token) -> Token {
+fn _infer_datatype(value: &Token) -> Token {
     match value {
         Token::StringLiteral(_) => Token::TypeString,
         Token::RawStringLiteral(_) => Token::TypeString,
@@ -212,7 +209,7 @@ fn infer_datatype(value: &Token) -> Token {
         Token::FloatLiteral(_) => Token::TypeFloat,
         Token::BoolLiteral(_) => Token::TypeBool,
         Token::DecLiteral(_) => Token::TypeDecimal,
-        Token::CollectionOpen => Token::TypeCollection,
+        Token::OpenCollection => Token::TypeCollection,
         Token::SceneOpen => Token::TypeScene,
         _ => Token::Error(
             "Invalid Assignment for Variable, must be assigned wih a valid datatype".to_string(),

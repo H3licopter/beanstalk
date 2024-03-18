@@ -3,3 +3,15 @@
 ## Heading
 Things all working correctly. Horay! 
 [: random nested scene].
+
+## But there was a missing *fullstop*
+That needs to be [rgb(175,0,0): FIXED].
+
+But for now let's test just using square brackets for scenes instead 
+and see how it goes.
+
+` Raw output test with escape character \` `
+
+Raw output test inside of scenehead:
+
+[` Raw inside scene head [][[][]]]`]

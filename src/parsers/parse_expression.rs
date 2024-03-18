@@ -1,7 +1,7 @@
 use super::build_ast::is_reference;
 use crate::{ast::AstNode, Token};
 
-enum Operator {
+enum _Operator {
     Add,
     Subtract,
     Multiply,
@@ -26,9 +26,9 @@ enum Operator {
     BitwiseShiftRight,
 }
 
-enum Expression {
-    Unary(Operator, Token),         // Operator, Value
-    Binary(Operator, Token, Token), // Operator, LHS value, RHS value
+enum _Expression {
+    Unary(_Operator, Token),         // Operator, Value
+    Binary(_Operator, Token, Token), // Operator, LHS value, RHS value
 }
 
 // Returns the result of the expression for compile time evaluation
@@ -38,7 +38,7 @@ pub fn parse_expression(
     bracket_nesting: i32,
     type_declaration: &Token,
 ) -> AstNode {
-    let mut expr = AstNode::Literal(Token::IntLiteral(0));
+    let mut _expr = AstNode::Literal(Token::IntLiteral(0));
 
     match &tokens[*i] {
         // Check if name is a reference to another variable or function call
@@ -68,7 +68,7 @@ pub fn parse_expression(
 
         // Check if is a literal
         Token::StringLiteral(string) => {
-            expr = AstNode::Literal(Token::StringLiteral(string.clone()));
+            _expr = AstNode::Literal(Token::StringLiteral(string.clone()));
         }
 
         _ => {
@@ -79,15 +79,11 @@ pub fn parse_expression(
         }
     }
 
-    expr
+    _expr
 }
 
-pub enum NumberType {
+pub enum _NumberType {
     Int(i32),
     Float(f64),
     Decimal(Vec<char>),
-}
-
-pub fn parse_math_exp(tokens: &Vec<AstNode>, i: &mut usize, bracket_nesting: i32) -> NumberType {
-    NumberType::Int(0)
 }
