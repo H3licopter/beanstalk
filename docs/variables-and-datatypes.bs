@@ -65,9 +65,9 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 -----------------------------------
 | int    | These numerical types are 64 bit by default but |support custom sizes | 0 |
 
-| number | | |
+| float | | |
 
-| decimal| A precise number of any size. Memory inefficiency and slower calculation speeds in ex change for precision. Apeend with number for it to be a fixed point number, otherwise it's an arrray of binary digits. | |
+| decimal | A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision | |
 
 | string | UTF-8 | "" |
 

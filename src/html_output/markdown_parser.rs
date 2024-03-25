@@ -2,10 +2,8 @@
 // Also make sure to escape reserved HTML characters
 pub fn add_markdown_tags(content: &mut String) -> String {
     let mut i = 0;
-    *content = content
-        .replace('<', "&lt;")
-        .replace('>', "&gt;");
-    
+    *content = content.replace('<', "&lt;").replace('>', "&gt;");
+
     while i < content.len() - 1 {
         if !add_em_tags(content, &mut i) {
             break;

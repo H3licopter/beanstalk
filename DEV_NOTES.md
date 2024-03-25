@@ -1,7 +1,7 @@
 # TO DO
 ## GENERAL
 - Should move any html tag creation from create_scene_node to web_parser and have a unique AST node before that instead.
-- Other datatypes can be inserted directly into scenes. Raw strings, numbers etc.
+- Other datatypes can be inserted directly into scenes. Raw strings, numbers, even collections should have a default behaviour etc.
 - Add 'alt' attribute to images.
 - Try making the spaces after an inline element significant rather than at the end of the element. HTML automatically parses them out.
 - Tidy up code a bit and prep for isolated task to create a function to manage precedence and parse maths expressions in the language.
@@ -32,7 +32,7 @@
 - Create WASM bindings for the DOM
 
 ## SYNTAX
-- number types will be a single letter followed by the max size. u32, i8, f64, d63 (fixed point decimal with 63 decimal places). d0 f0, i0 etc means the compiler decides. d0 = array of binary digits in memory (arbitary precision)
+- number types will be a single letter followed by the max size. u32, i8, f64, d63 (fixed point decimal with 63 decimal places). 
 - think about making commas ignorable, does it work?
 - Scene syntax is just triple dash muliline comment. So the parent scene is just a mutliline style comment.
 

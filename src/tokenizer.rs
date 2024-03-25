@@ -662,7 +662,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                     }
                 }
                 Token::BulletPoint(_, _) => {
-                    break; 
+                    break;
                 }
                 _ => {}
             }
@@ -673,27 +673,25 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
         content.push(current_char.clone());
 
         match chars.peek() {
-            Some(&ch) => {
-                match ch {
-                    ']' => {
-                        content = content.trim_end().to_string();
-                        break;
-                    }
-                    '[' => {
-                        break;
-                    }
-                    '-' => {
-                        if !content.trim().is_empty() && previous_newlines > 0 { 
-                            break; 
-                        }
-                        
-                        token = Token::BulletPoint(0, String::new());
-                    }
-                    _=> {
-                        *current_char = chars.next().unwrap();
-                    }
+            Some(&ch) => match ch {
+                ']' => {
+                    content = content.trim_end().to_string();
+                    break;
                 }
-            }
+                '[' => {
+                    break;
+                }
+                '-' => {
+                    if !content.trim().is_empty() && previous_newlines > 0 {
+                        break;
+                    }
+
+                    token = Token::BulletPoint(0, String::new());
+                }
+                _ => {
+                    *current_char = chars.next().unwrap();
+                }
+            },
             None => {
                 break;
             }
@@ -722,12 +720,12 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
             Token::Heading(count, content)
         }
 
-        Token::BulletPoint(indentation, _) => {
+        Token::BulletPoint(strength, _) => {
             if content.trim().is_empty() {
                 return Token::Empty;
             }
 
-            Token::BulletPoint(indentation, content)
+            Token::BulletPoint(strength, content)
         }
 
         _ => Token::Error("Invalid Markdown Element".to_string()),

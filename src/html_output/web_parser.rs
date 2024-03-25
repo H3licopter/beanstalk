@@ -43,7 +43,7 @@ pub fn parse(ast: Vec<AstNode>) -> String {
         .replace("page-title", &page_title)
 }
 
-fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> ( String, bool ) {
+fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
 
@@ -52,10 +52,10 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> ( String, bool ) {
             AstNode::Element(token) => {
                 match token {
                     Token::Span(content) => {
-                        html.push_str(
-                            &format!("<span>{}", 
-                            add_markdown_tags(&mut content.clone()))
-                        );
+                        html.push_str(&format!(
+                            "<span>{}",
+                            add_markdown_tags(&mut content.clone())
+                        ));
                         closing_tags.push("</span>".to_string());
                     }
 
@@ -66,9 +66,9 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> ( String, bool ) {
                             html.push_str(&add_markdown_tags(&mut content.clone()));
                         } else {
                             html.push_str(&format!(
-                                "<p>{}", 
-                                add_markdown_tags(&mut content.clone()))
-                            );
+                                "<p>{}",
+                                add_markdown_tags(&mut content.clone())
+                            ));
 
                             if count_newlines_at_end_of_string(&content) > 1 {
                                 html.push_str("</p>");
@@ -139,7 +139,7 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> ( String, bool ) {
         html.push_str(tag);
     }
 
-    ( html, *inside_p )
+    (html, *inside_p)
 }
 
 fn collect_closing_tags(closing_tags: &mut Vec<String>) -> String {

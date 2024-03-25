@@ -165,7 +165,10 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::BulletPoint(indentation, content) => {
-                scene.push(AstNode::Element(Token::BulletPoint(*indentation, content.clone())));
+                scene.push(AstNode::Element(Token::BulletPoint(
+                    *indentation,
+                    content.clone(),
+                )));
             }
 
             Token::RawStringLiteral(content) => {
@@ -284,8 +287,8 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
                 true
             }
         }
-        
-        Token::Pre(_) => { false }
+
+        Token::Pre(_) => false,
 
         Token::A | Token::StringLiteral(_) => true,
 
