@@ -2,7 +2,7 @@
 #date "2024-2-5"
 ---
 # Collections
-Collections of data in Beanstalk are created using square brackets. The type of the collection is inferred from the assignment. All collections have their data accessed using square brackets.
+Collections of data in Beanstalk are created using curly brackets. The type of the collection is inferred from the assignment. All collections have their data accessed using square brackets.
 
 ## Collection Prototype
 - Properties cannot be changed or added, as prototypes are compile time evaluated. Becomes a prototype with default values for new structs.
@@ -11,10 +11,10 @@ Collections of data in Beanstalk are created using square brackets. The type of 
 - If you don't set an explicit zero value on a property, any new structs created with the prototype MUST assign a value to it.
 
 `
-    Vec :: [
+    Vec :: {
         x : float = 0,
         y : float = 0,
-    ]
+    }
 `
 
 
@@ -29,9 +29,8 @@ Collections of data in Beanstalk are created using square brackets. The type of 
 ### Default values from Prototype
 If Vec did not assign zero values for the properties, this would throw an error as values for x and y would have to be provided.
 
-`
-    emptyVec : Vec
-`
+emptyVec : Vec
+
 ## Named Collection
 A named collection is like a Struct in other languages. It is a collection of properties and methods.
 
@@ -40,99 +39,100 @@ Properties can be accessed on the named collection the same as any other collect
 New struct from prototype. Will inherit any methods implemented for those structs.
 
 `
-    coordinates : Vec = [
-        x = 3.45,
-        y = 7.93
-    ]
+    coordinates : Vec = {
+        x := 3.45,
+        y := 7.93
+    }
 
     A new struct without a prototype
-    new_struct := [
+    new_struct := {
         thing :: 0,
         another_thing := 3
-    ]
+    }
 `
 
 Named Collections can also contain other named collectios and refer to its current instance using the "this" keyword.
-
 `
     -- Object definition with default values
-    Person :: [
+    Person :: {
         name: string,
         age := 69,
-        occupation := "Grave Digger"
-    ]
+        occupation := "Grave Digger",
+        change_age : (this: Person, years: int) : (
+            this.age = this.age + years
+        )
+    }
 
     -- Creating a new instance of the same Object
-    Bob : Person : [
+    Bob : Person : {
         name = "Bob",
         age = 42
-    ]
+    }
 `
 
 Accessing fields on Objects works the same as Arrays, available properties become visible when opening a new square bracket. Methods are always accessed using the dot syntax instead.
 
 ## Tuples
 Tuples are the simplest form of collection. They are an immutable set of values. 
-A tuple can is created by assigning a constant variable without any specified type more than 1 value separated by commas. 
-These values can optionally have a type definition. 
+A tuple can is created by assigning a constant variable without any specified type more than 1 value separated by commas.
+These values can optionally have a type definition.
 
 `
-    Person[name] -- returns "Gary"
+    Person.name -- returns "Gary"
     Bob.incrementAge(1) -- returns 43
 
-    tuple : [] : [
+    tuple : {} : {
         1, 
         decimal: 3, 
         6, 
         "random string", 
         false
-    ]
+    }
 
-    print(immutable_tuple[2]) -- 6
+    print(immutable_tuple.2) -- 6
 `
 
 ## Arrays
 Collections created without named properties become arrays. All arrays must contain the same datatype.
 
 - Mutable arrays are dynamically sized (behave like slices) and their values can be mutated
-array := [ 3, 4, 5 ]
+`array := { 3, 4, 5 }`
 
 - By specifying a size for the array, you can initialise a fixed size array.
 - Zero values will be added for each element that is not yet assigned to the array.
-array : [420] = [ 3, 4, 5 ]
+`array : {420} = { 3, 4, 5 }`
 
 - Constant arrays cannot have their values mutated, but can have them removed or added dynamically by default. 
-array :: [ 2, 8, 9 ]
+`array :: { 2, 8, 9 }`
 
 - Create a fixed size immutable array and infer the fixed size from the assignment. 
-tuple_example : [] : [ "really cool", "programming language" ]
+`tuple_example : {} : { "really cool", "programming language" }`
 
 `
     -- Dynamically sized string array, type inferred as s8 at compile time
-    fears : [] = ["The Unknown", "Compiler Errors", "Imposter's Syndrome"]
-
+    fears : {} = { "The Unknown", "Compiler Errors", "Imposter's Syndrome" }
 
     -- Creates an empty, dynamically sized array that can only contain integers
-    integers : int[]
+    integers : int{}
 
     -- 
     A mutable array of UTF-8 strings with a fixed size of 69 elements
     Fills unassigned indexes of the array with the type's default value of empty string.
     Attempting to remove elements from fixed size arrays will result in an error
     --
-    fears : string[69] = ["Javascript", "C++", "Cobol"]
-    fears[0] -- returns ‘Javascript'
-    fears[69] -- returns out of bounds error, 69 is the number of elements, so 68 is the last element in the array
-    fears[30] -- returns an empty string ""
+    fears : string{69} = { "Javascript", "C++", "Cobol" }
+    fears.0 -- returns ‘Javascript'
+    fears.69 -- returns out of bounds error, 69 is the number of elements, so 68 is the last element in the array
+    fears.30 -- returns an empty string ""
 
     -- A dynamically sized array that can contain strings, booleans and integers. These types are inferred from the assignment at compile time. Only these types will be acceptable. 
-    cool : [] : ["Beanstalk", "Beans", false, 0]
+    cool : {} : { "Beanstalk", "Beans", false, 0 }
 `
 
 ## Array Slices
 Slices are references to a subset of an existing array. To create a slice, you create a new variable and assign it to an existing array, but you can specify a range of elements that the slice can reference. 
 
 `
-    array_slice := big_old_array[32 to 49]
-    array_slice[0] -- returns the 32nd element of big_old_array
+    array_slice := big_array.(31 to 42)
+    array_slice.0 -- returns the 32nd element of big_array
 `

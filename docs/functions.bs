@@ -16,7 +16,7 @@ You must assign the same or less variables to the return values of a function, a
 
 Instead of a "return" keyword, Beanstalk uses a big arrow -> to return the result of the following expression. 
 
-{raw:
+`
     concatThings : (a : string, b : string) -> string : (
         -> a + b
     )
@@ -47,8 +47,7 @@ Instead of a "return" keyword, Beanstalk uses a big arrow -> to return the resul
 
     -- Anonymous functions
     (arg) : -> arg + 1
-
-}
+`
 
 # Methods
 Method chaining is a core part of how data can be transformed in Beanstalk. 
@@ -60,14 +59,14 @@ Methods are instead created similarly to functions but will impliment themselves
 Create a new method by using the Self keyword as the name of an argument. 
 To impliment the method on one or more types, specify them as types of the Self argument.
 
-{raw:
+`
     incrementInt : (self: int or float) : -> self += 1
 
     number := 0
     number.incrementInt() -- 1
 
     randomizeAge : (self: person) : self.age = int.rng(0 as min, 100 as max)
-}
+`
 
 # Explicit Function Overloading
 Function overloading is explicit in Beanstalk, all functions must have unique names. 
@@ -77,7 +76,7 @@ This is to maintain type safety and code clarity.
 By creating a new variable and setting it equal to a list of functions using the plus operator. 
 You can create an overloaded function that will automatically call the correct function depending on the arguments passed into it.
 
-{raw:
+`
     toString :: intToString + floatToString + decimalToString
 
     -- Can wrap in brackets for multi-line
@@ -86,4 +85,4 @@ You can create an overloaded function that will automatically call the correct f
         floatToString + 
         decimalToString
     )
-}
+`

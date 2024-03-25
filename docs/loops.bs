@@ -11,7 +11,7 @@ The 'to' keyword defines a range for the loop.
 
 Finally, you can add the "as" keyword to specify how the iterator will mutate for each step of the loop.
 
-{raw: 
+`
     for thing in things (
         print("ye")
     )
@@ -32,14 +32,14 @@ Finally, you can add the "as" keyword to specify how the iterator will mutate fo
     )
 
     for i to text_array.length (
-        print(text_array[i])
+        print(text_array.i)
     )
 
-    --- infinite loop
-    for p is true: print(":(")
+    --- infinite loop (a break statement is required to exit)
+    for true: print(":(")
 
     --- for loop as an assignment expression
     me: string = for fact in fact_array (
         if fact is "not cool" (=> fact)
     )
-}
+`

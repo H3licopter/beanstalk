@@ -11,44 +11,36 @@ You can specify a name for the scene by naming it on the same line as the triple
 
 Scenes use curly braces and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
 
-{raw: 
+`
     ---
 
-    { head_of_element: content of element (markdown / more templates) }
+    [ head_of_element: content of element (markdown / more templates) ]
 
     reactiveVariable := "some text"
     changeText: (text: string): reactiveVariable = text
 
     $grid_id -- An element from a scene (getting the element’s ID)
-    Scene_example[grid_id] -- Another way to get an element from a scene, by getting the child of a parent scene.
+    Scene_example.grid_id -- Another way to get an element from a scene, by getting the child of a parent scene.
 
-    scene_component_example := { theme=example_theme:
+    scene_component_example := [ theme=example_theme:
 
-    { img "images/meme.jpg", style "big-img crap-border", 
-        click (reactiveVariable = "WOW")
-    }
+        [img "images/meme.jpg", style "big-img crap-border", click (reactiveVariable = "WOW")]
 
-    # A Cool Table
-    { $grid_id, style "grid":
-        Some grid text
-        { reactiveVariable }
-        [here's a link!](site_link)
-    }
+        # A Cool Table
+        [ $grid_id, style "grid":
+            Some grid text
+            [ reactiveVariable ]
+            [link "http link": here's a link!]
+        ]
 
-    { for i to text_array.length: { text_array[i] } }
+        [ for i to text_array.length: [ text_array.i ]]
 
-    { style "big-text", if not text.isBlank():
-        { text: plus some extra text in the same element as the variable text }
-    }
+        [ style "big-text", if not text.isBlank():
+            [ text: plus some extra text in the same element as the variable text ]
+        ]
 
-    { imported_bs_markdown }
-        { slot "main content" }
-    }
-
-
-    {comment: 
-        This scene will continue for the rest of the file,
-        unless an extra closing curly brace is added.
-    }
-}
+        [ imported_bs_markdown ]
+        [ slot "main content" ]
+    ]
+`
 

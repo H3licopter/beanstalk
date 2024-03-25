@@ -541,6 +541,7 @@ fn tokenize_scenehead(
 fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> Token {
     let mut content = String::new(); // To keep track of current chars being parsed
     let mut token: Token = Token::P(String::new());
+    let mut previous_newlines = 0;
 
     //Ignore starting whitespace (except newlines)
     while current_char.is_whitespace() {
@@ -548,6 +549,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
             if content.ends_with("\n\n") {
                 return Token::Empty;
             }
+            previous_newlines += 1;
             content.push('\n');
         }
 
@@ -560,6 +562,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
     // HEADINGS
     if current_char == &'#' {
         let mut heading_count = 1;
+        previous_newlines = 0;
 
         loop {
             *current_char = match chars.next() {
@@ -584,12 +587,32 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
 
             break;
         }
+    // BULLET POINTS
+    } else if current_char == &'-' {
+        let mut bullet_strength: u8 = 0;
+        loop {
+            *current_char = match chars.next() {
+                Some(ch) => ch,
+                None => return Token::EOF,
+            };
+
+            if current_char == &'-' {
+                bullet_strength += 1;
+                continue;
+            }
+
+            if current_char.is_whitespace() {
+                continue;
+            }
+
+            break;
+        }
+
+        token = Token::BulletPoint(bullet_strength, String::new());
     }
 
     // Loop through the elements content until hitting a condition that
     // breaks out of the element
-    let mut previous_newlines = 0;
-
     let mut parse_raw = false;
     loop {
         // Parsing Raw String inside of Markdown
@@ -616,8 +639,10 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
             continue;
         }
 
+        // Raw Strings
         if current_char == &'`' {
             parse_raw = true;
+            previous_newlines = 0;
             continue;
         }
 
@@ -636,6 +661,9 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                         break;
                     }
                 }
+                Token::BulletPoint(_, _) => {
+                    break; 
+                }
                 _ => {}
             }
         } else if !current_char.is_whitespace() {
@@ -646,14 +674,24 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
 
         match chars.peek() {
             Some(&ch) => {
-                if ch == ']' {
-                    content = content.trim_end().to_string();
-                    println!("Content: {}", content);
-                    break;
-                } else if ch == '[' {
-                    break;
-                } else {
-                    *current_char = chars.next().unwrap();
+                match ch {
+                    ']' => {
+                        content = content.trim_end().to_string();
+                        break;
+                    }
+                    '[' => {
+                        break;
+                    }
+                    '-' => {
+                        if !content.trim().is_empty() && previous_newlines > 0 { 
+                            break; 
+                        }
+                        
+                        token = Token::BulletPoint(0, String::new());
+                    }
+                    _=> {
+                        *current_char = chars.next().unwrap();
+                    }
                 }
             }
             None => {
@@ -682,6 +720,14 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
             }
 
             Token::Heading(count, content)
+        }
+
+        Token::BulletPoint(indentation, _) => {
+            if content.trim().is_empty() {
+                return Token::Empty;
+            }
+
+            Token::BulletPoint(indentation, content)
         }
 
         _ => Token::Error("Invalid Markdown Element".to_string()),

@@ -1,5 +1,5 @@
 #title "Operators"
-#date “2024--2--5”
+#date “2024-2-5”
 ---
 
 # Keywords

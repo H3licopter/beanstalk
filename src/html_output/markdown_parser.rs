@@ -1,22 +1,24 @@
 // Loop through and replace all Markdown formatting with correct tags
 // Also make sure to escape reserved HTML characters
-pub fn add_tags(content: &mut String, i: &mut usize) -> String {
+pub fn add_markdown_tags(content: &mut String) -> String {
+    let mut i = 0;
     *content = content
         .replace('<', "&lt;")
         .replace('>', "&gt;");
     
-    while *i < content.len() - 1 {
-        if !add_em_tags(content, i) {
+    while i < content.len() - 1 {
+        if !add_em_tags(content, &mut i) {
             break;
         }
-        *i += 1;
+        i += 1;
     }
 
-    while *i < content.len() - 1 {
-        if !add_superscript_tags(content, i) {
+    i = 0;
+    while i < content.len() - 1 {
+        if !add_superscript_tags(content, &mut i) {
             break;
         }
-        *i += 1;
+        i += 1;
     }
 
     content.trim_start().to_string()

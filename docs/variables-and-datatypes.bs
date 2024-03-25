@@ -5,15 +5,14 @@
 Equals '=' is used for variable assignment. And colon : is used to indicate initialisation. If a variable is assigned a value with a colon rather than the equals symbol it becomes immutable.
 
 # Static Assignment
-{raw:
-    my_brain : string = "Dumb"
+`
+    my_brain : s8 = "Dumb"
 
-    --type is inferred as i64
-    number_4 : int = 69 
+    number_4 : u32 = 69 
 
     -- dynamically infer the type at compile time
     my_brain := "thing" 
-}
+`
 
 **There is no such thing as Nil or Null in Beanstalk.**
 
@@ -21,61 +20,70 @@ Variables initialised with a type but no assignment will have a zero value depen
 If an error occurs during assignment of a variable, 
 the zero value will be used and an error will be created as an additional value that must be handled during the assignement or passed up the callstack.
 
-{raw:
-    uselessness: int --value is 0
+`
+    uselessness: i32 --value is 0
 
     thing :: a_collection -- Immutable reference
     thing := a_collection -- mutable reference
     thing := a_collection.copy() -- deep copy, inherits type
 
-    number : int = 30.0
+    number : i32 = 30.0
     number_copy := number 
-}
+`
 
 # Immutable Variables
-{raw:
+`
     -- Int constant (type inferred at compile time)
     self_worth :: 0
 
     -- Float constant
     my_iq :: 0.0
 
-    best_number : int : 69
+    best_number : i32 : 69
 
     -- Int constant evaluated at compile time
     weird_num :: 69 ** 420
-}
+`
 
 If you are creating a non-collection variable and need it to be formatted over multiple lines, you can wrap the value in brackets
 
-{raw:
-    var1, var2, var3, var4 : int : (
+`
+    var1, var2, var3, var4 : u8 : (
         4 + 5 + 6 + 7 + 8 + 9 + 10
     )
 
-    var1, var2 : int : 420
+    var1, var2 : u16 : 420
 
     var3, var4 := "cool", "beans"
-}
+`
 
 # Data Types
 All data type keywords contain methods from the standard library for common manipulation of types. 
 The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
 
-{table 3:
-    {: Type} {: Description} {: Zero Value}
-    {: int} {xcol: These numerical types are 64 bit by default but support custom sizes} {xcol: 0}
-    {: number } 
-    {: decimal} {: A precise number of any size. Memory inefficiency and slower calculation speeds in ex change for precision}
-    {: string} {: UTF-8} {: ""}
-    {: rune} {: Unicode char (rune) is like an Int32} {: 0}
-    {: bool} {: Including true and false as types} {: false}
-    {: scene} {: The templating syntax of Beanstalk} {xcol: []}
-    {: []} {: Collection}
-    {: choice} {: Rust style enums} {xcol 2: error}
-    {: type} {: For creating new objects}
-    {: error} {: Contains a string detailing the error}
-}
+| Type | Description | Zero Value |
+-----------------------------------
+| int    | These numerical types are 64 bit by default but |support custom sizes | 0 |
+
+| number | | |
+
+| decimal| A precise number of any size. Memory inefficiency and slower calculation speeds in ex change for precision. Apeend with number for it to be a fixed point number, otherwise it's an arrray of binary digits. | |
+
+| string | UTF-8 | "" |
+
+| rune   | Unicode char (rune) is like an Int32 | 0 |
+
+| bool   | Including true and false as types | false |
+
+| scene  | The templating syntax of Beanstalk | [] |
+
+| []     | Collection | |
+
+| choice | Rust style enums | error |
+
+| type   | For creating new objects | |
+
+| error  | Contains a string detailing the error | |
 
 Type will operate as a generic when specified as the type of a function arg. 
 It's also used for creating Objects and choices, using the same syntax as creating constant variables.
@@ -87,22 +95,22 @@ String is the keyword for string types in Beanstalk. Double quotes are automatic
 
 Curly braces are used to add expressions into the string. 
 
-{raw:
+`
     "9 is {5 + 4}" -- 9 is 9
-}
+`
 
 Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 
 "string literal with \{curly braces} in it that is escaped" 
 
-{raw:
+`
     `9 "is" {5 + 4}` -- 9 "is" {5 + 4}
-}
+`
 
 # Runes
 Rune characters are equivalent to Int32 but are their own specific type. 
 
-cool_emoji : rune: 😂
+cool_emoji : rune : 😂
 
 # Strict Types
 Variables can also have additional contraints about their types, allowing only valid matches to be assigned at compiletime or runtime without an error being thrown. 
@@ -110,20 +118,18 @@ Variables can also have additional contraints about their types, allowing only v
 These constraints can be added to the type portion of the variable assignemnt.
 Doing this allows a small, clean syntax for handling invalid inputs using Beanstalks error handling.
 
-
-{raw:
-    person_age : int 0 to 120 = $age_input.value !(
+`
+    person_age : i 0 to 120 = $age_input.value !(
         print("Invalid age input: {error}")
     )
-}
+`
 
 # Unit Types
 Number types can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
 
-The first unit in the operation will be used if no unit type is set in the number type.
+The first unit in the operation will be used if no unit type is specified in the type parameter.
 
-{raw:
-
+`
     #unit m = 0
     #unit cm = m * 0.01
     #unit mm = cm * 0.1
@@ -133,5 +139,4 @@ The first unit in the operation will be used if no unit type is set in the numbe
 
     height : float cm = 3m * 2m
     -- result is 500
-
-}
+`

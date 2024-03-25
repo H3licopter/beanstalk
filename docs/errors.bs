@@ -15,7 +15,7 @@ Errors can be explicitly passed up the call stack by using a ! without returning
 
 Double bang !! will force the program to panic and halt if the previous expression or function call returns an error.
 
-{raw:
+`
     -- Always returns a string even if an error is thrown by getNetworkRequest()
     -- The program will print the error and continue 
     getURL : () -> string : (
@@ -46,4 +46,4 @@ Double bang !! will force the program to panic and halt if the previous expressi
     callingFunction : () : (
         thing := dodgyFunction() ! -> "default_thing"
     )
-}
+`

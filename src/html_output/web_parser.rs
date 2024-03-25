@@ -1,4 +1,4 @@
-use super::{generate_html::create_html_boilerplate, markdown_parser::add_tags};
+use super::{generate_html::create_html_boilerplate, markdown_parser::add_markdown_tags};
 use crate::{
     ast::AstNode, parsers::util::count_newlines_at_end_of_string, settings::get_meta_config, Token,
 };
@@ -17,7 +17,7 @@ pub fn parse(ast: Vec<AstNode>) -> String {
     for node in ast {
         match node {
             AstNode::Scene(scene) => {
-                html.push_str(&parse_scene(scene));
+                html.push_str(&parse_scene(scene, &mut false).0);
             }
             AstNode::Title(value) => {
                 page_title = value;
@@ -43,7 +43,7 @@ pub fn parse(ast: Vec<AstNode>) -> String {
         .replace("page-title", &page_title)
 }
 
-fn parse_scene(scene: Vec<AstNode>) -> String {
+fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> ( String, bool ) {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
 
@@ -52,18 +52,30 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
             AstNode::Element(token) => {
                 match token {
                     Token::Span(content) => {
-                        html.push_str(&format!("<span>{}", add_tags(&mut content.clone(), &mut 0)));
+                        html.push_str(
+                            &format!("<span>{}", 
+                            add_markdown_tags(&mut content.clone()))
+                        );
                         closing_tags.push("</span>".to_string());
                     }
 
                     Token::P(content) => {
                         html.push_str(collect_closing_tags(&mut closing_tags).as_str());
-                        html.push_str(&format!("<p>{}", add_tags(&mut content.clone(), &mut 0)));
 
-                        if count_newlines_at_end_of_string(&content) > 1 {
-                            html.push_str("</p>");
+                        if *inside_p {
+                            html.push_str(&add_markdown_tags(&mut content.clone()));
                         } else {
-                            closing_tags.push("</p>".to_string());
+                            html.push_str(&format!(
+                                "<p>{}", 
+                                add_markdown_tags(&mut content.clone()))
+                            );
+
+                            if count_newlines_at_end_of_string(&content) > 1 {
+                                html.push_str("</p>");
+                            } else {
+                                *inside_p = true;
+                                closing_tags.push("</p>".to_string());
+                            }
                         }
                     }
 
@@ -72,7 +84,7 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
                         html.push_str(&format!(
                             "<h{}>{}",
                             size,
-                            add_tags(&mut content.clone(), &mut 0)
+                            add_markdown_tags(&mut content.clone())
                         ));
 
                         if count_newlines_at_end_of_string(&content) > 0 {
@@ -80,6 +92,12 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
                         } else {
                             closing_tags.push(format!("</h{}>", size));
                         }
+                    }
+
+                    Token::BulletPoint(_indentation, content) => {
+                        html.push_str(collect_closing_tags(&mut closing_tags).as_str());
+                        html.push_str(&format!("<li>{}", add_markdown_tags(&mut content.clone())));
+                        closing_tags.push("</li>".to_string());
                     }
 
                     Token::Pre(content) => {
@@ -93,8 +111,9 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
             }
 
             AstNode::Scene(scene) => {
-                let new_scene = parse_scene(scene);
-                html.push_str(&new_scene);
+                let new_scene = parse_scene(scene, inside_p);
+
+                html.push_str(&new_scene.0);
             }
 
             AstNode::SceneTag(tag) => {
@@ -116,10 +135,11 @@ fn parse_scene(scene: Vec<AstNode>) -> String {
     }
 
     for tag in closing_tags.iter().rev() {
+        *inside_p = false;
         html.push_str(tag);
     }
 
-    html
+    ( html, *inside_p )
 }
 
 fn collect_closing_tags(closing_tags: &mut Vec<String>) -> String {

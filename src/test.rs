@@ -31,7 +31,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     println!("CREATING HTML OUTPUT\n");
     let html_output = web_parser::parse(ast);
     println!("HTML:\n");
-    print!(
+    println!(
         "{:?}",
         html_output.split("<body>").collect::<Vec<&str>>()[1]
     );

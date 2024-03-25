@@ -1,7 +1,6 @@
 # TO DO
 ## GENERAL
-- Bug with lots of newlines in nested scene, will not wrap all the scene elements in the scene tag correctly.
-- Switch collections to using curly brace syntax. All access is done via dot operator.
+- Should move any html tag creation from create_scene_node to web_parser and have a unique AST node before that instead.
 - Other datatypes can be inserted directly into scenes. Raw strings, numbers etc.
 - Add 'alt' attribute to images.
 - Try making the spaces after an inline element significant rather than at the end of the element. HTML automatically parses them out.
@@ -10,19 +9,24 @@
 
 ## HTML
 - Markdown things to add:
+  - Numbered lists
   - Underlining
-  - strikethroughs
+  - strikethroughs ~~
+  - blockquotes ~
+  - Checkboxes / Radio buttons (will be empty scene for checkbox)
+
+- refactor markdown parser to parse all custom markdown in the same loop (look through the content once and replace all markdown with the correct HTML in one pass). Maybe a collection of parsing states that can contain each markdown type.
+
 - Add most common HTML elements to the base language:
   - audio, video
   - lists
   - form, input, button, select, option, textarea
   - tables
   - header, footer, main, section, article, aside, nav
-- custom markdown parsing
 
 ## CSS
 - Compile [custom pico css style](https://picocss.com/docs/sass) for the base of the CSS framework, remove pico- from the class names
-- Figure out if direct Tailwind integration is possible. Maybe just use a style if this works? Otherwise create custom utility classes, if even needed.
+- Create base BS css file for basic additional syling
 
 ## JS / WASM
 - Create WASM bindings for the DOM
