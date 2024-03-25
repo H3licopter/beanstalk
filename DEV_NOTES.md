@@ -32,6 +32,7 @@
 - Create WASM bindings for the DOM
 
 ## SYNTAX
+- number types will be a single letter followed by the max size. u32, i8, f64, d63 (fixed point decimal with 63 decimal places). d0 f0, i0 etc means the compiler decides. d0 = array of binary digits in memory (arbitary precision)
 - think about making commas ignorable, does it work?
 - Scene syntax is just triple dash muliline comment. So the parent scene is just a mutliline style comment.
 
