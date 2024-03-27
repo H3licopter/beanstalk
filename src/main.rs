@@ -5,7 +5,6 @@ use std::{
     path::Path,
 };
 
-mod ast;
 mod build;
 mod create_new_project;
 mod settings;
@@ -13,6 +12,7 @@ mod test;
 mod tokenizer;
 mod tokens;
 mod parsers {
+    pub mod ast;
     pub mod build_ast;
     mod create_scene_node;
     pub mod parse_expression;

@@ -1,7 +1,7 @@
 use crate::html_output::web_parser;
 use crate::parsers;
 use crate::tokenizer;
-use crate::tokens::Token;
+use crate::Token;
 use std::error::Error;
 use std::fs;
 
@@ -22,7 +22,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Create AST
     println!("CREATING AST\n");
-    let ast: Vec<crate::ast::AstNode> = parsers::build_ast::new_ast(&tokens, 0).0;
+    let ast: Vec<parsers::ast::AstNode> = parsers::build_ast::new_ast(&tokens, 0).0;
 
     println!("AST:");
     println!("{:?}", ast);
@@ -33,7 +33,12 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     println!("HTML:\n");
     println!(
         "{:?}",
-        html_output.split("<body>").collect::<Vec<&str>>()[1]
+        html_output.0
+    );
+    println!("\nJS:\n");
+    println!(
+        "{:?}",
+        html_output.1
     );
     Ok(())
 }

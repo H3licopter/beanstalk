@@ -57,7 +57,10 @@ fn get_next_token(
         return tokenize_markdown(chars, &mut current_char);
     }
 
-    // Skip whitespace
+    // Skip non-newline whitespace
+    if current_char == '\n' {
+        return Token::Newline;
+    }
     while current_char.is_whitespace() {
         current_char = match chars.next() {
             Some(ch) => ch,
@@ -208,9 +211,9 @@ fn get_next_token(
             } else {
                 if next_char == '=' {
                     chars.next();
-                    return Token::SubtractionAssign;
+                    return Token::SubtractAssign;
                 }
-                return Token::Subtraction;
+                return Token::Subtract;
             }
         }
     }
@@ -221,23 +224,23 @@ fn get_next_token(
         if let Some(&next_char) = chars.peek() {
             if next_char == '=' {
                 chars.next();
-                return Token::AdditionAssign;
+                return Token::AddAssign;
             }
         }
         chars.next();
-        return Token::Addition;
+        return Token::Add;
     }
     if current_char == '*' {
         if let Some(&next_char) = chars.peek() {
             if next_char == '*' {
                 chars.next();
-                return Token::Exponentiation;
+                return Token::Exponent;
             }
             if next_char == '=' {
                 chars.next();
-                return Token::MultiplicationAssign;
+                return Token::MultiplyAssign;
             }
-            return Token::Multiplication;
+            return Token::Multiply;
         }
     }
     if current_char == '/' {
@@ -254,9 +257,9 @@ fn get_next_token(
             }
             if next_char == '=' {
                 chars.next();
-                return Token::DivisionAssign;
+                return Token::DivideAssign;
             }
-            return Token::Division;
+            return Token::Divide;
         }
     }
     if current_char == '%' {
@@ -282,10 +285,10 @@ fn get_next_token(
         if let Some(&next_char) = chars.peek() {
             if next_char == '=' {
                 chars.next();
-                return Token::ExponentiationAssign;
+                return Token::ExponentAssign;
             }
         }
-        return Token::Exponentiation;
+        return Token::Exponent;
     }
 
     // Check for greater than and Less than logic operators
@@ -440,6 +443,11 @@ fn keyword_or_variable(
                 "collection" => return Token::TypeCollection,
                 "object" => return Token::TypeObject,
                 _ => {}
+            }
+
+            // IO
+            if token_value == "io" {
+                return Token::Print;
             }
 
             // only bother tokenizing / reserving these keywords if inside of a scene head

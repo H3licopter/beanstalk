@@ -1,6 +1,6 @@
 # TO DO
 ## GENERAL
-- Should move any html tag creation from create_scene_node to web_parser and have a unique AST node before that instead.
+- Should move any markdown tag creation from create_scene_node to web_parser and have a unique AST node before that instead.
 - Other datatypes can be inserted directly into scenes. Raw strings, numbers, even collections should have a default behaviour etc.
 - Add 'alt' attribute to images.
 - Try making the spaces after an inline element significant rather than at the end of the element. HTML automatically parses them out.
@@ -15,8 +15,6 @@
   - blockquotes ~
   - Checkboxes / Radio buttons (will be empty scene for checkbox)
 
-- refactor markdown parser to parse all custom markdown in the same loop (look through the content once and replace all markdown with the correct HTML in one pass). Maybe a collection of parsing states that can contain each markdown type.
-
 - Add most common HTML elements to the base language:
   - audio, video
   - lists
@@ -29,7 +27,7 @@
 - Create base BS css file for basic additional syling
 
 ## JS / WASM
-- Create WASM bindings for the DOM
+- Mostly just compile to JS, then add wasm module for heavy lifting tasks and proper types.
 
 ## SYNTAX
 - number types will be a single letter followed by the max size. u32, i8, f64, d63 (fixed point decimal with 63 decimal places). 

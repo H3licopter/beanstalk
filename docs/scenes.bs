@@ -33,7 +33,7 @@ Scenes use curly braces and have predefined properties that will affect the beha
             [link "http link": here's a link!]
         ]
 
-        [ for i to text_array.length: [ text_array.i ]]
+        [ for text in text_array ( -> text ) ]
 
         [ style "big-text", if not text.isBlank():
             [ text: plus some extra text in the same element as the variable text ]

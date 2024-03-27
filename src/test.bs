@@ -1,8 +1,1 @@
-#title "Test Page"
----
-# some bullet points
-A description of things:
-- Bullet point
-- Another point *ITALIC* [rgb(0,255,0): scene inside bullet point here]
-- Seperate bullet point [: scene inline of it]
-normal paragraph
+io 1-3

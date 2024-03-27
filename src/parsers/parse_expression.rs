@@ -1,5 +1,5 @@
-use super::build_ast::is_reference;
-use crate::{ast::AstNode, Token};
+use crate::Token;
+use super::{ast::AstNode, build_ast::is_reference};
 
 enum _Operator {
     Add,
@@ -35,51 +35,98 @@ enum _Expression {
 pub fn parse_expression(
     tokens: &Vec<Token>,
     i: &mut usize,
-    bracket_nesting: i32,
     type_declaration: &Token,
 ) -> AstNode {
-    let mut _expr = AstNode::Literal(Token::IntLiteral(0));
+    let mut expression = Vec::new();
 
-    match &tokens[*i] {
-        // Check if name is a reference to another variable or function call
-        Token::Variable(name) => {
-            if is_reference(tokens, i, name) {
-                // Check if is function call
-                if &tokens[*i + 1] == &Token::OpenBracket {
-                    // Read function args
-                    let mut args = Vec::new();
-                    *i += 2;
-                    while &tokens[*i] != &Token::CloseBracket {
-                        // TO DO, CHECK IS VALID ARGUMENT
-                        let arg = parse_expression(tokens, i, bracket_nesting, type_declaration);
-                        args.push(arg);
-
-                        *i += 1;
-                    }
-
-                    return AstNode::FunctionCall(name.clone(), args);
-                }
-
-                return AstNode::Ref(name.clone());
-            }
-
-            return AstNode::Error("Variable reference not defined. Maybe you're using a variable that has not yet been declared?".to_string());
-        }
-
-        // Check if is a literal
-        Token::StringLiteral(string) => {
-            _expr = AstNode::Literal(Token::StringLiteral(string.clone()));
-        }
-
-        _ => {
-            return AstNode::Error(
-                "Invalid Assignment for Variable, must be assigned wih a valid datatype"
-                    .to_string(),
-            );
-        }
+    // Check if value is wrapped in brackets and move on until first value is found
+    let mut bracket_nesting: i32 = 0;
+    while &tokens[*i] == &Token::OpenBracket {
+        bracket_nesting += 1;
+        *i += 1;
     }
 
-    _expr
+    while let Some(token) = tokens.get(*i) {
+        match token {
+            
+            // Conditions that end the expression
+            Token::Newline => {
+                if bracket_nesting == 0 {
+                    break;
+                }
+            }
+            Token::EOF => {
+                break;
+            }
+            Token::CloseBracket => {
+                if bracket_nesting > 1 {
+                    bracket_nesting -= 1;
+                }
+                if bracket_nesting == 1 {
+                    break;
+                }
+                if bracket_nesting < 1 {
+                    expression.push(AstNode::Error("Too many closing brackets".to_string()));
+                }
+            }
+
+            // Check if name is a reference to another variable or function call
+            Token::Variable(name) => {
+                if is_reference(tokens, i, name) {
+                    // Check if is function call
+                    if &tokens[*i + 1] == &Token::OpenBracket {
+                        // Read function args
+                        let mut args = Vec::new();
+                        *i += 2;
+                        while &tokens[*i] != &Token::CloseBracket {
+                            // TO DO, CHECK IS VALID ARGUMENT
+                            let arg = parse_expression(tokens, i, type_declaration);
+                            args.push(arg);
+    
+                            *i += 1;
+                        }
+    
+                        expression.push(AstNode::FunctionCall(name.clone(), args));
+                    }
+    
+                    expression.push(AstNode::Ref(name.clone()));
+                }
+    
+                expression.push(AstNode::Error("Variable reference not defined. Maybe you're using a variable that has not yet been declared?".to_string()));
+            }
+    
+            // Check if is a literal
+            Token::IntLiteral(int) => {
+                expression.push(AstNode::Literal(Token::IntLiteral(*int)));
+            }
+            Token::StringLiteral(string) => {
+                expression.push(AstNode::Literal(Token::StringLiteral(string.clone())));
+            }
+            Token::FloatLiteral(float) => {
+                expression.push(AstNode::Literal(Token::FloatLiteral(*float)));
+            }
+
+
+            // Check if operator
+            Token::Add => {expression.push(AstNode::Add);}
+            Token::Subtract => {expression.push(AstNode::Subtract);}
+            Token::Multiply => {expression.push(AstNode::Multiply);}
+            Token::Divide => {expression.push(AstNode::Divide);}
+            Token::Modulus => {expression.push(AstNode::Modulus);}
+            Token::Exponent => {expression.push(AstNode::Exponent);}
+    
+            _ => {
+                expression.push(AstNode::Error(
+                    "Invalid Expression, must be assigned wih a valid datatype"
+                        .to_string(),
+                ));
+            }
+        }
+
+        *i += 1;
+    }
+
+    AstNode::Expression(expression)
 }
 
 pub enum _NumberType {

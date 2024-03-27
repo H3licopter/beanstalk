@@ -1,5 +1,5 @@
-use super::{create_scene_node::new_scene, parse_expression::parse_expression};
-use crate::{ast::AstNode, Token};
+use super::{ast::AstNode, create_scene_node::new_scene, parse_expression::parse_expression};
+use crate::Token;
 
 pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
     let mut ast = Vec::new();
@@ -52,6 +52,11 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
                 // Do nothing
             }
 
+            Token::Print => {
+                i += 1;
+                ast.push(AstNode::Print(Box::new(parse_expression(tokens, &mut i, &Token::TypeString))));
+            }
+
             // Or stuff that hasn't been implemented yet
             _ => {
                 ast.push(AstNode::Error("Invalid Token Used".to_string()));
@@ -83,7 +88,6 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     // Variable Properties
     let mut type_declaration = Token::TypeInference;
     let mut _var_is_const = true;
-    let mut bracket_nesting = 0;
 
     match &tokens[*i] {
         // Infer type (CONSTANT VARIABLE)
@@ -137,21 +141,16 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     // Get value of variable
     *i += 1;
 
-    // Check if value is wrapped in brackets and move on until first value is found
-    while &tokens[*i] == &Token::OpenBracket {
-        bracket_nesting += 1;
-        *i += 1;
-    }
 
-    let _var_value = parse_expression(tokens, i, bracket_nesting, &type_declaration);
-
-    AstNode::Error("Invalid variable assignment".to_string())
+    AstNode::VarDeclaration(name.to_string(), Box::new(parse_expression(tokens, i, &type_declaration)))
+    // AstNode::Error("Invalid variable assignment".to_string())
 }
 
 // TO DO - SOME PLACEHOLDER CODE FOR FUNCTION DECLARATION
 fn new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut _function_name = String::new();
     let mut function_args = Vec::new();
+    let mut _function_body = Vec::new();
 
     // Get function name
     match &tokens[*i] {
@@ -185,19 +184,17 @@ fn new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
         *i += 1;
     }
 
-    AstNode::Function(_function_name, function_args)
+    // TODO - Get function body
+
+    AstNode::Function(_function_name, function_args, _function_body)
 }
 
 // Check if variable name has been used earlier in the vec of tokens, if it has return true
 pub fn is_reference(tokens: &Vec<Token>, i: &usize, name: &String) -> bool {
-    for j in (0..=*i - 1).rev() {
-        if let Token::Variable(value) = &tokens[j] {
-            if value == name {
-                return true;
-            }
-        }
-    }
-    false
+    tokens[..*i].iter().rev().any(|token| match token {
+        Token::Variable(var_name) => var_name == name,
+        _ => false,
+    })
 }
 
 fn _infer_datatype(value: &Token) -> Token {

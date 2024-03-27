@@ -1,11 +1,11 @@
 use super::{generate_html::create_html_boilerplate, markdown_parser::add_markdown_tags};
 use crate::{
-    ast::AstNode, parsers::util::count_newlines_at_end_of_string, settings::get_meta_config, Token,
+    parsers::{ast::AstNode, util::count_newlines_at_end_of_string}, settings::get_meta_config, Token
 };
 
 // Parse ast into valid JS, HTML and CSS
-pub fn parse(ast: Vec<AstNode>) -> String {
-    let js = String::new();
+pub fn parse(ast: Vec<AstNode>) -> (String, String) {
+    let mut js = String::new();
     let _wasm = String::new();
     let mut html = String::new();
     let css = String::new();
@@ -16,6 +16,7 @@ pub fn parse(ast: Vec<AstNode>) -> String {
     // Parse HTML
     for node in ast {
         match node {
+            // SCENES (HTML)
             AstNode::Scene(scene) => {
                 html.push_str(&parse_scene(scene, &mut false).0);
             }
@@ -30,17 +31,96 @@ pub fn parse(ast: Vec<AstNode>) -> String {
                 // Eventually a way to get date information about the page
             }
 
+            // JAVASCRIPT / WASM
+            AstNode::VarDeclaration(name, expr ) => {
+                let expressions = match *expr {
+                    AstNode::Expression(e) => e,
+                    _ => {
+                        println!("Error: No expression found for variable declaration");
+                        break;
+                    }
+                };
+                js.push_str(&format!("let {} = {};", name, expression_to_js(expressions)));
+            }
+            AstNode::Function(name, args, body) => {
+                js.push_str(&format!("function {}({:?}){{\n{:?}\n}}", 
+                    name,
+                    args,
+                    body
+                ));
+            }
+            AstNode::Print(expr) => {
+                let expressions = match *expr {
+                    AstNode::Expression(e) => e,
+                    _ => {
+                        println!("Error: No expression found for variable declaration");
+                        break;
+                    }
+                };
+                js.push_str(&format!("console.log({});", expression_to_js(expressions)));
+            }
+
             _ => {
                 println!("unknown AST node found");
             }
         }
     }
+    
 
-    create_html_boilerplate(get_meta_config())
-        .replace("page-js", &js)
-        .replace("page-template", &html)
-        .replace("page-css", &css)
-        .replace("page-title", &page_title)
+    (
+        create_html_boilerplate(get_meta_config())
+            .replace("page-template", &html)
+            .replace("page-css", &css)
+            .replace("page-title", &page_title),
+
+        js
+    )
+}
+
+fn expression_to_js(expr: Vec<AstNode>) -> String {
+    let mut js = String::new();
+
+    for node in expr {
+        match node {
+            AstNode::Literal(token) => {
+                match token {
+                    Token::IntLiteral(value) => {
+                        js.push_str(&value.to_string());
+                    }
+                    Token::FloatLiteral(value) => {
+                        js.push_str(&value.to_string());
+                    }
+                    Token::StringLiteral(value) => {
+                        js.push_str(&format!("\"{}\"", value));
+                    }
+                    _ => {
+                        println!("unknown literal found in expression");
+                    }
+                }
+            }
+
+            AstNode::Ref(name) => {
+                js.push_str(&name);
+            }
+
+            AstNode::FunctionCall(name, args) => {
+                js.push_str(&format!("{}({:?})", name, args));
+            }
+
+            AstNode::Add => {js.push_str("+");}
+            AstNode::Subtract => {js.push_str(" - ");}
+            AstNode::Multiply => {js.push_str("*");}
+            AstNode::Divide => {js.push_str("/");}
+            AstNode::Modulus => {js.push_str("%");}
+            AstNode::Exponent => {js.push_str("**");}
+
+            _ => {
+                println!("unknown AST node found in expression");
+            }
+        }
+    }
+
+    js
 }
 
 fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {

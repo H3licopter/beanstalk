@@ -27,7 +27,8 @@ pub enum Token {
     Title,
     Date,
 
-    // Basic syntax
+    // Basics
+    Print,
     Comment(String),
     MultilineComment(String),
     DocComment(String),
@@ -86,20 +87,20 @@ pub enum Token {
     QuestionMark,
 
     //Mathematical Operators
-    Addition,
-    Subtraction,
-    Multiplication,
-    Division,
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
     Modulus,
     Remainder,
-    Exponentiation,
+    Exponent,
     Root,
-    MultiplicationAssign,
-    DivisionAssign,
+    MultiplyAssign,
+    DivideAssign,
     ModulusAssign,
-    AdditionAssign,
-    SubtractionAssign,
-    ExponentiationAssign,
+    AddAssign,
+    SubtractAssign,
+    ExponentAssign,
     RootAssign,
     RemainderAssign,
 

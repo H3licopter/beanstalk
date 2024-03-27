@@ -1,5 +1,5 @@
-use super::util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string};
-use crate::{ast::AstNode, Token};
+use super::{ast::AstNode, util::count_newlines_at_end_of_string, util::count_newlines_at_start_of_string};
+use crate::Token;
 
 struct Element {
     tag: String,

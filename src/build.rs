@@ -3,7 +3,7 @@ use crate::parsers;
 use crate::tokenizer;
 use crate::tokens::Token;
 use std::error::Error;
-use std::{fs, io::prelude::Write};
+use std::fs;
 
 #[allow(unused_variables)]
 pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
@@ -17,8 +17,8 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     }
 
     // Read content from a test file
-    println!("Reading from: {}", entry_path);
-    let content = fs::read_to_string(entry_path)?;
+    println!("Reading from: {}", &entry_path);
+    let content = fs::read_to_string(&entry_path)?;
 
     // Tokenize File
     let tokens: Vec<Token> = tokenizer::tokenize(&content);
@@ -29,12 +29,14 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     let ast = parsers::build_ast::new_ast(&tokens, 0).0;
 
     // Parse Tokens into code output
-    let html_output = web_parser::parse(ast);
+    // 0 = HTML, 1 = JS, 2 = CSS
+    let web_parser_output = web_parser::parse(ast);
 
     // Write HTML output to file
-    let output_path = "../test_project_output/html_project_template/dist/".to_string();
-    let mut file = fs::File::create(output_path + "index.html")?;
-    file.write_all(html_output.as_bytes())?;
+    // TEMPORARY TESTING ENTRY PATH
+    entry_path = "../html_project_template/dist/".to_string();
+    fs::write(entry_path.clone() + "index.html", web_parser_output.0)?;
+    fs::write(entry_path + "script.js", web_parser_output.1)?;
 
     Ok(())
 }
