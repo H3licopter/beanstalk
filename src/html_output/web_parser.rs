@@ -34,7 +34,7 @@ pub fn parse(ast: Vec<AstNode>) -> (String, String) {
             // JAVASCRIPT / WASM
             AstNode::VarDeclaration(name, expr ) => {
                 let expressions = match *expr {
-                    AstNode::Expression(e) => e,
+                    AstNode::Expression(e, _) => e,
                     _ => {
                         println!("Error: No expression found for variable declaration");
                         break;
@@ -51,7 +51,7 @@ pub fn parse(ast: Vec<AstNode>) -> (String, String) {
             }
             AstNode::Print(expr) => {
                 let expressions = match *expr {
-                    AstNode::Expression(e) => e,
+                    AstNode::Expression(e, _) => e,
                     _ => {
                         println!("Error: No expression found for variable declaration");
                         break;

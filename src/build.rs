@@ -36,7 +36,7 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     // TEMPORARY TESTING ENTRY PATH
     entry_path = "../html_project_template/dist/".to_string();
     fs::write(entry_path.clone() + "index.html", web_parser_output.0)?;
-    fs::write(entry_path + "script.js", web_parser_output.1)?;
+    fs::write(entry_path + "bs.js", web_parser_output.1)?;
 
     Ok(())
 }

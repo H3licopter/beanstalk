@@ -1,4 +1,4 @@
-use crate::Token;
+use crate::{bs_types::DataType, Token};
 use super::{ast::AstNode, build_ast::is_reference};
 
 enum _Operator {
@@ -35,7 +35,7 @@ enum _Expression {
 pub fn parse_expression(
     tokens: &Vec<Token>,
     i: &mut usize,
-    type_declaration: &Token,
+    type_declaration: &DataType,
 ) -> AstNode {
     let mut expression = Vec::new();
 
@@ -80,7 +80,7 @@ pub fn parse_expression(
                         *i += 2;
                         while &tokens[*i] != &Token::CloseBracket {
                             // TO DO, CHECK IS VALID ARGUMENT
-                            let arg = parse_expression(tokens, i, type_declaration);
+                            let arg = parse_expression(tokens, i, &type_declaration);
                             args.push(arg);
     
                             *i += 1;
@@ -126,11 +126,6 @@ pub fn parse_expression(
         *i += 1;
     }
 
-    AstNode::Expression(expression)
+    AstNode::Expression(expression, type_declaration.clone())
 }
 
-pub enum _NumberType {
-    Int(i32),
-    Float(f64),
-    Decimal(Vec<char>),
-}

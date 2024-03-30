@@ -1,5 +1,5 @@
-use super::{ast::AstNode, create_scene_node::new_scene, parse_expression::parse_expression};
-use crate::Token;
+use super::{ast::AstNode, create_scene_node::new_scene, eval_expression::eval_expression, parse_expression::parse_expression};
+use crate::{bs_types::DataType, Token};
 
 pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
     let mut ast = Vec::new();
@@ -54,7 +54,7 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
 
             Token::Print => {
                 i += 1;
-                ast.push(AstNode::Print(Box::new(parse_expression(tokens, &mut i, &Token::TypeString))));
+                ast.push(AstNode::Print(Box::new(parse_expression(tokens, &mut i, &DataType::String))));
             }
 
             // Or stuff that hasn't been implemented yet
@@ -86,8 +86,8 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     *i += 1;
 
     // Variable Properties
-    let mut type_declaration = Token::TypeInference;
-    let mut _var_is_const = true;
+    let mut type_declaration = DataType::Inffered;
+    let mut var_is_const = true;
 
     match &tokens[*i] {
         // Infer type (CONSTANT VARIABLE)
@@ -95,36 +95,21 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 
         // Infer type (MUTABLE VARIABLE)
         Token::Assign => {
-            _var_is_const = false;
+            var_is_const = false;
         }
 
         // Explicit Type Declarations
         Token::TypeInt => {
-            type_declaration = Token::TypeInt;
+            type_declaration = DataType::I32;
         }
         Token::TypeFloat => {
-            type_declaration = Token::TypeFloat;
+            type_declaration = DataType::F64;
         }
         Token::TypeString => {
-            type_declaration = Token::TypeString;
-        }
-        Token::TypeCollection => {
-            type_declaration = Token::TypeCollection;
-        }
-        Token::TypeObject => {
-            type_declaration = Token::TypeObject;
+            type_declaration = DataType::String;
         }
         Token::TypeRune => {
-            type_declaration = Token::TypeRune;
-        }
-        Token::TypeDecimal => {
-            type_declaration = Token::TypeDecimal;
-        }
-        Token::TypeBool => {
-            type_declaration = Token::TypeBool;
-        }
-        Token::TypeScene => {
-            type_declaration = Token::TypeScene;
+            type_declaration = DataType::Rune;
         }
 
         // Function with implicit return type
@@ -141,8 +126,19 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     // Get value of variable
     *i += 1;
 
+    let parsed_expr = parse_expression(tokens, i, &type_declaration);
 
-    AstNode::VarDeclaration(name.to_string(), Box::new(parse_expression(tokens, i, &type_declaration)))
+    if var_is_const {
+        return AstNode::ConstDeclaration(
+            name.to_string(),
+            Box::new(eval_expression(parsed_expr)
+        ));
+    }
+
+    AstNode::VarDeclaration(
+        name.to_string(), 
+        Box::new(parsed_expr)
+    )
     // AstNode::Error("Invalid variable assignment".to_string())
 }
 

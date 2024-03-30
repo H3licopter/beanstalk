@@ -1,1 +1,13 @@
-io 1-3
+#title "VERY COOL WEBSITE!"
+---
+
+# This is anything
+## smaller heading
+### h3 heading
+Some text for this website ^superscript^
+
+*italic text* **bold text** ***bold italic text***
+
+[: things] some tt
+
+more text [rgb(25, 244, 0): this is colorful text]

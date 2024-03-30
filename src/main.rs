@@ -11,12 +11,14 @@ mod settings;
 mod test;
 mod tokenizer;
 mod tokens;
+pub mod bs_types;
 mod parsers {
     pub mod ast;
     pub mod build_ast;
     mod create_scene_node;
     pub mod parse_expression;
     pub mod util;
+    pub mod eval_expression;
 }
 mod html_output {
     mod generate_html;

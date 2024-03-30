@@ -1,13 +1,14 @@
 # TO DO
 ## GENERAL
-- Should move any markdown tag creation from create_scene_node to web_parser and have a unique AST node before that instead.
+
+- Superscript tags added extra at end in output
+- Scene with only scenehead, followed by scene immediately doesn't work
 - Other datatypes can be inserted directly into scenes. Raw strings, numbers, even collections should have a default behaviour etc.
-- Add 'alt' attribute to images.
-- Try making the spaces after an inline element significant rather than at the end of the element. HTML automatically parses them out.
-- Tidy up code a bit and prep for isolated task to create a function to manage precedence and parse maths expressions in the language.
+- New non-inline scenes should allow text following it inline to be inline of it. (Maybe needs to be all wrapped in div?)
 - Add in memory safety net for recursive function calls, or use a better pattern e.g tail recursion.
 
 ## HTML
+- Image alt descriptions
 - Markdown things to add:
   - Numbered lists
   - Underlining
@@ -27,7 +28,7 @@
 - Create base BS css file for basic additional syling
 
 ## JS / WASM
-- Mostly just compile to JS, then add wasm module for heavy lifting tasks and proper types.
+- Mostly just compile to JS, then add wasm module for heavy lifting tasks and proper types. Too complex to try and compile too much dynamically to WASM format directly without building in LLVM or something that is too bloated.
 
 ## SYNTAX
 - number types will be a single letter followed by the max size. u32, i8, f64, d63 (fixed point decimal with 63 decimal places). 
