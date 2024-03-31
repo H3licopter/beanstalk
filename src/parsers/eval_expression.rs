@@ -9,7 +9,7 @@ pub fn eval_expression(expr: AstNode) -> AstNode {
             
             match data_type {
 
-                DataType::I32 => {
+                DataType::Int => {
                     let mut result = 0;
 
                     return AstNode::Literal(Token::IntLiteral(result));

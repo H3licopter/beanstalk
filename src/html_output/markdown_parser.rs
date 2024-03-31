@@ -11,13 +11,13 @@ pub fn add_markdown_tags(content: &mut String) -> String {
         i += 1;
     }
 
-    i = 0;
-    while i < content.len() - 1 {
-        if !add_superscript_tags(content, &mut i) {
-            break;
-        }
-        i += 1;
-    }
+    // i = 0;
+    // while i < content.len() - 1 {
+    //     if !add_superscript_tags(content, &mut i) {
+    //         break;
+    //     }
+    //     i += 1;
+    // }
 
     content.trim_start().to_string()
 }
@@ -87,39 +87,40 @@ fn add_em_tags(content: &mut String, i: &mut usize) -> bool {
     true
 }
 
-fn add_superscript_tags(content: &mut String, i: &mut usize) -> bool {
-    let mut open_index: usize = 0;
-    let mut close_index: usize = 0;
+// fn add_superscript_tags(content: &mut String, i: &mut usize) -> bool {
+//     let mut open_index: usize = 0;
+//     let mut close_index: usize = 0;
 
-    // Get starting index
-    while let Some(char) = content.chars().nth(*i) {
-        if char == '^' {
-            open_index = *i;
-            break;
-        }
-        *i += 1;
-    }
+//     // Get starting index
+//     while let Some(char) = content.chars().nth(*i) {
+//         if char == '^' {
+//             open_index = *i;
+//             break;
+//         }
+//         *i += 1;
+//     }
 
-    if open_index == 0 {
-        return false;
-    }
+//     if open_index == 0 {
+//         return false;
+//     }
 
-    // Get closing index
-    while let Some(char) = content.chars().nth(*i) {
-        if char == '^' {
-            close_index = *i;
-            break;
-        }
-        *i += 1;
-    }
+//     // Get closing index
+//     while let Some(char) = content.chars().nth(*i) {
+//         if char == '^' {
+//             close_index = *i;
+//             *i += 1;
+//             break;
+//         }
+//         *i += 1;
+//     }
 
-    if close_index == 0 {
-        return false;
-    }
+//     if close_index == 0 {
+//         return false;
+//     }
 
-    // Replace carets with sup tags
-    content.replace_range(open_index..open_index + 1, "<sup>");
-    content.replace_range(close_index..close_index, "</sup>");
+//     // Replace carets with sup tags
+//     content.replace_range(open_index..open_index + 1, "<sup>");
+//     content.replace_range(close_index..close_index, "</sup>");
 
-    true
-}
+//     true
+// }

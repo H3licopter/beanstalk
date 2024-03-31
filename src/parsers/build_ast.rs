@@ -100,10 +100,10 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 
         // Explicit Type Declarations
         Token::TypeInt => {
-            type_declaration = DataType::I32;
+            type_declaration = DataType::Int;
         }
         Token::TypeFloat => {
-            type_declaration = DataType::F64;
+            type_declaration = DataType::Float;
         }
         Token::TypeString => {
             type_declaration = DataType::String;

@@ -18,4 +18,14 @@
 <link rel="apple-touch-icon"href="site-favicons-folder-url/apple-touch-icon.png">
 <link rel="manifest"href="favicons-folder-url/site.webmanifest">
 <link rel="stylesheet" href="css/pico.min.css" />
-<style>page-css</style></head><body><main class="container">page-template</main><script src="bs.js"></script></main></body></html>
+<style>@page-css</style></head><body><main class="container">page-template</main>
+<script type="module">
+  import init, { } from 'bs_wasm.js';
+  async function run() {
+    await init();
+  }
+  run();
+  //js
+</script>
+</main></body>
+</html>

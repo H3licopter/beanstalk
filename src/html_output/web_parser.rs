@@ -4,7 +4,7 @@ use crate::{
 };
 
 // Parse ast into valid JS, HTML and CSS
-pub fn parse(ast: Vec<AstNode>) -> (String, String) {
+pub fn parse(ast: Vec<AstNode>) -> String {
     let mut js = String::new();
     let _wasm = String::new();
     let mut html = String::new();
@@ -67,14 +67,11 @@ pub fn parse(ast: Vec<AstNode>) -> (String, String) {
     }
     
 
-    (
-        create_html_boilerplate(get_meta_config())
-            .replace("page-template", &html)
-            .replace("page-css", &css)
-            .replace("page-title", &page_title),
-
-        js
-    )
+    create_html_boilerplate(get_meta_config())
+        .replace("page-template", &html)
+        .replace("@page-css", &css)
+        .replace("page-title", &page_title)
+        .replace("//js", &js)
 }
 
 fn expression_to_js(expr: Vec<AstNode>) -> String {
@@ -178,6 +175,10 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                         html.push_str(collect_closing_tags(&mut closing_tags).as_str());
                         html.push_str(&format!("<li>{}", add_markdown_tags(&mut content.clone())));
                         closing_tags.push("</li>".to_string());
+                    }
+
+                    Token::Superscript(content) => {
+                        html.push_str(&format!("<sup>{}</sup>", content));
                     }
 
                     Token::Pre(content) => {

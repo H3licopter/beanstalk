@@ -171,6 +171,10 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 )));
             }
 
+            Token::Superscript(content) => {
+                scene.push(AstNode::Element(Token::Superscript(content.clone())));
+            }
+
             Token::RawStringLiteral(content) => {
                 scene.push(AstNode::Element(Token::Span(content.to_string())));
             }

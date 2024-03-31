@@ -623,8 +623,9 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
     // breaks out of the element
     let mut parse_raw = false;
     loop {
-        // Parsing Raw String inside of Markdown
+        // Parsing Raw String inside of Markdown        
         if parse_raw {
+            *current_char = chars.next().unwrap();
             match current_char {
                 // Escape character for backticks in raw strings
                 '\\' => {
@@ -638,7 +639,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                     };
                 }
                 '`' => {
-                    parse_raw = false;
+                    break;
                 }
                 _ => {
                     content.push(current_char.clone());
@@ -734,6 +735,14 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
             }
 
             Token::BulletPoint(strength, content)
+        }
+
+        Token::Superscript(_) => {
+            if content.trim().is_empty() {
+                return Token::Empty;
+            }
+
+            Token::Superscript(content)
         }
 
         _ => Token::Error("Invalid Markdown Element".to_string()),

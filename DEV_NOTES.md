@@ -1,6 +1,4 @@
-# TO DO
 ## GENERAL
-
 - Superscript tags added extra at end in output
 - Scene with only scenehead, followed by scene immediately doesn't work
 - Other datatypes can be inserted directly into scenes. Raw strings, numbers, even collections should have a default behaviour etc.

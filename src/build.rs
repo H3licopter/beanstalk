@@ -28,15 +28,10 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     // Create AST
     let ast = parsers::build_ast::new_ast(&tokens, 0).0;
 
-    // Parse Tokens into code output
-    // 0 = HTML, 1 = JS, 2 = CSS
-    let web_parser_output = web_parser::parse(ast);
-
     // Write HTML output to file
     // TEMPORARY TESTING ENTRY PATH
     entry_path = "../html_project_template/dist/".to_string();
-    fs::write(entry_path.clone() + "index.html", web_parser_output.0)?;
-    fs::write(entry_path + "bs.js", web_parser_output.1)?;
+    fs::write(entry_path.clone() + "index.html", web_parser::parse(ast))?;
 
     Ok(())
 }

@@ -33,12 +33,12 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     println!("HTML:\n");
     println!(
         "{:?}",
-        html_output.0
+        html_output
     );
     println!("\nJS:\n");
     println!(
         "{:?}",
-        html_output.1
+        html_output
     );
     Ok(())
 }
