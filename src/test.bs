@@ -1,5 +1,10 @@
 
 ---
-testing new sup things
+testing some things
 
-heres some ^superscript^ text
+testing some [rgb(255, 0, 0): red text] woooo!
+
+new p. 
+
+testing some [rgb(0, 255, 0): green text] 
+lol

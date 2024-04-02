@@ -1,5 +1,5 @@
 ## GENERAL
-- Superscript tags added extra at end in output
+- full expressions need to be supported in sceneheads
 - Scene with only scenehead, followed by scene immediately doesn't work
 - Other datatypes can be inserted directly into scenes. Raw strings, numbers, even collections should have a default behaviour etc.
 - New non-inline scenes should allow text following it inline to be inline of it. (Maybe needs to be all wrapped in div?)
@@ -15,11 +15,12 @@
   - Checkboxes / Radio buttons (will be empty scene for checkbox)
 
 - Add most common HTML elements to the base language:
-  - audio, video
-  - lists
   - form, input, button, select, option, textarea
   - tables
-  - header, footer, main, section, article, aside, nav
+  - header, footer, main, section, article, aside, 
+  - nav
+
+Needs to parse expressions inside of scenehead
 
 ## CSS
 - Compile [custom pico css style](https://picocss.com/docs/sass) for the base of the CSS framework, remove pico- from the class names

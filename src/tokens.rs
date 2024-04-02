@@ -161,6 +161,9 @@ pub enum Token {
     A,   // href, content
     Img, // src, alt
     Video,
+    Audio,
+    Width,
+    Height,
     Rgb,
     Raw,
     Code,

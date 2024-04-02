@@ -35,10 +35,5 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
         "{:?}",
         html_output
     );
-    println!("\nJS:\n");
-    println!(
-        "{:?}",
-        html_output
-    );
     Ok(())
 }

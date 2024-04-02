@@ -462,8 +462,17 @@ fn keyword_or_variable(
                     if token_value == "img" {
                         return Token::Img;
                     }
+                    if token_value == "width" {
+                        return Token::Width;
+                    }
+                    if token_value == "height" {
+                        return Token::Height;
+                    }
                     if token_value == "video" {
                         return Token::Video;
+                    }
+                    if token_value == "audio" {
+                        return Token::Audio;
                     }
                     if token_value == "slot" {
                         return Token::Slot;

@@ -19,6 +19,7 @@ mod parsers {
     pub mod parse_expression;
     pub mod util;
     pub mod eval_expression;
+    pub mod styles;
 }
 mod html_output {
     mod generate_html;

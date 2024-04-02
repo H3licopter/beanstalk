@@ -1,22 +1,20 @@
-use super::{ast::AstNode, util::count_newlines_at_end_of_string, util::count_newlines_at_start_of_string};
+use super::{ast::AstNode, styles::{Style, Tag}, util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string}};
 use crate::Token;
-
-struct Element {
-    tag: String,
-    properties: String,
-}
 
 // Recursive function to parse scenes
 pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut scene = Vec::new();
     *i += 1;
 
-    let mut scene_wrapping_tags: Vec<Element> = Vec::new();
+    let mut scene_tags: Vec<Tag> = Vec::new();
+    let mut scene_styles: Vec<Style> = Vec::new();
     let mut scene_open: bool = true;
 
     // Look at all the possible properties that can be added to the scene head
     let mut j = 0;
 
+    // CURRENTLY ONLY SUPPORTS COMPILE TIME PROPERTIES
+    // NEEDS TO BE ABLE TO LINK INTO GENERATED JS
     while j < scene_head.len() {
         match &scene_head[j] {
             Token::SceneClose(spaces) => {
@@ -41,10 +39,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                         "".to_string()
                     }
                 };
-                scene_wrapping_tags.push(Element {
-                    tag: "a".to_string(),
-                    properties: format!("href={}", href),
-                });
+                scene_tags.push(Tag::A(href));
             }
 
             Token::Rgb => {
@@ -57,7 +52,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                     let mut red = 0;
                     match &scene_head[j + 2] {
                         Token::IntLiteral(value) => {
-                            red = *value as i32;
+                            red = *value as u8;
                         }
                         _ => {
                             scene.push(AstNode::Error("Invalid RGB value for red".to_string()));
@@ -66,7 +61,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                     let mut green = 0;
                     match &scene_head[j + 4] {
                         Token::IntLiteral(value) => {
-                            green = *value as i32;
+                            green = *value as u8;
                         }
                         _ => {
                             scene.push(AstNode::Error("Invalid RGB value for green".to_string()));
@@ -75,40 +70,94 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                     let mut blue = 0;
                     match &scene_head[j + 6] {
                         Token::IntLiteral(value) => {
-                            blue = *value as i32;
+                            blue = *value as u8;
                         }
                         _ => {
                             scene.push(AstNode::Error("Invalid RGB value for blue".to_string()));
                         }
                     }
 
-                    scene_wrapping_tags.push(Element {
-                        tag: "span".to_string(),
-                        properties: format!("style=\'color:rgb({},{},{})\' ", red, green, blue),
-                    });
+                    scene_styles.push(Style::TextColor(red, green, blue));
 
                     j += 7;
                 }
             }
 
-            Token::Img => {
+            Token::Width => {
                 j += 1;
-                let src = match &scene_head[j] {
-                    Token::StringLiteral(value) => {
-                        format!("\"{}\"", value)
+                match &scene_head[j] {
+                    Token::FloatLiteral(value) => {
+                        scene_styles.push(Style::Width(*value));
+                    }
+                    Token::IntLiteral(value) => {
+                        scene_styles.push(Style::Width(*value as f64));
                     }
                     _ => {
                         scene.push(AstNode::Error(
-                            "No string literal provided for img src".to_string(),
+                            "No int literal provided for width".to_string(),
                         ));
-                        "".to_string()
                     }
                 };
+                
+            }
 
-                scene_wrapping_tags.push(Element {
-                    tag: "img".to_string(),
-                    properties: format!("src={}", src),
-                });
+            Token::Height => {
+                j += 1;
+                match &scene_head[j] {
+                    Token::FloatLiteral(value) => {
+                        scene_styles.push(Style::Height(*value));
+                    }
+                    Token::IntLiteral(value) => {
+                        scene_styles.push(Style::Height(*value as f64));
+                    }
+                    _ => {
+                        scene.push(AstNode::Error(
+                            "No int literal provided for height".to_string(),
+                        ));
+                    }
+                };
+            }
+
+            Token::Img => {
+                j += 1;
+                match &scene_head[j] {
+                    Token::StringLiteral(value) => {
+                        scene_tags.push(Tag::Img(value.clone()));
+                    }
+                    _ => {
+                        scene.push(AstNode::Error(
+                            "No src provided for img".to_string(),
+                        ));
+                    }
+                };
+            }
+
+            Token::Video => {
+                j += 1;
+                match &scene_head[j] {
+                    Token::StringLiteral(value) => {
+                        scene_tags.push(Tag::Video(value.clone()));
+                    }
+                    _ => {
+                        scene.push(AstNode::Error(
+                            "No src provided for video".to_string(),
+                        ));
+                    }
+                };
+            }
+
+            Token::Audio => {
+                j += 1;
+                match &scene_head[j] {
+                    Token::StringLiteral(value) => {
+                        scene_tags.push(Tag::Audio(value.clone()));
+                    }
+                    _ => {
+                        scene.push(AstNode::Error(
+                            "No src provided for audio".to_string(),
+                        ));
+                    }
+                };
             }
 
             Token::StringLiteral(string_content) | Token::RawStringLiteral(string_content) => {
@@ -118,6 +167,8 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             Token::ParentScene => {
                 // Useful for wrapping the scene in <main> or unwrapped if it's a component
             }
+
+            Token::Comma | Token::Newline => {}
 
             _ => {
                 scene.push(AstNode::Error(format!(
@@ -195,14 +246,11 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
         *i += 1;
     }
 
-    if !scene_wrapping_tags.is_empty() {
-        for element in scene_wrapping_tags.iter().rev() {
-            scene.insert(
-                0,
-                AstNode::SceneTag(format!("<{} {}>", element.tag, element.properties)),
-            );
-            scene.push(AstNode::SceneTag(format!("</{}>", element.tag)));
-        }
+    if !scene_tags.is_empty() || !scene_styles.is_empty() {
+        scene.insert(
+            0,
+            AstNode::SceneTag(scene_tags, scene_styles),
+        );
     }
 
     AstNode::Scene(scene)
