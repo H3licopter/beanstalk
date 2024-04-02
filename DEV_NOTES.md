@@ -1,9 +1,7 @@
 ## GENERAL
 - full expressions need to be supported in sceneheads
-- Scene with only scenehead, followed by scene immediately doesn't work
 - Other datatypes can be inserted directly into scenes. Raw strings, numbers, even collections should have a default behaviour etc.
-- New non-inline scenes should allow text following it inline to be inline of it. (Maybe needs to be all wrapped in div?)
-- Add in memory safety net for recursive function calls, or use a better pattern e.g tail recursion.
+- Add in memory safety net for recursive function calls, or use a better pattern e.g tail call recursion.
 
 ## HTML
 - Image alt descriptions
@@ -23,8 +21,7 @@
 Needs to parse expressions inside of scenehead
 
 ## CSS
-- Compile [custom pico css style](https://picocss.com/docs/sass) for the base of the CSS framework, remove pico- from the class names
-- Create base BS css file for basic additional syling
+- Compile [custom pico css style](https://picocss.com/docs/sass) for the base of the CSS framework, remove pico- from the class names and merge into main bs css file.
 
 ## JS / WASM
 - Mostly just compile to JS, then add wasm module for heavy lifting tasks and proper types. Too complex to try and compile too much dynamically to WASM format directly without building in LLVM or something that is too bloated.

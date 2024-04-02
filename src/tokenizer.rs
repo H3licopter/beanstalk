@@ -632,7 +632,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
     // breaks out of the element
     let mut parse_raw = false;
     loop {
-        // Parsing Raw String inside of Markdown        
+        // Parsing Raw String inside of Markdown
         if parse_raw {
             *current_char = chars.next().unwrap();
             match current_char {

@@ -1,5 +1,5 @@
-use crate::{bs_types::DataType, Token};
 use super::styles::{Style, Tag};
+use crate::{bs_types::DataType, Token};
 
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -35,9 +35,9 @@ pub enum AstNode {
     Exponent,
 
     // HTML
-    Element(Token),   // HTML element content
-    Space,            // Add a space at front of element
-    SceneTag(Vec<Tag>, Vec<Style>),    // Scene wrapping tag / Styles
+    Element(Token),                 // HTML element content
+    Space,                          // Add a space at front of element
+    SceneTag(Vec<Tag>, Vec<Style>), // Scene wrapping tag / Styles
 
     // SCENE META DATA
     Title(String),

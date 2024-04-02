@@ -1,4 +1,8 @@
-use super::{ast::AstNode, styles::{Style, Tag}, util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string}};
+use super::{
+    ast::AstNode,
+    styles::{Style, Tag},
+    util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
+};
 use crate::Token;
 
 // Recursive function to parse scenes
@@ -98,7 +102,6 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                         ));
                     }
                 };
-                
             }
 
             Token::Height => {
@@ -125,9 +128,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                         scene_tags.push(Tag::Img(value.clone()));
                     }
                     _ => {
-                        scene.push(AstNode::Error(
-                            "No src provided for img".to_string(),
-                        ));
+                        scene.push(AstNode::Error("No src provided for img".to_string()));
                     }
                 };
             }
@@ -139,9 +140,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                         scene_tags.push(Tag::Video(value.clone()));
                     }
                     _ => {
-                        scene.push(AstNode::Error(
-                            "No src provided for video".to_string(),
-                        ));
+                        scene.push(AstNode::Error("No src provided for video".to_string()));
                     }
                 };
             }
@@ -153,9 +152,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                         scene_tags.push(Tag::Audio(value.clone()));
                     }
                     _ => {
-                        scene.push(AstNode::Error(
-                            "No src provided for audio".to_string(),
-                        ));
+                        scene.push(AstNode::Error("No src provided for audio".to_string()));
                     }
                 };
             }
@@ -247,10 +244,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
     }
 
     if !scene_tags.is_empty() || !scene_styles.is_empty() {
-        scene.insert(
-            0,
-            AstNode::SceneTag(scene_tags, scene_styles),
-        );
+        scene.insert(0, AstNode::SceneTag(scene_tags, scene_styles));
     }
 
     AstNode::Scene(scene)

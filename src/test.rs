@@ -31,9 +31,6 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     println!("CREATING HTML OUTPUT\n");
     let html_output = web_parser::parse(ast);
     println!("HTML:\n");
-    println!(
-        "{:?}",
-        html_output
-    );
+    println!("{:?}", html_output);
     Ok(())
 }

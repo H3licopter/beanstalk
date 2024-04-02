@@ -5,21 +5,21 @@ use std::{
     path::Path,
 };
 
+pub mod bs_types;
 mod build;
 mod create_new_project;
 mod settings;
 mod test;
 mod tokenizer;
 mod tokens;
-pub mod bs_types;
 mod parsers {
     pub mod ast;
     pub mod build_ast;
     mod create_scene_node;
-    pub mod parse_expression;
-    pub mod util;
     pub mod eval_expression;
+    pub mod parse_expression;
     pub mod styles;
+    pub mod util;
 }
 mod html_output {
     mod generate_html;

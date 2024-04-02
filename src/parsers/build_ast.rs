@@ -1,4 +1,7 @@
-use super::{ast::AstNode, create_scene_node::new_scene, eval_expression::eval_expression, parse_expression::parse_expression};
+use super::{
+    ast::AstNode, create_scene_node::new_scene, eval_expression::eval_expression,
+    parse_expression::parse_expression,
+};
 use crate::{bs_types::DataType, Token};
 
 pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
@@ -54,7 +57,11 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
 
             Token::Print => {
                 i += 1;
-                ast.push(AstNode::Print(Box::new(parse_expression(tokens, &mut i, &DataType::String))));
+                ast.push(AstNode::Print(Box::new(parse_expression(
+                    tokens,
+                    &mut i,
+                    &DataType::String,
+                ))));
             }
 
             // Or stuff that hasn't been implemented yet
@@ -129,16 +136,10 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let parsed_expr = parse_expression(tokens, i, &type_declaration);
 
     if var_is_const {
-        return AstNode::ConstDeclaration(
-            name.to_string(),
-            Box::new(eval_expression(parsed_expr)
-        ));
+        return AstNode::ConstDeclaration(name.to_string(), Box::new(eval_expression(parsed_expr)));
     }
 
-    AstNode::VarDeclaration(
-        name.to_string(), 
-        Box::new(parsed_expr)
-    )
+    AstNode::VarDeclaration(name.to_string(), Box::new(parsed_expr))
     // AstNode::Error("Invalid variable assignment".to_string())
 }
 

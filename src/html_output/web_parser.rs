@@ -1,6 +1,12 @@
 use super::{generate_html::create_html_boilerplate, markdown_parser::add_markdown_tags};
 use crate::{
-    parsers::{ast::AstNode, styles::{Style, Tag}, util::count_newlines_at_end_of_string}, settings::get_meta_config, Token
+    parsers::{
+        ast::AstNode,
+        styles::{Style, Tag},
+        util::count_newlines_at_end_of_string,
+    },
+    settings::get_meta_config,
+    Token,
 };
 
 // Parse ast into valid JS, HTML and CSS
@@ -32,7 +38,7 @@ pub fn parse(ast: Vec<AstNode>) -> String {
             }
 
             // JAVASCRIPT / WASM
-            AstNode::VarDeclaration(name, expr ) => {
+            AstNode::VarDeclaration(name, expr) => {
                 let expressions = match *expr {
                     AstNode::Expression(e, _) => e,
                     _ => {
@@ -40,14 +46,14 @@ pub fn parse(ast: Vec<AstNode>) -> String {
                         break;
                     }
                 };
-                js.push_str(&format!("let {} = {};", name, expression_to_js(expressions)));
+                js.push_str(&format!(
+                    "let {} = {};",
+                    name,
+                    expression_to_js(expressions)
+                ));
             }
             AstNode::Function(name, args, body) => {
-                js.push_str(&format!("function {}({:?}){{\n{:?}\n}}", 
-                    name,
-                    args,
-                    body
-                ));
+                js.push_str(&format!("function {}({:?}){{\n{:?}\n}}", name, args, body));
             }
             AstNode::Print(expr) => {
                 let expressions = match *expr {
@@ -65,7 +71,6 @@ pub fn parse(ast: Vec<AstNode>) -> String {
             }
         }
     }
-    
 
     create_html_boilerplate(get_meta_config())
         .replace("page-template", &html)
@@ -79,22 +84,20 @@ fn expression_to_js(expr: Vec<AstNode>) -> String {
 
     for node in expr {
         match node {
-            AstNode::Literal(token) => {
-                match token {
-                    Token::IntLiteral(value) => {
-                        js.push_str(&value.to_string());
-                    }
-                    Token::FloatLiteral(value) => {
-                        js.push_str(&value.to_string());
-                    }
-                    Token::StringLiteral(value) => {
-                        js.push_str(&format!("\"{}\"", value));
-                    }
-                    _ => {
-                        println!("unknown literal found in expression");
-                    }
+            AstNode::Literal(token) => match token {
+                Token::IntLiteral(value) => {
+                    js.push_str(&value.to_string());
                 }
-            }
+                Token::FloatLiteral(value) => {
+                    js.push_str(&value.to_string());
+                }
+                Token::StringLiteral(value) => {
+                    js.push_str(&format!("\"{}\"", value));
+                }
+                _ => {
+                    println!("unknown literal found in expression");
+                }
+            },
 
             AstNode::Ref(name) => {
                 js.push_str(&name);
@@ -104,12 +107,24 @@ fn expression_to_js(expr: Vec<AstNode>) -> String {
                 js.push_str(&format!("{}({:?})", name, args));
             }
 
-            AstNode::Add => {js.push_str("+");}
-            AstNode::Subtract => {js.push_str(" - ");}
-            AstNode::Multiply => {js.push_str("*");}
-            AstNode::Divide => {js.push_str("/");}
-            AstNode::Modulus => {js.push_str("%");}
-            AstNode::Exponent => {js.push_str("**");}
+            AstNode::Add => {
+                js.push_str("+");
+            }
+            AstNode::Subtract => {
+                js.push_str(" - ");
+            }
+            AstNode::Multiply => {
+                js.push_str("*");
+            }
+            AstNode::Divide => {
+                js.push_str("/");
+            }
+            AstNode::Modulus => {
+                js.push_str("%");
+            }
+            AstNode::Exponent => {
+                js.push_str("**");
+            }
 
             _ => {
                 println!("unknown AST node found in expression");
@@ -148,7 +163,9 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                 for style in styles {
                     match style {
                         Style::TextColor(r, g, b) => {
-                            scene_wrap.style.push_str(&format!("color:rgb({},{},{});", r, g, b));
+                            scene_wrap
+                                .style
+                                .push_str(&format!("color:rgb({},{},{});", r, g, b));
                             scene_wrap.tag = Tag::Span;
                         }
                         Style::Width(value) => {
@@ -162,7 +179,7 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                 }
 
                 let img_count = images.len();
-                
+
                 for tag in &tags {
                     match tag {
                         Tag::Img(src) => {
@@ -171,7 +188,9 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                         Tag::Video(src) => {
                             scene_wrap.tag = Tag::Video(src.to_string());
                             if img_count > 0 {
-                                scene_wrap.properties.push_str(&format!(" poster=\"{}\"", images[0]));
+                                scene_wrap
+                                    .properties
+                                    .push_str(&format!(" poster=\"{}\"", images[0]));
                             }
 
                             continue;
@@ -187,10 +206,15 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                 // If there are multiple images, turn it into a grid of images
                 if img_count > 1 {
                     scene_wrap.tag = Tag::Div;
-                    scene_wrap.properties.push_str(&format!(" class=\"bs-img-grid\""));
+                    scene_wrap
+                        .properties
+                        .push_str(&format!(" class=\"bs-img-grid\""));
                     let img_resize = 100.0 / f32::sqrt(img_count as f32);
                     for image in images {
-                        html.push_str(&format!("<img src=\"{}\" alt=\"\" style=\"width:{}%;height:{}%;\"/>", image, img_resize, img_resize));
+                        html.push_str(&format!(
+                            "<img src=\"{}\" alt=\"\" style=\"width:{}%;height:{}%;\"/>",
+                            image, img_resize, img_resize
+                        ));
                     }
                 }
             }
@@ -203,44 +227,45 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                             add_markdown_tags(&mut content.clone())
                         ));
                         closing_tags.push("</span>".to_string());
-                        
+
                         if *inside_p && count_newlines_at_end_of_string(&content) > 1 {
                             html.push_str("</p>");
                             *inside_p = false;
                         }
                     }
 
-                    Token::P(content) => {
-                        match scene_wrap.tag {
-                            Tag::Img(_) | Tag::Video(_) => {
-                                scene_wrap.properties.push_str(&format!(" alt=\"{}\"", content));
+                    Token::P(content) => match scene_wrap.tag {
+                        Tag::Img(_) | Tag::Video(_) => {
+                            scene_wrap
+                                .properties
+                                .push_str(&format!(" alt=\"{}\"", content));
+                        }
+                        _ => {
+                            html.push_str(collect_closing_tags(&mut closing_tags).as_str());
+
+                            let parsed_content = add_markdown_tags(&mut content.clone());
+                            if *inside_p {
+                                html.push_str(&parsed_content);
+                                closing_tags.push("</p>".to_string());
+                            } else {
+                                html.push_str(&if scene_wrap.tag == Tag::Span {
+                                    format!(
+                                        "<p><span style=\"{}\">{}</span>",
+                                        scene_wrap.style, parsed_content
+                                    )
+                                } else {
+                                    format!("<p>{}", parsed_content)
+                                });
                             }
-                            _=> {
-                                html.push_str(collect_closing_tags(&mut closing_tags).as_str());
 
-                                let parsed_content = add_markdown_tags(&mut content.clone());
-                                if *inside_p {
-                                    html.push_str(&parsed_content);
-                                    closing_tags.push("</p>".to_string());
-                                } else {
-                                    html.push_str(
-                                        &if scene_wrap.tag == Tag::Span {
-                                            format!("<p><span style=\"{}\">{}</span>", scene_wrap.style, parsed_content)
-                                        } else { 
-                                            format!("<p>{}", parsed_content)
-                                        }
-                                    );
-                                }
-
-                                if count_newlines_at_end_of_string(&content) > 1 {
-                                    html.push_str("</p>");
-                                    *inside_p = false;
-                                } else {
-                                    *inside_p = true;
-                                }
+                            if count_newlines_at_end_of_string(&content) > 1 {
+                                html.push_str("</p>");
+                                *inside_p = false;
+                            } else {
+                                *inside_p = true;
                             }
                         }
-                    }
+                    },
 
                     Token::Heading(size, content) => {
                         html.push_str(collect_closing_tags(&mut closing_tags).as_str());
@@ -301,32 +326,74 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
 
     match scene_wrap.tag {
         Tag::P => {
-            html.insert_str(0, &format!("<p style=\"{}\" {}>", scene_wrap.style, scene_wrap.properties));
+            html.insert_str(
+                0,
+                &format!(
+                    "<p style=\"{}\" {}>",
+                    scene_wrap.style, scene_wrap.properties
+                ),
+            );
             html.push_str("</p>");
-        },
+        }
         Tag::Span => {
-            html.insert_str(0, &format!("<span style=\"{}\" {}>", scene_wrap.style, scene_wrap.properties));
+            html.insert_str(
+                0,
+                &format!(
+                    "<span style=\"{}\" {}>",
+                    scene_wrap.style, scene_wrap.properties
+                ),
+            );
             html.push_str("</span>");
-        },
+        }
         Tag::Div => {
-            html.insert_str(0, &format!("<div style=\"{}\" {}>", scene_wrap.style, scene_wrap.properties));
+            html.insert_str(
+                0,
+                &format!(
+                    "<div style=\"{}\" {}>",
+                    scene_wrap.style, scene_wrap.properties
+                ),
+            );
             html.push_str("</div>");
-        },
+        }
         Tag::A(href) => {
-            html.insert_str(0, &format!("<a href=\"{}\" style=\"{}\" {}>", href, scene_wrap.style, scene_wrap.properties));
+            html.insert_str(
+                0,
+                &format!(
+                    "<a href=\"{}\" style=\"{}\" {}>",
+                    href, scene_wrap.style, scene_wrap.properties
+                ),
+            );
             html.push_str("</a>");
-        },
+        }
         Tag::Img(src) => {
-            html.insert_str(0, &format!("<img src=\"{}\" style=\"{}\" {}", src, scene_wrap.style, scene_wrap.properties));
+            html.insert_str(
+                0,
+                &format!(
+                    "<img src=\"{}\" style=\"{}\" {}",
+                    src, scene_wrap.style, scene_wrap.properties
+                ),
+            );
             html.push_str("\"/>");
-        },
+        }
         Tag::Video(src) => {
-            html.insert_str(0, &format!("<video src=\"{}\" style=\"{}\" {} controls />", src, scene_wrap.style, scene_wrap.properties));
-        },
+            html.insert_str(
+                0,
+                &format!(
+                    "<video src=\"{}\" style=\"{}\" {} controls />",
+                    src, scene_wrap.style, scene_wrap.properties
+                ),
+            );
+        }
         Tag::Audio(src) => {
-            html.insert_str(0, &format!("<audio src=\"{}\" style=\"{}\" {} controls />", src, scene_wrap.style, scene_wrap.properties));
-        },
-        _ => {},
+            html.insert_str(
+                0,
+                &format!(
+                    "<audio src=\"{}\" style=\"{}\" {} controls />",
+                    src, scene_wrap.style, scene_wrap.properties
+                ),
+            );
+        }
+        _ => {}
     };
 
     (html, *inside_p)

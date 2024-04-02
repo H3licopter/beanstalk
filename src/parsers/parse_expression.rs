@@ -1,5 +1,5 @@
-use crate::{bs_types::DataType, Token};
 use super::{ast::AstNode, build_ast::is_reference};
+use crate::{bs_types::DataType, Token};
 
 enum _Operator {
     Add,
@@ -48,7 +48,6 @@ pub fn parse_expression(
 
     while let Some(token) = tokens.get(*i) {
         match token {
-            
             // Conditions that end the expression
             Token::Newline => {
                 if bracket_nesting == 0 {
@@ -82,19 +81,19 @@ pub fn parse_expression(
                             // TO DO, CHECK IS VALID ARGUMENT
                             let arg = parse_expression(tokens, i, &type_declaration);
                             args.push(arg);
-    
+
                             *i += 1;
                         }
-    
+
                         expression.push(AstNode::FunctionCall(name.clone(), args));
                     }
-    
+
                     expression.push(AstNode::Ref(name.clone()));
                 }
-    
+
                 expression.push(AstNode::Error("Variable reference not defined. Maybe you're using a variable that has not yet been declared?".to_string()));
             }
-    
+
             // Check if is a literal
             Token::IntLiteral(int) => {
                 expression.push(AstNode::Literal(Token::IntLiteral(*int)));
@@ -106,19 +105,29 @@ pub fn parse_expression(
                 expression.push(AstNode::Literal(Token::FloatLiteral(*float)));
             }
 
-
             // Check if operator
-            Token::Add => {expression.push(AstNode::Add);}
-            Token::Subtract => {expression.push(AstNode::Subtract);}
-            Token::Multiply => {expression.push(AstNode::Multiply);}
-            Token::Divide => {expression.push(AstNode::Divide);}
-            Token::Modulus => {expression.push(AstNode::Modulus);}
-            Token::Exponent => {expression.push(AstNode::Exponent);}
-    
+            Token::Add => {
+                expression.push(AstNode::Add);
+            }
+            Token::Subtract => {
+                expression.push(AstNode::Subtract);
+            }
+            Token::Multiply => {
+                expression.push(AstNode::Multiply);
+            }
+            Token::Divide => {
+                expression.push(AstNode::Divide);
+            }
+            Token::Modulus => {
+                expression.push(AstNode::Modulus);
+            }
+            Token::Exponent => {
+                expression.push(AstNode::Exponent);
+            }
+
             _ => {
                 expression.push(AstNode::Error(
-                    "Invalid Expression, must be assigned wih a valid datatype"
-                        .to_string(),
+                    "Invalid Expression, must be assigned wih a valid datatype".to_string(),
                 ));
             }
         }
@@ -128,4 +137,3 @@ pub fn parse_expression(
 
     AstNode::Expression(expression, type_declaration.clone())
 }
-
