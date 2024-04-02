@@ -1,5 +1,5 @@
 ## GENERAL
-- full expressions need to be supported in sceneheads
+- full expressions need to be supported in sceneheads. Code gen only needs to happen if eval expression returns an expression rather than literal.
 - Other datatypes can be inserted directly into scenes. Raw strings, numbers, even collections should have a default behaviour etc.
 - Add in memory safety net for recursive function calls, or use a better pattern e.g tail call recursion.
 
@@ -13,14 +13,21 @@
   - Checkboxes / Radio buttons (will be empty scene for checkbox)
 
 - Add most common HTML elements to the base language:
-  - form, input, button, select, option, textarea
+  - form
   - tables
-  - header, footer, main, section, article, aside, 
+  - input
+  - button
   - nav
-
-Needs to parse expressions inside of scenehead
+  - select
+  - textarea
+  - header, footer
+  - section, article (mostly auto generated?)
+  - aside
 
 ## CSS
+- padding: pad (l, r, t, b)
+- margin (m)
+- center
 - Compile [custom pico css style](https://picocss.com/docs/sass) for the base of the CSS framework, remove pico- from the class names and merge into main bs css file.
 
 ## JS / WASM

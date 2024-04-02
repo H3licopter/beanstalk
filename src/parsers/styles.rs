@@ -3,7 +3,6 @@ pub enum Tag {
     None,
     Span,
     Div,
-    P,
     A(String),     // src
     Img(String),   // src
     Video(String), // src
@@ -12,8 +11,9 @@ pub enum Tag {
 
 #[derive(Debug)]
 pub enum Style {
-    Width(f64),
-    Height(f64),
+    Padding(f64),
+    Margin(f64),
+    Size(f64, f64),
     TextColor(u8, u8, u8),
     BackgroundColor(u8, u8, u8),
 }

@@ -89,6 +89,7 @@ pub enum Token {
     //Mathematical Operators
     Add,
     Subtract,
+    Negative,
     Multiply,
     Divide,
     Modulus,
@@ -162,11 +163,13 @@ pub enum Token {
     Img, // src, alt
     Video,
     Audio,
-    Width,
-    Height,
-    Rgb,
     Raw,
-    Code,
 
     Slot, // Injection point for additional template nesting
+
+    // Styles
+    Padding,
+    Margin,
+    Size,
+    Rgb,
 }

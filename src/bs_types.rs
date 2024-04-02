@@ -1,11 +1,11 @@
 #[derive(Debug, Clone)]
 pub enum DataType {
-    Inffered,
-    Int,
-    Float,
+    Inffered, // Type is inferred
+    Int,      // 32 bit signed by default, may add more in future
+    Float,    // 64 bit
     Decimal,
     Bool,
-    String,
+    String,   // UTF-8
     Rune,
     Collection,
 }

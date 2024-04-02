@@ -1,9 +1,7 @@
 use super::{
-    ast::AstNode,
-    styles::{Style, Tag},
-    util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
+    ast::AstNode, parse_expression::{create_expression, eval_expression}, styles::{Style, Tag}, util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string}
 };
-use crate::Token;
+use crate::{bs_types::DataType, Token};
 
 // Recursive function to parse scenes
 pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
@@ -87,39 +85,23 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 }
             }
 
-            Token::Width => {
+            Token::Size => {
                 j += 1;
                 match &scene_head[j] {
                     Token::FloatLiteral(value) => {
-                        scene_styles.push(Style::Width(*value));
+                        scene_styles.push(Style::Size(*value, *value));
                     }
                     Token::IntLiteral(value) => {
-                        scene_styles.push(Style::Width(*value as f64));
+                        scene_styles.push(Style::Size(*value as f64, *value as f64));
                     }
                     _ => {
                         scene.push(AstNode::Error(
-                            "No int literal provided for width".to_string(),
+                            "No value provided for size".to_string(),
                         ));
                     }
                 };
             }
 
-            Token::Height => {
-                j += 1;
-                match &scene_head[j] {
-                    Token::FloatLiteral(value) => {
-                        scene_styles.push(Style::Height(*value));
-                    }
-                    Token::IntLiteral(value) => {
-                        scene_styles.push(Style::Height(*value as f64));
-                    }
-                    _ => {
-                        scene.push(AstNode::Error(
-                            "No int literal provided for height".to_string(),
-                        ));
-                    }
-                };
-            }
 
             Token::Img => {
                 j += 1;
@@ -343,4 +325,29 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
             false
         }
     }
+}
+
+fn parse_scenehead_value(scene_head: &Vec<Token>, i: &mut usize) -> Vec<AstNode> {
+    let mut values = Vec::new();
+    
+    *i += 1;
+    // SKIP INITIAL OPEN BRACKET
+    if &scene_head[*i] == &Token::OpenBracket {
+        *i += 1;
+    }
+    
+    while *i < scene_head.len() {
+        values.push(eval_expression(
+            create_expression(
+                scene_head,
+                i,
+                &DataType::Float,
+            )
+        ));
+    }
+
+
+    *i += 1;
+
+    values
 }

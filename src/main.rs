@@ -16,7 +16,6 @@ mod parsers {
     pub mod ast;
     pub mod build_ast;
     mod create_scene_node;
-    pub mod eval_expression;
     pub mod parse_expression;
     pub mod styles;
     pub mod util;

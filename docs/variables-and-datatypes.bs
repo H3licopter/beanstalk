@@ -61,6 +61,10 @@ If you are creating a non-collection variable and need it to be formatted over m
 All data type keywords contain methods from the standard library for common manipulation of types. 
 The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
 
+[table(3): 
+
+]
+
 | Type | Description | Zero Value |
 -----------------------------------
 | int    | These numerical types are 64 bit by default but |support custom sizes | 0 |

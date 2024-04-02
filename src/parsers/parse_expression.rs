@@ -32,7 +32,7 @@ enum _Expression {
 }
 
 // Returns the result of the expression for compile time evaluation
-pub fn parse_expression(
+pub fn create_expression(
     tokens: &Vec<Token>,
     i: &mut usize,
     type_declaration: &DataType,
@@ -48,24 +48,20 @@ pub fn parse_expression(
 
     while let Some(token) = tokens.get(*i) {
         match token {
-            // Conditions that end the expression
+            // Conditions that close the expression
             Token::Newline => {
                 if bracket_nesting == 0 {
                     break;
                 }
             }
-            Token::EOF => {
+            Token::EOF | Token::Comma => {
                 break;
             }
             Token::CloseBracket => {
                 if bracket_nesting > 1 {
                     bracket_nesting -= 1;
-                }
-                if bracket_nesting == 1 {
+                } else {
                     break;
-                }
-                if bracket_nesting < 1 {
-                    expression.push(AstNode::Error("Too many closing brackets".to_string()));
                 }
             }
 
@@ -79,7 +75,7 @@ pub fn parse_expression(
                         *i += 2;
                         while &tokens[*i] != &Token::CloseBracket {
                             // TO DO, CHECK IS VALID ARGUMENT
-                            let arg = parse_expression(tokens, i, &type_declaration);
+                            let arg = create_expression(tokens, i, &type_declaration);
                             args.push(arg);
 
                             *i += 1;
@@ -106,23 +102,26 @@ pub fn parse_expression(
             }
 
             // Check if operator
+            Token::Negative => {
+                expression.push(AstNode::Unary(Token::Negative));
+            }
             Token::Add => {
-                expression.push(AstNode::Add);
+                expression.push(AstNode::Binary(Token::Add));
             }
             Token::Subtract => {
-                expression.push(AstNode::Subtract);
+                expression.push(AstNode::Binary(Token::Subtract));
             }
             Token::Multiply => {
-                expression.push(AstNode::Multiply);
+                expression.push(AstNode::Binary(Token::Multiply));
             }
             Token::Divide => {
-                expression.push(AstNode::Divide);
+                expression.push(AstNode::Binary(Token::Divide));
             }
             Token::Modulus => {
-                expression.push(AstNode::Modulus);
+                expression.push(AstNode::Binary(Token::Modulus));
             }
             Token::Exponent => {
-                expression.push(AstNode::Exponent);
+                expression.push(AstNode::Binary(Token::Exponent));
             }
 
             _ => {
@@ -136,4 +135,58 @@ pub fn parse_expression(
     }
 
     AstNode::Expression(expression, type_declaration.clone())
+}
+
+// This function takes in an Expression node that has a Vec of Nodes to evaluate
+// And evaluates everything possible at compile time
+// If it returns a literal, then everything was evaluated at compile time
+// Otherwise it will return a simplified expression for runtime evaluation
+pub fn eval_expression(expr: AstNode) -> AstNode {
+    match expr {
+        AstNode::Expression(e, data_type) => {
+            match data_type {
+                DataType::Float => {
+                    let mut result = 0.0;
+
+                    for token in e {
+                        match token {
+                            AstNode::Literal(Token::FloatLiteral(float)) => {
+                                result = float;
+                            }
+                            AstNode::Literal(Token::IntLiteral(int)) => {
+                                result = int as f64;
+                            }
+
+                            _ => {
+                                return AstNode::Error("Unknown Operator used in Expression".to_string());
+                            }
+                        }
+                    }
+
+                    return AstNode::Literal(Token::FloatLiteral(result));
+                }
+
+
+                // UNIMPLIMENTED DATA TYPES
+                DataType::Int => {
+                    let mut result = 0;
+
+                    return AstNode::Literal(Token::IntLiteral(result));
+                }
+                DataType::String => {
+                    let mut result = String::new();
+
+                    return AstNode::Literal(Token::StringLiteral(result));
+                }
+
+                // Eval other types here ......
+                _ => {
+                    return AstNode::Error("Data Type for expression not supported".to_string());
+                }
+            }
+        }
+        _ => {
+            return AstNode::Error("No Expression to Evaluate".to_string());
+        }
+    }
 }

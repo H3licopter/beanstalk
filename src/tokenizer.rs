@@ -168,7 +168,7 @@ fn get_next_token(
         return Token::QuestionMark;
     }
 
-    // Comments / Subtraction / Scene Head
+    // Comments / Subtraction / Negative / Scene Head
     if current_char == '-' {
         if let Some(&next_char) = chars.peek() {
             // Comments
@@ -212,6 +212,9 @@ fn get_next_token(
                 if next_char == '=' {
                     chars.next();
                     return Token::SubtractAssign;
+                }
+                if next_char.is_numeric() {
+                    return Token::Negative;
                 }
                 return Token::Subtract;
             }
@@ -456,17 +459,20 @@ fn keyword_or_variable(
                     if token_value == "link" {
                         return Token::A;
                     }
-                    if token_value == "rgb" {
-                        return Token::Rgb;
+                    if token_value == "m" {
+                        return Token::Margin;
+                    }
+                    if token_value == "p" {
+                        return Token::Padding;
                     }
                     if token_value == "img" {
                         return Token::Img;
                     }
-                    if token_value == "width" {
-                        return Token::Width;
+                    if token_value == "rgb" {
+                        return Token::Rgb;
                     }
-                    if token_value == "height" {
-                        return Token::Height;
+                    if token_value == "size" {
+                        return Token::Size;
                     }
                     if token_value == "video" {
                         return Token::Video;
@@ -570,8 +576,13 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
             content.push('\n');
         }
 
-        *current_char = match chars.next() {
-            Some(ch) => ch,
+        match chars.peek() {
+            Some(ch) => match ch {
+                '[' | ']' => {
+                    break;
+                }
+                _ => {*current_char = chars.next().unwrap();},
+            }
             None => return Token::EOF,
         };
     }

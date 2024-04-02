@@ -27,12 +27,8 @@ pub enum AstNode {
     Scene(Vec<AstNode>),
 
     // Operators
-    Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Modulus,
-    Exponent,
+    Unary(Token),
+    Binary(Token),
 
     // HTML
     Element(Token),                 // HTML element content

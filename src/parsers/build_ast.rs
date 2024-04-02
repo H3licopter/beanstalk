@@ -1,6 +1,5 @@
 use super::{
-    ast::AstNode, create_scene_node::new_scene, eval_expression::eval_expression,
-    parse_expression::parse_expression,
+    ast::AstNode, create_scene_node::new_scene, parse_expression::{eval_expression, create_expression},
 };
 use crate::{bs_types::DataType, Token};
 
@@ -57,7 +56,7 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
 
             Token::Print => {
                 i += 1;
-                ast.push(AstNode::Print(Box::new(parse_expression(
+                ast.push(AstNode::Print(Box::new(create_expression(
                     tokens,
                     &mut i,
                     &DataType::String,
@@ -133,7 +132,7 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     // Get value of variable
     *i += 1;
 
-    let parsed_expr = parse_expression(tokens, i, &type_declaration);
+    let parsed_expr = create_expression(tokens, i, &type_declaration);
 
     if var_is_const {
         return AstNode::ConstDeclaration(name.to_string(), Box::new(eval_expression(parsed_expr)));
