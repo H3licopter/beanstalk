@@ -32,15 +32,19 @@ Beanstalk aims to become an entire self-contained ecosystem for building webpage
 When creating a page or UI in Beanstalk, you make Scenes. Scenes are a markup syntax that can be used to write content, HTML, CSS and JS/WASM all in one file. It is very minimal and easy to read, with a few simple rules to follow.
 
 **Content**
+
 Write content in a simple dialect of markdown, with only a few dashes needed to start a new scene and get writing.
 
 **HTML**
+
 Scenes provide a template for your styles and content, with the ability to add custom elements and styling. They are like a far more minimal and more readable version of JSX.
 
 **CSS**
+
 Scenes have utility classes built in. Use keywords at the start of scenes to not only defined your elememts, but style and position them as well.
 
 **JS/WASM**
+
 (CODE GEN NOT YET IMPLIMENTED) Beanstalk will be an entire programming language that compiles into JS/WASM on the frontend and ties into your scenes naturally for dynamic content and interactivity. The language is planned to also compile to other platforms including server side so you can write your entire stack in Beanstalk.
 
 Reactivity, (scene) components, compile time evaluation and more will be built into the language with many more features already planned out in the language syntax for the future.
