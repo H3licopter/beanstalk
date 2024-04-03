@@ -1,10 +1,14 @@
-## GENERAL
+# NOTES FOR DEVELOPERS / CONTRIBUTORS
+Since this is very early stages, this is just a disorganised collection of notes and to-dos. 
+
+# GENERAL
 - full expressions need to be supported in sceneheads. Code gen only needs to happen if eval expression returns an expression rather than literal.
   - create_expression should impliment shunting yard
   - eval_expression should then solve the expression
 - Other datatypes can be inserted directly into scenes. Raw strings, numbers, even collections should have a default behaviour etc.
 - Add in memory safety net for recursive function calls, or use a better pattern e.g tail call recursion.
 
+# TODO
 ## HTML
 - Image alt descriptions
 - Markdown things to add:
@@ -48,15 +52,13 @@
 - think about making commas ignorable, does it work?
 - Scene syntax is just triple dash muliline comment. So the parent scene is just a mutliline style comment.
 
-
-## Notes
+# Random Notes / Thoughts
 - Objects are stripped of methods when parsed into JSON or protobuf format
 - Support for SPA solutions, or MPA focused only? (Probably just MPA)
 - Print styles?
 - Handling no JS browsers? - Allow for no js sites, just pure templates into HTML stuff?
 - Uses rust markdown parser for parsing markdown into GFM markdown (Github Flavored Markdown)
 
-## Future Stuff
 @ - HTTP and sockets, server communication etc. 
 defer
 ^ - pointers

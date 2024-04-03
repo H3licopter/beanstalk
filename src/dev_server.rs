@@ -45,9 +45,10 @@ fn handle_connection(mut stream: TcpStream, path: String) {
     };
 
     // println!("{}", format!("{}/{}/dist/any file should be here", entry_path, path));
-    let mut contents = fs::read_to_string(format!("{}/{}/dist/404.html", entry_path, path)).unwrap();
+    let mut contents =
+        fs::read_to_string(format!("{}/{}/dist/404.html", entry_path, path)).unwrap();
     let mut length = contents.len();
-    let mut status_line = "HTTP/1.1 404 NOT FOUND"; 
+    let mut status_line = "HTTP/1.1 404 NOT FOUND";
 
     let request_line = buf_reader.lines().next().unwrap();
     match request_line {

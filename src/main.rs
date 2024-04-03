@@ -49,9 +49,7 @@ fn main() {
                         name.to_string()
                     }
                 }
-                None => {
-                    "test_output".to_string()
-                }
+                None => "test_output".to_string(),
             };
 
             match create_new_project::create_project(path, &project_name) {
@@ -133,14 +131,12 @@ fn collect_user_input() -> Command {
             match args.get(1) {
                 Some(path) => {
                     if path.is_empty() {
-                        return Command::Dev("test_output".to_string())
+                        return Command::Dev("test_output".to_string());
                     } else {
-                        return Command::Dev(path.to_string())
+                        return Command::Dev(path.to_string());
                     }
                 }
-                None => {
-                    return Command::Dev("test_output".to_string())
-                }
+                None => return Command::Dev("test_output".to_string()),
             };
         }
         _ => {
