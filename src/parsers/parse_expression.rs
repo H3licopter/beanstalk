@@ -163,7 +163,8 @@ pub fn eval_expression(expr: AstNode) -> AstNode {
                             }
                             _ => {
                                 return AstNode::Error(
-                                    "(Eval Expression) Unknown Operator used in Expression".to_string(),
+                                    "(Eval Expression) Unknown Operator used in Expression"
+                                        .to_string(),
                                 );
                             }
                         }

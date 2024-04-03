@@ -51,7 +51,11 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 let values = parse_scenehead_number_values(scene_head, &mut j);
 
                 if values.len() == 3 {
-                    scene_styles.push(Style::TextColor(values[0] as u8, values[1] as u8, values[2] as u8));
+                    scene_styles.push(Style::TextColor(
+                        values[0] as u8,
+                        values[1] as u8,
+                        values[2] as u8,
+                    ));
                 } else {
                     scene.push(AstNode::Error(
                         "Invalid number of values provided for rgb".to_string(),
@@ -307,7 +311,6 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
         }
     }
 }
-
 
 // Implicitly converts everything to floats
 fn parse_scenehead_number_values(scene_head: &Vec<Token>, i: &mut usize) -> Vec<f64> {

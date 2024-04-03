@@ -8,11 +8,11 @@ use std::{
 pub mod bs_types;
 mod build;
 mod create_new_project;
+pub mod dev_server;
 mod settings;
 mod test;
 mod tokenizer;
 mod tokens;
-pub mod dev_server;
 mod parsers {
     pub mod ast;
     pub mod build_ast;
@@ -38,7 +38,23 @@ fn main() {
     let command = collect_user_input();
     match command {
         Command::NewHTMLProject(path) => {
-            match create_new_project::create_project(path) {
+            let args = prompt_user_for_input("Project name: ".to_string());
+            let name_args = args.get(0);
+
+            let project_name = match name_args {
+                Some(name) => {
+                    if name.is_empty() {
+                        "test_output".to_string()
+                    } else {
+                        name.to_string()
+                    }
+                }
+                None => {
+                    "test_output".to_string()
+                }
+            };
+
+            match create_new_project::create_project(path, &project_name) {
                 Ok(_) => {
                     println!("Creating new HTML project...");
                     main();
@@ -81,27 +97,16 @@ fn main() {
 }
 
 fn collect_user_input() -> Command {
-    let mut input = String::new();
-    print!("Enter compiler command: ");
-    io::stdout().flush().unwrap(); // Make sure the prompt is immediately displayed
-    io::stdin().read_line(&mut input).unwrap();
-    let args: Vec<String> = input.split_whitespace().map(String::from).collect();
+    let args = prompt_user_for_input("Enter compiler command: ".to_string());
 
     match args.get(0).map(String::as_str) {
         Some("new") => {
             // Check type of project
             match args.get(1).map(String::as_str) {
                 Some("html") => {
-                    match args.get(2).map(String::as_str) {
-                        Some(string) => {
-                            // Check if path is valid, if not, throw error
-                            if check_if_valid_directory_path(string) {
-                                return Command::NewHTMLProject(string.to_string());
-                            }
-                        }
-                        _ => {
-                            return Command::NewHTMLProject("".to_string());
-                        }
+                    let dir = &prompt_user_for_input("Enter project path: ".to_string())[0];
+                    if check_if_valid_directory_path(&dir) {
+                        return Command::NewHTMLProject(dir.to_string());
                     }
                 }
                 _ => {
@@ -125,19 +130,21 @@ fn collect_user_input() -> Command {
             return Command::Test;
         }
         Some("dev") => {
-            match args.get(1).map(String::as_str) {
-                Some(string) => {
-                    // Check if path is valid, if not, throw error
-                    return Command::Dev(string.to_string());
+            match args.get(1) {
+                Some(path) => {
+                    if path.is_empty() {
+                        return Command::Dev("test_output".to_string())
+                    } else {
+                        return Command::Dev(path.to_string())
+                    }
                 }
-                _ => {
-                    // Return current working directory path
-                    return Command::Dev("../html_project_template".to_string());
+                None => {
+                    return Command::Dev("test_output".to_string())
                 }
-            }
+            };
         }
         _ => {
-            return Command::Build("test".to_string());
+            return Command::Dev("test_output".to_string());
         }
     }
 
@@ -175,4 +182,14 @@ fn check_if_valid_directory_path(path: &str) -> bool {
     }
 
     true
+}
+
+fn prompt_user_for_input(msg: String) -> Vec<String> {
+    let mut input = String::new();
+    print!("{}", msg);
+    io::stdout().flush().unwrap(); // Make sure the prompt is immediately displayed
+    io::stdin().read_line(&mut input).unwrap();
+    let args: Vec<String> = input.split_whitespace().map(String::from).collect();
+
+    args
 }

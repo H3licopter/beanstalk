@@ -11,6 +11,7 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     if entry_path == "test" {
         entry_path = "src/test.bs".to_string();
     }
+
     if entry_path.is_empty() {
         let current_dir = std::env::current_dir()?;
         entry_path = current_dir.to_string_lossy().into_owned();
@@ -32,9 +33,10 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     let ast = parsers::build_ast::new_ast(&tokens, 0).0;
 
     // Write HTML output to file
-    // TEMPORARY TESTING ENTRY PATH
-    entry_path = "../html_project_template/dist/".to_string();
-    fs::write(entry_path.clone() + "index.html", web_parser::parse(ast))?;
+    fs::write(
+        entry_path.clone() + "/dist/index.html",
+        web_parser::parse(ast),
+    )?;
 
     Ok(())
 }
