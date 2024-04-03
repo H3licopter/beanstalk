@@ -1,5 +1,7 @@
 ## GENERAL
 - full expressions need to be supported in sceneheads. Code gen only needs to happen if eval expression returns an expression rather than literal.
+  - create_expression should impliment shunting yard
+  - eval_expression should then solve the expression
 - Other datatypes can be inserted directly into scenes. Raw strings, numbers, even collections should have a default behaviour etc.
 - Add in memory safety net for recursive function calls, or use a better pattern e.g tail call recursion.
 
@@ -28,6 +30,7 @@
 - padding: pad (l, r, t, b)
 - margin (m)
 - center
+- rgba
 - Compile [custom pico css style](https://picocss.com/docs/sass) for the base of the CSS framework, remove pico- from the class names and merge into main bs css file.
 
 ## JS / WASM

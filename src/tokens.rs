@@ -166,6 +166,7 @@ pub enum Token {
     Raw,
 
     Slot, // Injection point for additional template nesting
+    Alt,
 
     // Styles
     Padding,

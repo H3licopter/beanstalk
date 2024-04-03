@@ -27,11 +27,12 @@ enum _Operator {
 }
 
 enum _Expression {
-    Unary(_Operator, Token),         // Operator, Value
-    Binary(_Operator, Token, Token), // Operator, LHS value, RHS value
+    Unary(_Operator, Token),                 // Operator, Value
+    BinaryOperator(_Operator, Token, Token), // Operator, LHS value, RHS value
 }
 
-// Returns the result of the expression for compile time evaluation
+// Creates an expression and orders operators based on precedence
+// Should impliment shunting yard algorithm and return a simplified expression
 pub fn create_expression(
     tokens: &Vec<Token>,
     i: &mut usize,
@@ -54,7 +55,11 @@ pub fn create_expression(
                     break;
                 }
             }
-            Token::EOF | Token::Comma => {
+            Token::EOF => {
+                break;
+            }
+            Token::Comma => {
+                // *i += 1;
                 break;
             }
             Token::CloseBracket => {
@@ -103,25 +108,25 @@ pub fn create_expression(
 
             // Check if operator
             Token::Negative => {
-                expression.push(AstNode::Unary(Token::Negative));
+                expression.push(AstNode::UnaryOperator(Token::Negative));
             }
             Token::Add => {
-                expression.push(AstNode::Binary(Token::Add));
+                expression.push(AstNode::BinaryOperator(Token::Add));
             }
             Token::Subtract => {
-                expression.push(AstNode::Binary(Token::Subtract));
+                expression.push(AstNode::BinaryOperator(Token::Subtract));
             }
             Token::Multiply => {
-                expression.push(AstNode::Binary(Token::Multiply));
+                expression.push(AstNode::BinaryOperator(Token::Multiply));
             }
             Token::Divide => {
-                expression.push(AstNode::Binary(Token::Divide));
+                expression.push(AstNode::BinaryOperator(Token::Divide));
             }
             Token::Modulus => {
-                expression.push(AstNode::Binary(Token::Modulus));
+                expression.push(AstNode::BinaryOperator(Token::Modulus));
             }
             Token::Exponent => {
-                expression.push(AstNode::Binary(Token::Exponent));
+                expression.push(AstNode::BinaryOperator(Token::Exponent));
             }
 
             _ => {
@@ -156,9 +161,10 @@ pub fn eval_expression(expr: AstNode) -> AstNode {
                             AstNode::Literal(Token::IntLiteral(int)) => {
                                 result = int as f64;
                             }
-
                             _ => {
-                                return AstNode::Error("Unknown Operator used in Expression".to_string());
+                                return AstNode::Error(
+                                    "(Eval Expression) Unknown Operator used in Expression".to_string(),
+                                );
                             }
                         }
                     }
@@ -166,10 +172,26 @@ pub fn eval_expression(expr: AstNode) -> AstNode {
                     return AstNode::Literal(Token::FloatLiteral(result));
                 }
 
-
                 // UNIMPLIMENTED DATA TYPES
                 DataType::Int => {
                     let mut result = 0;
+
+                    for token in e {
+                        match token {
+                            AstNode::Literal(Token::FloatLiteral(float)) => {
+                                result = float as i64;
+                            }
+                            AstNode::Literal(Token::IntLiteral(int)) => {
+                                result = int;
+                            }
+
+                            _ => {
+                                return AstNode::Error(
+                                    "Unknown Operator used in Expression".to_string(),
+                                );
+                            }
+                        }
+                    }
 
                     return AstNode::Literal(Token::IntLiteral(result));
                 }

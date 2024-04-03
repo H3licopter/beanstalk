@@ -12,6 +12,7 @@ mod settings;
 mod test;
 mod tokenizer;
 mod tokens;
+pub mod dev_server;
 mod parsers {
     pub mod ast;
     pub mod build_ast;
@@ -26,34 +27,57 @@ mod html_output {
     pub mod web_parser;
 }
 pub use tokens::Token;
-
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let command = collect_user_input();
-    match command {
-        Command::NewHTMLProject(path) => {
-            create_new_project::create_project(path)?;
-            println!("Creating new HTML project...");
-        }
-        Command::Build(path) => {
-            let start = Instant::now();
-            build::build(path)?;
-            let duration = start.elapsed();
-            println!("Building project...");
-            println!("Project built in: {:?}", duration);
-        }
-        Command::Test => {
-            println!("Testing...");
-            test::test_build()?;
-        }
-    }
-
-    main()?;
-    Ok(())
-}
 enum Command {
     NewHTMLProject(String),
     Build(String),
     Test,
+    Dev(String), // Runs local dev server
+}
+
+fn main() {
+    let command = collect_user_input();
+    match command {
+        Command::NewHTMLProject(path) => {
+            match create_new_project::create_project(path) {
+                Ok(_) => {
+                    println!("Creating new HTML project...");
+                    main();
+                }
+                Err(e) => {
+                    println!("Error creating project: {:?}", e);
+                }
+            }
+        }
+        Command::Build(path) => {
+            println!("Building project...");
+            let start = Instant::now();
+            match build::build(path) {
+                Ok(_) => {
+                    let duration = start.elapsed();
+                    println!("Project built in: {:?}", duration);
+                    main();
+                }
+                Err(e) => {
+                    println!("Error building project: {:?}", e);
+                }
+            }
+        }
+        Command::Test => {
+            println!("Testing...");
+            match test::test_build() {
+                Ok(_) => {
+                    main();
+                }
+                Err(e) => {
+                    println!("Error while testing: {:?}", e);
+                }
+            }
+        }
+        Command::Dev(path) => {
+            println!("Starting dev server...");
+            dev_server::start_dev_server(path);
+        }
+    }
 }
 
 fn collect_user_input() -> Command {
@@ -100,8 +124,19 @@ fn collect_user_input() -> Command {
         Some("test") => {
             return Command::Test;
         }
+        Some("dev") => {
+            match args.get(1).map(String::as_str) {
+                Some(string) => {
+                    // Check if path is valid, if not, throw error
+                    return Command::Dev(string.to_string());
+                }
+                _ => {
+                    // Return current working directory path
+                    return Command::Dev("test".to_string());
+                }
+            }
+        }
         _ => {
-            println!("Building test project....");
             return Command::Build("test".to_string());
         }
     }

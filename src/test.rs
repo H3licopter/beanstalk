@@ -37,7 +37,8 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     let re = Regex::new(r"(?s)<body>(.*?)</main>").unwrap();
 
     // Extract the content between the <main> and </main> tags
-    let main_content = re.captures(&html_output)
+    let main_content = re
+        .captures(&html_output)
         .and_then(|cap| cap.get(1))
         .map_or("", |m| m.as_str());
 

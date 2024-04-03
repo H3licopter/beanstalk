@@ -468,6 +468,9 @@ fn keyword_or_variable(
                     if token_value == "img" {
                         return Token::Img;
                     }
+                    if token_value == "alt" {
+                        return Token::Alt;
+                    }
                     if token_value == "rgb" {
                         return Token::Rgb;
                     }
@@ -581,8 +584,10 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                 '[' | ']' => {
                     break;
                 }
-                _ => {*current_char = chars.next().unwrap();},
-            }
+                _ => {
+                    *current_char = chars.next().unwrap();
+                }
+            },
             None => return Token::EOF,
         };
     }

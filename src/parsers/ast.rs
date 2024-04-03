@@ -27,8 +27,8 @@ pub enum AstNode {
     Scene(Vec<AstNode>),
 
     // Operators
-    Unary(Token),
-    Binary(Token),
+    UnaryOperator(Token),
+    BinaryOperator(Token),
 
     // HTML
     Element(Token),                 // HTML element content

@@ -126,7 +126,6 @@ fn expression_to_js(expr: Vec<AstNode>) -> String {
             // AstNode::Exponent => {
             //     js.push_str("**");
             // }
-
             _ => {
                 println!("unknown AST node found in expression");
             }
@@ -170,7 +169,14 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                             scene_wrap.tag = Tag::Span;
                         }
                         Style::Size(w, h) => {
-                            scene_wrap.style.push_str(&format!("width:{}px;height:{}px", w, h));
+                            scene_wrap
+                                .style
+                                .push_str(&format!("width:{}px;height:{}px", w, h));
+                        }
+                        Style::Alt(value) => {
+                            scene_wrap
+                                .properties
+                                .push_str(&format!(" alt=\"{}\"", value));
                         }
                         _ => {}
                     }
@@ -181,11 +187,11 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                 for tag in &tags {
                     match tag {
                         Tag::Img(src) => {
-                            images.push(src.to_string());
+                            images.push(format!("./{}", src));
                             img_count += 1;
                         }
                         Tag::Video(src) => {
-                            scene_wrap.tag = Tag::Video(src.to_string());
+                            scene_wrap.tag = Tag::Video(format!("./{}", src));
                             if img_count > 0 {
                                 scene_wrap
                                     .properties
@@ -214,7 +220,7 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                     let img_resize = 100.0 / f32::sqrt(img_count as f32);
                     for image in images {
                         html.push_str(&format!(
-                            "<img src=\"{}\" alt=\"\" style=\"width:{}%;height:{}%;\"/>",
+                            "<img src=\"{}\" style=\"width:{}%;height:{}%;\"/>",
                             image, img_resize, img_resize
                         ));
                     }

@@ -16,4 +16,5 @@ pub enum Style {
     Size(f64, f64),
     TextColor(u8, u8, u8),
     BackgroundColor(u8, u8, u8),
+    Alt(String),
 }

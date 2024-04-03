@@ -1,5 +1,8 @@
 use super::{
-    ast::AstNode, parse_expression::{create_expression, eval_expression}, styles::{Style, Tag}, util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string}
+    ast::AstNode,
+    parse_expression::{create_expression, eval_expression},
+    styles::{Style, Tag},
+    util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
 };
 use crate::{bs_types::DataType, Token};
 
@@ -45,63 +48,29 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::Rgb => {
-                if j + 7 >= scene_head.len() {
-                    scene.push(AstNode::Error(
-                        "RGB values not formatted correctly. \nShould look like: rgb(0, 0, 0)"
-                            .to_string(),
-                    ));
+                let values = parse_scenehead_number_values(scene_head, &mut j);
+
+                if values.len() == 3 {
+                    scene_styles.push(Style::TextColor(values[0] as u8, values[1] as u8, values[2] as u8));
                 } else {
-                    let mut red = 0;
-                    match &scene_head[j + 2] {
-                        Token::IntLiteral(value) => {
-                            red = *value as u8;
-                        }
-                        _ => {
-                            scene.push(AstNode::Error("Invalid RGB value for red".to_string()));
-                        }
-                    }
-                    let mut green = 0;
-                    match &scene_head[j + 4] {
-                        Token::IntLiteral(value) => {
-                            green = *value as u8;
-                        }
-                        _ => {
-                            scene.push(AstNode::Error("Invalid RGB value for green".to_string()));
-                        }
-                    }
-                    let mut blue = 0;
-                    match &scene_head[j + 6] {
-                        Token::IntLiteral(value) => {
-                            blue = *value as u8;
-                        }
-                        _ => {
-                            scene.push(AstNode::Error("Invalid RGB value for blue".to_string()));
-                        }
-                    }
-
-                    scene_styles.push(Style::TextColor(red, green, blue));
-
-                    j += 7;
+                    scene.push(AstNode::Error(
+                        "Invalid number of values provided for rgb".to_string(),
+                    ));
                 }
             }
 
             Token::Size => {
-                j += 1;
-                match &scene_head[j] {
-                    Token::FloatLiteral(value) => {
-                        scene_styles.push(Style::Size(*value, *value));
-                    }
-                    Token::IntLiteral(value) => {
-                        scene_styles.push(Style::Size(*value as f64, *value as f64));
-                    }
-                    _ => {
-                        scene.push(AstNode::Error(
-                            "No value provided for size".to_string(),
-                        ));
-                    }
-                };
+                let values = parse_scenehead_number_values(scene_head, &mut j);
+                if values.len() == 2 {
+                    scene_styles.push(Style::Size(values[0], values[1]));
+                } else if values.len() == 1 {
+                    scene_styles.push(Style::Size(values[0], values[0]));
+                } else {
+                    scene.push(AstNode::Error(
+                        "Invalid number of values provided for size parameter".to_string(),
+                    ));
+                }
             }
-
 
             Token::Img => {
                 j += 1;
@@ -111,6 +80,18 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                     }
                     _ => {
                         scene.push(AstNode::Error("No src provided for img".to_string()));
+                    }
+                };
+            }
+
+            Token::Alt => {
+                j += 1;
+                match &scene_head[j] {
+                    Token::StringLiteral(value) => {
+                        scene_styles.push(Style::Alt(value.clone()));
+                    }
+                    _ => {
+                        scene.push(AstNode::Error("No string provided for alt".to_string()));
                     }
                 };
             }
@@ -327,27 +308,41 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     }
 }
 
-fn parse_scenehead_value(scene_head: &Vec<Token>, i: &mut usize) -> Vec<AstNode> {
+
+// Implicitly converts everything to floats
+fn parse_scenehead_number_values(scene_head: &Vec<Token>, i: &mut usize) -> Vec<f64> {
     let mut values = Vec::new();
-    
+
     *i += 1;
     // SKIP INITIAL OPEN BRACKET
     if &scene_head[*i] == &Token::OpenBracket {
         *i += 1;
     }
-    
-    while *i < scene_head.len() {
-        values.push(eval_expression(
-            create_expression(
-                scene_head,
-                i,
-                &DataType::Float,
-            )
-        ));
+
+    while *i < scene_head.len() - 1 {
+        values.push(eval_expression(create_expression(
+            scene_head,
+            i,
+            &DataType::Float,
+        )));
+
+        *i += 1;
     }
 
+    let mut args = Vec::new();
+    for node in values {
+        match node {
+            AstNode::Literal(Token::FloatLiteral(value)) => {
+                args.push(value);
+            }
+            AstNode::Literal(Token::IntLiteral(value)) => {
+                args.push(value as f64);
+            }
+            _ => {
+                args.push(0.0);
+            }
+        }
+    }
 
-    *i += 1;
-
-    values
+    args
 }

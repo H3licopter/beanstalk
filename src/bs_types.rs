@@ -5,7 +5,7 @@ pub enum DataType {
     Float,    // 64 bit
     Decimal,
     Bool,
-    String,   // UTF-8
+    String, // UTF-8
     Rune,
     Collection,
 }

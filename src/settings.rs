@@ -34,7 +34,7 @@ pub fn get_meta_config() -> HTMLMeta {
     let default_meta = HTMLMeta {
         site_title: String::from("Website Title"),
         page_description: String::from("Website Description"),
-        site_url: String::from("localhost:3069"),
+        site_url: String::from("localhost:6969"),
         page_url: String::from(""),
         page_og_title: String::from(""),
         page_og_description: String::from(""),
