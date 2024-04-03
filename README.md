@@ -1,15 +1,14 @@
 <div align="center">
 
   <h1>Beanstalk 🌱</h1>
-  <h4>(Currently in early development, still changing rapidly)<h4>
 
   <p>
-    <strong>A statically typed all-in-one language designed for building UIs and webpages.</strong>
+    <strong>An open source, statically typed, all-in-one language designed for building UIs and webpages.</strong>
   </p>
 
   *The only BS should be in the filename*
 
-  <sub>This is currently a work in progress compiler, written in Rust. It's not reccomended you try and actually use it yet!</sub>
+  <sub>This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</sub>
 
 </div>
 
