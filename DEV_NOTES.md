@@ -36,6 +36,13 @@
 ## JS / WASM
 - Mostly just compile to JS, then add wasm module for heavy lifting tasks and proper types. Too complex to try and compile too much dynamically to WASM format directly without building in LLVM or something that is too bloated.
 
+  import init, { } from './bs_wasm.js';
+  async function run() {
+    await init();
+  }
+  run();
+  //js
+
 ## SYNTAX
 - number types will be a single letter followed by the max size. u32, i8, f64, d63 (fixed point decimal with 63 decimal places). 
 - think about making commas ignorable, does it work?

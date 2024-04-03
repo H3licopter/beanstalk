@@ -12,24 +12,59 @@ pub fn start_dev_server(path: String) {
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        thread::spawn(|| {
-            handle_connection(stream);
-        });
+        handle_connection(stream, path.clone());
     }
 
 }
 
-fn handle_connection(mut stream: TcpStream) {
+fn handle_connection(mut stream: TcpStream, path: String) {
     let buf_reader = BufReader::new(&mut stream);
-    let http_request: Vec<_> = buf_reader
-        .lines()
-        .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty())
-        .collect();
+    let mut contents = fs::read_to_string(format!("{}/dist/404.html", path)).unwrap();
+    let mut length = contents.len();
+    let mut status_line = "HTTP/1.1 404 NOT FOUND";
 
-    let contents = fs::read_to_string("../html_project_template/dist/index.html".to_string()).unwrap();
-    let status_line = "HTTP/1.1 200 OK";
-    let length = contents.len();
+    let request_line = buf_reader.lines().next().unwrap();
+    match request_line {
+        Ok(request) => {
+            
+            // Build updated HTML on each request
+            // DEFINITELY DON'T DO FOR PRODUCTION
+            build_project(&path);
+
+            // HANDLE REQUESTS
+            if request == "GET / HTTP/1.1" {
+                contents = fs::read_to_string(format!("{}/dist/index.html", path)).unwrap();
+                length = contents.len();
+                status_line = "HTTP/1.1 200 OK";
+                println!("Sending Home page");
+            } else if request.starts_with("GET /") {
+                // Get requested path
+                let file_path = request.split_whitespace().collect::<Vec<&str>>()[1];
+                println!("Requested path: {}", file_path);
+                contents = fs::read_to_string(format!("{}/dist{}", path, file_path)).unwrap();
+
+                // Make sure the path does not try to access any directories outside of /dist
+                if !file_path.contains("..") {
+                    length = contents.len();
+                    status_line = "HTTP/1.1 200 OK";
+                    println!("Sending page");
+                }
+            }
+            if request.starts_with("GET /css") {
+                // Get requested css path
+                let file_path = request.split_whitespace().collect::<Vec<&str>>()[1];
+
+                if !file_path.contains("..") {
+                    contents = fs::read_to_string(format!("{}/dist{}", path, file_path)).unwrap();
+                    length = contents.len();
+                    status_line = "HTTP/1.1 200 OK";
+                }
+            }
+        }
+        _=> {
+            println!("Error reading request line");
+        }
+    }
 
     let response =
         format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
@@ -37,6 +72,23 @@ fn handle_connection(mut stream: TcpStream) {
     stream.write_all(response.as_bytes()).unwrap();
 }
 
+fn build_project(build_path: &String) {
+    println!("Building project...");
+    let start = Instant::now();
+    match build::build(build_path.to_string()) {
+        Ok(_) => {
+            let duration = start.elapsed();
+            println!("Project built in: {:?}", duration);
+        }
+        Err(e) => {
+            println!("Error building project: {:?}", e);
+            return;
+        }
+    }
+}
+
+
+// CURRENTLY JUST BLOCKS THE THREAD, NEED TO GET WORKING
 fn watch_directory(dev_dir: &Path, build_path: &String) {
     println!("Watching {:?} for changes...", dev_dir);
 
@@ -59,24 +111,9 @@ fn watch_directory(dev_dir: &Path, build_path: &String) {
         match result {
             Ok(event) => {
                 println!("Event {event:?}");
-                build_and_send_html(build_path);
+                build_project(build_path);
             },
             Err(error) => println!("Error {error:?}"),
-        }
-    }
-}
-
-fn build_and_send_html(build_path: &String) {
-    println!("Building project...");
-    let start = Instant::now();
-    match build::build(build_path.to_string()) {
-        Ok(_) => {
-            let duration = start.elapsed();
-            println!("Project built in: {:?}", duration);
-        }
-        Err(e) => {
-            println!("Error building project: {:?}", e);
-            return;
         }
     }
 }

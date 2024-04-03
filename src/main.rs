@@ -132,7 +132,7 @@ fn collect_user_input() -> Command {
                 }
                 _ => {
                     // Return current working directory path
-                    return Command::Dev("test".to_string());
+                    return Command::Dev("../html_project_template".to_string());
                 }
             }
         }

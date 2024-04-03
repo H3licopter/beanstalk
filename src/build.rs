@@ -18,7 +18,10 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
 
     // Read content from a test file
     println!("Reading from: {}", &entry_path);
-    let content = fs::read_to_string(&entry_path)?;
+
+    // GET EACH BS FILE TO PARSE
+    // JUST GET HOME PAGE FOR NOW
+    let content = fs::read_to_string(format!("{}/src/pages/home.bs", &entry_path))?;
 
     // Tokenize File
     let tokens: Vec<Token> = tokenizer::tokenize(&content);
