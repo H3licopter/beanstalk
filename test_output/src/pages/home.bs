@@ -1,7 +1,3 @@
 ---
-Test output
-
-
-Bunch more stuff in here wooo
-
+[img "default.png", img "default.png", img "default.png", img "default.png"]
 [rgb(100,20,150): bunch of text with color]

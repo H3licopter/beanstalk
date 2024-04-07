@@ -2,95 +2,107 @@
 #date "2024-2-4"
 ---
 # Variables
-Equals '=' is used for variable assignment. And colon : is used to indicate initialisation. If a variable is assigned a value with a colon rather than the equals symbol it becomes immutable.
+Equals '=' is used for variable assignment. And colon : is used to indicate initialisation. If a variable is assigned a value with a colon rather than the equals symbol it becomes immutable (a constant).
+
+Beanstalk uses a name, value, type syntax for variable assignment. This is to make the code readable, concise and allows for a unique unit type syntax. 
+It also means Beanstalk values are written like values with units you would see in a physics equation, with the value being appended by it's unit.
 
 # Static Assignment
 `
-    my_brain : s8 = "Dumb"
+    -- UTF-8 string
+    my_brain = "Dumb"
 
-    number_4 : u32 = 69 
+    -- 32 bit integer
+    integer = 69
 
-    -- dynamically infer the type at compile time
-    my_brain := "thing" 
+    -- 32 bit float
+    float = 69.0
+
+    -- Specify the type as an unsigned 32 bit integer by appending the type unit to the value
+    my_brain = 420 uint
 `
 
 **There is no such thing as Nil or Null in Beanstalk.**
 
-Variables initialised with a type but no assignment will have a zero value depending on the type.
+Variables must be given a value when they are declared. 
 If an error occurs during assignment of a variable, 
 the zero value will be used and an error will be created as an additional value that must be handled during the assignement or passed up the callstack.
 
 `
-    uselessness: i32 --value is 0
+    uselessness = int 
+    -- value is 0
 
-    thing :: a_collection -- Immutable reference
-    thing := a_collection -- mutable reference
-    thing := a_collection.copy() -- deep copy, inherits type
+    -- Immutable copy
+    thing : a_collection 
 
-    number : i32 = 30.0
-    number_copy := number 
+    -- Referecnce to a_collection
+    thing = a_collection
+
+    -- deep copy of a collection
+    thing = a_collection.copy() 
+
+    number_copy = number
 `
 
 # Immutable Variables
 `
-    -- Int constant (type inferred at compile time)
-    self_worth :: 0
+    -- Int constant (type inferred as int)
+    self_worth : 0
 
     -- Float constant
-    my_iq :: 0.0
+    my_iq : 0.0
 
-    best_number : i32 : 69
+    best_number : 69 float
 
     -- Int constant evaluated at compile time
+    -- Will throw an error at compile time (int overflow) as the value is too big
     weird_num :: 69 ** 420
 `
 
-If you are creating a non-collection variable and need it to be formatted over multiple lines, you can wrap the value in brackets
+If you are creating a non-collection variable and need it to be formatted over multiple lines, you can wrap the value in parenthesis. 
 
 `
-    var1, var2, var3, var4 : u8 : (
+    var1, var2, var3, var4 : (
         4 + 5 + 6 + 7 + 8 + 9 + 10
-    )
+    ) int
 
-    var1, var2 : u16 : 420
+    var1, var2 : 420
 
-    var3, var4 := "cool", "beans"
+    var3, var4 = "cool", "beans"
 `
 
 # Data Types
 All data type keywords contain methods from the standard library for common manipulation of types. 
 The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
 
-[table(3): 
+[table 3: 
+    [: Type] [: Description] [: Zero Value]
 
+    [: int] [: These numerical types are 64 bit by default but support custom sizes] [: 0]
+
+    [: float] [: ] [: ]
+
+    [: decimal] [: A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision] [: ]
+
+    [: string] [: UTF-8] [: ""]
+
+    [: unicode] [: Unicode strings are UTF-32 strings. They are created using single quotes. ] [: '']
+
+    [: bool] [: Including true and false as types] [: false]
+
+    [: scene] [: The templating syntax of Beanstalk] [: []]
+
+    [: []] [: Collection] [: ]
+
+    [: choice] [: Rust style enums] [: error]
+
+    [: type] [: For creating new objects] [: ]
+
+    [: error] [: Contains a string detailing the error] [: ]
 ]
 
-| Type | Description | Zero Value |
------------------------------------
-| int    | These numerical types are 64 bit by default but |support custom sizes | 0 |
-
-| float | | |
-
-| decimal | A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision | |
-
-| string | UTF-8 | "" |
-
-| rune   | Unicode char (rune) is like an Int32 | 0 |
-
-| bool   | Including true and false as types | false |
-
-| scene  | The templating syntax of Beanstalk | [] |
-
-| []     | Collection | |
-
-| choice | Rust style enums | error |
-
-| type   | For creating new objects | |
-
-| error  | Contains a string detailing the error | |
-
-Type will operate as a generic when specified as the type of a function arg. 
-It's also used for creating Objects and choices, using the same syntax as creating constant variables.
+Type will operate like a generic when specified as the type of a function arg. 
+It's also used for creating new Objects, using the same syntax as creating constant variables.
 
 # Strings
 String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
@@ -111,36 +123,40 @@ Backticks are used for RAW strings. To escape a backtick it must be preceded wit
     `9 "is" {5 + 4}` -- 9 "is" {5 + 4}
 `
 
-# Runes
-Rune characters are equivalent to Int32 but are their own specific type. 
+# Unicode Strings
+Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 
 
-cool_emoji : rune : 😂
-
-# Strict Types
-Variables can also have additional contraints about their types, allowing only valid matches to be assigned at compiletime or runtime without an error being thrown. 
-
-These constraints can be added to the type portion of the variable assignemnt.
-Doing this allows a small, clean syntax for handling invalid inputs using Beanstalks error handling.
-
-`
-    person_age : i 0 to 120 = $age_input.value !(
-        print("Invalid age input: {error}")
-    )
-`
+cool_emoji : '😂'
 
 # Unit Types
-Number types can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
+Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
 
-The first unit in the operation will be used if no unit type is specified in the type parameter.
+These are extensions to exsisting base types.
+
+The first unit in the operation will be used if no unit type is specified in the type parameter. 
+You don't need to have a space between a literal value and the unit type, but variables must have a space between the value and the unit type.
+
+If you are mixing unit types in an operation, the first unit type will be used for the result.
 
 `
-    #unit m = 0
+    #unit m = float -- Specifies the base type as a float
     #unit cm = m * 0.01
     #unit mm = cm * 0.1
 
-    width : float = 5m * 230cm
+    width = 5m * 230cm
     -- result is 5.23
 
-    height : float cm = 3m * 2m
+    height = (3m * 2m) cm
     -- result is 500
+`
+
+You can also create boolean unit types that allow for strict type checking. 
+
+`
+    #unit age_range = 0 to 120
+
+    person_age = age_input.value age_range !(
+        print("Invalid age input: {error}")
+    )
+
 `

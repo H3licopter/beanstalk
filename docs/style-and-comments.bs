@@ -4,11 +4,10 @@
 
 # Style Guide
 The recommended style guide is:
-- snake_case for variables
 - camelCase for functions
 - PascalCase for objects
 - SCREAMING_SNAKE_CASE for Choices
-- kebab-case for file names and styles
+- snake_case as the default choice for variables and other things
 
 4 spaces are recommended for indentation.
 

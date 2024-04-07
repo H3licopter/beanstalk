@@ -11,17 +11,24 @@ Collections of data in Beanstalk are created using curly brackets. The type of t
 - If you don't set an explicit zero value on a property, any new structs created with the prototype MUST assign a value to it.
 
 `
-    Vec :: {
-        x : float = 0,
-        y : float = 0,
+    Vec : {
+        x float,
+        y float,
     }
 `
 
+Here is the same prototype, but with optional parameters that have default zero values.
 
+`
+    Vec : {
+        x = 0.0,
+        y = 0.0,
+    }
+`
 
 ### Adding a method to the prototype
 `
-    move_x : ( this: Vec ) : (
+    move_x :: { this Vec } (
         this.x, this.y = 0
     )
 `
@@ -32,42 +39,11 @@ If Vec did not assign zero values for the properties, this would throw an error 
 emptyVec : Vec
 
 ## Named Collection
-A named collection is like a Struct in other languages. It is a collection of properties and methods.
-
-Properties can be accessed on the named collection the same as any other collection, by using square brackets. Methods are accessed differently, using a dot instead. 
-
-New struct from prototype. Will inherit any methods implemented for those structs.
-
 `
-    coordinates : Vec = {
-        x := 3.45,
-        y := 7.93
-    }
-
-    A new struct without a prototype
-    new_struct := {
-        thing :: 0,
-        another_thing := 3
-    }
-`
-
-Named Collections can also contain other named collectios and refer to its current instance using the "this" keyword.
-`
-    -- Object definition with default values
-    Person :: {
-        name: string,
-        age := 69,
-        occupation := "Grave Digger",
-        change_age : (this: Person, years: int) : (
-            this.age = this.age + years
-        )
-    }
-
-    -- Creating a new instance of the same Object
-    Bob : Person : {
-        name = "Bob",
-        age = 42
-    }
+    coordinates = {
+        x = 3.45,
+        y = 7.93
+    } Vec
 `
 
 Accessing fields on Objects works the same as Arrays, available properties become visible when opening a new square bracket. Methods are always accessed using the dot syntax instead.

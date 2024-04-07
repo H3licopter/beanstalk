@@ -183,15 +183,16 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                 }
 
                 let mut img_count = 0;
+                let img_default_dir = "/images/";
 
                 for tag in &tags {
                     match tag {
                         Tag::Img(src) => {
-                            images.push(format!("./{}", src));
+                            images.push(format!("{img_default_dir}{src}"));
                             img_count += 1;
                         }
                         Tag::Video(src) => {
-                            scene_wrap.tag = Tag::Video(format!("./{}", src));
+                            scene_wrap.tag = Tag::Video(format!("{src}"));
                             if img_count > 0 {
                                 scene_wrap
                                     .properties
@@ -220,8 +221,7 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                     let img_resize = 100.0 / f32::sqrt(img_count as f32);
                     for image in images {
                         html.push_str(&format!(
-                            "<img src=\"{}\" style=\"width:{}%;height:{}%;\"/>",
-                            image, img_resize, img_resize
+                            "<img src=\"{image}\" style=\"width:{img_resize}%;height:{img_resize}%;\"/>"
                         ));
                     }
                 }

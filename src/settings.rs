@@ -10,6 +10,7 @@ pub enum Config {
     Favicons(String),
     DefaultImage(String),
     PageXLargeImage(String),
+    ProjectImageFolder(String),
 }
 pub struct HTMLMeta {
     pub site_title: String,
@@ -31,7 +32,7 @@ pub struct HTMLMeta {
 }
 
 pub fn get_meta_config() -> HTMLMeta {
-    let default_meta = HTMLMeta {
+    HTMLMeta {
         site_title: String::from("Website Title"),
         page_description: String::from("Website Description"),
         site_url: String::from("localhost:6969"),
@@ -48,6 +49,5 @@ pub fn get_meta_config() -> HTMLMeta {
         theme_color_light: String::from("#fafafa"),
         theme_color_dark: String::from("#101010"),
         auto_site_title: true,
-    };
-    default_meta
+    }
 }

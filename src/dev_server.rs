@@ -67,20 +67,38 @@ fn handle_connection(mut stream: TcpStream, path: String) {
                 // Get requested path
                 let file_path = request.split_whitespace().collect::<Vec<&str>>()[1];
                 println!("Requested path: {}", file_path);
-                let file_requested = fs::read_to_string(format!("{}/dist{}", path, file_path));
 
+                if file_path.ends_with(".png") || file_path.ends_with(".jpg") || file_path.ends_with(".gif") {
+                    match fs::read(format!("{}/dist{}", path, file_path)) {
+                        Ok(c) => {
+                            let response = format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{c}");
+                            stream.write_all(response.as_bytes()).unwrap();
+                            return;
+                        }
+                        Err(_) => {
+                            println!("Image not found");
+                        }
+                    }
+                }
+
+                let file_requested = fs::read_to_string(format!("{}/dist{}", path, file_path));
                 match file_requested {
                     Ok(c) => {
                         // Make sure the path does not try to access any directories outside of /dist
-                        if !file_path.contains("..") {
-                            contents = c;
-                            length = contents.len();
-                            status_line = "HTTP/1.1 200 OK";
-                            println!("Sending requested file");
+                        if file_path.contains("..") {
+                            println!("Invalid path");
+                            return;
                         }
+
+                        contents = c;
+                        length = contents.len();
+                        status_line = "HTTP/1.1 200 OK";
+                        println!("Sending requested file");
+                        
                     }
                     Err(_) => {
-                        println!("File not found");
+                        println!("File path not found");
+                        fs::read_to_string(format!("{}/{}/dist/404.html", entry_path, path)).unwrap();
                     }
                 }
             }
@@ -91,7 +109,6 @@ fn handle_connection(mut stream: TcpStream, path: String) {
     }
 
     let response = format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
-
     stream.write_all(response.as_bytes()).unwrap();
 }
 
