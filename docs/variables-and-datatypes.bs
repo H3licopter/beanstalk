@@ -153,9 +153,9 @@ If you are mixing unit types in an operation, the first unit type will be used f
 You can also create boolean unit types that allow for strict type checking. 
 
 `
-    #unit age_range = 0 to 120
+    #unit Age_Range = 0 to 120
 
-    person_age = age_input.value age_range !(
+    person_age = age_input.value Age_Range !(
         print("Invalid age input: {error}")
     )
 

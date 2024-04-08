@@ -3,47 +3,48 @@
 ---
 
 # Error Handling
-Errors are treated as values. Any function can return an error as its last return value. 
+Errors are treated as values. Any function can return an error as its last return value. Beanstalk handles errors  similar to Go, but with a more minimal syntax for error checking.
 
-The ! operator can append any statement or expression and create a new scope to catch and handle errors by checking if the previous expression or function returned an error as its last value.
-
-You can give the error a variable name and open a new scope with a colon to handle the error. If the error handling returns a value, the expression or function that returned the error will return that value instead.
+The ! operator can append any statement or expression and create a new scope to catch and handle errors by checking if the previous expression or function contains an error as in it's last value.
 
 If an error happens in a function, any values will be assigned their zero value if assignment fails. 
 
+If the error handling scope returns a value, the expression or function that contained the error will return that value instead of the zero value that would have been set.
+
 Errors can be explicitly passed up the call stack by using a ! without returning a value.
 
-Double bang !! will force the program to panic and halt if the previous expression or function call returns an error.
+Double bang !! will force the program to panic and halt if the previous expression or function call returned an error as one of it's values.
 
 `
     -- Always returns a string even if an error is thrown by getNetworkRequest()
-    -- The program will print the error and continue 
-    getURL : () -> string : (
+    -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
+    getURL : {} -> string (
         -> getNetworkRequest() !(
-            print("Network Request Error: {error}")
+            io("Network Request Error: {error}")
             -> "example.com"
         )
     )
 
-    -- Returns an error to the calling function, just providing information about the error
-    getURL : string() : (
+    -- Returns an error to the calling function, just printing out information about the error without returning a value to replace the empty string.
+    -- A question mark must be added to the return type of the function to specify that it can return an error. This enforces that the error must be handled by the calling function.
+    getURL : {} -> string? (
         -> getNetworkRequest() !(
-            print("Network Request Error: {error}")
+            io("Network Request Error: {error}")
         )
     )
 
-    -- Default case in the case getURL returns an error
-    -- The function specifies it can return an error so no explicit error handling is needed inside
-    dodgyFunction: () -> string, error  : -> getURL()
+    -- This function also specifies it can return an error so no explicit error handling is needed inside
+    dodgyFunction: {} -> string?  ( 
+        -> getURL()
+    )
 
     -- The compiler will give a warning about unhandled error cases inside this function
-    callingFunction : () : (
+    callingFunction : {} -> (
         thing := dodgyFunction()
     )
 
-    -- Unless an error is specified as a return value of the calling function, it must be handled
-    -- Here is an example handling the error inline
-    callingFunction : () : (
-        thing := dodgyFunction() ! -> "default_thing"
+    -- So it must be handled like this
+    callingFunction : {} -> (
+        thing := dodgyFunction() !( -> "default_thing" )
     )
 `

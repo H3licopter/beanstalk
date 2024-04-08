@@ -3,9 +3,7 @@
 ---
 
 # Functions
-Functions are created using double colons ::
-
-Their structure is: optional return type, prototype containing the args for the function, then the body of the function.
+Their structure is: prototype containing the args for the function, the return type, then the body of the function.
 
 A return type is required for any functions returning a value.
 
@@ -13,16 +11,23 @@ You specify arguments by using the prototype syntax to create a prototype litera
 
 Arrows are the symbol for returns within the function scope.
 
-Multiple expressions (or values) can be chained together at the end of the function with commas so it can return multiple values. 
-You must assign the same or less variables to the return values of a function, any additional values the function returns that are not assigned can be ignored.
+When functions return mutliple values, they are returned as a choice. This choice can always contain an error as a possible choice.
+
+`
+    -- Multiple return values
+    multipleReturns : {} -> ( -> {1, 2, 3} )
+
+    a = multipleReturns{}
+
+    a.0 -- 1
 
 `
     concatString : {a string, b string} -> string ( a + b )
 
-    myself = concatString(
+    myself = concatString{
         a "I am ",
         b "really cool"
-    )
+    }
 
     -- Using an exsisting prototype to define the args
     NormalizeVectors : Vec -> Vec (
@@ -35,19 +40,19 @@ You must assign the same or less variables to the return values of a function, a
     -- No return value or args
     inlineSideEffect : {} -> ( state = "beans" )
 
-    -- With default args and implicit return
-    addNumbers : {a = 1, b = 1} -> ( a + b )
+    -- With default args
+    addNumbers : {a = 1, b = 1} -> ( -> a + b )
 
     -- named args access
-    result = addNumbers(a 3, b 16)
+    result = addNumbers{a 3, b 16}
 
     -- Multiple return values
-    multipleReturns : {} -> (1, 2, 3)
+    multipleReturns : {} -> ( 1, 2, 3 )
 
-    a, b, c = multipleReturns()
+    a, b, c = multipleReturns{}
 
     -- Anonymous functions
-    {arg int} -> (arg + 1)
+    {arg int} -> ( arg + 1 )
     
     {arg int} -> ( arg + 1 )
 
@@ -68,7 +73,7 @@ To impliment the method on one or more types, specify them as types of the Self 
     increment : {self int or float} -> ( self += 1 )
 
     number = 0
-    number.incrementInt() -- 1
+    number.incrementInt{} -- 1
 
     randomizeAge : {self: person} -> ( 
         self.age = int.rng(min 0, max 100) 

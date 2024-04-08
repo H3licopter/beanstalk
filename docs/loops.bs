@@ -9,37 +9,24 @@ Using the "in" keyword, you can specify an integer, float or collection to itera
 
 The 'to' keyword defines a range for the loop.
 
-Finally, you can add the "as" keyword to specify how the iterator will mutate for each step of the loop.
-
 `
     for thing in things (
-        print("ye")
+        print{"ye"}
     )
 
-    -- While style loop
     thing = 2
-    for thing < 5 (
-        print(num)
-        thing += 1
+    for thing to 5 (
+        io{thing}
     )
 
-    --  Defining the iterator, use the "to" keyword to define a range
-    for n in 0 to 5 ( cringe(i) ) 
-
-    -- loop also using the "as" keyword to describe how the new iterator will change each loop
-    for n in 12 to 0 as -1 (
-        cringe(i)
+    for checkIfTrue{} (
+        io{"ye"}
     )
 
     for i to text_array.length (
-        print(text_array.i)
+        print{text_array.i}
     )
 
     --- infinite loop (a break statement is required to exit)
-    for true: print(":(")
-
-    --- for loop as an assignment expression
-    me: string = for fact in fact_array (
-        if fact is "not cool" (=> fact)
-    )
+    for ( io{":("} )
 `

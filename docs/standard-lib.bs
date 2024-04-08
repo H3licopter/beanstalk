@@ -9,7 +9,7 @@ Standard library in Beanstalk comprises methods and scene properties. The standa
 When starting a new HTML project, Beanstalk will implicitly import relevant scene properties and global keywords. Other keywords that are added into the global scope include:
 
 *Global keywords:*
-- print
+- io
 - window
 
 ## Scene Properties:

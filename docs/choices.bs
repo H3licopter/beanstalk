@@ -3,19 +3,23 @@
 ---
 
 # Choices (enums)
-Choices are created by setting a variable type as an choice. 
+Choices are a way to define a set of possible values for a variable.
+
+Choices are created by seperating mutliple values with a pipe |.
+
 Choices are written in screaming snake case. 
-Each choice can have a specified data type associated with it that allows you to easily store and access values equal to that Choice.
+
+Each choice can optionally contain data that can be accessed inside that Choice.
 
 `
-    STATE : choice : (
-        Paused,
-        Running,
-        ErrorMessage: String,
-        Person: Person
+    STATE : (
+        Paused
+        | Running
+        | ErrorMessage: ""
+        | Person: {} Person
     )
 
-    now := STATE.Running
+    now = STATE.Running
 
     if now is STATE.Running (
         now = STATE.Paused

@@ -2,7 +2,7 @@
 #date "2024-2-5"
 ---
 # Collections
-Collections of data in Beanstalk are created using curly brackets. The type of the collection is inferred from the assignment. All collections have their data accessed using square brackets.
+Collections of data in Beanstalk are created using curly brackets. The type of the collection is inferred from the assignment, but can be specified by appending the type after the collection declaration. All collections have their data accessed using the dot operator.
 
 ## Collection Prototype
 - Properties cannot be changed or added, as prototypes are compile time evaluated. Becomes a prototype with default values for new structs.
@@ -28,7 +28,7 @@ Here is the same prototype, but with optional parameters that have default zero 
 
 ### Adding a method to the prototype
 `
-    move_x :: { this Vec } (
+    reset : this Vec -> (
         this.x, this.y = 0
     )
 `
@@ -38,77 +38,26 @@ If Vec did not assign zero values for the properties, this would throw an error 
 
 emptyVec : Vec
 
-## Named Collection
+## Creating a new struct from a prototype
 `
     coordinates = {
         x = 3.45,
         y = 7.93
     } Vec
+
+    coordinates.x -- returns 3.45
+    coordinates.reset{} -- sets x and y to 0
 `
 
-Accessing fields on Objects works the same as Arrays, available properties become visible when opening a new square bracket. Methods are always accessed using the dot syntax instead.
+Collections created without named properties become arrays. All collections must contain the same datatype.
 
-## Tuples
-Tuples are the simplest form of collection. They are an immutable set of values. 
-A tuple can is created by assigning a constant variable without any specified type more than 1 value separated by commas.
-These values can optionally have a type definition.
+- Mutable collections are dynamically sized
+`array = { 3, 4, 5 }`
 
 `
-    Person.name -- returns "Gary"
-    Bob.incrementAge(1) -- returns 43
+    -- Creates an empty collection that can only contain integers
+    integers = {int}
 
-    tuple : {} : {
-        1, 
-        decimal: 3, 
-        6, 
-        "random string", 
-        false
-    }
-
-    print(immutable_tuple.2) -- 6
-`
-
-## Arrays
-Collections created without named properties become arrays. All arrays must contain the same datatype.
-
-- Mutable arrays are dynamically sized (behave like slices) and their values can be mutated
-`array := { 3, 4, 5 }`
-
-- By specifying a size for the array, you can initialise a fixed size array.
-- Zero values will be added for each element that is not yet assigned to the array.
-`array : {420} = { 3, 4, 5 }`
-
-- Constant arrays cannot have their values mutated, but can have them removed or added dynamically by default. 
-`array :: { 2, 8, 9 }`
-
-- Create a fixed size immutable array and infer the fixed size from the assignment. 
-`tuple_example : {} : { "really cool", "programming language" }`
-
-`
-    -- Dynamically sized string array, type inferred as s8 at compile time
-    fears : {} = { "The Unknown", "Compiler Errors", "Imposter's Syndrome" }
-
-    -- Creates an empty, dynamically sized array that can only contain integers
-    integers : int{}
-
-    -- 
-    A mutable array of UTF-8 strings with a fixed size of 69 elements
-    Fills unassigned indexes of the array with the type's default value of empty string.
-    Attempting to remove elements from fixed size arrays will result in an error
-    --
-    fears : string{69} = { "Javascript", "C++", "Cobol" }
+    fears = { "Javascript", "C++", "Cobol" }
     fears.0 -- returns ‘Javascript'
-    fears.69 -- returns out of bounds error, 69 is the number of elements, so 68 is the last element in the array
-    fears.30 -- returns an empty string ""
-
-    -- A dynamically sized array that can contain strings, booleans and integers. These types are inferred from the assignment at compile time. Only these types will be acceptable. 
-    cool : {} : { "Beanstalk", "Beans", false, 0 }
-`
-
-## Array Slices
-Slices are references to a subset of an existing array. To create a slice, you create a new variable and assign it to an existing array, but you can specify a range of elements that the slice can reference. 
-
-`
-    array_slice := big_array.(31 to 42)
-    array_slice.0 -- returns the 32nd element of big_array
 `
