@@ -1,50 +1,132 @@
 use crate::build;
+use std::{path::{Path, PathBuf}, time::{Duration, Instant}};
+use notify_debouncer_mini::{new_debouncer_opt, Config, DebouncedEvent};
 use notify::{RecursiveMode, Watcher};
-use notify_debouncer_mini::{new_debouncer_opt, Config};
-use std::{
-    fs,
-    io::{prelude::*, BufReader},
-    net::{TcpListener, TcpStream},
-    path::Path,
-    time::{Duration, Instant},
-};
+use tokio::fs;
+use tokio::sync::mpsc;
+use tokio::task;
 
-pub fn start_dev_server(mut path: String) {
-    let listener = TcpListener::bind("127.0.0.1:6969").unwrap();
+#[tokio::main]
+pub async fn launch_server(path: String) {
+    let path = format!("{}/test_output/dist", path);
 
-    // watch_directory(Path::new("./src"), &path);
+    // Create a channel to communicate changes
+    let (sender, mut reciever) = mpsc::channel(1);
 
-    if path.is_empty() {
-        let current_dir = std::env::current_dir();
+    // Spawn a task to watch for file changes
+    task::spawn(watch_files(path.clone(), sender, reciever));
 
-        match current_dir {
-            Ok(dir) => {
-                path = dir.to_string_lossy().into_owned();
-            }
-            Err(e) => {
-                println!("Error getting current directory: {:?}", e);
+    // Define a filter to serve static files
+    let static_files = warp::fs::dir(path.clone());
+
+    // Launch the server
+    warp::serve(static_files).run(([127, 0, 0, 1], 6969)).await;
+}
+
+async fn watch_files(path: String, sender: mpsc::Sender<()>, mut reciever: mpsc::Receiver<()>) {
+    // Watch for changes in the directory
+    let dist_dir = format!("{}/test_output/dist", path);
+    let src_dir = format!("{}/test_output/src", path);
+    
+    // setup debouncer
+    // notify backend configuration
+    let backend_config = notify::Config::default().with_poll_interval(Duration::from_secs(2));
+    // debouncer configuration
+    let debouncer_config = Config::default().with_notify_config(backend_config);
+    // select backend via fish operator, here PollWatcher backend
+    let mut debouncer = new_debouncer_opt::<_, 
+        notify::PollWatcher>(
+        debouncer_config, 
+        move |result: Result<Vec<DebouncedEvent>, notify::Error>| {
+            if let Ok(events) = result {
+                for event in events {
+                    println!("File changed: {:?}", event);
+                    let _ = sender.send(());
+                }
+            } else if let Err(e) = result {
+                println!("Watch error: {:?}", e);
             }
         }
-    }
+    ).unwrap();
 
-    for stream in listener.incoming() {
-        let stream = stream.unwrap();
-        handle_connection(stream, path.clone());
+    debouncer
+        .watcher()
+        .watch(Path::new(&src_dir), RecursiveMode::Recursive)
+        .unwrap();
+
+    loop {
+        // Wait for a file change event
+        let _ = reciever.recv();
+
+        // Print a message indicating a change
+        println!("File changed, restarting server...");
+
+        // Restart the server
+        let path = dist_dir.clone();
+        task::spawn(async move {
+            // Gracefully shutdown the server
+            tokio::signal::ctrl_c().await.expect("failed to install CTRL+C signal handler");
+
+            // Serve static files again
+            warp::serve(warp::fs::dir(path.clone()))
+                .run(([127, 0, 0, 1], 6969))
+                .await;
+        });
     }
 }
 
+fn watch_directory(dev_dir: &Path, build_path: &String) {
+    println!("Watching {:?} for changes...", dev_dir);
+
+    // setup debouncer
+    let (tx, rx) = std::sync::mpsc::channel();
+    // notify backend configuration
+    let backend_config = notify::Config::default().with_poll_interval(Duration::from_millis(100));
+    // debouncer configuration
+    let debouncer_config = Config::default().with_notify_config(backend_config);
+    // select backend via fish operator, here PollWatcher backend
+    let mut debouncer = new_debouncer_opt::<_, notify::PollWatcher>(debouncer_config, tx).unwrap();
+
+    debouncer
+        .watcher()
+        .watch(Path::new(dev_dir), RecursiveMode::Recursive)
+        .unwrap();
+    // print all events, non returning
+    for result in rx {
+        match result {
+            Ok(event) => {
+                println!("Event {event:?}");
+                build_project(build_path);
+            }
+            Err(error) => println!("Error {error:?}"),
+        }
+    }
+}
+
+
+
+fn build_project(build_path: &String) {
+    println!("Building project...");
+    let start = Instant::now();
+    match build::build(build_path.to_string()) {
+        Ok(_) => {
+            let duration = start.elapsed();
+            println!("Project built in: {:?}", duration);
+        }
+        Err(e) => {
+            println!("Error building project: {:?}", e);
+            return;
+        }
+    }
+}
+
+/*
+
 fn handle_connection(mut stream: TcpStream, path: String) {
     let buf_reader = BufReader::new(&mut stream);
-    let current_dir = std::env::current_dir();
-    let entry_path = match current_dir {
-        Ok(dir) => dir.to_string_lossy().into_owned(),
-        Err(e) => {
-            println!("Error getting current directory: {:?}", e);
-            "/".to_string()
-        }
-    };
 
-    // println!("{}", format!("{}/{}/dist/any file should be here", entry_path, path));
+
+    // 
     let mut contents =
         fs::read_to_string(format!("{}/{}/dist/404.html", entry_path, path)).unwrap();
     let mut length = contents.len();
@@ -112,46 +194,5 @@ fn handle_connection(mut stream: TcpStream, path: String) {
     stream.write_all(response.as_bytes()).unwrap();
 }
 
-fn build_project(build_path: &String) {
-    println!("Building project...");
-    let start = Instant::now();
-    match build::build(build_path.to_string()) {
-        Ok(_) => {
-            let duration = start.elapsed();
-            println!("Project built in: {:?}", duration);
-        }
-        Err(e) => {
-            println!("Error building project: {:?}", e);
-            return;
-        }
-    }
-}
+ */
 
-// CURRENTLY JUST BLOCKS THE THREAD, NEED TO GET WORKING
-fn watch_directory(dev_dir: &Path, build_path: &String) {
-    println!("Watching {:?} for changes...", dev_dir);
-
-    // setup debouncer
-    let (tx, rx) = std::sync::mpsc::channel();
-    // notify backend configuration
-    let backend_config = notify::Config::default().with_poll_interval(Duration::from_millis(100));
-    // debouncer configuration
-    let debouncer_config = Config::default().with_notify_config(backend_config);
-    // select backend via fish operator, here PollWatcher backend
-    let mut debouncer = new_debouncer_opt::<_, notify::PollWatcher>(debouncer_config, tx).unwrap();
-
-    debouncer
-        .watcher()
-        .watch(Path::new(dev_dir), RecursiveMode::Recursive)
-        .unwrap();
-    // print all events, non returning
-    for result in rx {
-        match result {
-            Ok(event) => {
-                println!("Event {event:?}");
-                build_project(build_path);
-            }
-            Err(error) => println!("Error {error:?}"),
-        }
-    }
-}

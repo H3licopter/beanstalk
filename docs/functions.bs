@@ -17,7 +17,7 @@ Multiple expressions (or values) can be chained together at the end of the funct
 You must assign the same or less variables to the return values of a function, any additional values the function returns that are not assigned can be ignored.
 
 `
-    concatString :: {a string, b string} -> string ( a + b )
+    concatString : {a string, b string} -> string ( a + b )
 
     myself = concatString(
         a "I am ",
@@ -25,7 +25,7 @@ You must assign the same or less variables to the return values of a function, a
     )
 
     -- Using an exsisting prototype to define the args
-    NormalizeVectors :: Vec -> Vec (
+    NormalizeVectors : Vec -> Vec (
         -> { 
             x = Vec.x / Vec.length, 
             y = Vec.y / Vec.length 
@@ -33,25 +33,25 @@ You must assign the same or less variables to the return values of a function, a
     )
 
     -- No return value or args
-    inlineSideEffect :: state = "beans"
+    inlineSideEffect : {} -> ( state = "beans" )
 
     -- With default args and implicit return
-    addNumbers :: {a = 1, b = 1} -> a + b
+    addNumbers : {a = 1, b = 1} -> ( a + b )
 
     -- named args access
     result = addNumbers(a 3, b 16)
 
     -- Multiple return values
-    multipleReturns :: -> 1, 2, 3
+    multipleReturns : {} -> (1, 2, 3)
 
     a, b, c = multipleReturns()
 
     -- Anonymous functions
-    int {arg int} :: (arg + 1)
+    {arg int} -> (arg + 1)
     
-    {arg int} :: arg + 1
+    {arg int} -> ( arg + 1 )
 
-    {} -> "Hello, World!"
+    {} -> ( "Hello, World!" )
 `
 
 # Methods
@@ -65,12 +65,14 @@ Create a new method by using the Self keyword as the name of an argument.
 To impliment the method on one or more types, specify them as types of the Self argument.
 
 `
-    increment :: {self: int or float} ( -> self += 1 )
+    increment : {self int or float} -> ( self += 1 )
 
-    number := 0
+    number = 0
     number.incrementInt() -- 1
 
-    randomizeAge : (self: person) : self.age = int.rng(0 as min, 100 as max)
+    randomizeAge : {self: person} -> ( 
+        self.age = int.rng(min 0, max 100) 
+    )
 `
 
 # Explicit Function Overloading
@@ -82,12 +84,12 @@ By creating a new variable and setting it equal to a list of functions using the
 You can create an overloaded function that will automatically call the correct function depending on the arguments passed into it.
 
 `
-    toString :: intToString | floatToString | decimalToString
+    toString : intToString + floatToString + decimalToString
 
     -- Can wrap in brackets for multi-line
-    toString :: (
-        intToString |
-        floatToString | 
+    toString : (
+        intToString +
+        floatToString +
         decimalToString
     )
 `
