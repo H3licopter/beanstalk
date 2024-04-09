@@ -10,7 +10,7 @@ use std::fs;
 pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     // If entry_path is empty, use the current directory
     if entry_path == "test" {
-        entry_path = "src/test.bs".to_string();
+        entry_path = "test_output/src/pages/home.bs".to_string();
     }
 
     if entry_path.is_empty() {
@@ -30,51 +30,76 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     // check to see if there is a config.bs file in this directory
     // if there is, read it and set the config settings
     // and check where the project entry points are
+    enum CompileType {
+        SingleFile(String, String), // File Name, Source Code
+        MultiFile(String), // Config file content
+        Error(String)
+    }
     let config = if entry_path.ends_with(".bs") {
-        Ok("single file".to_string())
+        let source_code = fs::read_to_string(&entry_path);
+        let og_file_name = entry_path.split("/").last().unwrap();
+        let new_file_name = og_file_name.split(".").next().unwrap();
+
+        match source_code {
+            Ok(content) => CompileType::SingleFile(new_file_name.to_string(), content),
+            Err(_) => CompileType::Error("No file found".to_string()),
+        }
     } else {
-        fs::read_to_string(format!("{}/config.bs", &entry_path))
+        let source_code = fs::read_to_string(format!("{}/config.bs", &entry_path));
+        match source_code {
+            Ok(content) => CompileType::MultiFile(content),
+            Err(_) => CompileType::Error("No config.bs file found in directory".to_string()),
+        }
     };
 
     match config {
-        Ok(config_content) => {
-            if config_content == "single file" {
-                // Compile the induvidual file
-                let default_output_dir = format!("{}/dist/index.html", &entry_path);
-                fs::create_dir(&default_output_dir)?;
-                let source_code = fs::read_to_string(&entry_path)?;
-                compile(&source_code, &default_output_dir);
-                return Ok(());
-            }
+        CompileType::SingleFile(file_name, code) => {
+            // Compile the induvidual file
+            let entry_file_dir = entry_path.split("/").collect::<Vec<&str>>();
+            let default_output_dir = format!("{}/dist", entry_file_dir[0..entry_file_dir.len()-3].join("/"));
 
+            source_code_to_parse.push(OutputFile {
+                source_code: code,
+                output_file: format!("{}/{}.html", &default_output_dir, file_name)
+            });
+        }
+
+        CompileType::Error(e) => {
+            return Err(e.into());
+        }
+
+        CompileType::MultiFile(source_code) => {
             // Get config settings from config file
-            let project_config = get_config_data(&config_content);
+            let project_config = get_config_data(&source_code);
 
-            // Read the content of the entry file from config data
-            let source_code = fs::read_to_string(&project_config.main);
-            match source_code {
-                Ok(code) => {
+            // TO DO, READ WHOLE PROJECT FROM CONFIG ENTRY POINT AND ADD EVERYTHING TO COMPILE LIST
+            
+            let main_code = fs::read_to_string(project_config.main);
+            
+            match main_code {
+                Ok(content) => {
                     source_code_to_parse.push(OutputFile {
-                        source_code: code,
-                        output_file: "dist/index.html".to_string(),
+                        source_code: content,
+                        output_file: format!("{}/index.html", project_config.output)
                     });
                 }
-                Err(_) => {
-                    return Err("No entry file found".into());
+                Err(e) => {
+                    return Err(e.into());
                 }
             }
-        }
-        Err(_) => {
-            return Err("No config.bs file found in directory".into());
         }
     }
 
-
+    // Compile all output files
+    for file in source_code_to_parse {
+        compile(&file.source_code, &file.output_file)?;
+    }
 
     Ok(())
 }
 
 fn compile(source_code: &str, output_dir: &str) -> Result<Vec<AstNode>, Box<dyn Error>> {
+    println!("Compiling: {}", &output_dir);
     let tokens: Vec<Token> = tokenizer::tokenize(&source_code);
     let ast = parsers::build_ast::new_ast(&tokens, 0).0;
 
@@ -93,13 +118,14 @@ fn compile(source_code: &str, output_dir: &str) -> Result<Vec<AstNode>, Box<dyn 
 struct ProjectConfig {
     errors: Vec<String>,
     main: String,
+    output: String,
 }
-
-fn get_config_data(content: &str) -> ProjectConfig {
-    let config_ast = compile(content, "");
+fn get_config_data(config_source_code: &str) -> ProjectConfig {
+    let config_ast = compile(config_source_code, "");
     let mut config = ProjectConfig {
         errors: Vec::new(),
         main: "src/pages/home.bs".to_string(),
+        output: "dist/".to_string(),
     };
 
     match config_ast {

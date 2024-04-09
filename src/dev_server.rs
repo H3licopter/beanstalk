@@ -1,8 +1,7 @@
 use crate::build;
-use std::{path::{Path, PathBuf}, time::{Duration, Instant}};
+use std::{path::Path, time::{Duration, Instant}};
 use notify_debouncer_mini::{new_debouncer_opt, Config, DebouncedEvent};
-use notify::{RecursiveMode, Watcher};
-use tokio::fs;
+use notify::RecursiveMode;
 use tokio::sync::mpsc;
 use tokio::task;
 
@@ -11,7 +10,7 @@ pub async fn launch_server(path: String) {
     let path = format!("{}/test_output/dist", path);
 
     // Create a channel to communicate changes
-    let (sender, mut reciever) = mpsc::channel(1);
+    let (sender, reciever) = mpsc::channel(1);
 
     // Spawn a task to watch for file changes
     task::spawn(watch_files(path.clone(), sender, reciever));
@@ -75,7 +74,7 @@ async fn watch_files(path: String, sender: mpsc::Sender<()>, mut reciever: mpsc:
     }
 }
 
-fn watch_directory(dev_dir: &Path, build_path: &String) {
+fn _watch_directory(dev_dir: &Path, build_path: &String) {
     println!("Watching {:?} for changes...", dev_dir);
 
     // setup debouncer
@@ -96,7 +95,7 @@ fn watch_directory(dev_dir: &Path, build_path: &String) {
         match result {
             Ok(event) => {
                 println!("Event {event:?}");
-                build_project(build_path);
+                _build_project(build_path);
             }
             Err(error) => println!("Error {error:?}"),
         }
@@ -105,7 +104,7 @@ fn watch_directory(dev_dir: &Path, build_path: &String) {
 
 
 
-fn build_project(build_path: &String) {
+fn _build_project(build_path: &String) {
     println!("Building project...");
     let start = Instant::now();
     match build::build(build_path.to_string()) {

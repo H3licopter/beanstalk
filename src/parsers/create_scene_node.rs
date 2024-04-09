@@ -4,7 +4,7 @@ use super::{
     styles::{Style, Tag},
     util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
 };
-use crate::{bs_types::DataType, Token};
+use crate::Token;
 
 // Recursive function to parse scenes
 pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> AstNode {

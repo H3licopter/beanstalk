@@ -1,3 +1,5 @@
+use crate::bs_types::DataType;
+
 #[derive(Debug, PartialEq)]
 pub enum TokenizeMode {
     Normal,
@@ -70,17 +72,7 @@ pub enum Token {
     As, // For default args in functions
 
     // Type Declarations
-    TypeInt,
-    TypeFloat,
-    TypeDecimal,
-    TypeString,
-    TypeRune,
-    TypeBool,
-    True,
-    False,
-    TypeScene,
-    TypeCollection,
-    TypeObject,
+    TypeKeyword(DataType),
 
     // Errors
     Bang,

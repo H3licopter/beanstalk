@@ -11,10 +11,10 @@ pub enum Tag {
 
 #[derive(Debug)]
 pub enum Style {
-    Padding(f64),
-    Margin(f64),
+    _Padding(f64),
+    _Margin(f64),
     Size(f64, f64),
     TextColor(u8, u8, u8),
-    BackgroundColor(u8, u8, u8),
+    _BackgroundColor(u8, u8, u8),
     Alt(String),
 }

@@ -26,11 +26,6 @@ enum _Operator {
     BitwiseShiftRight,
 }
 
-enum _Expression {
-    Unary(_Operator, Token),                 // Operator, Value
-    BinaryOperator(_Operator, Token, Token), // Operator, LHS value, RHS value
-}
-
 // Creates an expression node from a list of tokens
 pub fn create_expression(
     tokens: &Vec<Token>,
@@ -60,28 +55,30 @@ pub fn create_expression(
         }
     } else {
         // Find the next newline and end expression there
-        while &tokens[expression_end] != &Token::Newline ||
-              &tokens[expression_end] != &Token::Comma   &&
-              &expression_end < &tokens.len() {
-            expression_end += 1;
+        while &expression_end < &tokens.len() {
+            match &tokens[expression_end] {
+                Token::Newline | Token::Comma | Token::SceneClose(_) => {
+                    break;
+                }
+                _ => {
+                    expression_end += 1;
+                }
+            }
         }
     }
 
-    // Get the data type of the expression if it is assigned
-    let data_type = match &tokens[expression_end + 1] {
-        Token::IntLiteral(_) => {
-            DataType::Int
-        }
-        Token::FloatLiteral(_) => {
-            DataType::Float
-        }
-        Token::StringLiteral(_) => {
-            DataType::String
-        }
-        _ => {
-            DataType::Inffered
-        }
-    };
+    // Get the data type of the expression if there is one after the expression
+    let mut data_type = &DataType::Inferred;
+    if expression_end < tokens.len() {
+        match &tokens[expression_end + 1] {
+            Token::TypeKeyword(type_keyword) => {
+                data_type = &type_keyword
+            }
+            _ => {}
+        };
+    }
+
+
 
 
     // Loop through the expression and create the AST nodes
@@ -95,12 +92,11 @@ pub fn create_expression(
                     break;
                 }
             }
-            Token::EOF => {
-                break;
-            }
-            Token::Comma => {
-                // *i += 1;
-                break;
+            Token::EOF | Token::Comma | Token::CloseCollection => {
+                if bracket_nesting == 0 {
+                    break;
+                }
+                return AstNode::Error("Not enough closing parenthesis for expression. Need more ')'!".to_string());
             }
             Token::CloseParenthesis => {
                 if bracket_nesting > 1 {
@@ -179,7 +175,7 @@ pub fn create_expression(
         *i += 1;
     }
 
-    AstNode::Expression(expression, data_type)
+    AstNode::Expression(expression, data_type.clone())
 }
 
 // This function takes in an Expression node that has a Vec of Nodes to evaluate
@@ -237,9 +233,9 @@ pub fn eval_expression(expr: AstNode) -> AstNode {
                     return AstNode::Literal(Token::IntLiteral(result));
                 }
                 DataType::String => {
-                    let mut result = String::new();
+                    let mut _result = String::new();
 
-                    return AstNode::Literal(Token::StringLiteral(result));
+                    return AstNode::Literal(Token::StringLiteral(_result));
                 }
 
                 // Eval other types here ......

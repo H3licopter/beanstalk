@@ -1,3 +1,5 @@
+use crate::bs_types::DataType;
+
 use super::tokens::{Token, TokenizeMode};
 use std::iter::Peekable;
 use std::str::Chars;
@@ -160,6 +162,14 @@ fn get_next_token(
         return Token::Semicolon;
     }
 
+    // Collections
+    if current_char == '{' {
+        return Token::OpenCollection;
+    }
+    if current_char == '}' {
+        return Token::CloseCollection;
+    }
+
     //Error handling
     if current_char == '!' {
         return Token::Bang;
@@ -320,14 +330,6 @@ fn get_next_token(
         return Token::Reference;
     }
 
-    // Arrays
-    if current_char == '{' {
-        return Token::OpenCollection;
-    }
-    if current_char == '}' {
-        return Token::CloseCollection;
-    }
-
     if current_char == '@' {
         return Token::Href;
     }
@@ -436,15 +438,14 @@ fn keyword_or_variable(
 
             // Data Types
             match token_value.as_str() {
-                "int" => return Token::TypeInt,
-                "float" => return Token::TypeFloat,
-                "string" => return Token::TypeString,
-                "rune" => return Token::TypeRune,
-                "bool" => return Token::TypeBool,
-                "decimal" => return Token::TypeDecimal,
-                "scene" => return Token::TypeScene,
-                "collection" => return Token::TypeCollection,
-                "object" => return Token::TypeObject,
+                "int" => return Token::TypeKeyword(DataType::Int),
+                "float" => return Token::TypeKeyword(DataType::Float),
+                "string" => return Token::TypeKeyword(DataType::String),
+                "rune" => return Token::TypeKeyword(DataType::Rune),
+                "bool" => return Token::TypeKeyword(DataType::Bool),
+                "decimal" => return Token::TypeKeyword(DataType::Decimal),
+                "scene" => return Token::TypeKeyword(DataType::Scene),
+                "collection" => return Token::TypeKeyword(DataType::Collection),
                 _ => {}
             }
 

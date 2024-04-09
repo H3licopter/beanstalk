@@ -24,6 +24,12 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
                 ast.push(new_variable(name, tokens, &mut i));
             }
 
+            Token::OpenCollection => {
+                ast.push(
+                    new_collection(tokens, &mut i)
+                );
+            }
+
             Token::Title => {
                 i += 1;
                 match &tokens[i] {
@@ -113,7 +119,7 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 }
 
 // TO DO - SOME PLACEHOLDER CODE FOR FUNCTION DECLARATION
-fn new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
+fn _new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut _function_name = String::new();
     let mut function_args = Vec::new();
     let mut _function_body = Vec::new();
@@ -163,21 +169,69 @@ pub fn is_reference(tokens: &Vec<Token>, i: &usize, name: &String) -> bool {
     })
 }
 
-fn _infer_datatype(value: &Token) -> Token {
-    match value {
-        Token::StringLiteral(_) => Token::TypeString,
-        Token::RawStringLiteral(_) => Token::TypeString,
-        Token::RuneLiteral(_) => Token::TypeRune,
-        Token::IntLiteral(_) => Token::TypeInt,
-        Token::FloatLiteral(_) => Token::TypeFloat,
-        Token::BoolLiteral(_) => Token::TypeBool,
-        Token::DecLiteral(_) => Token::TypeDecimal,
-        Token::OpenCollection => Token::TypeCollection,
-        Token::SceneOpen => Token::TypeScene,
-        _ => Token::Error(
-            "Invalid Assignment for Variable, must be assigned wih a valid datatype".to_string(),
-        ),
+fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
+    let mut collection = Vec::new();
+    let mut collection_type = &DataType::Inferred;
+    
+    // Should always start with current token being an open collection
+    *i += 1;
+
+    // look for index of final CloseCollection in tokens,
+    // And check if there is a type declaration after it
+    let close_index = tokens.iter().position(|x| x == &Token::CloseCollection);
+    match close_index {
+        Some(index) => {
+            if index + 1 < tokens.len() {
+                match &tokens[index + 1] {
+                    Token::TypeKeyword(data_type) => {
+                        collection_type = data_type;
+                    }
+                    _ => {
+                        return AstNode::Error("Expected type declaration after closing collection".to_string());
+                    }
+                }
+            }
+        }
+        None => {
+            return AstNode::Error("Expected closing '}' for collection".to_string());
+        }
     }
+
+    
+
+    while *i < tokens.len() {
+        
+        // Parse the element inside of collection
+        let element = create_expression(tokens, i);
+        
+        // Make sure the datatype is correct for the collection
+        match element {
+            AstNode::Expression(_, ref expression_type) => {
+                if expression_type != collection_type{
+                    return AstNode::Error("Invalid datatype inside collection".to_string());
+                }
+            }
+            _ => { /* Should never happen */ }
+        }
+
+        collection.push(element);
+
+        // Check to see if there is another element, or collection is closed.
+        match &tokens[*i] {
+            &Token::Comma => {
+                *i += 1;
+            }
+            &Token::CloseCollection => {
+                *i += 1;
+                break;
+            }
+            _=> {
+                return AstNode::Error("Expected ',' or '}' in collection after previous value".to_string());
+            }
+        }
+    }
+
+    AstNode::Collection(collection)
 }
 
 
