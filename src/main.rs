@@ -140,7 +140,7 @@ fn collect_user_input() -> Command {
             };
         }
         _ => {
-            return Command::Dev("test_output".to_string());
+            return Command::Test;
         }
     }
 

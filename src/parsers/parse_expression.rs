@@ -27,6 +27,7 @@ enum _Operator {
 }
 
 // Creates an expression node from a list of tokens
+// Will eventually also evaluate the expression at compile time to simplify the AST
 pub fn create_expression(
     tokens: &Vec<Token>,
     i: &mut usize,
@@ -45,19 +46,23 @@ pub fn create_expression(
     if bracket_nesting > 0 {
         // Find the last closing bracket and end expression there
         let mut total_open_brackets = bracket_nesting;
-        while total_open_brackets > 0 && &expression_end < &tokens.len()  {
-            expression_end += 1;
+        while &expression_end < &tokens.len()  {
             if &tokens[expression_end] == &Token::OpenParenthesis {
                 total_open_brackets += 1;
             } else if &tokens[expression_end] == &Token::CloseParenthesis {
+                if total_open_brackets < 1 {
+                    break;
+                }
                 total_open_brackets -= 1;
             }
+
+            expression_end += 1;
         }
     } else {
-        // Find the next newline and end expression there
+        // Find the next newline, comma or final closing bracket and end expression there
         while &expression_end < &tokens.len() {
             match &tokens[expression_end] {
-                Token::Newline | Token::Comma | Token::SceneClose(_) => {
+                Token::Newline | Token::Comma | Token::SceneClose(_) | Token::CloseParenthesis => {
                     break;
                 }
                 _ => {
@@ -69,7 +74,7 @@ pub fn create_expression(
 
     // Get the data type of the expression if there is one after the expression
     let mut data_type = &DataType::Inferred;
-    if expression_end < tokens.len() {
+    if expression_end + 1 < tokens.len() {
         match &tokens[expression_end + 1] {
             Token::TypeKeyword(type_keyword) => {
                 data_type = &type_keyword
@@ -77,8 +82,6 @@ pub fn create_expression(
             _ => {}
         };
     }
-
-
 
 
     // Loop through the expression and create the AST nodes
@@ -92,7 +95,7 @@ pub fn create_expression(
                     break;
                 }
             }
-            Token::EOF | Token::Comma | Token::CloseCollection => {
+            Token::EOF | Token::Comma | Token::CloseCollection | Token::SceneClose(_) => {
                 if bracket_nesting == 0 {
                     break;
                 }
@@ -133,12 +136,36 @@ pub fn create_expression(
 
             // Check if is a literal
             Token::IntLiteral(int) => {
+                if data_type == &DataType::Inferred {
+                    data_type = &DataType::Int;
+                }
+
+                if data_type != &DataType::Int {
+                    return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+                }
+
                 expression.push(AstNode::Literal(Token::IntLiteral(*int)));
             }
             Token::StringLiteral(string) => {
+                if data_type == &DataType::Inferred {
+                    data_type = &DataType::String;
+                }
+
+                if data_type != &DataType::String {
+                    return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+                }
+
                 expression.push(AstNode::Literal(Token::StringLiteral(string.clone())));
             }
             Token::FloatLiteral(float) => {
+                if data_type == &DataType::Inferred {
+                    data_type = &DataType::Float;
+                }
+
+                if data_type != &DataType::Float {
+                    return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+                }
+
                 expression.push(AstNode::Literal(Token::FloatLiteral(*float)));
             }
 
@@ -175,7 +202,8 @@ pub fn create_expression(
         *i += 1;
     }
 
-    AstNode::Expression(expression, data_type.clone())
+    // Evaluate the expression at compile time and return the result
+    eval_expression(AstNode::Expression(expression, data_type.clone()))
 }
 
 // This function takes in an Expression node that has a Vec of Nodes to evaluate
@@ -183,9 +211,12 @@ pub fn create_expression(
 // If it returns a literal, then everything was evaluated at compile time
 // Otherwise it will return a simplified expression for runtime evaluation
 pub fn eval_expression(expr: AstNode) -> AstNode {
+    println!("Eval Expression: {:?}", expr);
     match expr {
         AstNode::Expression(e, data_type) => {
             match data_type {
+
+                // Evaluate Expression and return simplified result
                 DataType::Float => {
                     let mut result = 0.0;
 
@@ -206,32 +237,20 @@ pub fn eval_expression(expr: AstNode) -> AstNode {
                         }
                     }
 
+                    println!("FLOAT RESULT: {:?}", result);
+
                     return AstNode::Literal(Token::FloatLiteral(result));
                 }
 
+                
+                
+                
+                
+                
+                
+                
+                
                 // UNIMPLIMENTED DATA TYPES
-                DataType::Int => {
-                    let mut result = 0;
-
-                    for token in e {
-                        match token {
-                            AstNode::Literal(Token::FloatLiteral(float)) => {
-                                result = float as i64;
-                            }
-                            AstNode::Literal(Token::IntLiteral(int)) => {
-                                result = int;
-                            }
-
-                            _ => {
-                                return AstNode::Error(
-                                    "Unknown Operator used in Expression".to_string(),
-                                );
-                            }
-                        }
-                    }
-
-                    return AstNode::Literal(Token::IntLiteral(result));
-                }
                 DataType::String => {
                     let mut _result = String::new();
 
@@ -240,7 +259,7 @@ pub fn eval_expression(expr: AstNode) -> AstNode {
 
                 // Eval other types here ......
                 _ => {
-                    return AstNode::Error("Data Type for expression not supported".to_string());
+                    return AstNode::Error(format!("Data Type for expression not supported: {:?}", &data_type).to_string());
                 }
             }
         }

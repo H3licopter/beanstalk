@@ -169,7 +169,7 @@ pub fn is_reference(tokens: &Vec<Token>, i: &usize, name: &String) -> bool {
     })
 }
 
-fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
+pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut collection = Vec::new();
     let mut collection_type = &DataType::Inferred;
     
@@ -186,9 +186,7 @@ fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
                     Token::TypeKeyword(data_type) => {
                         collection_type = data_type;
                     }
-                    _ => {
-                        return AstNode::Error("Expected type declaration after closing collection".to_string());
-                    }
+                    _ => {}
                 }
             }
         }

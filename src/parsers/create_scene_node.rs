@@ -1,8 +1,5 @@
 use super::{
-    ast::AstNode,
-    parse_expression::{create_expression, eval_expression},
-    styles::{Style, Tag},
-    util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
+    ast::AstNode, build_ast::new_collection, parse_expression::create_expression, styles::{Style, Tag}, util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string}
 };
 use crate::Token;
 
@@ -49,7 +46,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
             Token::Rgb => {
                 let values = parse_scenehead_number_values(scene_head, &mut j);
-
+                
                 if values.len() == 3 {
                     scene_styles.push(Style::TextColor(
                         values[0] as u8,
@@ -65,6 +62,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
             Token::Size => {
                 let values = parse_scenehead_number_values(scene_head, &mut j);
+                
                 if values.len() == 2 {
                     scene_styles.push(Style::Size(values[0], values[1]));
                 } else if values.len() == 1 {
@@ -312,39 +310,60 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     }
 }
 
-// Implicitly converts everything to floats
 fn parse_scenehead_number_values(scene_head: &Vec<Token>, i: &mut usize) -> Vec<f64> {
     let mut values = Vec::new();
 
     *i += 1;
-    // SKIP INITIAL OPEN BRACKET
-    if &scene_head[*i] == &Token::OpenParenthesis {
-        *i += 1;
-    }
+    
+    // If Collection, unwrap the values
+    if &scene_head[*i] == &Token::OpenCollection {
+        let collection = new_collection(&scene_head, i);
+        println!("Collection: {:?}", collection);
+        match collection {
+            AstNode::Collection(elements) => {
+                for element in elements {
+                    match element {
+                        AstNode::Literal(Token::FloatLiteral(value)) => {
+                            values.push(value.clone());
+                        }
+                        AstNode::Literal(Token::IntLiteral(value)) => {
+                            values.push(value.clone() as f64);
+                        }
+                        _ => {
+                            AstNode::Error("Invalid value in collection".to_string());
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
 
-    while *i < scene_head.len() - 1 {
-        values.push(eval_expression(create_expression(
-            scene_head,
-            i,
-        )));
-
-        *i += 1;
+        return values;
     }
 
     let mut args = Vec::new();
-    for node in values {
+    while *i < scene_head.len() - 1 {
+        args.push(create_expression(
+            scene_head,
+            i,
+        ));
+
+        *i += 1;
+    }
+
+    for node in args {
         match node {
             AstNode::Literal(Token::FloatLiteral(value)) => {
-                args.push(value);
+                values.push(value.clone());
             }
             AstNode::Literal(Token::IntLiteral(value)) => {
-                args.push(value as f64);
+                values.push(value as f64);
             }
             _ => {
-                args.push(0.0);
+                values.push(0.0);
             }
         }
     }
 
-    args
+    values
 }

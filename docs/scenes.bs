@@ -24,7 +24,7 @@ Scenes use curly braces and have predefined properties that will affect the beha
 
     scene_component_example := [ theme=example_theme:
 
-        [img "images/meme.jpg", style "big-img crap-border", click (reactiveVariable = "WOW")]
+        [img "images/meme.jpg", style "big-img crap-border", click(reactiveVariable = "WOW")]
 
         # A Cool Table
         [ $grid_id, style "grid":
@@ -38,6 +38,8 @@ Scenes use curly braces and have predefined properties that will affect the beha
         [ style "big-text", if not text.isBlank():
             [ text: plus some extra text in the same element as the variable text ]
         ]
+
+        [rgb{230,20,150}: bunch of text with rgb color]
 
         [ imported_bs_markdown ]
         [ slot "main content" ]
