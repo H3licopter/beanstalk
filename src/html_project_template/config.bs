@@ -2,7 +2,7 @@
     name: "html_project",
     version: "0.1.0",
     description: "",
-    main: "src/home.bs",
+    main: "src/pages/home.bs",
     author: "",
     license: "MIT"
 ]
@@ -13,7 +13,8 @@
     url: "localhost:3069",
     locale: "en_US",
     page_type: "website",
-    favicons: "./images/favicons",
-    default_image: "./dist/images/default.png",
-    page_x_large_image: "./dist/images/x_default.jpg"
+    favicons: "dist/images/favicons",
+    default_image: "dist/images/default.png",
+    page_x_large_image: "dist/images/x_default.jpg",
+    image_folder: "dist/images"
 ]

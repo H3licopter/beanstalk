@@ -318,7 +318,7 @@ fn parse_scenehead_number_values(scene_head: &Vec<Token>, i: &mut usize) -> Vec<
 
     *i += 1;
     // SKIP INITIAL OPEN BRACKET
-    if &scene_head[*i] == &Token::OpenBracket {
+    if &scene_head[*i] == &Token::OpenParenthesis {
         *i += 1;
     }
 
@@ -326,7 +326,6 @@ fn parse_scenehead_number_values(scene_head: &Vec<Token>, i: &mut usize) -> Vec<
         values.push(eval_expression(create_expression(
             scene_head,
             i,
-            &DataType::Float,
         )));
 
         *i += 1;

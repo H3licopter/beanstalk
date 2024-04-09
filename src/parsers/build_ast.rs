@@ -61,7 +61,6 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
                 ast.push(AstNode::Print(Box::new(create_expression(
                     tokens,
                     &mut i,
-                    &DataType::String,
                 ))));
             }
 
@@ -78,67 +77,36 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
 }
 
 fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
+    
     // If already initialised, return a reference ast node
     if is_reference(tokens, i, name) {
         return AstNode::Ref(name.clone());
     }
 
-    *i += 1;
-    if &tokens[*i] != &Token::Initialise {
-        return AstNode::Error(
-            "Expected ':' for initialising. Variable does not yet exsist".to_string(),
-        );
-    }
-
-    // Check type or infer type
-    *i += 1;
-
-    // Variable Properties
-    let mut type_declaration = DataType::Inffered;
     let mut var_is_const = true;
 
+    *i += 1;
     match &tokens[*i] {
-        // Infer type (CONSTANT VARIABLE)
-        Token::Initialise => {}
-
-        // Infer type (MUTABLE VARIABLE)
-        Token::Assign => {
+        &Token::Assign => {
             var_is_const = false;
         }
-
-        // Explicit Type Declarations
-        Token::TypeInt => {
-            type_declaration = DataType::Int;
-        }
-        Token::TypeFloat => {
-            type_declaration = DataType::Float;
-        }
-        Token::TypeString => {
-            type_declaration = DataType::String;
-        }
-        Token::TypeRune => {
-            type_declaration = DataType::Rune;
-        }
-
-        // Function with implicit return type
-        Token::OpenBracket => return new_function(tokens, i),
-
-        _ => {
-            return AstNode::Error(
-                "Expected either type definition or another ':' or '=' for initialising"
-                    .to_string(),
-            )
+        &Token::Initialise => {}
+        _=> { 
+            return AstNode::Error("Expected ':' or '=' after variable name for initialising. Variable does not yet exsist".to_string());
         }
     }
 
     // Get value of variable
     *i += 1;
 
-    let parsed_expr = create_expression(tokens, i, &type_declaration);
+    let parsed_expr = create_expression(tokens, i);
 
     if var_is_const {
         return AstNode::ConstDeclaration(name.to_string(), Box::new(eval_expression(parsed_expr)));
     }
+
+    // Check type or infer type
+    *i += 1;
 
     AstNode::VarDeclaration(name.to_string(), Box::new(parsed_expr))
     // AstNode::Error("Invalid variable assignment".to_string())
@@ -162,12 +130,12 @@ fn new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 
     // Get function args
     *i += 1;
-    if &tokens[*i] != &Token::OpenBracket {
+    if &tokens[*i] != &Token::OpenParenthesis {
         return AstNode::Error("Expected '(' for function args".to_string());
     }
 
     *i += 1;
-    while &tokens[*i] != &Token::CloseBracket {
+    while &tokens[*i] != &Token::CloseParenthesis {
         match &tokens[*i] {
             Token::Variable(name) => {
                 function_args.push(AstNode::VarDeclaration(
@@ -211,3 +179,40 @@ fn _infer_datatype(value: &Token) -> Token {
         ),
     }
 }
+
+
+/*
+match &tokens[*i] {
+    // Infer type (CONSTANT VARIABLE)
+    Token::Initialise => {}
+
+    // Infer type (MUTABLE VARIABLE)
+    Token::Assign => {
+        var_is_const = false;
+    }
+
+    // Explicit Type Declarations
+    Token::TypeInt => {
+        type_declaration = DataType::Int;
+    }
+    Token::TypeFloat => {
+        type_declaration = DataType::Float;
+    }
+    Token::TypeString => {
+        type_declaration = DataType::String;
+    }
+    Token::TypeRune => {
+        type_declaration = DataType::Rune;
+    }
+
+    // Function with implicit return type
+    Token::OpenParenthesis => return new_function(tokens, i),
+
+    _ => {
+        return AstNode::Error(
+            "Expected either type definition or another ':' or '=' for initialising"
+                .to_string(),
+        )
+    }
+}
+*/

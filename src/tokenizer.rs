@@ -139,10 +139,10 @@ fn get_next_token(
 
     // Functions and grouping expressions
     if current_char == '(' {
-        return Token::OpenBracket;
+        return Token::OpenParenthesis;
     }
     if current_char == ')' {
-        return Token::CloseBracket;
+        return Token::CloseParenthesis;
     }
 
     // All the tokens that are always what they are on their own

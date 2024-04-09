@@ -31,22 +31,62 @@ enum _Expression {
     BinaryOperator(_Operator, Token, Token), // Operator, LHS value, RHS value
 }
 
-// Creates an expression and orders operators based on precedence
-// Should impliment shunting yard algorithm and return a simplified expression
+// Creates an expression node from a list of tokens
 pub fn create_expression(
     tokens: &Vec<Token>,
     i: &mut usize,
-    type_declaration: &DataType,
 ) -> AstNode {
     let mut expression = Vec::new();
 
     // Check if value is wrapped in brackets and move on until first value is found
     let mut bracket_nesting: i32 = 0;
-    while &tokens[*i] == &Token::OpenBracket {
+    while &tokens[*i] == &Token::OpenParenthesis {
         bracket_nesting += 1;
         *i += 1;
     }
 
+    // Find the end of the expression and check if it is assigned a data type at the end
+    let mut expression_end = *i;
+    if bracket_nesting > 0 {
+        // Find the last closing bracket and end expression there
+        let mut total_open_brackets = bracket_nesting;
+        while total_open_brackets > 0 && &expression_end < &tokens.len()  {
+            expression_end += 1;
+            if &tokens[expression_end] == &Token::OpenParenthesis {
+                total_open_brackets += 1;
+            } else if &tokens[expression_end] == &Token::CloseParenthesis {
+                total_open_brackets -= 1;
+            }
+        }
+    } else {
+        // Find the next newline and end expression there
+        while &tokens[expression_end] != &Token::Newline ||
+              &tokens[expression_end] != &Token::Comma   &&
+              &expression_end < &tokens.len() {
+            expression_end += 1;
+        }
+    }
+
+    // Get the data type of the expression if it is assigned
+    let data_type = match &tokens[expression_end + 1] {
+        Token::IntLiteral(_) => {
+            DataType::Int
+        }
+        Token::FloatLiteral(_) => {
+            DataType::Float
+        }
+        Token::StringLiteral(_) => {
+            DataType::String
+        }
+        _ => {
+            DataType::Inffered
+        }
+    };
+
+
+    // Loop through the expression and create the AST nodes
+    // Figure out the type from the data
+    // If the type does not match the assigned datatype then throw an error
     while let Some(token) = tokens.get(*i) {
         match token {
             // Conditions that close the expression
@@ -62,7 +102,7 @@ pub fn create_expression(
                 // *i += 1;
                 break;
             }
-            Token::CloseBracket => {
+            Token::CloseParenthesis => {
                 if bracket_nesting > 1 {
                     bracket_nesting -= 1;
                 } else {
@@ -74,13 +114,13 @@ pub fn create_expression(
             Token::Variable(name) => {
                 if is_reference(tokens, i, name) {
                     // Check if is function call
-                    if &tokens[*i + 1] == &Token::OpenBracket {
+                    if &tokens[*i + 1] == &Token::OpenParenthesis {
                         // Read function args
                         let mut args = Vec::new();
                         *i += 2;
-                        while &tokens[*i] != &Token::CloseBracket {
+                        while &tokens[*i] != &Token::CloseParenthesis {
                             // TO DO, CHECK IS VALID ARGUMENT
-                            let arg = create_expression(tokens, i, &type_declaration);
+                            let arg = create_expression(tokens, i);
                             args.push(arg);
 
                             *i += 1;
@@ -139,7 +179,7 @@ pub fn create_expression(
         *i += 1;
     }
 
-    AstNode::Expression(expression, type_declaration.clone())
+    AstNode::Expression(expression, data_type)
 }
 
 // This function takes in an Expression node that has a Vec of Nodes to evaluate

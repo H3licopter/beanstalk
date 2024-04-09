@@ -11,7 +11,7 @@ pub enum Token {
     // For Compiler
     Directive(String), // Single hash
     Comptime,          // Double hash for comptime
-    Meta(Vec<Token>),  // Everthing to be executed at compile time
+    Meta(Vec<Token>),  // Compiler Directive
     Error(String),
     EOF, // End of file
 
@@ -59,8 +59,8 @@ pub enum Token {
     Assign,     // =
 
     // Scope
-    OpenBracket,
-    CloseBracket,
+    OpenParenthesis,
+    CloseParenthesis,
     OpenCollection,
     CloseCollection,
     SceneOpen,

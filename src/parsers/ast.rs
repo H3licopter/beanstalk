@@ -4,6 +4,10 @@ use crate::{bs_types::DataType, Token};
 #[derive(Debug)]
 #[allow(dead_code)]
 pub enum AstNode {
+    // Config settings
+    Config(Vec<AstNode>),
+    Project(Vec<AstNode>),
+    
     // Blocks
     Function(String, Vec<AstNode>, Vec<AstNode>),
     Expression(Vec<AstNode>, DataType), //Expression, Result type
