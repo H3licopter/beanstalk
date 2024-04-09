@@ -1,5 +1,6 @@
 use crate::html_output::web_parser;
 use crate::parsers;
+use crate::settings::get_html_config;
 use crate::tokenizer;
 use crate::Token;
 use regex::Regex;
@@ -30,7 +31,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     println!("\n");
 
     println!("CREATING HTML OUTPUT\n");
-    let html_output = web_parser::parse(ast);
+    let html_output = web_parser::parse(ast, get_html_config());
 
     // Print the HTML output
     // Create a regex to match the content between the <main> and </main> tags

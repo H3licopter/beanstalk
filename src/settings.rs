@@ -1,17 +1,24 @@
-#[allow(dead_code)]
-pub enum Config {
-    Project(String),
-    Main(String),
-    Locale(String),
-    Url(String),
-    SiteTitle(String),
-    Description(String),
-    PageType(String),
-    Favicons(String),
-    DefaultImage(String),
-    PageXLargeImage(String),
-    ProjectImageFolder(String),
+pub struct Config {
+    pub project: String,
+    pub main: String,
+    pub output_folder: String,
+    pub name: String,
+    pub version: String,
+    pub author: String,
+    pub license: String
 }
+pub fn get_default_config() -> Config {
+    Config {
+        project: String::from("html"),
+        main: String::from("src/pages/home.bs"),
+        output_folder: String::from("dist"),
+        name: String::from("html_project"),
+        version: String::from("0.1.0"),
+        author: String::new(),
+        license: String::from("MIT")
+    }
+}
+
 pub struct HTMLMeta {
     pub site_title: String,
     pub page_description: String,
@@ -25,13 +32,14 @@ pub struct HTMLMeta {
     pub page_type: String,
     pub page_twitter_large_image: String,
     pub page_canonical_url: String,
+    pub image_folder_url: String,
     pub favicons_folder_url: String,
     pub theme_color_light: String,
     pub theme_color_dark: String,
     pub auto_site_title: bool,
 }
 
-pub fn get_meta_config() -> HTMLMeta {
+pub fn get_html_config() -> HTMLMeta {
     HTMLMeta {
         site_title: String::from("Website Title"),
         page_description: String::from("Website Description"),
@@ -45,7 +53,8 @@ pub fn get_meta_config() -> HTMLMeta {
         page_type: String::from("website"),
         page_twitter_large_image: String::from(""),
         page_canonical_url: String::from(""),
-        favicons_folder_url: String::from("./images/favicons"),
+        image_folder_url: String::from("images/"),
+        favicons_folder_url: String::from("images/favicons/"),
         theme_color_light: String::from("#fafafa"),
         theme_color_dark: String::from("#101010"),
         auto_site_title: true,

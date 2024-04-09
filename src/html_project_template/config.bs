@@ -3,6 +3,7 @@
     version: "0.1.0",
     description: "",
     main: "src/pages/home.bs",
+    output_folder: "dist",
     author: "",
     license: "MIT"
 ]

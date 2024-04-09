@@ -5,19 +5,17 @@ use crate::{
         styles::{Style, Tag},
         util::count_newlines_at_end_of_string,
     },
-    settings::get_meta_config,
+    settings::{get_html_config, HTMLMeta},
     Token,
 };
 
 // Parse ast into valid JS, HTML and CSS
-pub fn parse(ast: Vec<AstNode>) -> String {
+pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
     let mut js = String::new();
     let _wasm = String::new();
     let mut html = String::new();
     let css = String::new();
     let mut page_title = String::new();
-
-    let config = get_meta_config();
 
     // Parse HTML
     for node in ast {
@@ -72,7 +70,7 @@ pub fn parse(ast: Vec<AstNode>) -> String {
         }
     }
 
-    create_html_boilerplate(get_meta_config())
+    create_html_boilerplate(config)
         .replace("page-template", &html)
         .replace("@page-css", &css)
         .replace("page-title", &page_title)
@@ -183,7 +181,7 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                 }
 
                 let mut img_count = 0;
-                let img_default_dir = "/images/";
+                let img_default_dir = get_html_config().image_folder_url.clone();
 
                 for tag in &tags {
                     match tag {

@@ -1,6 +1,7 @@
 use crate::html_output::web_parser;
 use crate::parsers;
 use crate::parsers::ast::AstNode;
+use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::Token;
 use std::error::Error;
@@ -70,7 +71,7 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
 
         CompileType::MultiFile(source_code) => {
             // Get config settings from config file
-            let project_config = get_config_data(&source_code);
+            let project_config = get_config_data(&source_code)?;
 
             // TO DO, READ WHOLE PROJECT FROM CONFIG ENTRY POINT AND ADD EVERYTHING TO COMPILE LIST
             
@@ -80,7 +81,7 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
                 Ok(content) => {
                     source_code_to_parse.push(OutputFile {
                         source_code: content,
-                        output_file: format!("{}/index.html", project_config.output)
+                        output_file: format!("{}/index.html", project_config.output_folder)
                     });
                 }
                 Err(e) => {
@@ -107,7 +108,7 @@ fn compile(source_code: &str, output_dir: &str) -> Result<Vec<AstNode>, Box<dyn 
     if !output_dir.is_empty() {
         fs::write(
             output_dir,
-            web_parser::parse(ast),
+            web_parser::parse(ast, get_html_config()),
         )?;
         return Ok(Vec::new());
     }
@@ -115,37 +116,28 @@ fn compile(source_code: &str, output_dir: &str) -> Result<Vec<AstNode>, Box<dyn 
     Ok(ast)
 }
 
-struct ProjectConfig {
-    errors: Vec<String>,
-    main: String,
-    output: String,
-}
-fn get_config_data(config_source_code: &str) -> ProjectConfig {
+fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
     let config_ast = compile(config_source_code, "");
-    let mut config = ProjectConfig {
-        errors: Vec::new(),
-        main: "src/pages/home.bs".to_string(),
-        output: "dist/".to_string(),
-    };
+    let config = get_default_config();
 
     match config_ast {
         Ok(ast) => {
             for node in ast {
                 match node {
                     AstNode::Error(e) => {
-                        config.errors.push(e);
+                        return Err(e.into());
                     }
                     AstNode::Project(data) => {
                         for node in data {
                             match node {
                                 AstNode::Error(e) => {
-                                    config.errors.push(e);
+                                    return Err(e.into());
                                 }
                                 AstNode::Collection(values) => {
                                     for node in values {
                                         match node {
                                             AstNode::Error(e) => {
-                                                config.errors.push(e);
+                                                return Err(e.into());
                                             }
                                             _=> {}
                                         }
@@ -160,9 +152,9 @@ fn get_config_data(config_source_code: &str) -> ProjectConfig {
             }
         }
         Err(e) => {
-            config.errors.push(e.to_string());
+            return Err(e.into());
         }
     }
 
-    config
+    Ok(config)
 }
