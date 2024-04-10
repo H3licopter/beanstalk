@@ -22,9 +22,9 @@
   - Batteries included. Opinionated about how to do common fiddly tasks
 
 ## Planned Features
-Beanstalk can be thought of as giga-chad mega-extended Markdown. 
-
-You can also think of it as: *what would a good Javascript/HTML replacement look like, if it was actually designed to be used everywhere and had the hindsight of modern programming language design with no constraints on convention or backwards compatibility?*.
+Beanstalk can be thought of as:
+1. Mega-extended Markdown. 
+2. What would a good Javascript/HTML/CSS replacement look like, if it was actually designed to be used everywhere and had the hindsight of modern programming language design with no constraints on convention or backwards compatibility?
 
 The design is generalised enough to eventually target more than just the web. Beanstalk outputs HTML, CSS and JS/WASM all in one consistent syntax without having to switch between any languages, or even a different file.
 
