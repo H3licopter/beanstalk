@@ -3,7 +3,7 @@
   <h1>Beanstalk 🌱</h1>
 
   <p>
-    <strong>A statically typed, all-in-one language designed for building UIs and websites.</strong>
+    <strong>A compiled, statically typed, all-in-one language designed for building UIs and websites.</strong>
   </p>
 
   *The only BS should be in the filename*
