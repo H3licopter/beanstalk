@@ -14,8 +14,6 @@ A return type is required for any functions returning a value.
 
 You specify arguments by using the prototype syntax to create a prototype literal.
 
-Arrows are the symbol for returns within the function scope.
-
 When functions return mutliple values, they are returned as a choice. This choice can always contain an error as a possible choice.
 
 `
