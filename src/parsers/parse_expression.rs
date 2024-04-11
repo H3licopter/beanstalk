@@ -1,37 +1,9 @@
-use super::{ast::AstNode, build_ast::is_reference};
+use super::ast::AstNode;
 use crate::{bs_types::DataType, Token};
-
-enum _Operator {
-    Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Root,
-    Modulus,
-    Exponent,
-    And,
-    Or,
-    Not,
-    Equal,
-    NotEqual,
-    GreaterThan,
-    LessThan,
-    GreaterThanOrEqual,
-    LessThanOrEqual,
-    BitwiseAnd,
-    BitwiseOr,
-    BitwiseNot,
-    BitwiseXor,
-    BitwiseShiftLeft,
-    BitwiseShiftRight,
-}
 
 // Creates an expression node from a list of tokens
 // Will eventually also evaluate the expression at compile time to simplify the AST
-pub fn create_expression(
-    tokens: &Vec<Token>,
-    i: &mut usize,
-) -> AstNode {
+pub fn create_expression(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut expression = Vec::new();
 
     // Check if value is wrapped in brackets and move on until first value is found
@@ -46,7 +18,7 @@ pub fn create_expression(
     if bracket_nesting > 0 {
         // Find the last closing bracket and end expression there
         let mut total_open_brackets = bracket_nesting;
-        while &expression_end < &tokens.len()  {
+        while &expression_end < &tokens.len() {
             if &tokens[expression_end] == &Token::OpenParenthesis {
                 total_open_brackets += 1;
             } else if &tokens[expression_end] == &Token::CloseParenthesis {
@@ -76,13 +48,10 @@ pub fn create_expression(
     let mut data_type = &DataType::Inferred;
     if expression_end + 1 < tokens.len() {
         match &tokens[expression_end + 1] {
-            Token::TypeKeyword(type_keyword) => {
-                data_type = &type_keyword
-            }
+            Token::TypeKeyword(type_keyword) => data_type = &type_keyword,
             _ => {}
         };
     }
-
 
     // Loop through the expression and create the AST nodes
     // Figure out the type from the data
@@ -99,39 +68,22 @@ pub fn create_expression(
                 if bracket_nesting == 0 {
                     break;
                 }
-                return AstNode::Error("Not enough closing parenthesis for expression. Need more ')'!".to_string());
+                return AstNode::Error(
+                    "Not enough closing parenthesis for expression. Need more ')'!".to_string(),
+                );
             }
             Token::CloseParenthesis => {
                 if bracket_nesting > 1 {
                     bracket_nesting -= 1;
                 } else {
+                    *i += 1;
                     break;
                 }
             }
 
             // Check if name is a reference to another variable or function call
             Token::Variable(name) => {
-                if is_reference(tokens, i, name) {
-                    // Check if is function call
-                    if &tokens[*i + 1] == &Token::OpenParenthesis {
-                        // Read function args
-                        let mut args = Vec::new();
-                        *i += 2;
-                        while &tokens[*i] != &Token::CloseParenthesis {
-                            // TO DO, CHECK IS VALID ARGUMENT
-                            let arg = create_expression(tokens, i);
-                            args.push(arg);
-
-                            *i += 1;
-                        }
-
-                        expression.push(AstNode::FunctionCall(name.clone(), args));
-                    }
-
-                    expression.push(AstNode::Ref(name.clone()));
-                }
-
-                expression.push(AstNode::Error("Variable reference not defined. Maybe you're using a variable that has not yet been declared?".to_string()));
+                expression.push(AstNode::Error("NOT IMPLIMENTED YET - GETTING VARIABLE. Variable reference not defined. Maybe you're using a variable that has not yet been declared?".to_string()));
             }
 
             // Check if is a literal
@@ -169,27 +121,85 @@ pub fn create_expression(
                 expression.push(AstNode::Literal(Token::FloatLiteral(*float)));
             }
 
-            // Check if operator
+            // OPERATORS
+            // Assign precedence
+
+            // UNARY OPERATORS
             Token::Negative => {
-                expression.push(AstNode::UnaryOperator(Token::Negative));
-            }
-            Token::Add => {
-                expression.push(AstNode::BinaryOperator(Token::Add));
-            }
-            Token::Subtract => {
-                expression.push(AstNode::BinaryOperator(Token::Subtract));
-            }
-            Token::Multiply => {
-                expression.push(AstNode::BinaryOperator(Token::Multiply));
-            }
-            Token::Divide => {
-                expression.push(AstNode::BinaryOperator(Token::Divide));
-            }
-            Token::Modulus => {
-                expression.push(AstNode::BinaryOperator(Token::Modulus));
+                expression.push(AstNode::UnaryOperator(Token::Negative, 10));
             }
             Token::Exponent => {
-                expression.push(AstNode::BinaryOperator(Token::Exponent));
+                expression.push(AstNode::UnaryOperator(Token::Exponent, 8));
+            }
+
+            // BINARY OPERATORS
+            Token::Add => {
+                expression.push(AstNode::BinaryOperator(Token::Add, 6));
+            }
+            Token::Subtract => {
+                expression.push(AstNode::BinaryOperator(Token::Subtract, 6));
+            }
+            Token::Multiply => {
+                expression.push(AstNode::BinaryOperator(Token::Multiply, 7));
+            }
+            Token::Divide => {
+                expression.push(AstNode::BinaryOperator(Token::Divide, 7));
+            }
+            Token::AddAssign => {
+                expression.push(AstNode::BinaryOperator(Token::AddAssign, 6));
+            }
+            Token::SubtractAssign => {
+                expression.push(AstNode::BinaryOperator(Token::SubtractAssign, 6));
+            }
+            Token::Equal => {
+                expression.push(AstNode::BinaryOperator(Token::Equal, 5));
+            }
+            Token::LessThan => {
+                expression.push(AstNode::BinaryOperator(Token::LessThan, 5));
+            }
+            Token::LessThanOrEqual => {
+                expression.push(AstNode::BinaryOperator(Token::LessThanOrEqual, 5));
+            }
+            Token::GreaterThan => {
+                expression.push(AstNode::BinaryOperator(Token::GreaterThan, 5));
+            }
+            Token::GreaterThanOrEqual => {
+                expression.push(AstNode::BinaryOperator(Token::GreaterThanOrEqual, 5));
+            }
+            Token::Modulus => {
+                expression.push(AstNode::BinaryOperator(Token::Modulus, 7));
+            }
+            Token::Remainder => {
+                expression.push(AstNode::BinaryOperator(Token::Remainder, 7));
+            }
+            Token::Root => {
+                expression.push(AstNode::BinaryOperator(Token::Root, 8));
+            }
+            Token::ExponentAssign => {
+                expression.push(AstNode::BinaryOperator(Token::ExponentAssign, 8));
+            }
+            Token::MultiplyAssign => {
+                expression.push(AstNode::BinaryOperator(Token::MultiplyAssign, 7));
+            }
+            Token::DivideAssign => {
+                expression.push(AstNode::BinaryOperator(Token::DivideAssign, 7));
+            }
+            Token::ModulusAssign => {
+                expression.push(AstNode::BinaryOperator(Token::ModulusAssign, 7));
+            }
+            Token::RootAssign => {
+                expression.push(AstNode::BinaryOperator(Token::RootAssign, 8));
+            }
+            Token::RemainderAssign => {
+                expression.push(AstNode::BinaryOperator(Token::RemainderAssign, 7));
+            }
+
+            // LOGICAL OPERATORS
+            Token::And => {
+                expression.push(AstNode::BinaryOperator(Token::And, 4));
+            }
+            Token::Or => {
+                expression.push(AstNode::BinaryOperator(Token::Or, 3));
             }
 
             _ => {
@@ -202,64 +212,67 @@ pub fn create_expression(
         *i += 1;
     }
 
-    // Evaluate the expression at compile time and return the result
-    eval_expression(AstNode::Expression(expression, data_type.clone()))
+    // TO DO: Evaluate the expression at compile time and return the result
+    // THIS WILL BE DONE IN EVAL_EXPRESSION FUNCTION
+    AstNode::Expression(expression, data_type.clone())
 }
 
 // This function takes in an Expression node that has a Vec of Nodes to evaluate
-// And evaluates everything possible at compile time
+// And evaluates everything possible at compile time (Constant Folding)
 // If it returns a literal, then everything was evaluated at compile time
-// Otherwise it will return a simplified expression for runtime evaluation
-pub fn eval_expression(expr: AstNode) -> AstNode {
-    println!("Eval Expression: {:?}", expr);
+// Otherwise it will return an expression, which will need runtime evaluation
+pub fn _eval_expression(expr: AstNode) -> AstNode {
+    let mut simplified_expression = Vec::new();
+    let mut result_type = DataType::Inferred;
+
+    // Shunting Yard Algorithm
+    let mut operator_stack: Vec<AstNode> = Vec::new();
+    let mut output_queue: Vec<AstNode> = Vec::new();
+
     match expr {
         AstNode::Expression(e, data_type) => {
-            match data_type {
+            result_type = data_type;
+            let mut tokens = e;
 
-                // Evaluate Expression and return simplified result
-                DataType::Float => {
-                    let mut result = 0.0;
-
-                    for token in e {
-                        match token {
-                            AstNode::Literal(Token::FloatLiteral(float)) => {
-                                result = float;
-                            }
-                            AstNode::Literal(Token::IntLiteral(int)) => {
-                                result = int as f64;
-                            }
-                            _ => {
-                                return AstNode::Error(
-                                    "(Eval Expression) Unknown Operator used in Expression"
-                                        .to_string(),
-                                );
+            while tokens.len() > 0 {
+                match tokens.pop() {
+                    Some(AstNode::Literal(token)) => {
+                        output_queue.push(AstNode::Literal(token));
+                    }
+                    Some(AstNode::UnaryOperator(op, precedence)) => {
+                        while let Some(AstNode::BinaryOperator(op2, precedence2)) =
+                            operator_stack.last()
+                        {
+                            if precedence2 > &precedence {
+                                output_queue.push(operator_stack.pop().unwrap());
+                            } else {
+                                break;
                             }
                         }
+                        operator_stack.push(AstNode::UnaryOperator(op, precedence));
                     }
-
-                    println!("FLOAT RESULT: {:?}", result);
-
-                    return AstNode::Literal(Token::FloatLiteral(result));
-                }
-
-                
-                
-                
-                
-                
-                
-                
-                
-                // UNIMPLIMENTED DATA TYPES
-                DataType::String => {
-                    let mut _result = String::new();
-
-                    return AstNode::Literal(Token::StringLiteral(_result));
-                }
-
-                // Eval other types here ......
-                _ => {
-                    return AstNode::Error(format!("Data Type for expression not supported: {:?}", &data_type).to_string());
+                    Some(AstNode::BinaryOperator(op, precedence)) => {
+                        while let Some(AstNode::BinaryOperator(op2, precedence2)) =
+                            operator_stack.last()
+                        {
+                            if precedence2 > &precedence {
+                                output_queue.push(operator_stack.pop().unwrap());
+                            } else {
+                                break;
+                            }
+                        }
+                        operator_stack.push(AstNode::BinaryOperator(op, precedence));
+                    }
+                    Some(AstNode::FunctionCall(name, args)) => {
+                        // TO DO: Get value of function
+                        output_queue.push(AstNode::FunctionCall(name, args));
+                    }
+                    Some(AstNode::Error(error)) => {
+                        return AstNode::Error(error);
+                    }
+                    _ => {
+                        return AstNode::Error("Invalid Expression".to_string());
+                    }
                 }
             }
         }
@@ -267,4 +280,58 @@ pub fn eval_expression(expr: AstNode) -> AstNode {
             return AstNode::Error("No Expression to Evaluate".to_string());
         }
     }
+
+    AstNode::Expression(simplified_expression, DataType::Inferred)
 }
+
+/*
+while there are tokens to be read:
+    read a token
+    if the token is:
+
+    - a number:
+        put it into the output queue
+
+
+    - a function:
+        push it onto the operator stack
+
+
+    - an operator o1:
+        while (
+            there is an operator o2 at the top of the operator stack which is not a left parenthesis,
+            and (o2 has greater precedence than o1 or (o1 and o2 have the same precedence and o1 is left-associative))
+        ):
+            pop o2 from the operator stack into the output queue
+        push o1 onto the operator stack
+
+
+    - a ",":
+        while the operator at the top of the operator stack is not a left parenthesis:
+             pop the operator from the operator stack into the output queue
+
+
+    - a left parenthesis (i.e. "("):
+        push it onto the operator stack
+
+
+    - a right parenthesis (i.e. ")"):
+        while the operator at the top of the operator stack is not a left parenthesis:
+            {assert the operator stack is not empty}
+            /* If the stack runs out without finding a left parenthesis, then there are mismatched parentheses. */
+            pop the operator from the operator stack into the output queue
+        {assert there is a left parenthesis at the top of the operator stack}
+        pop the left parenthesis from the operator stack and discard it
+        if there is a function token at the top of the operator stack, then:
+            pop the function from the operator stack into the output queue
+
+            After the while loop, pop the remaining items from the operator stack into the output queue.
+
+while there are tokens on the operator stack:
+If the operator token on the top of the stack is a parenthesis, then there are mismatched parentheses.
+    {assert the operator on top of the stack is not a (left) parenthesis}
+    pop the operator from the operator stack onto the output queue
+
+
+
+*/

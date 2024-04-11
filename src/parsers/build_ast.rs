@@ -1,11 +1,11 @@
 use super::{
     ast::AstNode,
     create_scene_node::new_scene,
-    parse_expression::{create_expression, eval_expression},
+    parse_expression::create_expression,
 };
 use crate::{bs_types::DataType, Token};
 
-pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
+pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
     let mut ast = Vec::new();
     let mut i = start_index;
 
@@ -16,18 +16,16 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
             }
 
             Token::SceneHead(scene_head) => {
-                ast.push(new_scene(scene_head, tokens, &mut i));
+                ast.push(new_scene(scene_head, &tokens, &mut i));
             }
 
             // New Function or Variable declaration or reference
-            Token::Variable(name) => {
-                ast.push(new_variable(name, tokens, &mut i));
+            Token::VarDeclaration(id) => {
+                ast.push(new_variable(*id, &tokens, &mut i));
             }
 
             Token::OpenCollection => {
-                ast.push(
-                    new_collection(tokens, &mut i)
-                );
+                ast.push(new_collection(&tokens, &mut i));
             }
 
             Token::Title => {
@@ -64,10 +62,7 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
 
             Token::Print => {
                 i += 1;
-                ast.push(AstNode::Print(Box::new(create_expression(
-                    tokens,
-                    &mut i,
-                ))));
+                ast.push(AstNode::Print(Box::new(create_expression(&tokens, &mut i))));
             }
 
             // Or stuff that hasn't been implemented yet
@@ -82,13 +77,8 @@ pub fn new_ast(tokens: &Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize)
     (ast, i)
 }
 
-fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
-    
-    // If already initialised, return a reference ast node
-    if is_reference(tokens, i, name) {
-        return AstNode::Ref(name.clone());
-    }
-
+// CAN ALSO RETURN A FUNCTION
+fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut var_is_const = true;
 
     *i += 1;
@@ -97,82 +87,71 @@ fn new_variable(name: &String, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
             var_is_const = false;
         }
         &Token::Initialise => {}
-        _=> { 
+        &Token::FunctionInitPrivate => {
+            return new_function(false, name, tokens, i);
+        }
+        &Token::FunctionInitPublic => {
+            return new_function(true, name, tokens, i);
+        }
+        _ => {
             return AstNode::Error("Expected ':' or '=' after variable name for initialising. Variable does not yet exsist".to_string());
         }
     }
 
     // Get value of variable
     *i += 1;
+    let parsed_expr;
 
-    let parsed_expr = create_expression(tokens, i);
-
-    if var_is_const {
-        return AstNode::ConstDeclaration(name.to_string(), Box::new(eval_expression(parsed_expr)));
+    // Check if collection
+    if &tokens[*i] == &Token::OpenCollection {
+        parsed_expr = new_collection(tokens, i);
+    } else {
+        parsed_expr = create_expression(tokens, i);
     }
 
-    // Check type or infer type
-    *i += 1;
+    if var_is_const {
+        return AstNode::Const(name, Box::new(parsed_expr));
+    }
 
-    AstNode::VarDeclaration(name.to_string(), Box::new(parsed_expr))
+    AstNode::VarDeclaration(name, Box::new(parsed_expr))
     // AstNode::Error("Invalid variable assignment".to_string())
 }
 
-// TO DO - SOME PLACEHOLDER CODE FOR FUNCTION DECLARATION
-fn _new_function(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
-    let mut _function_name = String::new();
-    let mut function_args = Vec::new();
-    let mut _function_body = Vec::new();
-
-    // Get function name
-    match &tokens[*i] {
-        Token::Variable(name) => {
-            _function_name = name.clone();
-        }
-        _ => {
-            return AstNode::Error("Expected function name".to_string());
-        }
-    }
+fn new_function(_public: bool, name: usize, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
+    let mut function_args = AstNode::Collection(Vec::new());
+    let function_body = Vec::new();
 
     // Get function args
     *i += 1;
-    if &tokens[*i] != &Token::OpenParenthesis {
+
+    match &tokens[*i] {
+        Token::OpenCollection => {
+            function_args = new_collection(tokens, i);
+        }
+        // Can directly get args from an existing collection
+        Token::VarDeclaration(_) => {
+            // PROBABLY SHOULDEN'T LET ANY VARIABLE BE USED AS FUNCTION ARGS
+            // but for now it's just here incase it's a collection
+        }
+        _ => {
+            return AstNode::Error("Expected '(' for function args".to_string());
+        }
+    }
+    if &tokens[*i] != &Token::OpenCollection {
         return AstNode::Error("Expected '(' for function args".to_string());
     }
 
     *i += 1;
-    while &tokens[*i] != &Token::CloseParenthesis {
-        match &tokens[*i] {
-            Token::Variable(name) => {
-                function_args.push(AstNode::VarDeclaration(
-                    name.clone(),
-                    Box::new(AstNode::Ref("".to_string())),
-                ));
-            }
-            _ => {
-                return AstNode::Error("Expected variable name for function args".to_string());
-            }
-        }
-        *i += 1;
-    }
 
     // TODO - Get function body
 
-    AstNode::Function(_function_name, function_args, _function_body)
-}
-
-// Check if variable name has been used earlier in the vec of tokens, if it has return true
-pub fn is_reference(tokens: &Vec<Token>, i: &usize, name: &String) -> bool {
-    tokens[..*i].iter().rev().any(|token| match token {
-        Token::Variable(var_name) => var_name == name,
-        _ => false,
-    })
+    AstNode::Function(name.clone(), Box::new(function_args), function_body)
 }
 
 pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut collection = Vec::new();
     let mut collection_type = &DataType::Inferred;
-    
+
     // Should always start with current token being an open collection
     *i += 1;
 
@@ -195,17 +174,14 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
         }
     }
 
-    
-
     while *i < tokens.len() {
-        
         // Parse the element inside of collection
         let element = create_expression(tokens, i);
-        
+
         // Make sure the datatype is correct for the collection
         match element {
             AstNode::Expression(_, ref expression_type) => {
-                if expression_type != collection_type{
+                if expression_type != collection_type {
                     return AstNode::Error("Invalid datatype inside collection".to_string());
                 }
             }
@@ -223,15 +199,16 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
                 *i += 1;
                 break;
             }
-            _=> {
-                return AstNode::Error("Expected ',' or '}' in collection after previous value".to_string());
+            _ => {
+                return AstNode::Error(
+                    "Expected ',' or '}' in collection after previous value".to_string(),
+                );
             }
         }
     }
 
     AstNode::Collection(collection)
 }
-
 
 /*
 match &tokens[*i] {

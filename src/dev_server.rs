@@ -1,7 +1,10 @@
 use crate::build;
-use std::{path::Path, time::{Duration, Instant}};
-use notify_debouncer_mini::{new_debouncer_opt, Config, DebouncedEvent};
 use notify::RecursiveMode;
+use notify_debouncer_mini::{new_debouncer_opt, Config, DebouncedEvent};
+use std::{
+    path::Path,
+    time::{Duration, Instant},
+};
 use tokio::sync::mpsc;
 use tokio::task;
 
@@ -26,16 +29,15 @@ async fn watch_files(path: String, sender: mpsc::Sender<()>, mut reciever: mpsc:
     // Watch for changes in the directory
     let dist_dir = format!("{}/test_output/dist", path);
     let src_dir = format!("{}/test_output/src", path);
-    
+
     // setup debouncer
     // notify backend configuration
     let backend_config = notify::Config::default().with_poll_interval(Duration::from_secs(2));
     // debouncer configuration
     let debouncer_config = Config::default().with_notify_config(backend_config);
     // select backend via fish operator, here PollWatcher backend
-    let mut debouncer = new_debouncer_opt::<_, 
-        notify::PollWatcher>(
-        debouncer_config, 
+    let mut debouncer = new_debouncer_opt::<_, notify::PollWatcher>(
+        debouncer_config,
         move |result: Result<Vec<DebouncedEvent>, notify::Error>| {
             if let Ok(events) = result {
                 for event in events {
@@ -45,8 +47,9 @@ async fn watch_files(path: String, sender: mpsc::Sender<()>, mut reciever: mpsc:
             } else if let Err(e) = result {
                 println!("Watch error: {:?}", e);
             }
-        }
-    ).unwrap();
+        },
+    )
+    .unwrap();
 
     debouncer
         .watcher()
@@ -64,7 +67,9 @@ async fn watch_files(path: String, sender: mpsc::Sender<()>, mut reciever: mpsc:
         let path = dist_dir.clone();
         task::spawn(async move {
             // Gracefully shutdown the server
-            tokio::signal::ctrl_c().await.expect("failed to install CTRL+C signal handler");
+            tokio::signal::ctrl_c()
+                .await
+                .expect("failed to install CTRL+C signal handler");
 
             // Serve static files again
             warp::serve(warp::fs::dir(path.clone()))
@@ -102,8 +107,6 @@ fn _watch_directory(dev_dir: &Path, build_path: &String) {
     }
 }
 
-
-
 fn _build_project(build_path: &String) {
     println!("Building project...");
     let start = Instant::now();
@@ -125,7 +128,7 @@ fn handle_connection(mut stream: TcpStream, path: String) {
     let buf_reader = BufReader::new(&mut stream);
 
 
-    // 
+    //
     let mut contents =
         fs::read_to_string(format!("{}/{}/dist/404.html", entry_path, path)).unwrap();
     let mut length = contents.len();
@@ -175,7 +178,7 @@ fn handle_connection(mut stream: TcpStream, path: String) {
                         length = contents.len();
                         status_line = "HTTP/1.1 200 OK";
                         println!("Sending requested file");
-                        
+
                     }
                     Err(_) => {
                         println!("File path not found");
@@ -194,4 +197,3 @@ fn handle_connection(mut stream: TcpStream, path: String) {
 }
 
  */
-

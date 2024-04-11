@@ -10,22 +10,22 @@ The 'is' keyword is used to check equality. Not ==. The "and / or" keywords are 
 Only false, ! and ? are falsy values. Any other check with an if statement will return true. 
 
 ## Bitwise operations
-band --Bitwise and
-bor  --Bitwise or
-bnot  --Bitwise not
-xor  --Bitwise xor
-bshift  --Bitwise signed right shift
-zshift --Bitwise zero fill right shift
-lshift --Bitwise zero fill left shift
+~and  --Bitwise and
+~or   --Bitwise or
+~not  --Bitwise not
+~xor  --Bitwise xor
+~~>   --Bitwise signed right shift
+~>    --Bitwise zero fill right shift
+<~    --Bitwise zero fill left shift
 
-{table 3, style"bg-blue-499":
-    {: Operator} {: Description}   {: Precedence}
-    {: **}       {: Exponents}     {xcol: 8}
-    {: //}       {: Roots}
-    {: *}        {: Multiplication}{xcol 3: 7}
-    {: /}        {: Division}
-    {: %}        {: Modulo (truncated)}
-    {: %%}       {: Remainder (floored)}
-    {: +} {: Sum} {xcol: 6}
-    {: --} {: Subtraction}
+{table 3, style "bg-blue-499":
+    {: Operator} {: Description}          {: Precedence}
+    {: **}       {: Exponents}            {xcol: 8}
+    {: //}       {: Roots}                {xcol: 8}
+    {: *}        {: Multiplication}       {xcol 3: 7}
+    {: /}        {: Division}             {xcol: 7}
+    {: %}        {: Modulo (truncated)}   {xcol: 7}
+    {: %%}       {: Remainder (floored)}  {xcol: 7}
+    {: +}        {: Sum}                  {xcol: 6}
+    {: -}        {: Subtraction}          {xcol: 6}
 }

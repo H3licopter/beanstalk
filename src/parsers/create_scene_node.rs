@@ -1,5 +1,9 @@
 use super::{
-    ast::AstNode, build_ast::new_collection, parse_expression::create_expression, styles::{Style, Tag}, util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string}
+    ast::AstNode,
+    build_ast::new_collection,
+    parse_expression::create_expression,
+    styles::{Style, Tag},
+    util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
 };
 use crate::Token;
 
@@ -46,7 +50,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
             Token::Rgb => {
                 let values = parse_scenehead_number_values(scene_head, &mut j);
-                
+
                 if values.len() == 3 {
                     scene_styles.push(Style::TextColor(
                         values[0] as u8,
@@ -62,7 +66,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
             Token::Size => {
                 let values = parse_scenehead_number_values(scene_head, &mut j);
-                
+
                 if values.len() == 2 {
                     scene_styles.push(Style::Size(values[0], values[1]));
                 } else if values.len() == 1 {
@@ -314,7 +318,7 @@ fn parse_scenehead_number_values(scene_head: &Vec<Token>, i: &mut usize) -> Vec<
     let mut values = Vec::new();
 
     *i += 1;
-    
+
     // If Collection, unwrap the values
     if &scene_head[*i] == &Token::OpenCollection {
         let collection = new_collection(&scene_head, i);
@@ -343,10 +347,7 @@ fn parse_scenehead_number_values(scene_head: &Vec<Token>, i: &mut usize) -> Vec<
 
     let mut args = Vec::new();
     while *i < scene_head.len() - 1 {
-        args.push(create_expression(
-            scene_head,
-            i,
-        ));
+        args.push(create_expression(scene_head, i));
 
         *i += 1;
     }

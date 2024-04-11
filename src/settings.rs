@@ -5,7 +5,7 @@ pub struct Config {
     pub name: String,
     pub version: String,
     pub author: String,
-    pub license: String
+    pub license: String,
 }
 pub fn get_default_config() -> Config {
     Config {
@@ -15,7 +15,7 @@ pub fn get_default_config() -> Config {
         name: String::from("html_project"),
         version: String::from("0.1.0"),
         author: String::new(),
-        license: String::from("MIT")
+        license: String::from("MIT"),
     }
 }
 

@@ -98,10 +98,9 @@ fn expression_to_js(expr: Vec<AstNode>) -> String {
                 }
             },
 
-            AstNode::Ref(name) => {
-                js.push_str(&name);
-            }
-
+            // AstNode::Ref(name) => {
+            //     js.push_str(&name);
+            // }
             AstNode::FunctionCall(name, args) => {
                 js.push_str(&format!("{}({:?})", name, args));
             }

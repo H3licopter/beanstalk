@@ -7,10 +7,17 @@ pub enum TokenizeMode {
     SceneHead,
     Meta,
 }
+// Stores variable name, it's index and whether it has a reference in the token array
+pub struct Declaration {
+    pub name: String,
+    pub index: usize,
+    pub has_ref: bool,
+}
 
 #[derive(PartialEq, Debug)]
 pub enum Token {
     // For Compiler
+    ModuleStart(String),
     Directive(String), // Single hash
     Comptime,          // Double hash for comptime
     Meta(Vec<Token>),  // Compiler Directive
@@ -35,8 +42,14 @@ pub enum Token {
     MultilineComment(String),
     DocComment(String),
 
-    // Variables
+    // Variables / Functions
+    FunctionInitPrivate,
+    FunctionInitPublic,
     Variable(String),
+
+    // Optimised Variables (Happens during AST creation)
+    VarDeclaration(usize),
+    Reference(usize),
 
     // Literals
     TypeInference,
@@ -68,8 +81,7 @@ pub enum Token {
     SceneOpen,
     SceneClose(u32), // Keeps track of the spaces following the scene
 
-    //Functions
-    As, // For default args in functions
+    As, // Type casting
 
     // Type Declarations
     TypeKeyword(DataType),
@@ -78,45 +90,46 @@ pub enum Token {
     Bang,
     QuestionMark,
 
-    //Mathematical Operators
-    Add,
-    Subtract,
+    //Mathematical Operators in order of precedence
     Negative,
+
+    Exponent,
     Multiply,
     Divide,
     Modulus,
     Remainder,
-    Exponent,
     Root,
+
+    ExponentAssign,
     MultiplyAssign,
     DivideAssign,
     ModulusAssign,
-    AddAssign,
-    SubtractAssign,
-    ExponentAssign,
     RootAssign,
     RemainderAssign,
 
-    // Logical Operators
-    And,
-    Or,
+    Add,
+    Subtract,
+    AddAssign,
+    SubtractAssign,
+
+    // Logical Operators in order of precedence
     Not,
-
-    //Memory and Pointers
-    Pointer,
-    Reference,
-    Allocate,
-    Free,
-
-    // Bitwise Operators
-    Bitwise,
-
-    // Comparison Operators
     Equal,
     LessThan,
     LessThanOrEqual,
     GreaterThan,
     GreaterThanOrEqual,
+
+    And,
+    Or,
+
+    //Memory and Pointers
+    Pointer,
+    Allocate,
+    Free,
+
+    // Bitwise Operators
+    Bitwise,
 
     // Control Flow
     If,
@@ -147,7 +160,7 @@ pub enum Token {
     Heading(u8, String), // Max heading size should be 10 or something
     BulletPoint(u8, String),
     Superscript(String),
-    Empty,
+    Empty,       // ALSO USED FOR REMOVED TOKENS
     Pre(String), // Content inside raw elements. Might change to not be a format tag in the future
 
     // named tags

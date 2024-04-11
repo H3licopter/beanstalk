@@ -14,7 +14,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Tokenize File
     println!("TOKENIZING FILE\n");
-    let tokens: Vec<Token> = tokenizer::tokenize(&content);
+    let tokens: Vec<Token> = tokenizer::tokenize(&content, "Test File".to_string());
 
     println!("TOKENS:");
     for token in &tokens {
@@ -24,7 +24,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Create AST
     println!("CREATING AST\n");
-    let ast: Vec<parsers::ast::AstNode> = parsers::build_ast::new_ast(&tokens, 0).0;
+    let ast: Vec<parsers::ast::AstNode> = parsers::build_ast::new_ast(tokens, 0).0;
 
     println!("AST:");
     println!("{:?}", ast);

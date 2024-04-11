@@ -3,7 +3,12 @@
 ---
 
 # Functions
-Their structure is: prototype containing the args for the function, the return type, then the body of the function.
+Their structure is: 
+1. the function name (can be omited for anonymous functions)
+2. A double colon for private functions '::' or a colon-equals for public functions ':='
+3. collection containing the args for the function
+4. the optional return type
+5. the the body of the function.
 
 A return type is required for any functions returning a value.
 
@@ -14,15 +19,19 @@ Arrows are the symbol for returns within the function scope.
 When functions return mutliple values, they are returned as a choice. This choice can always contain an error as a possible choice.
 
 `
-    -- Multiple return values
-    multipleReturns : {} -> ( -> {1, 2, 3} )
+    -- Multiple return values (private function)
+    multipleReturns :: -> int, int, int ( 
+        return 1, 2, 3 
+    )
 
-    a = multipleReturns{}
+    a = multipleReturns
 
     a.0 -- 1
-
 `
-    concatString : {a string, b string} -> string ( a + b )
+`
+    concatString :: {a string, b string} -> string ( 
+        return a + b 
+    )
 
     myself = concatString{
         a "I am ",
@@ -30,7 +39,8 @@ When functions return mutliple values, they are returned as a choice. This choic
     }
 
     -- Using an exsisting prototype to define the args
-    NormalizeVectors : Vec -> Vec (
+    -- Public function
+    NormalizeVectors := Vec -> Vec (
         -> { 
             x = Vec.x / Vec.length, 
             y = Vec.y / Vec.length 
@@ -38,25 +48,27 @@ When functions return mutliple values, they are returned as a choice. This choic
     )
 
     -- No return value or args
-    inlineSideEffect : {} -> ( state = "beans" )
+    inlineSideEffect :: ( state = "beans" )
 
     -- With default args
-    addNumbers : {a = 1, b = 1} -> ( -> a + b )
+    addNumbers :: {a = 1, b = 1} ( 
+        return a + b 
+    )
 
     -- named args access
     result = addNumbers{a 3, b 16}
 
     -- Multiple return values
-    multipleReturns : {} -> ( 1, 2, 3 )
+    multipleReturns :: ( return 1, 2, 3 )
 
-    a, b, c = multipleReturns{}
+    a, b, c = multipleReturns
 
     -- Anonymous functions
-    {arg int} -> ( arg + 1 )
+    :: {arg int} ( arg + 1 )
     
-    {arg int} -> ( arg + 1 )
+    :: {arg int} ( arg + 1 )
 
-    {} -> ( "Hello, World!" )
+    :: return "Hello, World!"
 `
 
 # Methods
@@ -70,7 +82,7 @@ Create a new method by using the Self keyword as the name of an argument.
 To impliment the method on one or more types, specify them as types of the Self argument.
 
 `
-    increment : {self int or float} -> ( self += 1 )
+    increment => {self int or float} -> ( self += 1 )
 
     number = 0
     number.incrementInt{} -- 1

@@ -68,6 +68,7 @@ Technologies currently used in the compiler:
 
 ## Current Goals
   - Finish implementing all basic scene styling and keywords
+  - Finish implimenting constant folding and basic compile time evaluation
   - Finish frontend codegen
   - Dev server built into compiler tools
   - Complete all the basic features of the initial compiler so it can actually be downloaded and used easily 

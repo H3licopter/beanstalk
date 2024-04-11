@@ -1,19 +1,38 @@
+use super::tokens::{Declaration, Token, TokenizeMode};
 use crate::bs_types::DataType;
-
-use super::tokens::{Token, TokenizeMode};
 use std::iter::Peekable;
 use std::str::Chars;
 
-pub fn tokenize(source_code: &str) -> Vec<Token> {
+pub fn tokenize(source_code: &str, module_name: String) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut chars: Peekable<Chars<'_>> = source_code.chars().peekable();
     let mut tokenize_mode: TokenizeMode = TokenizeMode::Normal;
     let mut scene_nesting_level: &mut i64 = &mut 0;
 
-    let mut token: Token = get_next_token(&mut chars, &mut tokenize_mode, &mut scene_nesting_level);
-    while token != Token::EOF {
+    // For variable optimisation
+    let mut var_names: Vec<Declaration> = Vec::new();
+
+    let mut token: Token = Token::ModuleStart(module_name);
+    loop {
+        match token {
+            Token::Variable(name) => {
+                token = new_var_or_ref(name, tokens.len(), &mut var_names);
+            }
+            Token::EOF => {
+                break;
+            }
+            _ => {}
+        }
+
         tokens.push(token);
         token = get_next_token(&mut chars, &mut tokenize_mode, &mut scene_nesting_level);
+    }
+
+    // Elimate any VarDeclaration tokens that have no reference
+    for var_dec in var_names.iter() {
+        if !var_dec.has_ref {
+            tokens[var_dec.index] = Token::Empty;
+        }
     }
 
     tokens.push(token);
@@ -93,7 +112,18 @@ fn get_next_token(
 
     // Initialisation
     // Check if going into markdown mode
+    // := and :: are reserved for function initialisation
     if current_char == ':' {
+        if chars.peek() == Some(&':') {
+            chars.next();
+            return Token::FunctionInitPrivate;
+        }
+
+        if chars.peek() == Some(&'=') {
+            chars.next();
+            return Token::FunctionInitPublic;
+        }
+
         if tokenize_mode == &TokenizeMode::SceneHead {
             *tokenize_mode = TokenizeMode::Markdown;
         }
@@ -216,12 +246,15 @@ fn get_next_token(
                         token_value.push(ch);
                     }
                 }
-
-            // Subtraction
+            // Subtraction / Negative / Return / Subtract Assign
             } else {
                 if next_char == '=' {
                     chars.next();
                     return Token::SubtractAssign;
+                }
+                if next_char == '>' {
+                    chars.next();
+                    return Token::Return;
                 }
                 if next_char.is_numeric() {
                     return Token::Negative;
@@ -325,11 +358,6 @@ fn get_next_token(
         }
     }
 
-    // Pointers and Memory Allocation
-    if current_char == '&' {
-        return Token::Reference;
-    }
-
     if current_char == '@' {
         return Token::Href;
     }
@@ -402,9 +430,6 @@ fn keyword_or_variable(
             }
             if token_value == "for" {
                 return Token::For;
-            }
-            if token_value == "return" {
-                return Token::Return;
             }
             if token_value == "match" {
                 return Token::Match;
@@ -775,5 +800,28 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
         }
 
         _ => Token::Error("Invalid Markdown Element".to_string()),
+    }
+}
+
+// Check for duplicate variable names
+// If duplicate, replace reference token with a usize number of the ref
+// If not duplicate, add to the list of variable names and give it it's index
+// Then remove any VarDeclaration tokens that have no reference
+pub fn new_var_or_ref(name: String, token_index: usize, var_names: &mut Vec<Declaration>) -> Token {
+    let check_if_ref = var_names.iter().rposition(|n| n.name == name);
+
+    match check_if_ref {
+        Some(index) => {
+            var_names[index].has_ref = true;
+            return Token::Reference(index);
+        }
+        None => {
+            var_names.push(Declaration {
+                name: name.clone(),
+                index: token_index,
+                has_ref: false,
+            });
+            return Token::VarDeclaration(var_names.len());
+        }
     }
 }

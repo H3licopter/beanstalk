@@ -7,6 +7,12 @@ use crate::tokens::Token;
 use std::error::Error;
 use std::fs;
 
+struct OutputFile {
+    source_code: String,
+    output_dir: String,
+    file_name: String,
+}
+
 #[allow(unused_variables)]
 pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     // If entry_path is empty, use the current directory
@@ -22,10 +28,6 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     // Read content from a test file
     println!("Reading from: {}", &entry_path);
 
-    struct OutputFile {
-        source_code: String,
-        output_file: String,
-    }
     let mut source_code_to_parse: Vec<OutputFile> = Vec::new();
 
     // check to see if there is a config.bs file in this directory
@@ -33,8 +35,8 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     // and check where the project entry points are
     enum CompileType {
         SingleFile(String, String), // File Name, Source Code
-        MultiFile(String), // Config file content
-        Error(String)
+        MultiFile(String),          // Config file content
+        Error(String),
     }
     let config = if entry_path.ends_with(".bs") {
         let source_code = fs::read_to_string(&entry_path);
@@ -57,11 +59,15 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
         CompileType::SingleFile(file_name, code) => {
             // Compile the induvidual file
             let entry_file_dir = entry_path.split("/").collect::<Vec<&str>>();
-            let default_output_dir = format!("{}/dist", entry_file_dir[0..entry_file_dir.len()-3].join("/"));
+            let default_output_dir = format!(
+                "{}/dist",
+                entry_file_dir[0..entry_file_dir.len() - 3].join("/")
+            );
 
             source_code_to_parse.push(OutputFile {
                 source_code: code,
-                output_file: format!("{}/{}.html", &default_output_dir, file_name)
+                output_dir: format!("{}/", &default_output_dir),
+                file_name: file_name,
             });
         }
 
@@ -74,14 +80,15 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
             let project_config = get_config_data(&source_code)?;
 
             // TO DO, READ WHOLE PROJECT FROM CONFIG ENTRY POINT AND ADD EVERYTHING TO COMPILE LIST
-            
+
             let main_code = fs::read_to_string(project_config.main);
-            
+
             match main_code {
                 Ok(content) => {
                     source_code_to_parse.push(OutputFile {
                         source_code: content,
-                        output_file: format!("{}/index.html", project_config.output_folder)
+                        output_dir: format!("{}/", project_config.output_folder),
+                        file_name: "index.html".to_string(),
                     });
                 }
                 Err(e) => {
@@ -93,23 +100,20 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
 
     // Compile all output files
     for file in source_code_to_parse {
-        compile(&file.source_code, &file.output_file)?;
+        compile(file)?;
     }
 
     Ok(())
 }
 
-fn compile(source_code: &str, output_dir: &str) -> Result<Vec<AstNode>, Box<dyn Error>> {
-    println!("Compiling: {}", &output_dir);
-    let tokens: Vec<Token> = tokenizer::tokenize(&source_code);
-    let ast = parsers::build_ast::new_ast(&tokens, 0).0;
+fn compile(output: OutputFile) -> Result<Vec<AstNode>, Box<dyn Error>> {
+    println!("Compiling: {}", output.output_dir);
+    let tokens: Vec<Token> = tokenizer::tokenize(&output.source_code, output.file_name);
+    let ast = parsers::build_ast::new_ast(tokens, 0).0;
 
     // If no output path, just return the AST
-    if !output_dir.is_empty() {
-        fs::write(
-            output_dir,
-            web_parser::parse(ast, get_html_config()),
-        )?;
+    if !output.output_dir.is_empty() {
+        fs::write(output.output_dir, web_parser::parse(ast, get_html_config()))?;
         return Ok(Vec::new());
     }
 
@@ -117,7 +121,11 @@ fn compile(source_code: &str, output_dir: &str) -> Result<Vec<AstNode>, Box<dyn 
 }
 
 fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
-    let config_ast = compile(config_source_code, "");
+    let config_ast = compile(OutputFile {
+        source_code: config_source_code.to_string(),
+        output_dir: String::new(),
+        file_name: String::new(),
+    });
     let config = get_default_config();
 
     match config_ast {
@@ -139,7 +147,7 @@ fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
                                             AstNode::Error(e) => {
                                                 return Err(e.into());
                                             }
-                                            _=> {}
+                                            _ => {}
                                         }
                                     }
                                 }

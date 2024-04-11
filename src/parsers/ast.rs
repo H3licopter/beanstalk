@@ -7,22 +7,29 @@ pub enum AstNode {
     // Config settings
     Config(Vec<AstNode>),
     Project(Vec<AstNode>),
-    
+
     // Blocks
-    Function(String, Vec<AstNode>, Vec<AstNode>),
+    Function(usize, Box<AstNode>, Vec<AstNode>),
     Expression(Vec<AstNode>, DataType), //Expression, Result type
 
     // Basics
     Error(String),
     Comment(String),
-    VarDeclaration(String, Box<AstNode>),
-    ConstDeclaration(String, Box<AstNode>),
+    VarDeclaration(usize, Box<AstNode>),
+    Const(usize, Box<AstNode>),
 
     // IO
     Print(Box<AstNode>),
 
     // References to existing variables
-    Ref(String),
+
+    // Pointers
+    IntRef(*const i32),
+    FloatRef(*const f32),
+    StringRef(*const String),
+    BoolRef(*const bool),
+    RuneRef(*const char),
+
     FunctionCall(String, Vec<AstNode>),
 
     // Literals
@@ -31,8 +38,8 @@ pub enum AstNode {
     Scene(Vec<AstNode>),
 
     // Operators
-    UnaryOperator(Token),
-    BinaryOperator(Token),
+    UnaryOperator(Token, u8),  // Operator, Precedence
+    BinaryOperator(Token, u8), // Operator, Precedence
 
     // HTML
     Element(Token),                 // HTML element content
