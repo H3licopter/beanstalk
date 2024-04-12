@@ -20,6 +20,9 @@ It also means Beanstalk values are written like values with units you would see 
 
     -- Specify the type as an unsigned 32 bit integer by appending the type unit to the value
     my_brain = 420 uint
+
+    -- Uninitialised variable
+    lonely_variable : int
 `
 
 **There is no such thing as Nil or Null in Beanstalk.**

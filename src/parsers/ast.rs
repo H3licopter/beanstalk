@@ -17,20 +17,14 @@ pub enum AstNode {
     Comment(String),
     VarDeclaration(usize, Box<AstNode>),
     Const(usize, Box<AstNode>),
-
+    
     // IO
     Print(Box<AstNode>),
 
     // References to existing variables
-
-    // Pointers
-    IntRef(*const i32),
-    FloatRef(*const f32),
-    StringRef(*const String),
-    BoolRef(*const bool),
-    RuneRef(*const char),
-
-    FunctionCall(String, Vec<AstNode>),
+    VarReference(usize),
+    ConstReference(usize),
+    FunctionCall(usize, Vec<AstNode>),
 
     // Literals
     Literal(Token),

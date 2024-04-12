@@ -322,11 +322,13 @@ fn parse_scenehead_number_values(scene_head: &Vec<Token>, i: &mut usize) -> Vec<
     // If Collection, unwrap the values
     if &scene_head[*i] == &Token::OpenCollection {
         let collection = new_collection(&scene_head, i);
-        println!("Collection: {:?}", collection);
         match collection {
             AstNode::Collection(elements) => {
                 for element in elements {
                     match element {
+                        AstNode::Expression(nodes, _) => {
+                            values.push(0.0);
+                        }
                         AstNode::Literal(Token::FloatLiteral(value)) => {
                             values.push(value.clone());
                         }
@@ -341,7 +343,6 @@ fn parse_scenehead_number_values(scene_head: &Vec<Token>, i: &mut usize) -> Vec<
             }
             _ => {}
         }
-
         return values;
     }
 

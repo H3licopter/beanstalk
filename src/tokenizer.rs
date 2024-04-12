@@ -803,17 +803,14 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
     }
 }
 
-// Check for duplicate variable names
-// If duplicate, replace reference token with a usize number of the ref
-// If not duplicate, add to the list of variable names and give it it's index
-// Then remove any VarDeclaration tokens that have no reference
+
 pub fn new_var_or_ref(name: String, token_index: usize, var_names: &mut Vec<Declaration>) -> Token {
     let check_if_ref = var_names.iter().rposition(|n| n.name == name);
 
     match check_if_ref {
         Some(index) => {
             var_names[index].has_ref = true;
-            return Token::Reference(index);
+            return Token::Reference(var_names[index].index);
         }
         None => {
             var_names.push(Declaration {

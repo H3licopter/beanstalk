@@ -21,7 +21,14 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
 
             // New Function or Variable declaration or reference
             Token::VarDeclaration(id) => {
-                ast.push(new_variable(*id, &tokens, &mut i));
+                ast.push(
+                    new_variable(*id, &tokens, &mut i)
+                );
+            }
+            Token::Reference(var_index) => {
+                ast.push(
+                    create_reference(&tokens, var_index)
+                );
             }
 
             Token::OpenCollection => {
@@ -56,8 +63,8 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                 }
             }
 
-            Token::Newline => {
-                // Do nothing
+            Token::Newline | Token::Empty | Token::ModuleStart(_) => {
+                // Do nothing for now
             }
 
             Token::Print => {
@@ -65,9 +72,10 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                 ast.push(AstNode::Print(Box::new(create_expression(&tokens, &mut i))));
             }
 
+
             // Or stuff that hasn't been implemented yet
             _ => {
-                ast.push(AstNode::Error("Invalid Token Used".to_string()));
+                ast.push(AstNode::Error(format!("Invalid Token Used: {:?}", &tokens[i]).to_string()));
             }
         }
 
@@ -77,7 +85,8 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
     (ast, i)
 }
 
-// CAN ALSO RETURN A FUNCTION
+// CAN RETURN:
+// VarDeclaration, Const, Error, Function
 fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut var_is_const = true;
 
@@ -117,8 +126,9 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     // AstNode::Error("Invalid variable assignment".to_string())
 }
 
+// Called from new_variable
 fn new_function(_public: bool, name: usize, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
-    let mut function_args = AstNode::Collection(Vec::new());
+    let function_args;
     let function_body = Vec::new();
 
     // Get function args
@@ -130,8 +140,7 @@ fn new_function(_public: bool, name: usize, tokens: &Vec<Token>, i: &mut usize) 
         }
         // Can directly get args from an existing collection
         Token::VarDeclaration(_) => {
-            // PROBABLY SHOULDEN'T LET ANY VARIABLE BE USED AS FUNCTION ARGS
-            // but for now it's just here incase it's a collection
+            function_args = new_variable(0, tokens, i);
         }
         _ => {
             return AstNode::Error("Expected '(' for function args".to_string());
@@ -150,20 +159,22 @@ fn new_function(_public: bool, name: usize, tokens: &Vec<Token>, i: &mut usize) 
 
 pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut collection = Vec::new();
-    let mut collection_type = &DataType::Inferred;
+    let mut collection_type = DataType::Inferred;
 
     // Should always start with current token being an open collection
     *i += 1;
 
     // look for index of final CloseCollection in tokens,
     // And check if there is a type declaration after it
-    let close_index = tokens.iter().position(|x| x == &Token::CloseCollection);
+    let close_index = tokens.iter()
+        .position(|x| x == &Token::CloseCollection);
+
     match close_index {
         Some(index) => {
             if index + 1 < tokens.len() {
                 match &tokens[index + 1] {
                     Token::TypeKeyword(data_type) => {
-                        collection_type = data_type;
+                        collection_type = data_type.clone();
                     }
                     _ => {}
                 }
@@ -181,7 +192,9 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
         // Make sure the datatype is correct for the collection
         match element {
             AstNode::Expression(_, ref expression_type) => {
-                if expression_type != collection_type {
+                if collection_type == DataType::Inferred {
+                    collection_type = expression_type.clone();
+                } else if *expression_type != collection_type {
                     return AstNode::Error("Invalid datatype inside collection".to_string());
                 }
             }
@@ -210,6 +223,24 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     AstNode::Collection(collection)
 }
 
+fn create_reference(tokens: &Vec<Token>, var_index: &usize) -> AstNode {
+
+    // Should never be out of bounds right?
+    match &tokens[var_index + 1] {
+        Token::Assign => {
+            return AstNode::VarReference(*var_index);
+        }
+        Token::Initialise => {
+            return AstNode::ConstReference(*var_index);
+        }
+        Token::FunctionInitPrivate | Token::FunctionInitPublic => {
+            return AstNode::ConstReference(*var_index);
+        }
+        _ => {
+            return AstNode::Error("Expected variable or reference after '&'".to_string());
+        }
+    }
+}
 /*
 match &tokens[*i] {
     // Infer type (CONSTANT VARIABLE)

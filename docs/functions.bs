@@ -58,6 +58,14 @@ When functions return mutliple values, they are returned as a choice. This choic
     -- named args access
     result = addNumbers{a 3, b 16}
 
+    sayThing :: {phrase: string} -> string ( 
+        return "{phrase}" 
+    )
+
+    -- Automatic Collection Destructuring
+    -- Args don't need to always be named, or in a collection
+    sayThing "Hello, World!"
+
     -- Multiple return values
     multipleReturns :: ( return 1, 2, 3 )
 
