@@ -3,7 +3,7 @@ use crate::bs_types::DataType;
 use std::iter::Peekable;
 use std::str::Chars;
 
-pub fn tokenize(source_code: &str, module_name: String) -> Vec<Token> {
+pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut chars: Peekable<Chars<'_>> = source_code.chars().peekable();
     let mut tokenize_mode: TokenizeMode = TokenizeMode::Normal;
@@ -12,7 +12,7 @@ pub fn tokenize(source_code: &str, module_name: String) -> Vec<Token> {
     // For variable optimisation
     let mut var_names: Vec<Declaration> = Vec::new();
 
-    let mut token: Token = Token::ModuleStart(module_name);
+    let mut token: Token = Token::ModuleStart(module_name.to_string());
     loop {
         match token {
             Token::Variable(name) => {

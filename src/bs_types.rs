@@ -12,4 +12,5 @@ pub enum DataType {
     Collection,
     Scene,
     Choice,
+    Type
 }

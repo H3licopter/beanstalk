@@ -1,5 +1,5 @@
 use super::{
-    ast::AstNode,
+    ast::{AstNode, CollectionType},
     create_scene_node::new_scene,
     parse_expression::create_expression,
 };
@@ -159,7 +159,10 @@ fn new_function(_public: bool, name: usize, tokens: &Vec<Token>, i: &mut usize) 
 
 pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut collection = Vec::new();
-    let mut collection_type = DataType::Inferred;
+    let mut appended_type = DataType::Inferred;
+
+    // CURRENTLY JUST PARSING AS IF IT'S A NORMAL ARRAY
+    let mut collection_type = CollectionType::Array;
 
     // Should always start with current token being an open collection
     *i += 1;
@@ -174,7 +177,7 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
             if index + 1 < tokens.len() {
                 match &tokens[index + 1] {
                     Token::TypeKeyword(data_type) => {
-                        collection_type = data_type.clone();
+                        appended_type = data_type.clone();
                     }
                     _ => {}
                 }
@@ -186,15 +189,20 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     }
 
     while *i < tokens.len() {
+        
+        
+        // TO DO: FIRST CHECK IF STRUCT WITH NAMES PARAMS
+
+
         // Parse the element inside of collection
         let element = create_expression(tokens, i);
 
         // Make sure the datatype is correct for the collection
         match element {
             AstNode::Expression(_, ref expression_type) => {
-                if collection_type == DataType::Inferred {
-                    collection_type = expression_type.clone();
-                } else if *expression_type != collection_type {
+                if appended_type == DataType::Inferred {
+                    appended_type = expression_type.clone();
+                } else if *expression_type != appended_type {
                     return AstNode::Error("Invalid datatype inside collection".to_string());
                 }
             }
@@ -220,7 +228,7 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
         }
     }
 
-    AstNode::Collection(collection)
+    AstNode::Collection(collection, collection_type)
 }
 
 fn create_reference(tokens: &Vec<Token>, var_index: &usize) -> AstNode {

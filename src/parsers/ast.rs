@@ -9,7 +9,7 @@ pub enum AstNode {
     Project(Vec<AstNode>),
 
     // Blocks
-    Function(usize, Box<AstNode>, Vec<AstNode>),
+    Function(usize, Box<AstNode>, Vec<AstNode>), // Function name, Args, Body
     Expression(Vec<AstNode>, DataType), //Expression, Result type
 
     // Basics
@@ -24,16 +24,17 @@ pub enum AstNode {
     // References to existing variables
     VarReference(usize),
     ConstReference(usize),
-    FunctionCall(usize, Vec<AstNode>),
+    FunctionCall(usize, Box<AstNode>),
 
     // Literals
     Literal(Token),
-    Collection(Vec<AstNode>),
+    Collection(Vec<AstNode>, CollectionType), // Contents, Collection Type
     Scene(Vec<AstNode>),
 
     // Operators
-    UnaryOperator(Token, u8),  // Operator, Precedence
-    BinaryOperator(Token, u8), // Operator, Precedence
+    // Operator, Precedence
+    UnaryOperator(Token, u8),  // Negative, Not, Exponent
+    BinaryOperator(Token, u8), 
 
     // HTML
     Element(Token),                 // HTML element content
@@ -43,4 +44,11 @@ pub enum AstNode {
     // SCENE META DATA
     Title(String),
     Date(String),
+}
+
+#[derive(Debug)]
+pub enum CollectionType {
+    Array,
+    Struct,
+    List,
 }

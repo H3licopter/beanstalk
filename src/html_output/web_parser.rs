@@ -1,4 +1,4 @@
-use super::{generate_html::create_html_boilerplate, markdown_parser::add_markdown_tags};
+use super::{generate_html::create_html_boilerplate, js_parser::{collection_to_vec_of_js, combine_collection_to_js, expression_to_js}, markdown_parser::add_markdown_tags};
 use crate::{
     parsers::{
         ast::AstNode,
@@ -37,31 +37,17 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
 
             // JAVASCRIPT / WASM
             AstNode::VarDeclaration(name, expr) => {
-                let expressions = match *expr {
-                    AstNode::Expression(e, _) => e,
-                    _ => {
-                        println!("Error: No expression found for variable declaration");
-                        break;
-                    }
-                };
                 js.push_str(&format!(
                     "let {} = {};",
                     name,
-                    expression_to_js(expressions)
+                    expression_to_js(&expr)
                 ));
             }
             AstNode::Function(name, args, body) => {
                 js.push_str(&format!("function {}({:?}){{\n{:?}\n}}", name, args, body));
             }
             AstNode::Print(expr) => {
-                let expressions = match *expr {
-                    AstNode::Expression(e, _) => e,
-                    _ => {
-                        println!("Error: No expression found for variable declaration");
-                        break;
-                    }
-                };
-                js.push_str(&format!("console.log({});", expression_to_js(expressions)));
+                js.push_str(&format!("console.log({});", expression_to_js(&expr)));
             }
 
             _ => {
@@ -75,61 +61,6 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
         .replace("@page-css", &css)
         .replace("page-title", &page_title)
         .replace("//js", &js)
-}
-
-// JS will also need to call into the prebuilt webassembly functions
-fn expression_to_js(expr: Vec<AstNode>) -> String {
-    let mut js = String::new();
-
-    for node in expr {
-        match node {
-            AstNode::Literal(token) => match token {
-                Token::IntLiteral(value) => {
-                    js.push_str(&value.to_string());
-                }
-                Token::FloatLiteral(value) => {
-                    js.push_str(&value.to_string());
-                }
-                Token::StringLiteral(value) => {
-                    js.push_str(&format!("\"{}\"", value));
-                }
-                _ => {
-                    println!("unknown literal found in expression");
-                }
-            },
-
-            // AstNode::Ref(name) => {
-            //     js.push_str(&name);
-            // }
-            AstNode::FunctionCall(name, args) => {
-                js.push_str(&format!("{}({:?})", name, args));
-            }
-
-            // AstNode::Add => {
-            //     js.push_str("+");
-            // }
-            // AstNode::Subtract => {
-            //     js.push_str(" - ");
-            // }
-            // AstNode::Multiply => {
-            //     js.push_str("*");
-            // }
-            // AstNode::Divide => {
-            //     js.push_str("/");
-            // }
-            // AstNode::Modulus => {
-            //     js.push_str("%");
-            // }
-            // AstNode::Exponent => {
-            //     js.push_str("**");
-            // }
-            _ => {
-                println!("unknown AST node found in expression");
-            }
-        }
-    }
-
-    js
 }
 
 struct SceneTag {
@@ -159,16 +90,19 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
 
                 for style in styles {
                     match style {
-                        Style::TextColor(r, g, b) => {
+                        Style::TextColor(arg) => {
                             scene_wrap
                                 .style
-                                .push_str(&format!("color:rgb({},{},{});", r, g, b));
+                                .push_str(&format!("color:rgb({});", combine_collection_to_js(&arg)));
                             scene_wrap.tag = Tag::Span;
                         }
-                        Style::Size(w, h) => {
+                        Style::Size(arg) => {
+                            let size = collection_to_vec_of_js(&arg);
+
+                            // TO DO: Add or remove parameters based on number of arguments
                             scene_wrap
                                 .style
-                                .push_str(&format!("width:{}px;height:{}px", w, h));
+                                .push_str(&format!("width:{}px;height:{}px", size[0], size[1]));
                         }
                         Style::Alt(value) => {
                             scene_wrap

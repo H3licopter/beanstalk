@@ -25,6 +25,7 @@ mod html_output {
     mod generate_html;
     mod markdown_parser;
     pub mod web_parser;
+    pub mod js_parser;
 }
 pub use tokens::Token;
 enum Command {
@@ -115,7 +116,6 @@ fn collect_user_input() -> Command {
         Some("build") => {
             match args.get(1).map(String::as_str) {
                 Some(string) => {
-                    // Check if path is valid, if not, throw error
                     return Command::Build(string.to_string());
                 }
                 _ => {

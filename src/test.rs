@@ -14,7 +14,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Tokenize File
     println!("TOKENIZING FILE\n");
-    let tokens: Vec<Token> = tokenizer::tokenize(&content, "Test File".to_string());
+    let tokens: Vec<Token> = tokenizer::tokenize(&content, &"Test File".to_string());
 
     println!("TOKENS:");
     for token in &tokens {

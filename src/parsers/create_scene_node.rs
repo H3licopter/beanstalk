@@ -3,7 +3,7 @@ use super::{
     build_ast::new_collection,
     parse_expression::create_expression,
     styles::{Style, Tag},
-    util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
+    util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string, parse_function_args},
 };
 use crate::Token;
 
@@ -19,8 +19,6 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
     // Look at all the possible properties that can be added to the scene head
     let mut j = 0;
 
-    // CURRENTLY ONLY SUPPORTS COMPILE TIME PROPERTIES
-    // NEEDS TO BE ABLE TO LINK INTO GENERATED JS
     while j < scene_head.len() {
         match &scene_head[j] {
             Token::SceneClose(spaces) => {
@@ -49,33 +47,16 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::Rgb => {
-                let values = parse_scenehead_number_values(scene_head, &mut j);
-
-                if values.len() == 3 {
-                    scene_styles.push(Style::TextColor(
-                        values[0] as u8,
-                        values[1] as u8,
-                        values[2] as u8,
-                    ));
-                } else {
-                    scene.push(AstNode::Error(
-                        "Invalid number of values provided for rgb".to_string(),
-                    ));
-                }
+                scene_styles.push(Style::TextColor(parse_function_args(scene_head, &mut j)));
             }
 
             Token::Size => {
-                let values = parse_scenehead_number_values(scene_head, &mut j);
-
-                if values.len() == 2 {
-                    scene_styles.push(Style::Size(values[0], values[1]));
-                } else if values.len() == 1 {
-                    scene_styles.push(Style::Size(values[0], values[0]));
-                } else {
-                    scene.push(AstNode::Error(
-                        "Invalid number of values provided for size parameter".to_string(),
-                    ));
-                }
+                let arg = parse_function_args(scene_head, &mut j);
+                match arg {
+                    _=> {
+                        scene.push(AstNode::Error(format!("Invalid Size argument: {:?}", arg)));
+                    }
+                };
             }
 
             Token::Img => {
@@ -312,60 +293,4 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
             false
         }
     }
-}
-
-fn parse_scenehead_number_values(scene_head: &Vec<Token>, i: &mut usize) -> Vec<f64> {
-    let mut values = Vec::new();
-
-    *i += 1;
-
-    // If Collection, unwrap the values
-    if &scene_head[*i] == &Token::OpenCollection {
-        let collection = new_collection(&scene_head, i);
-        match collection {
-            AstNode::Collection(elements) => {
-                for element in elements {
-                    match element {
-                        AstNode::Expression(nodes, _) => {
-                            values.push(0.0);
-                        }
-                        AstNode::Literal(Token::FloatLiteral(value)) => {
-                            values.push(value.clone());
-                        }
-                        AstNode::Literal(Token::IntLiteral(value)) => {
-                            values.push(value.clone() as f64);
-                        }
-                        _ => {
-                            AstNode::Error("Invalid value in collection".to_string());
-                        }
-                    }
-                }
-            }
-            _ => {}
-        }
-        return values;
-    }
-
-    let mut args = Vec::new();
-    while *i < scene_head.len() - 1 {
-        args.push(create_expression(scene_head, i));
-
-        *i += 1;
-    }
-
-    for node in args {
-        match node {
-            AstNode::Literal(Token::FloatLiteral(value)) => {
-                values.push(value.clone());
-            }
-            AstNode::Literal(Token::IntLiteral(value)) => {
-                values.push(value as f64);
-            }
-            _ => {
-                values.push(0.0);
-            }
-        }
-    }
-
-    values
 }

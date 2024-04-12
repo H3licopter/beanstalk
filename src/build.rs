@@ -1,6 +1,6 @@
 use crate::html_output::web_parser;
 use crate::parsers;
-use crate::parsers::ast::AstNode;
+use crate::parsers::ast::{AstNode, CollectionType};
 use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::Token;
@@ -18,11 +18,9 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     // If entry_path is empty, use the current directory
     if entry_path == "test" {
         entry_path = "test_output/src/pages/home.bs".to_string();
-    }
-
-    if entry_path.is_empty() {
+    } else {
         let current_dir = std::env::current_dir()?;
-        entry_path = current_dir.to_string_lossy().into_owned();
+        entry_path = format!("{}/{}", current_dir.to_string_lossy().into_owned(), entry_path);
     }
 
     // Read content from a test file
@@ -38,13 +36,19 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
         MultiFile(String),          // Config file content
         Error(String),
     }
+
     let config = if entry_path.ends_with(".bs") {
         let source_code = fs::read_to_string(&entry_path);
         let og_file_name = entry_path.split("/").last().unwrap();
         let new_file_name = og_file_name.split(".").next().unwrap();
 
         match source_code {
-            Ok(content) => CompileType::SingleFile(new_file_name.to_string(), content),
+            Ok(content) => {
+                let file_name = format!("{}.html", 
+                    if new_file_name == "home" { "index" } else { new_file_name }
+                );
+                CompileType::SingleFile(file_name, content)
+            },
             Err(_) => CompileType::Error("No file found".to_string()),
         }
     } else {
@@ -56,7 +60,7 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     };
 
     match config {
-        CompileType::SingleFile(file_name, code) => {
+        CompileType::SingleFile(name, code) => {
             // Compile the induvidual file
             let entry_file_dir = entry_path.split("/").collect::<Vec<&str>>();
             let default_output_dir = format!(
@@ -67,7 +71,7 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
             source_code_to_parse.push(OutputFile {
                 source_code: code,
                 output_dir: format!("{}/", &default_output_dir),
-                file_name: file_name,
+                file_name: name,
             });
         }
 
@@ -107,13 +111,14 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
 }
 
 fn compile(output: OutputFile) -> Result<Vec<AstNode>, Box<dyn Error>> {
-    println!("Compiling: {}", output.output_dir);
-    let tokens: Vec<Token> = tokenizer::tokenize(&output.source_code, output.file_name);
+    let tokens: Vec<Token> = tokenizer::tokenize(&output.source_code, &output.file_name);
     let ast = parsers::build_ast::new_ast(tokens, 0).0;
 
     // If no output path, just return the AST
     if !output.output_dir.is_empty() {
-        fs::write(output.output_dir, web_parser::parse(ast, get_html_config()))?;
+        let output_path = format!("{}{}", output.output_dir, output.file_name);
+        println!("Compiling: {}", output_path);
+        fs::write(output_path, web_parser::parse(ast, get_html_config()))?;
         return Ok(Vec::new());
     }
 
@@ -141,15 +146,23 @@ fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
                                 AstNode::Error(e) => {
                                     return Err(e.into());
                                 }
-                                AstNode::Collection(values) => {
-                                    for node in values {
-                                        match node {
-                                            AstNode::Error(e) => {
-                                                return Err(e.into());
+                                AstNode::Collection(values, data_type) => {
+                                    match data_type {
+                                        CollectionType::Array => {
+                                            for node in values {
+                                                match node {
+                                                    AstNode::Error(e) => {
+                                                        return Err(e.into());
+                                                    }
+                                                    _ => {}
+                                                }
                                             }
-                                            _ => {}
+                                        }
+                                        _=> {
+                                            return Err("Invalid collection type used for config data".into());
                                         }
                                     }
+
                                 }
                                 _ => {}
                             }

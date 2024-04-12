@@ -1,41 +1,15 @@
 use crate::Token;
+use super::{ast::AstNode, build_ast::new_collection, parse_expression::create_expression};
 
-pub fn _op_precedence(operator: Token) -> i8 {
-    match operator {
-        Token::Negative => 10,
-        Token::Not => 10,
+// Must return one element, but that element can be a collection
+pub fn parse_function_args(scene_head: &Vec<Token>, i: &mut usize) -> AstNode {
+    *i += 1;
 
-        Token::Root => 8,
-        Token::RootAssign => 8,
-        Token::Exponent => 8,
-        Token::ExponentAssign => 8,
+    if &scene_head[*i] == &Token::OpenCollection {
+        return new_collection(&scene_head, i);
+    } 
 
-        Token::Multiply => 7,
-        Token::Divide => 7,
-        Token::Modulus => 7,
-        Token::Remainder => 7,
-
-        Token::MultiplyAssign => 7,
-        Token::DivideAssign => 7,
-        Token::ModulusAssign => 7,
-        Token::RemainderAssign => 7,
-
-        Token::Add => 6,
-        Token::Subtract => 6,
-        Token::AddAssign => 6,
-        Token::SubtractAssign => 6,
-
-        Token::Equal => 5,
-        Token::LessThan => 5,
-        Token::LessThanOrEqual => 5,
-        Token::GreaterThan => 5,
-        Token::GreaterThanOrEqual => 5,
-
-        Token::And => 4,
-        Token::Or => 3,
-
-        _ => 0,
-    }
+    create_expression(scene_head, i)
 }
 
 pub fn count_newlines_at_end_of_string(s: &str) -> usize {
