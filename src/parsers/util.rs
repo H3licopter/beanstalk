@@ -2,6 +2,7 @@ use crate::Token;
 use super::{ast::AstNode, build_ast::new_collection, parse_expression::create_expression};
 
 // Must return one element, but that element can be a collection
+// Should also return whether the argument is a literal (compile time constant)
 pub fn parse_function_args(scene_head: &Vec<Token>, i: &mut usize) -> AstNode {
     *i += 1;
 

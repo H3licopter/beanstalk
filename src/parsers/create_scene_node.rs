@@ -1,7 +1,5 @@
 use super::{
     ast::AstNode,
-    build_ast::new_collection,
-    parse_expression::create_expression,
     styles::{Style, Tag},
     util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string, parse_function_args},
 };
@@ -47,16 +45,21 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::Rgb => {
-                scene_styles.push(Style::TextColor(parse_function_args(scene_head, &mut j)));
+                let arg = parse_function_args(scene_head, &mut j);
+                if check_if_comptime_value(&arg) {
+                    scene_styles.push(Style::TextColor(arg));
+                } else {
+                    // Need to add JS DOM hooks to change text color at runtime.
+                }
             }
 
             Token::Size => {
                 let arg = parse_function_args(scene_head, &mut j);
-                match arg {
-                    _=> {
-                        scene.push(AstNode::Error(format!("Invalid Size argument: {:?}", arg)));
-                    }
-                };
+                if check_if_comptime_value(&arg) {
+                    scene_styles.push(Style::Size(arg));
+                } else {
+                    // Need to add JS DOM hooks to change text size at runtime.
+                }
             }
 
             Token::Img => {
@@ -292,5 +295,13 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
             println!("Previous Element: {:?}", previous_element);
             false
         }
+    }
+}
+
+fn check_if_comptime_value(node: &AstNode) -> bool {
+    match node {
+        AstNode::Literal(_) | AstNode::ConstReference(_) => true,
+        AstNode::Collection(_, _, is_evaluated) => *is_evaluated,
+        _ => {false}
     }
 }

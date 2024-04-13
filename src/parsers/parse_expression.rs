@@ -82,7 +82,7 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
             }
 
             // Check if name is a reference to another variable or function call
-            Token::Variable(name) => {
+            Token::Variable(_) => {
                 expression.push(AstNode::Error("NOT IMPLIMENTED YET - GETTING VARIABLE. Variable reference not defined. Maybe you're using a variable that has not yet been declared?".to_string()));
             }
 
@@ -221,58 +221,64 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 // And evaluates everything possible at compile time (Constant Folding)
 // If it returns a literal, then everything was evaluated at compile time
 // Otherwise it will return an expression, which will need runtime evaluation
-pub fn _eval_expression(expr: AstNode) -> AstNode {
-    let mut simplified_expression = Vec::new();
+pub fn _eval_expression(expr: AstNode, tokens: &Vec<Token>) -> AstNode {
     let mut result_type = DataType::Inferred;
 
-    // Shunting Yard Algorithm
+    let mut constants_queue: Vec<AstNode> = Vec::new();
     let mut operator_stack: Vec<AstNode> = Vec::new();
-    let mut output_queue: Vec<AstNode> = Vec::new();
 
     match expr {
         AstNode::Expression(e, data_type) => {
-            result_type = data_type;
-            let mut tokens = e;
+            for node in e {
+                match node {
+                    AstNode::Literal(v) => {
+                        constants_queue.push(AstNode::Literal(v));
+                    }
+                    AstNode::BinaryOperator(op, precedence) => {
+                        if constants_queue.is_empty() { return AstNode::Error("Not enough operands for binary operator".to_string()); }
+                        
+                        if operator_stack.is_empty() {
+                            operator_stack.push(AstNode::BinaryOperator(op, precedence));
+                        } else {
+                            let top_op = operator_stack.pop().unwrap();
+                            match top_op {
+                                AstNode::BinaryOperator(top_op, top_precedence) => {
+                                    if top_precedence > precedence {
+                                        operator_stack.push(AstNode::BinaryOperator(top_op, top_precedence));
+                                        operator_stack.push(AstNode::BinaryOperator(op, precedence));
+                                    } else {
+                                        operator_stack.push(AstNode::BinaryOperator(top_op, top_precedence));
+                                        operator_stack.push(AstNode::BinaryOperator(op, precedence));
+                                    }
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
+                    AstNode::ConstReference(value) => {
+                        // Get the value of the constant and push it to the constants queue
+                        match &tokens[value] {
+                            Token::IntLiteral(int) => {
+                                if data_type == DataType::Inferred {result_type = DataType::Int;}
+                                else if data_type != DataType::Int {
+                                    return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+                                }
+                                constants_queue.push(AstNode::Literal(Token::IntLiteral(*int)));
+                            }
+                            Token::FloatLiteral(float) => {
+                                if data_type == DataType::Inferred {result_type = DataType::Int;}
+                                else if data_type != DataType::Int {
+                                    return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+                                }
+                                constants_queue.push(AstNode::Literal(Token::FloatLiteral(*float)));
+                            }
+                            _ => {
+                                return AstNode::Error("Invalid Constant Reference".to_string());
+                            }
+                        }
+                    }
 
-            while tokens.len() > 0 {
-                match tokens.pop() {
-                    Some(AstNode::Literal(token)) => {
-                        output_queue.push(AstNode::Literal(token));
-                    }
-                    Some(AstNode::UnaryOperator(op, precedence)) => {
-                        while let Some(AstNode::BinaryOperator(op2, precedence2)) =
-                            operator_stack.last()
-                        {
-                            if precedence2 > &precedence {
-                                output_queue.push(operator_stack.pop().unwrap());
-                            } else {
-                                break;
-                            }
-                        }
-                        operator_stack.push(AstNode::UnaryOperator(op, precedence));
-                    }
-                    Some(AstNode::BinaryOperator(op, precedence)) => {
-                        while let Some(AstNode::BinaryOperator(op2, precedence2)) =
-                            operator_stack.last()
-                        {
-                            if precedence2 > &precedence {
-                                output_queue.push(operator_stack.pop().unwrap());
-                            } else {
-                                break;
-                            }
-                        }
-                        operator_stack.push(AstNode::BinaryOperator(op, precedence));
-                    }
-                    Some(AstNode::FunctionCall(name, args)) => {
-                        // TO DO: Get value of function
-                        output_queue.push(AstNode::FunctionCall(name, args));
-                    }
-                    Some(AstNode::Error(error)) => {
-                        return AstNode::Error(error);
-                    }
-                    _ => {
-                        return AstNode::Error("Invalid Expression".to_string());
-                    }
+                    _=> {}
                 }
             }
         }
@@ -281,7 +287,9 @@ pub fn _eval_expression(expr: AstNode) -> AstNode {
         }
     }
 
-    AstNode::Expression(simplified_expression, DataType::Inferred)
+    let simplified_expression = Vec::new();
+
+    AstNode::Expression(simplified_expression, result_type)
 }
 
 /*

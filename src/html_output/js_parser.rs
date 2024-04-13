@@ -1,6 +1,7 @@
 use crate::{parsers::ast::{AstNode, CollectionType}, Token};
 
 // JS will also need to call into the prebuilt webassembly functions
+// Also parses literals
 pub fn expression_to_js(expr: &AstNode) -> String {
     let mut js = String::new();
 
@@ -32,7 +33,7 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     AstNode::FunctionCall(name, arg) => {
                         let mut js_args = "".to_string();
                         match **arg {
-                            AstNode::Collection(_, _) => {
+                            AstNode::Collection(_, _, _) => {
                                 js_args = combine_collection_to_js(&**arg);
                             }
                             AstNode::Expression(_, _) => {
@@ -50,13 +51,10 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                             AstNode::Expression(_, _) => {
                                 js.push_str(&format!("const c{} = {}", name, expression_to_js(value)));
                             }
-                            AstNode::Collection(_, collection_type) => {
+                            AstNode::Collection(_, collection_type, _) => {
                                 match collection_type {
                                     CollectionType::Array => {
                                         js.push_str(&format!("const c{} = [{}]", name, combine_collection_to_js(value)));
-                                    }
-                                    _=> {
-                                        println!("unknown collection type found in const declaration");
                                     }
                                 }
                             }
@@ -135,8 +133,23 @@ pub fn expression_to_js(expr: &AstNode) -> String {
             }
         }
 
+        AstNode::Literal(token) => match token {
+            Token::IntLiteral(value) => {
+                js.push_str(&value.to_string());
+            }
+            Token::FloatLiteral(value) => {
+                js.push_str(&value.to_string());
+            }
+            Token::StringLiteral(value) => {
+                js.push_str(&format!("\"{}\"", value));
+            }
+            _ => {
+                println!("unknown literal found in expression");
+            }
+        },
+
         _=> {
-            println!("Non-expression AST node given to expression_to_js");
+            println!("Non-expression / Literal AST node given to expression_to_js");
         }
     }
 
@@ -147,7 +160,7 @@ pub fn combine_collection_to_js(collection: &AstNode) -> String {
     let mut js = String::new();
 
     match collection {
-        AstNode::Collection(nodes, _) => {
+        AstNode::Collection(nodes, _, _) => {
             let mut i = 0;
             while i < nodes.len() {
                 
@@ -171,7 +184,7 @@ pub fn collection_to_vec_of_js(collection: &AstNode) -> Vec<String> {
     let mut js = Vec::new();
 
     match collection {
-        AstNode::Collection(nodes, _) => {
+        AstNode::Collection(nodes, _, _) => {
             for node in nodes {
                 js.push(expression_to_js(&node));
             }

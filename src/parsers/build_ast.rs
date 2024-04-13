@@ -160,9 +160,10 @@ fn new_function(_public: bool, name: usize, tokens: &Vec<Token>, i: &mut usize) 
 pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut collection = Vec::new();
     let mut appended_type = DataType::Inferred;
+    let mut constant = true;
 
     // CURRENTLY JUST PARSING AS IF IT'S A NORMAL ARRAY
-    let mut collection_type = CollectionType::Array;
+    let collection_type = CollectionType::Array;
 
     // Should always start with current token being an open collection
     *i += 1;
@@ -205,6 +206,43 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
                 } else if *expression_type != appended_type {
                     return AstNode::Error("Invalid datatype inside collection".to_string());
                 }
+                constant = false;
+            }
+            AstNode::Literal(ref token) => {
+                if appended_type == DataType::Inferred {
+                    appended_type = match token {
+                        Token::IntLiteral(_) => DataType::Int,
+                        Token::FloatLiteral(_) => DataType::Float,
+                        Token::StringLiteral(_) => DataType::String,
+                        Token::RuneLiteral(_) => DataType::Rune,
+                        _ => DataType::Inferred,
+                    };
+                } else {
+                    match token {
+                        Token::IntLiteral(_) => {
+                            if appended_type != DataType::Int {
+                                return AstNode::Error("Invalid datatype inside collection".to_string());
+                            }
+                        }
+                        Token::FloatLiteral(_) => {
+                            if appended_type != DataType::Float {
+                                return AstNode::Error("Invalid datatype inside collection".to_string());
+                            }
+                        }
+                        Token::StringLiteral(_) => {
+                            if appended_type != DataType::String {
+                                return AstNode::Error("Invalid datatype inside collection".to_string());
+                            }
+                        }
+                        Token::RuneLiteral(_) => {
+                            if appended_type != DataType::Rune {
+                                return AstNode::Error("Invalid datatype inside collection".to_string());
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+                constant = true;
             }
             _ => { /* Should never happen */ }
         }
@@ -228,7 +266,7 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
         }
     }
 
-    AstNode::Collection(collection, collection_type)
+    AstNode::Collection(collection, collection_type, constant)
 }
 
 fn create_reference(tokens: &Vec<Token>, var_index: &usize) -> AstNode {

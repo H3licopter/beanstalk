@@ -28,7 +28,7 @@ pub enum AstNode {
 
     // Literals
     Literal(Token),
-    Collection(Vec<AstNode>, CollectionType), // Contents, Collection Type
+    Collection(Vec<AstNode>, CollectionType, bool), // Contents, Collection Type, Is constant (has all been evaluated)
     Scene(Vec<AstNode>),
 
     // Operators
@@ -49,6 +49,4 @@ pub enum AstNode {
 #[derive(Debug)]
 pub enum CollectionType {
     Array,
-    Struct,
-    List,
 }

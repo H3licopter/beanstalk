@@ -146,7 +146,7 @@ fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
                                 AstNode::Error(e) => {
                                     return Err(e.into());
                                 }
-                                AstNode::Collection(values, data_type) => {
+                                AstNode::Collection(values, data_type, _) => {
                                     match data_type {
                                         CollectionType::Array => {
                                             for node in values {
@@ -157,9 +157,6 @@ fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
                                                     _ => {}
                                                 }
                                             }
-                                        }
-                                        _=> {
-                                            return Err("Invalid collection type used for config data".into());
                                         }
                                     }
 
