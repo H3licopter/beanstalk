@@ -1,118 +1,98 @@
 #title "Functions"
-#date "2024-2-5"
+#date "2024-4-14"
 ---
 
 # Functions
 Their structure is: 
 1. the function name (can be omited for anonymous functions)
-2. A double colon for private functions '::' or a colon-equals for public functions ':='
-3. collection containing the args for the function
-4. the optional return type
-5. the the body of the function.
+2. An equals for public and colon for private function (If not anonymous)
+3. An optional tuple of arguments.
+4. An arrow symbol followed by a return type. This must always be specified, even if the function returns nothing. To specify no return type, use an empty tuple `()`.
+6. the the body of the function
 
-A return type is required for any functions returning a value.
+Functions in Beanstalk look almost like they are whitespace significant, but this ain't Python. The scope of the function is opened immediately after the specified return type at the top of the function, and closed after the final return value. 
 
-You specify arguments by using the prototype syntax to create a prototype literal.
+This means you can indent and use whitespace however you want, but still avoid the messiness of having many nested brackets.
 
-When functions return mutliple values, they are returned as a choice. This choice can always contain an error as a possible choice.
+A return statement must always be present at the end of a function to determine the end of its scope. You can have an empty return statement if the function itself does not return a value.
+
+If the function can only return an error, you can use a '?' as the specified return type.  
 
 `
     -- Multiple return values (private function)
-    multipleReturns :: -> int, int, int ( 
-        return 1, 2, 3 
-    )
+    multipleReturns : -> int, int, int
+        return 1, 2, 3
 
+    -- When assigning mutliple values to a single variable, the variable becomes a tuple
     a = multipleReturns
 
-    a.0 -- 1
+    a.0 is 1 -- true
 `
 `
-    concatString :: {a string, b string} -> string ( 
-        return a + b 
-    )
+    concatString : (a string, b string) -> string
+        return a + b
 
-    myself = concatString{
+    myself = concatString(
         a "I am ",
         b "really cool"
-    }
+    )
 
-    -- Using an exsisting prototype to define the args
+    -- Using an exsisting collection Type as an argument
     -- Public function
-    NormalizeVectors := Vec -> Vec (
-        -> { 
+    NormalizeVectors = Vec -> Vec
+        return { 
             x = Vec.x / Vec.length, 
             y = Vec.y / Vec.length 
         }
-    )
 
-    -- No return value or args
-    inlineSideEffect :: ( state = "beans" )
+    NormalizeVectors {
+        x 3, y 4
+    }
+
+    -- inlined function with no return value or args
+    inlineSideEffect : -> () state = "beans"
 
     -- With default args
-    addNumbers :: {a = 1, b = 1} ( 
-        return a + b 
-    )
+    addNumbers : (a = 1, b = 1) -> ()
+        return a + b
 
     -- named args access
-    result = addNumbers{a 3, b 16}
+    result = addNumbers(a 3, b 16)
 
-    sayThing :: {phrase: string} -> string ( 
-        return "{phrase}" 
-    )
+    sayThing : phrase string -> string
+        return "{phrase}"
 
-    -- Automatic Collection Destructuring
-    -- Args don't need to always be named, or in a collection
-    sayThing "Hello, World!"
-
-    -- Multiple return values
-    multipleReturns :: ( return 1, 2, 3 )
+    -- returns a tuple
+    multipleReturns : -> (int, int, int)
+        return 1, 2, 3
 
     a, b, c = multipleReturns
 
     -- Anonymous functions
-    :: {arg int} ( arg + 1 )
-    
-    :: {arg int} ( arg + 1 )
+    (arg int) -> () arg + 1
 
-    :: return "Hello, World!"
+    -> string return "Hello, World!"
 `
 
 # Methods
 Method chaining is a core part of how data can be transformed in Beanstalk. 
 The standard library imports methods that will extend certain data types.
 
-You can't directly add methods to structs. 
 Methods are instead created similarly to functions but will impliment themselves on the specified types.
 
 Create a new method by using the Self keyword as the name of an argument. 
 To impliment the method on one or more types, specify them as types of the Self argument.
 
 `
-    increment => {self int or float} -> ( self += 1 )
+    increment : (self int or float) -> () ( self += 1 )
 
     number = 0
-    number.incrementInt{} -- 1
+    number.incrementInt 
+    io number -- 1
 
-    randomizeAge : {self: person} -> ( 
+    randomizeAge : self Person -> () ( 
         self.age = int.rng(min 0, max 100) 
     )
 `
 
-# Explicit Function Overloading
-Function overloading is explicit in Beanstalk, all functions must have unique names. 
-But you can still have function overloading by grouping functions together. 
-This is to maintain type safety and code clarity.
-
-By creating a new variable and setting it equal to a list of functions using the plus operator. 
-You can create an overloaded function that will automatically call the correct function depending on the arguments passed into it.
-
-`
-    toString : intToString + floatToString + decimalToString
-
-    -- Can wrap in brackets for multi-line
-    toString : (
-        intToString +
-        floatToString +
-        decimalToString
-    )
-`
+# Generics

@@ -28,7 +28,7 @@ pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
         token = get_next_token(&mut chars, &mut tokenize_mode, &mut scene_nesting_level);
     }
 
-    // Elimate any VarDeclaration tokens that have no reference
+    // Elimate any PRIVATE VarDeclaration tokens that have no reference
     for var_dec in var_names.iter() {
         if !var_dec.has_ref {
             tokens[var_dec.index] = Token::Empty;
@@ -115,13 +115,11 @@ fn get_next_token(
     // := and :: are reserved for function initialisation
     if current_char == ':' {
         if chars.peek() == Some(&':') {
-            chars.next();
-            return Token::FunctionInitPrivate;
+            // Might be something in the future ::
         }
 
         if chars.peek() == Some(&'=') {
-            chars.next();
-            return Token::FunctionInitPublic;
+            // Might be something in the future :=
         }
 
         if tokenize_mode == &TokenizeMode::SceneHead {
@@ -191,6 +189,16 @@ fn get_next_token(
     if current_char == ';' {
         return Token::Semicolon;
     }
+    if current_char == '$' {
+        // Create new signal variable
+        while let Some(&next_char) = chars.peek() {
+            if next_char.is_alphanumeric() || next_char == '_' {
+                token_value.push(chars.next().unwrap());
+            } else {
+                return Token::Signal(token_value)
+            }
+        }
+    }
 
     // Collections
     if current_char == '{' {
@@ -208,7 +216,7 @@ fn get_next_token(
         return Token::QuestionMark;
     }
 
-    // Comments / Subtraction / Negative / Scene Head
+    // Comments / Subtraction / Negative / Scene Head / Arrow
     if current_char == '-' {
         if let Some(&next_char) = chars.peek() {
             // Comments
@@ -254,7 +262,7 @@ fn get_next_token(
                 }
                 if next_char == '>' {
                     chars.next();
-                    return Token::Return;
+                    return Token::Arrow;
                 }
                 if next_char.is_numeric() {
                     return Token::Negative;
@@ -422,6 +430,9 @@ fn keyword_or_variable(
             // Otherwise break out and check it is a valid variable name
 
             // Control Flow
+            if token_value == "return" {
+                return Token::Return;
+            }
             if token_value == "if" {
                 return Token::If;
             }

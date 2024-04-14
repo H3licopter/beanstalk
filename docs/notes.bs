@@ -3,8 +3,8 @@
 ---
 
 # Reserved Keywords and symbols
-@ - HTTP and sockets, server communication etc. 
-^ - pointers
-& - Dereference pointer?
+@ - Attributes?
+^ - pointers (Like in Odin)
+& - Not sure yet
 << - Concurrency Channel
 >> - Concurrency Channel

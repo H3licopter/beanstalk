@@ -43,11 +43,10 @@ pub enum Token {
     DocComment(String),
 
     // Variables / Functions
-    FunctionInitPrivate,
-    FunctionInitPublic,
+    Arrow,
     Variable(String),
 
-    // Optimised Variables (Happens during AST creation)
+    // Optimised Variables (Happens just before AST creation)
     VarDeclaration(usize),
     Reference(usize),
 
@@ -149,6 +148,7 @@ pub enum Token {
     SceneHead(Vec<Token>), // Scene head properties, inline?
     SceneBody(Vec<Token>),
     Href,
+    Signal(String),
 
     // HTTP
     Dollar,

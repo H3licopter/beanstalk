@@ -28,6 +28,7 @@ pub enum AstNode {
 
     // Literals
     Literal(Token),
+    Tuple(Vec<AstNode>),
     Collection(Vec<AstNode>, CollectionType, bool), // Contents, Collection Type, Is constant (has all been evaluated)
     Scene(Vec<AstNode>),
 

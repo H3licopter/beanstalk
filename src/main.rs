@@ -26,6 +26,7 @@ mod html_output {
     mod markdown_parser;
     pub mod web_parser;
     pub mod js_parser;
+    mod dom_hooks;
 }
 pub use tokens::Token;
 enum Command {

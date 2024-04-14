@@ -86,8 +86,10 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
 }
 
 // CAN RETURN:
-// VarDeclaration, Const, Error, Function
+// VarDeclaration, Const, Error, Function, Tuple
 fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
+    
+    // Currently also whether a function is private
     let mut var_is_const = true;
 
     *i += 1;
@@ -96,19 +98,18 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
             var_is_const = false;
         }
         &Token::Initialise => {}
-        &Token::FunctionInitPrivate => {
-            return new_function(false, name, tokens, i);
-        }
-        &Token::FunctionInitPublic => {
-            return new_function(true, name, tokens, i);
+        &Token::Comma => {
+            // TO DO: Multiple assignments
         }
         _ => {
             return AstNode::Error("Expected ':' or '=' after variable name for initialising. Variable does not yet exsist".to_string());
         }
     }
 
-    // Get value of variable
+    // Get assigned value(s)
+    // Can also be function args
     *i += 1;
+
     let parsed_expr;
 
     // Check if collection
@@ -156,6 +157,7 @@ fn new_function(_public: bool, name: usize, tokens: &Vec<Token>, i: &mut usize) 
 
     AstNode::Function(name.clone(), Box::new(function_args), function_body)
 }
+
 
 pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut collection = Vec::new();
@@ -277,9 +279,6 @@ fn create_reference(tokens: &Vec<Token>, var_index: &usize) -> AstNode {
             return AstNode::VarReference(*var_index);
         }
         Token::Initialise => {
-            return AstNode::ConstReference(*var_index);
-        }
-        Token::FunctionInitPrivate | Token::FunctionInitPublic => {
             return AstNode::ConstReference(*var_index);
         }
         _ => {

@@ -105,7 +105,6 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 ]
 
 Type will operate like a generic when specified as the type of a function arg. 
-It's also used for creating new Objects, using the same syntax as creating constant variables.
 
 # Strings
 String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 

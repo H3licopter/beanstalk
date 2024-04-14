@@ -1,50 +1,61 @@
 #title "Errors"
 #date "2024-2-5"
 ---
-
 # Error Handling
-Errors are treated as values. Any function can return an error as its last return value. Beanstalk handles errors  similar to Go, but with a more minimal syntax for error checking.
+Any function that can return an error will return an Option type. This type can be checked for an error and handled / unpacked accordingly using the ! or ? operator.
 
-The ! operator can append any statement or expression and create a new scope to catch and handle errors by checking if the previous expression or function contains an error as in it's last value.
+Both the ! and ? can append any statement or expression. 
 
-If an error happens in a function, any values will be assigned their zero value if assignment fails. 
+## The '!' operator
+The ! operator will unpack the Option type and handle the error or pass the error up the call stack if one is present. 
 
-If the error handling scope returns a value, the expression or function that contained the error will return that value instead of the zero value that would have been set.
+## The '?' operator
+The ? operator will unpack the Option type and create a new scope to handle the value if there was no error. It is also used to define an option type by appending a type with it. 
 
-Errors can be explicitly passed up the call stack by using a ! without returning a value.
+This is useful if you want to only run a block of code if there was no error without having to nest the code inside an if statement.
 
-Double bang !! will force the program to panic and halt if the previous expression or function call returned an error as one of it's values.
+Option type examples: int? string? bool?
+
+## The '!!' Operator
+Double bang !! will force the program to panic and halt if the previous expression or function call returned an error as one of it's options.
+
+## Using the ! and ? operators
+These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code, as well as providing a way to avoid opening a new scope for every error check.
 
 `
     -- Always returns a string even if an error is thrown by getNetworkRequest()
     -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
-    getURL : {} -> string (
-        -> getNetworkRequest() !(
-            io("Network Request Error: {error}")
-            -> "example.com"
+    getURL : -> string (
+        return getNetworkRequest() ! (
+            io "Network Request Error: {error}"
+            return "example.com"
         )
     )
 
-    -- Returns an error to the calling function, just printing out information about the error without returning a value to replace the empty string.
-    -- A question mark must be added to the return type of the function to specify that it can return an error. This enforces that the error must be handled by the calling function.
-    getURL : {} -> string? (
-        -> getNetworkRequest() !(
+    -- 
+    Returns an error to the calling function, just printing out information about the error without returning a value to replace the empty string.
+    
+    A question mark must be added to the return type of the function to specify that it can return an error. This enforces that the error must be handled by the calling function.
+    --
+    
+    getURL : -> string? (
+        return getNetworkRequest() ! (
             io("Network Request Error: {error}")
         )
     )
 
     -- This function also specifies it can return an error so no explicit error handling is needed inside
-    dodgyFunction: {} -> string?  ( 
+    dodgyFunction : -> string? ( 
         -> getURL()
     )
 
     -- The compiler will give a warning about unhandled error cases inside this function
-    callingFunction : {} -> (
+    callingFunction : -> () (
         thing := dodgyFunction()
     )
 
     -- So it must be handled like this
-    callingFunction : {} -> (
-        thing := dodgyFunction() !( -> "default_thing" )
+    callingFunction : -> () (
+        thing = dodgyFunction ! return "default_thing"
     )
 `

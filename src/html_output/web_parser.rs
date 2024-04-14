@@ -69,6 +69,7 @@ struct SceneTag {
     style: String,
 }
 
+// Returns a string of the HTML and whether the scene is inside a paragraph
 fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
@@ -82,10 +83,6 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
     for node in scene {
         match node {
             AstNode::SceneTag(tags, styles) => {
-                // Should automatically create and format a grid
-                // If there are mutltiple video/ img elements
-                // If there is an image element inside of the video element,
-                // Then the image element becomes the thumbnail
                 let mut images: Vec<String> = Vec::new();
 
                 for style in styles {
@@ -100,6 +97,7 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                             let size = collection_to_vec_of_js(&arg);
 
                             // TO DO: Add or remove parameters based on number of arguments
+                            // And make sure there are no more than 4 arguments
                             scene_wrap
                                 .style
                                 .push_str(&format!("width:{}px;height:{}px", size[0], size[1]));

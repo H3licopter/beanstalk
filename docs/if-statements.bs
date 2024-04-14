@@ -31,8 +31,8 @@ The match keyword is used for pattern matching. Each potential match can return 
     )
 
     match status_msg (
-        STATE.running -> io{"yay"}
-        STATE.crashed -> io{"uh oh"}
-        else -> io{"no idea"}
+        STATE.running -> io "yay"
+        STATE.crashed -> io "uh oh"
+        else -> io "no idea"
     )
 `
