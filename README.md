@@ -6,7 +6,7 @@
     <strong>A compiled, statically typed, all-in-one language designed for building UIs and websites.</strong>
   </p>
 
-  *The only BS should be in the filename*
+  *The only BS in programming should be in the filename*
 
   ⚠️<sub>This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</sub>⚠️
 
@@ -15,7 +15,7 @@
 ---
 
 ## Principles
-  - Fast Development of UIs and text content heavy pages
+  - Fast Development of UIs and  content heavy pages
   - Concise, minimal and consistent syntax
   - All-in-one design with minimal dependencies and boilerplate
   - The compiler should do most of the annoying work for you and help catch common bugs
@@ -25,7 +25,8 @@
 Beanstalk can be thought of as:
 1. Mega-extended Markdown. 
 2. What would a good Javascript/HTML/CSS replacement look like, if it was actually designed to be used everywhere and had the hindsight of modern programming language design with no constraints on convention or backwards compatibility?
-
+3. Eventually a general UI language for native C/C++ based applications
+   
 The design is generalised enough to eventually target more than just the web. Beanstalk outputs HTML, CSS and JS/WASM all in one consistent syntax without having to switch between any languages, or even a different file.
 
 All the basic stuff needed for quickly building a good website will be built into the compiler, so you can focus on the content and design, not the boilerplate. 
@@ -33,7 +34,9 @@ All the basic stuff needed for quickly building a good website will be built int
 Beanstalk aims to become an entire self-contained ecosystem for building webpages, UIs and even server side code, with a focus on simplicity and speed of development.
 
 ## Overview
-When creating a page or UI in Beanstalk, you make Scenes. Scenes are a markup syntax that can be used to write text content, HTML, CSS and JS/WASM all in one file with it's own consistent syntax. It is designed to be very concise and easy to read.
+When creating a page or UI in Beanstalk, you make Scenes. 
+
+Scenes are a markup syntax that can be used to write text content, HTML, CSS and JS/WASM all in one file with it's own consistent syntax. It is designed to be very concise and easy to read.
 
 **Content**
 
