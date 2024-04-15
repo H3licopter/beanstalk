@@ -8,30 +8,30 @@
 
   *The only BS in programming should be in the filename*
 
-  ⚠️<sub>This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</sub>⚠️
+  ⚠️  <sub>This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</sub>  ⚠️
 
 </div>
 
 ---
 
 ## Principles
-  - Fast Development of UIs and  content heavy pages
+  - Fast Development of UIs and  content heavy web pages
   - Concise, minimal and consistent syntax
   - All-in-one design with minimal dependencies and boilerplate
-  - The compiler should do most of the annoying work for you and help catch common bugs
+  - The compiler should do most of the annoying work for you and help catch common bugs without compromising on very fast compile times (No slow LLVM backend)
   - Batteries included. Opinionated about how to do common fiddly tasks
 
 ## Planned Features
 Beanstalk can be thought of as:
-1. Mega-extended Markdown. 
+1. Mega-extended Markdown 
 2. What would a good Javascript/HTML/CSS replacement look like, if it was actually designed to be used everywhere and had the hindsight of modern programming language design with no constraints on convention or backwards compatibility?
-3. Eventually a general UI language for native C/C++ based applications
-   
-The design is generalised enough to eventually target more than just the web. Beanstalk outputs HTML, CSS and JS/WASM all in one consistent syntax without having to switch between any languages, or even a different file.
+3. Eventually a general UI language for native C/C++ based applications, with C planned to be the target output
 
-All the basic stuff needed for quickly building a good website will be built into the compiler, so you can focus on the content and design, not the boilerplate. 
+Beanstalk outputs HTML, CSS and JS/WASM all in one consistent syntax without having to switch between any languages, or even a different file.
 
-Beanstalk aims to become an entire self-contained ecosystem for building webpages, UIs and even server side code, with a focus on simplicity and speed of development.
+All the basic stuff needed for quickly building a good website will be built into the compiler, so you can focus on the content and high level design decisions, not the boilerplate. 
+
+Beanstalk aims to become an entire self-contained ecosystem for building webpages, UIs and even server side code and native applications, with a focus on simplicity and speed of development.
 
 ## Overview
 When creating a page or UI in Beanstalk, you make Scenes. 
@@ -72,6 +72,8 @@ Technologies currently used in the compiler:
 ## Current Goals
   - Finish implementing all basic scene styling and keywords
   - Finish implimenting constant folding and basic compile time evaluation
-  - Finish frontend codegen
+  - Finish basic frontend codegen
   - Dev server built into compiler tools
+  - C target codegen for WASM, server code and native apps
+  - Built-in Raylib intergration 
   - Complete all the basic features of the initial compiler so it can actually be downloaded and used easily 
