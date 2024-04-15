@@ -17,15 +17,12 @@
 ## Principles
   - Fast Development of UIs and  content heavy web pages
   - Concise, minimal and consistent syntax
-  - All-in-one design with minimal dependencies and boilerplate
+  - All-in-one design with minimal boilerplate
   - The compiler should do most of the annoying work for you and help catch common bugs without compromising on very fast compile times (No slow LLVM backend)
   - Batteries included. Opinionated about how to do common fiddly tasks
 
 ## Planned Features
-Beanstalk can be thought of as:
-1. Mega-extended Markdown 
-2. What would a good Javascript/HTML/CSS replacement look like, if it was actually designed to be used everywhere and had the hindsight of modern programming language design with no constraints on convention or backwards compatibility?
-3. Eventually a general UI language for native C/C++ based applications, with C planned to be the target output
+Beanstalk can be thought of as a mega-extended Markdown, a Javascript replacement and a modern UI focused programming language with no constraints on conventions or backwards compatibility.
 
 Beanstalk outputs HTML, CSS and JS/WASM all in one consistent syntax without having to switch between any languages, or even a different file.
 
