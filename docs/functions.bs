@@ -1,36 +1,38 @@
 #title "Functions"
 #date "2024-4-14"
 ---
-
 # Functions
+Functions are first class citizens in Beanstalk. They can be assigned to variables, passed as arguments, and returned from other functions.
+
 Their structure is: 
 1. the function name (can be omited for anonymous functions)
-2. An equals for public and colon for private function (If not anonymous)
-3. An optional tuple of arguments.
-4. An arrow symbol followed by a return type. This must always be specified, even if the function returns nothing. To specify no return type, use an empty tuple `()`.
-6. the the body of the function
-
-Functions in Beanstalk look almost like they are whitespace significant, but this ain't Python. The scope of the function is opened immediately after the specified return type at the top of the function, and closed after the final return value. 
-
-This means you can indent and use whitespace however you want, but still avoid the messiness of having many nested brackets.
-
-A return statement must always be present at the end of a function to determine the end of its scope. You can have an empty return statement if the function itself does not return a value.
+2. A colon (or double colon for compile time only)
+3. An argument (A collection is specified for multiple arguments and will be automatically destructured into the scope of the function), if no arguments are required, you must use an empty tuple.
+4. An arrow symbol (always required, even for functions that don't return anything)
+5. An optional return type.
+6. the the body of the function enclosed in curly braces
 
 If the function can only return an error, you can use a '?' as the specified return type.  
 
+## The arrow operator
+The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
+
 `
-    -- Multiple return values (private function)
-    multipleReturns : -> int, int, int
+    -- Returns a tuple of values (private function)
+    multipleReturns : () -> (int, int, int) {
         return 1, 2, 3
+    }
 
     -- When assigning mutliple values to a single variable, the variable becomes a tuple
-    a = multipleReturns
+    a = multipleReturns()
 
     a.0 is 1 -- true
 `
+
 `
-    concatString : (a string, b string) -> string
-        return a + b
+    concatString : (a string, b string) -> string {
+        return a b
+    }
 
     myself = concatString(
         a "I am ",
@@ -39,39 +41,43 @@ If the function can only return an error, you can use a '?' as the specified ret
 
     -- Using an exsisting collection Type as an argument
     -- Public function
-    NormalizeVectors = Vec -> Vec
-        return { 
+    @ NormalizeVectors : Vec -> Vec {
+        return (
             x = Vec.x / Vec.length, 
             y = Vec.y / Vec.length 
-        }
-
-    NormalizeVectors {
-        x 3, y 4
+        )
     }
 
+    NormalizeVectors(
+        x 3, y 4
+    )
+
     -- inlined function with no return value or args
-    inlineSideEffect : -> () state = "beans"
+    inlineSideEffect : () -> { state = "beans" }
 
     -- With default args
-    addNumbers : (a = 1, b = 1) -> ()
+    addNumbers : (a = 1, b = 1) -> {
         return a + b
+    }
 
     -- named args access
     result = addNumbers(a 3, b 16)
 
-    sayThing : phrase string -> string
+    sayThing : (phrase string) -> string {
         return "{phrase}"
+    }
 
     -- returns a tuple
-    multipleReturns : -> (int, int, int)
+    multipleReturns : () -> (int, int, int) {
         return 1, 2, 3
+    }
 
     a, b, c = multipleReturns
 
     -- Anonymous functions
-    (arg int) -> () arg + 1
+    (arg int) -> {arg + 1}
 
-    -> string return "Hello, World!"
+    () -> { "Hello" }
 `
 
 # Methods
@@ -84,15 +90,65 @@ Create a new method by using the Self keyword as the name of an argument.
 To impliment the method on one or more types, specify them as types of the Self argument.
 
 `
-    increment : (self int or float) -> () ( self += 1 )
+    increment : (self int or float) -> () { self += 1 }
 
     number = 0
     number.incrementInt 
     io number -- 1
 
-    randomizeAge : self Person -> () ( 
+    randomizeAge : (self Person) -> () ( 
         self.age = int.rng(min 0, max 100) 
     )
 `
 
-# Generics
+# Generic Functions
+The type keyword has some useful generic types that can be used in functions and methods.
+
+`
+    add : (a type.number, b type.number) -> type.number {
+        return a + b
+    }
+
+    -- This function will now work with any numerical type
+    add(3, 4) -- 7
+    add(3.23, 53.9) -- 57.13
+`
+
+Any operations in the function must be valid for all types that could be passed in.
+
+Here is an example using generics with collections:
+    
+    `
+        sortCollection : (collection type.collection) -> type.collection? {
+            match collection type {
+                string : return collection.sort()
+                int    : return collection.sort()
+                else   : return error "Invalid type"
+            }
+        }
+    `
+
+# Using the arrow operator to pipe values
+The arrow operator can be used to pipe values directly from one function to another. 
+You must provide the expected returned type after the arrow for this to work.
+
+`
+    result = func1(420) -> int func2() -> int func3() -> int func4()
+`
+
+You can also specify the type of the value being passed to the next function.
+
+`
+    result = func1(value1 a, value2 b) -> int func2(value1 a, value2 b) -> int func3(value1 a) -> int func4(value2 b)
+`
+
+And just like any expression in beanstalk, you can wrap the whole expression in pathenthesis to make it more readable over mutliple lines and specify the final type of the result.
+
+`
+    result = (
+        func1(value a, value b) -> int 
+        func2(value a, value b) -> int 
+        func3() -> int 
+        func4()
+    ) int
+`

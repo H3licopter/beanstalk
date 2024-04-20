@@ -2,62 +2,113 @@
 #date "2024-2-5"
 ---
 # Collections
-Collections of data in Beanstalk are created using curly brackets. The type of the collection is inferred from the assignment, but can be specified by appending the type after the collection declaration. All collections have their data accessed using the dot operator.
+Collections of data in Beanstalk are created seperating more than one expression or value with commas and wrapping them in parenthesis. 
 
-## Collection Prototype
-- Properties cannot be changed or added, as prototypes are compile time evaluated. Becomes a prototype with default values for new structs.
-- Values assigned to a prototype become the zero value of that property if it isn't assigned. 
-- Setting properties as constants means that when the properties are set on new struct using the prototype, they are also constants. 
-- If you don't set an explicit zero value on a property, any new structs created with the prototype MUST assign a value to it.
+Collections are refernece types, which means they are references to underlying data. 
+Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
+
+The type of the collection is inferred from the assignment, but can be specified by appending the type after the collection declaration. All collections have their data accessed using the dot operator.
+
+## Literals
+By simply wrapping a list of values in parethesis and not specifying a type, you create a collection literal.
 
 `
-    Vec : {
+(1, 2, 3)
+`
+
+## Fixed Collections
+Collection literals are fixed size by default and can contain any type when a type is not specified after the collection. These types of collection are called fixed collections and have implicit behaviours that allow for easy unpacking, comparison and assignment.
+
+When you create a collection and initialise it with a colon, it becomes a fixed collection.
+
+Fixed collections must contain more than one value, otherwise they are treated as the value itself.
+
+`
+    -- Fixed size collection of integers
+    tuple : (1, 2, 3)
+    tuple.0 -- returns 1
+`
+
+Fixed collections without a specified type that contain a single element are equivalent to the element, even when the element is named.
+
+`
+
+    -- Named tuple element
+    tuple_of_one : (number 69)
+    int_value = 69
+    tuple_of_one is int_value -- returns true
+
+    tuple_of_one = (number 420)
+    int_value = 420
+    tuple_of_one is int_value -- returns false
+
+`
+## Arrays
+When you assign a collection to a variable with an equals sign and provide more than one value, it becomes a dynamically sized array and must contain a single type.
+
+`
+    array = (3, 4, 5)
+    array.0 -- returns 3
+`
+
+Specifying the type of the collection is optional for arrays, but if your collection is empty or only contains one value, you must specify the type as a collection of that type.
+
+Empty parentheses are how you specify a collection type.
+
+`
+    -- Empty array of integers
+    empty_array = ()int
+    empty_array.push(3)
+    empty_array.0 -- returns 3
+
+    -- Array of one integer
+    single_array = (3) ()int
+
+    -- Array of one float with type specified
+    single_float_array = (3.14) ()float
+`
+
+An empty, dynamically sized collection of strings.
+
+`
+    strings = ()string
+    strings.push("Hello")
+    strings.push("World")
+    strings.0 -- returns "Hello"
+`
+
+## Prototypes
+Named collections of a fixed size can be used as prototypes for other collections. 
+
+Required properties inside of Prototypes are spcified with the name of the property followed by the type.
+
+You can also have optional properties with default values, by assgining values to those properties.
+
+`
+    -- Prototype for a vector
+    -- Has an optional Z property with a default value of 0
+    Vec : (
         x float,
         y float,
-    }
-`
-
-Here is the same prototype, but with optional parameters that have default zero values.
-
-`
-    Vec : {
-        x = 0.0,
-        y = 0.0,
-    }
-`
-
-### Adding a method to the prototype
-`
-    reset : this Vec -> (
-        this.x, this.y = 0
+        z = 0.0
     )
+
+    Vec.x -- returns 0
+
+    reset : this Vec -> {
+
+    }
 `
 
-### Default values from Prototype
-If Vec did not assign zero values for the properties, this would throw an error as values for x and y would have to be provided.
+## Creating a new collection from a prototype
+If you specify the type as a prototype, you can create a new collection with the same structure as the prototype.
 
-emptyVec : Vec
-
-## Creating a new struct from a prototype
 `
-    coordinates = {
-        x = 3.45,
-        y = 7.93
-    } Vec
+    coordinates = (
+        x 3.45,
+        y 7.93,
+    ) Vec
 
     coordinates.x -- returns 3.45
-    coordinates.reset{} -- sets x and y to 0
-`
-
-Collections created without named properties become arrays. All collections must contain the same datatype.
-
-- Mutable collections are dynamically sized
-`array = { 3, 4, 5 }`
-
-`
-    -- Creates an empty collection that can only contain integers
-    integers = {int}
-
-    fears = { "Javascript", "C++", "Cobol" }
-    fears.0 -- returns ‘Javascript'
+    coordinates.reset() -- sets x and y to 0
 `

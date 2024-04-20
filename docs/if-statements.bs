@@ -5,34 +5,49 @@
 # If Statements
 `
     v = 1
-    if v is not 1 ( io{"wow"} )
+    if v is not 1 {
+        io "nope"
+    } else {
+        io "yep"
+    }
 
-    if 4 / 2 is 1 (
+    -- Compiler will warn that condition always evaluates to true
+    if 4 / 2 is 2 {
         v += 1
-    )
+    }
 
-    if thing ( 
-        doThing{} 
-    ) else ( 
-        dontDoThing{}
-    )
+    if thing {
+        doThing()
+    } else {
+        dontDoThing()
+    } 
 `
 
 # Pattern Matching
-The match keyword is used for pattern matching. Each potential match can return a value using the return arrow. "else" is used as a catch if there are no previous matches.
+The match keyword is used for pattern matching. "else" is used as a catch if there are no previous matches. When match returns a type, it must always be exhaustive, so all possible options must be covered, or an else must be used.
+
+If the match statement must return a value, each branch must return the same type.
+
+A branch can also contain a function, which can be specified by using an arrow and creating a new scope with curly braces. If the branch must return a value, the function of that brach must have a return of that type.
+
+If the match does not return a value, it does not need to be exhaustive.
 
 `
-    content = match some_int (
-        0 -> "beans"
-        1 or 2 -> "burgers"
-        < 9 -> ("multiple 
+    content = match some_int {
+        0 : "beans"
+        1 or 2 : "burgers"
+        < 9 : ("multiple 
             lines of nonsense")
-        else -> "who cares"
-    )
 
-    match status_msg (
-        STATE.running -> io "yay"
-        STATE.crashed -> io "uh oh"
-        else -> io "no idea"
-    )
+        else -> { return "who cares" }
+    } string
+
+
+    -- No return type, non-exhaustive. No function will run if a choice is not covered.
+    match some_choice {
+        CHOICE.a -> { doThing() }
+        CHOICE.b -> { doOtherThing() }
+        CHOICE.c -> { doAnotherThing() }
+    }
+
 `

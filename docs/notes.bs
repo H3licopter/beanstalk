@@ -3,8 +3,7 @@
 ---
 
 # Reserved Keywords and symbols
-@ - Attributes?
 ^ - pointers (Like in Odin)
-& - Not sure yet
+& - References
 << - Concurrency Channel
 >> - Concurrency Channel
