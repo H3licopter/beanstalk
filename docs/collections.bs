@@ -90,7 +90,7 @@ You can also have optional properties with default values, by assgining values t
     Vec : (
         x float,
         y float,
-        z = 0.0
+        z 0.0
     )
 
     Vec.x -- returns 0
