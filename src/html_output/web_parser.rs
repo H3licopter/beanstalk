@@ -87,6 +87,18 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
 
                 for style in styles {
                     match style {
+                        Style::Padding(arg) => {
+                            scene_wrap
+                                .style
+                                .push_str(&format!("padding:{}px;", expression_to_js(&arg)));
+                            scene_wrap.tag = Tag::Span;
+                        }
+                        Style::Margin(arg) => {
+                            scene_wrap
+                                .style
+                                .push_str(&format!("margin:{}px;", expression_to_js(&arg)));
+                            scene_wrap.tag = Tag::Span;
+                        }
                         Style::TextColor(arg) => {
                             scene_wrap
                                 .style

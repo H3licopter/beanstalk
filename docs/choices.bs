@@ -13,9 +13,9 @@ Each choice can optionally contain data that can be accessed inside that Choice.
 
 `
     STATE : {
-        paused
-        running
-        error_message string
+        paused,
+        running,
+        error_message string,
         person Person
     }
 

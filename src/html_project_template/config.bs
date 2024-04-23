@@ -1,4 +1,4 @@
-#project [
+io.project = (
     name: "html_project",
     version: "0.1.0",
     description: "",
@@ -6,9 +6,9 @@
     output_folder: "dist",
     author: "",
     license: "MIT"
-]
+)
 
-#config [
+io.config = (
     title: "Website Title",
     description: "Website Description",
     url: "localhost:3069",
@@ -18,4 +18,4 @@
     default_image: "dist/images/default.png",
     page_x_large_image: "dist/images/x_default.jpg",
     image_folder: "dist/images"
-]
+)

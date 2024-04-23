@@ -3,6 +3,8 @@ use crate::{bs_types::DataType, Token};
 
 // Creates an expression node from a list of tokens
 // Will eventually also evaluate the expression at compile time to simplify the AST
+
+// Can return a literal, an expression or a collection of expressions
 pub fn create_expression(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     let mut expression = Vec::new();
 
@@ -64,21 +66,15 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
                     break;
                 }
             }
-            Token::EOF | Token::Comma | Token::CloseCollection | Token::SceneClose(_) => {
-                if bracket_nesting == 0 {
-                    break;
+            Token::EOF | Token::Comma | Token::CloseParenthesis | Token::SceneClose(_) => {
+                if bracket_nesting > 0 {
+                    bracket_nesting -= 1;
+                    continue;
                 }
+                
                 return AstNode::Error(
                     "Not enough closing parenthesis for expression. Need more ')'!".to_string(),
                 );
-            }
-            Token::CloseParenthesis => {
-                if bracket_nesting > 1 {
-                    bracket_nesting -= 1;
-                } else {
-                    *i += 1;
-                    break;
-                }
             }
 
             // Check if name is a reference to another variable or function call

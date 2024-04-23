@@ -44,6 +44,26 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 scene_tags.push(Tag::A(href));
             }
 
+            Token::Padding => {
+                let arg = parse_function_args(scene_head, &mut j);
+                if check_if_comptime_value(&arg) {
+                    scene_styles.push(Style::Padding(arg));
+                } else {
+                    // Need to add JS DOM hooks to change padding at runtime.
+                    scene_styles.push(Style::Padding(arg));
+                }
+            }
+
+            Token::Margin => {
+                let arg = parse_function_args(scene_head, &mut j);
+                if check_if_comptime_value(&arg) {
+                    scene_styles.push(Style::Margin(arg));
+                } else {
+                    scene_styles.push(Style::Margin(arg));
+                    // Need to add JS DOM hooks to change margin at runtime.
+                }
+            }
+
             Token::Rgb => {
                 let arg = parse_function_args(scene_head, &mut j);
                 if check_if_comptime_value(&arg) {
@@ -184,7 +204,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 scene.push(AstNode::Element(Token::Pre(content.to_string())));
             }
 
-            Token::Empty | Token::Initialise => {}
+            Token::Empty | Token::AssignConstant => {}
 
             _ => {
                 scene.push(AstNode::Error(
@@ -225,7 +245,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     while j > 0 {
         match &tokens[j] {
             // Ignore these tokens
-            Token::Initialise | Token::SceneClose(_) => {
+            Token::AssignConstant | Token::SceneClose(_) => {
                 j -= 1;
             }
 

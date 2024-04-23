@@ -16,6 +16,9 @@ This is useful if you want to only run a block of code if there was no error wit
 
 Option type examples: int? string? bool?
 
+## The '!?' operator
+The !? operator is an assert that will force the program to panic and halt if the previous condition is false or an error. This is useful for debugging and ensuring that the program will not continue if a critical condition is not met.
+
 ## The '!!' Operator
 Double bang !! will force the program to panic and halt if the previous expression or function call returned an error as one of it's options.
 

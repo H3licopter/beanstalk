@@ -28,9 +28,9 @@ pub enum AstNode {
 
     // Literals
     Literal(Token),
-    Tuple(Vec<AstNode>),
-    Collection(Vec<AstNode>, CollectionType, bool), // Contents, Collection Type, Is constant (has all been evaluated)
+    Collection(Vec<AstNode>, CollectionType, bool),
     Scene(Vec<AstNode>),
+    Empty, // Empty collection
 
     // Operators
     // Operator, Precedence

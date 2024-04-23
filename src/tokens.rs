@@ -5,7 +5,7 @@ pub enum TokenizeMode {
     Normal,
     Markdown,
     SceneHead,
-    Meta,
+    Window,
 }
 // Stores variable name, it's index and whether it has a reference in the token array
 pub struct Declaration {
@@ -27,7 +27,6 @@ pub enum Token {
     // Compiler Directives
     Import,
     Export,
-    Exclude, // Exclude specific standard library modules
 
     // HTML project compiler directives
     Main,
@@ -69,14 +68,16 @@ pub enum Token {
     Dot,
 
     // Declarations
-    Initialise, // :
     Assign,     // =
+    AssignConstant, // :
+    AssignComptime, // :=
+    AssignComptimeConstant, // ::
 
     // Scope
     OpenParenthesis,
     CloseParenthesis,
-    OpenCollection,
-    CloseCollection,
+    OpenScope,
+    CloseScope,
     SceneOpen,
     SceneClose(u32), // Keeps track of the spaces following the scene
 

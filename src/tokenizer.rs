@@ -112,7 +112,6 @@ fn get_next_token(
 
     // Initialisation
     // Check if going into markdown mode
-    // := and :: are reserved for function initialisation
     if current_char == ':' {
         if chars.peek() == Some(&':') {
             // Might be something in the future ::
@@ -125,17 +124,12 @@ fn get_next_token(
         if tokenize_mode == &TokenizeMode::SceneHead {
             *tokenize_mode = TokenizeMode::Markdown;
         }
-        return Token::Initialise;
+        return Token::AssignConstant;
     }
 
-    //Meta. Compile time things
+    //Window
     if current_char == '#' {
-        *tokenize_mode = TokenizeMode::Meta;
-
-        if chars.peek() == Some(&'#') {
-            chars.next();
-            return Token::Comptime;
-        }
+        *tokenize_mode = TokenizeMode::Window;
 
         //Get compiler directive token
         return keyword_or_variable(&mut token_value, chars, tokenize_mode);
@@ -202,10 +196,10 @@ fn get_next_token(
 
     // Collections
     if current_char == '{' {
-        return Token::OpenCollection;
+        return Token::OpenScope;
     }
     if current_char == '}' {
-        return Token::CloseCollection;
+        return Token::CloseScope;
     }
 
     //Error handling
@@ -442,6 +436,9 @@ fn keyword_or_variable(
             if token_value == "for" {
                 return Token::For;
             }
+            if token_value == "import" {
+                return Token::Import;
+            }
             if token_value == "match" {
                 return Token::Match;
             }
@@ -488,7 +485,7 @@ fn keyword_or_variable(
                 _ => {}
             }
 
-            // IO
+            // IO (Standard Library stuff)
             if token_value == "io" {
                 return Token::Print;
             }
@@ -527,21 +524,10 @@ fn keyword_or_variable(
                         return Token::Slot;
                     }
                 }
-                TokenizeMode::Meta => {
+
+                TokenizeMode::Window => {
                     *tokenize_mode = TokenizeMode::Normal;
 
-                    if token_value == "import" {
-                        return Token::Import;
-                    }
-                    if token_value == "export" {
-                        return Token::Export;
-                    }
-                    if token_value == "exclude" {
-                        return Token::Exclude;
-                    }
-                    if token_value == "main" {
-                        return Token::Main;
-                    }
                     if token_value == "date" {
                         return Token::Date;
                     }
@@ -587,7 +573,7 @@ fn tokenize_scenehead(
     while tokenize_mode == &TokenizeMode::SceneHead {
         let next_token = get_next_token(chars, tokenize_mode, scene_nesting_level);
         match next_token {
-            Token::EOF | Token::Initialise => {
+            Token::EOF | Token::AssignConstant => {
                 break;
             }
             Token::SceneClose(_) => {

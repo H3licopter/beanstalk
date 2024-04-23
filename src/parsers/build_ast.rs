@@ -31,10 +31,6 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                 );
             }
 
-            Token::OpenCollection => {
-                ast.push(new_collection(&tokens, &mut i));
-            }
-
             Token::Title => {
                 i += 1;
                 match &tokens[i] {
@@ -97,30 +93,51 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
         &Token::Assign => {
             var_is_const = false;
         }
-        &Token::Initialise => {}
+        &Token::AssignConstant => {}
         &Token::Comma => {
             // TO DO: Multiple assignments
+        }
+
+        // Uninitialised variable
+        &Token::Newline => {
+            return AstNode::VarDeclaration(name, Box::new(AstNode::Empty));
         }
         _ => {
             return AstNode::Error("Expected ':' or '=' after variable name for initialising. Variable does not yet exsist".to_string());
         }
     }
 
-    // Get assigned value(s)
+    // Get assigned values
     // Can also be function args
     *i += 1;
 
-    let parsed_expr;
+    let parsed_expr = create_expression(tokens, i);
 
-    // Check if collection
-    if &tokens[*i] == &Token::OpenCollection {
-        parsed_expr = new_collection(tokens, i);
-    } else {
-        parsed_expr = create_expression(tokens, i);
-    }
-
-    if var_is_const {
-        return AstNode::Const(name, Box::new(parsed_expr));
+    // Check if a type of collection has been created
+    // Or whether it is a literal or expression
+    match parsed_expr {
+        AstNode::Expression(_, _) => {
+            if var_is_const {
+                return AstNode::Const(name, Box::new(parsed_expr));
+            }
+            return AstNode::VarDeclaration(name, Box::new(parsed_expr));
+        }
+        AstNode::Literal(_) => {
+            if var_is_const {
+                return AstNode::Const(name, Box::new(parsed_expr));
+            }
+            return AstNode::VarDeclaration(name, Box::new(parsed_expr));
+        }
+        AstNode::Collection(_, _, _) => {
+            if var_is_const {
+                return AstNode::Const(name, Box::new(parsed_expr));
+            }
+            return AstNode::VarDeclaration(name, Box::new(parsed_expr));
+        }
+        AstNode::Error(_) => {
+            return AstNode::Error("Invalid expression for variable assignment".to_string());
+        }
+        _ => {}
     }
 
     AstNode::VarDeclaration(name, Box::new(parsed_expr))
@@ -136,7 +153,7 @@ fn new_function(_public: bool, name: usize, tokens: &Vec<Token>, i: &mut usize) 
     *i += 1;
 
     match &tokens[*i] {
-        Token::OpenCollection => {
+        Token::OpenScope => {
             function_args = new_collection(tokens, i);
         }
         // Can directly get args from an existing collection
@@ -147,7 +164,7 @@ fn new_function(_public: bool, name: usize, tokens: &Vec<Token>, i: &mut usize) 
             return AstNode::Error("Expected '(' for function args".to_string());
         }
     }
-    if &tokens[*i] != &Token::OpenCollection {
+    if &tokens[*i] != &Token::CloseScope {
         return AstNode::Error("Expected '(' for function args".to_string());
     }
 
@@ -173,7 +190,7 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
     // look for index of final CloseCollection in tokens,
     // And check if there is a type declaration after it
     let close_index = tokens.iter()
-        .position(|x| x == &Token::CloseCollection);
+        .position(|x| x == &Token::CloseScope);
 
     match close_index {
         Some(index) => {
@@ -256,7 +273,7 @@ pub fn new_collection(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
             &Token::Comma => {
                 *i += 1;
             }
-            &Token::CloseCollection => {
+            &Token::OpenScope => {
                 *i += 1;
                 break;
             }
@@ -278,7 +295,7 @@ fn create_reference(tokens: &Vec<Token>, var_index: &usize) -> AstNode {
         Token::Assign => {
             return AstNode::VarReference(*var_index);
         }
-        Token::Initialise => {
+        Token::AssignConstant => {
             return AstNode::ConstReference(*var_index);
         }
         _ => {

@@ -14,8 +14,8 @@ pub enum Tag {
 // Will contain an expression or collection of expressions to be parsed in the target language
 #[derive(Debug)]
 pub enum Style {
-    _Padding(AstNode),
-    _Margin(AstNode),
+    Padding(AstNode),
+    Margin(AstNode),
     Size(AstNode),
     TextColor(AstNode),
     _BackgroundColor(AstNode),
