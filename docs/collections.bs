@@ -91,7 +91,7 @@ By creating a collection using a colon, you create a prototype, which is a fixed
         x float,
         y float,
         z = 0.0
-    }
+    )
 
     Vec.x -- returns 0
 
