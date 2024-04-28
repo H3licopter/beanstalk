@@ -1,4 +1,4 @@
-use crate::{parsers::ast::{AstNode, CollectionType}, Token};
+use crate::{parsers::ast::AstNode, Token};
 
 // JS will also need to call into the prebuilt webassembly functions
 // Also parses literals
@@ -6,7 +6,7 @@ pub fn expression_to_js(expr: &AstNode) -> String {
     let mut js = String::new();
 
     match expr {
-        AstNode::Expression(nodes, _) => {
+        AstNode::EvaluatedExpression(nodes, _) | AstNode::Expression(nodes) => {
             for node in nodes {
                 match node {
                     AstNode::Literal(token) => match token {
@@ -32,11 +32,11 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     }
                     AstNode::FunctionCall(name, arg) => {
                         let mut js_args = "".to_string();
-                        match **arg {
-                            AstNode::Collection(_, _, _) => {
-                                js_args = combine_collection_to_js(&**arg);
+                        match &**arg {
+                            AstNode::Tuple(values) => {
+                                js_args = combine_vec_to_js(values);
                             }
-                            AstNode::Expression(_, _) => {
+                            AstNode::EvaluatedExpression(_, _) => {
                                 js_args = expression_to_js(arg);
                             }
                             _=> {
@@ -46,17 +46,13 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                         js.push_str(&format!("f{}({:?})", name, js_args));
                     }
             
-                    AstNode::Const(name, value) => {
+                    AstNode::Const(name, value, _) => {
                         match &**value {
-                            AstNode::Expression(_, _) => {
+                            AstNode::EvaluatedExpression(_, _) => {
                                 js.push_str(&format!("const c{} = {}", name, expression_to_js(value)));
                             }
-                            AstNode::Collection(_, collection_type, _) => {
-                                match collection_type {
-                                    CollectionType::Array => {
-                                        js.push_str(&format!("const c{} = [{}]", name, combine_collection_to_js(value)));
-                                    }
-                                }
+                            AstNode::Tuple(values) => {
+                                js.push_str(&format!("const c{} = [{}]", name, combine_vec_to_js(values)));
                             }
                             _ => {
                                 println!("unknown AST node found in const declaration");
@@ -126,6 +122,11 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                             }
                         }
                     }
+
+                    AstNode::Tuple(values) => {
+                        js.push_str(&format!("[{}]", combine_vec_to_js(values)));
+                    }
+
                     _ => {
                         println!("unknown AST node found in expression when parsing an expression into JS");
                     }
@@ -148,49 +149,58 @@ pub fn expression_to_js(expr: &AstNode) -> String {
             }
         },
 
+        // If the expression is just a tuple, 
+        // then it should automatically destructure into multiple arguments like this
+        AstNode::Tuple(values) => {
+            js.push_str(&format!("{}", combine_vec_to_js(values)));
+        }
+
         _=> {
-            println!("Non-expression / Literal AST node given to expression_to_js");
+            println!("Non-expression / Literal AST node given to expression_to_js: {:?}", expr);
         }
     }
 
     js
 }
 
-pub fn combine_collection_to_js(collection: &AstNode) -> String {
+pub fn combine_vec_to_js(collection: &Vec<AstNode>) -> String {
     let mut js = String::new();
 
-    match collection {
-        AstNode::Collection(nodes, _, _) => {
-            let mut i = 0;
-            while i < nodes.len() {
-                
-                // Make sure correct commas at end of each element but not last one
-                js.push_str(&format!(
-                    "{}{}", expression_to_js(&nodes[i]), 
-                    if i < nodes.len() - 1 { ", " } else { "" }
-                ));
-                i += 1;
-            }
-        }
-        _ => {
-            println!("unknown AST node found in collection");
-        }
+    let mut i: usize = 0;
+    for node in collection {
+        // Make sure correct commas at end of each element but not last one
+        js.push_str(&format!(
+            "{}{}", expression_to_js(&node), 
+            if i < collection.len() - 1 { ", " } else { "" }
+        ));
+        i += 1;
     }
 
     js
+}
+
+pub fn collection_to_js(collection: &AstNode) -> String {
+    match collection {
+        AstNode::Tuple(nodes) => {
+            return combine_vec_to_js(nodes);
+        }
+        _ => {
+            return "".to_string();
+        }
+    }
 }
 
 pub fn collection_to_vec_of_js(collection: &AstNode) -> Vec<String> {
     let mut js = Vec::new();
 
     match collection {
-        AstNode::Collection(nodes, _, _) => {
+        AstNode::Tuple(nodes) => {
             for node in nodes {
-                js.push(expression_to_js(&node));
+                js.push(expression_to_js(node));
             }
         }
         _ => {
-            println!("unknown AST node found in collection");
+            println!("Non-tuple AST node given to collection_to_vec_of_js");
         }
     }
 

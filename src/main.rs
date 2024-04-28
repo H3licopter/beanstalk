@@ -20,6 +20,7 @@ mod parsers {
     pub mod parse_expression;
     pub mod styles;
     pub mod util;
+    pub mod collections;
 }
 mod html_output {
     mod generate_html;

@@ -5,18 +5,18 @@ use crate::{bs_types::DataType, Token};
 #[allow(dead_code)]
 pub enum AstNode {
     // Config settings
-    Config(Vec<AstNode>),
-    Project(Vec<AstNode>),
+    Settings(Vec<AstNode>),
 
     // Blocks
-    Function(usize, Box<AstNode>, Vec<AstNode>), // Function name, Args, Body
-    Expression(Vec<AstNode>, DataType), //Expression, Result type
+    Function(usize, Box<AstNode>, Vec<AstNode>, bool), // Function name, Args, Body, Public
+    Expression(Vec<AstNode>), // Expression that can contain mixed types
+    EvaluatedExpression(Vec<AstNode>, DataType), //Expression, Result type
 
     // Basics
     Error(String),
     Comment(String),
-    VarDeclaration(usize, Box<AstNode>),
-    Const(usize, Box<AstNode>),
+    VarDeclaration(usize, Box<AstNode>, bool), // Variable name, Value, Public
+    Const(usize, Box<AstNode>, bool), // Constant name, Value, Public
     
     // IO
     Print(Box<AstNode>),
@@ -28,7 +28,9 @@ pub enum AstNode {
 
     // Literals
     Literal(Token),
-    Collection(Vec<AstNode>, CollectionType, bool),
+    Collection(Vec<AstNode>, DataType),
+    Struct(usize, Box<AstNode>, bool), // Name, Fields, Public
+    Tuple(Vec<AstNode>),
     Scene(Vec<AstNode>),
     Empty, // Empty collection
 
@@ -45,9 +47,4 @@ pub enum AstNode {
     // SCENE META DATA
     Title(String),
     Date(String),
-}
-
-#[derive(Debug)]
-pub enum CollectionType {
-    Array,
 }

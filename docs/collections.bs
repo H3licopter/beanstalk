@@ -25,7 +25,7 @@ Tuples can also contain named values that can be accessed by name rather than in
 When creating a tuple using a colon, the values inside become immutable.
 
 `
-    -- Fixed size collection of immutable integers
+    -- Fixed size tuple of immutable integers
     tuple : (1, 2, 3)
     tuple.0 -- returns 1
 
@@ -81,7 +81,7 @@ Dynamic collections can also have named values.
 `
 
 ## Prototypes (Structs)
-By creating a collection using a colon, you create a prototype, which is a fixed collection of named properties or methods. 
+By creating a collection using a colon (constant), you create a prototype, which is a fixed collection of named properties or methods. 
 
 `
     -- Prototype for a vector

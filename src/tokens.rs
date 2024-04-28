@@ -18,13 +18,11 @@ pub struct Declaration {
 pub enum Token {
     // For Compiler
     ModuleStart(String),
-    Directive(String), // Single hash
-    Comptime,          // Double hash for comptime
-    Meta(Vec<Token>),  // Compiler Directive
+    Comptime,          
     Error(String),
     EOF, // End of file
 
-    // Compiler Directives
+    // Module Import/Export
     Import,
     Export,
 
@@ -36,7 +34,8 @@ pub enum Token {
     Date,
 
     // Basics
-    Print,
+    Settings, // bs keyword
+    Print,    // io keyword
     Comment(String),
     MultilineComment(String),
     DocComment(String),
@@ -74,11 +73,11 @@ pub enum Token {
     AssignComptimeConstant, // ::
 
     // Scope
-    OpenParenthesis,
-    CloseParenthesis,
-    OpenScope,
-    CloseScope,
-    SceneOpen,
+    OpenParenthesis, // (
+    CloseParenthesis, // )
+    OpenScope, // {
+    CloseScope, // }
+    SceneOpen, // [
     SceneClose(u32), // Keeps track of the spaces following the scene
 
     As, // Type casting
@@ -148,7 +147,6 @@ pub enum Token {
     ParentScene,
     SceneHead(Vec<Token>), // Scene head properties, inline?
     SceneBody(Vec<Token>),
-    Href,
     Signal(String),
 
     // HTTP

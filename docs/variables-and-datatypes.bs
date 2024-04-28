@@ -125,17 +125,19 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
-    [: int] [: These numerical types are 64 bit by default but support custom sizes] [: 0]
+    [: int] [: 32 bit signed integer ] [: 0]
+    
+    [: idx ] [: Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible. ] [: 0]
 
-    [: float] [: ] [: 0.0]
+    [: flt] [: 32 bit floating point number ] [: 0.0]
 
-    [: decimal] [: A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision] [: 0.00]
+    [: dec] [: A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision] [: 0.00]
 
-    [: string] [: UTF-8] [: ""]
+    [: str] [: UTF-8] [: ""]
 
-    [: unicode] [: Unicode strings are UTF-32 strings. They are created using single quotes. ] [: '']
+    [: uni] [: Unicode strings are UTF-32 strings. They are created using single quotes. ] [: '']
 
-    [: bool] [: Including true and false as types] [: false]
+    [: bool] [: Boolean, including true and false as types] [: false]
 ]
 
 ## Collection Types

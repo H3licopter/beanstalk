@@ -1,6 +1,6 @@
 use crate::html_output::web_parser;
 use crate::parsers;
-use crate::parsers::ast::{AstNode, CollectionType};
+use crate::parsers::ast::AstNode;
 use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::Token;
@@ -131,7 +131,7 @@ fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
         output_dir: String::new(),
         file_name: String::new(),
     });
-    let config = get_default_config();
+    let mut config = get_default_config();
 
     match config_ast {
         Ok(ast) => {
@@ -139,31 +139,6 @@ fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
                 match node {
                     AstNode::Error(e) => {
                         return Err(e.into());
-                    }
-                    AstNode::Project(data) => {
-                        for node in data {
-                            match node {
-                                AstNode::Error(e) => {
-                                    return Err(e.into());
-                                }
-                                AstNode::Collection(values, data_type, _) => {
-                                    match data_type {
-                                        CollectionType::Array => {
-                                            for node in values {
-                                                match node {
-                                                    AstNode::Error(e) => {
-                                                        return Err(e.into());
-                                                    }
-                                                    _ => {}
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                }
-                                _ => {}
-                            }
-                        }
                     }
                     _ => {}
                 }

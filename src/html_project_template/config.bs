@@ -1,21 +1,21 @@
-io.project = (
-    name: "html_project",
-    version: "0.1.0",
-    description: "",
-    main: "src/pages/home.bs",
-    output_folder: "dist",
-    author: "",
-    license: "MIT"
+bs.project = (
+    name "html_project",
+    version "0.1.0",
+    description "",
+    main "src/pages/home.bs",
+    output_folder "dist",
+    author "",
+    license "MIT"
 )
 
-io.config = (
-    title: "Website Title",
-    description: "Website Description",
-    url: "localhost:3069",
-    locale: "en_US",
-    page_type: "website",
-    favicons: "dist/images/favicons",
-    default_image: "dist/images/default.png",
-    page_x_large_image: "dist/images/x_default.jpg",
-    image_folder: "dist/images"
+bs.config = (
+    title "Website Title",
+    description "Website Description",
+    url "localhost:3069",
+    locale "en_US",
+    page_type "website",
+    favicons "dist/images/favicons",
+    default_image "dist/images/default.png",
+    page_x_large_image "dist/images/x_default.jpg",
+    image_folder "dist/images"
 )

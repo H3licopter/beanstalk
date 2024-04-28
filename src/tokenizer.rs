@@ -16,7 +16,7 @@ pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
     loop {
         match token {
             Token::Variable(name) => {
-                token = new_var_or_ref(name, tokens.len(), &mut var_names);
+                token = new_var_or_ref(name, tokens.len(), &mut var_names, &tokens[tokens.len() - 1]);
             }
             Token::EOF => {
                 break;
@@ -29,11 +29,12 @@ pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
     }
 
     // Elimate any PRIVATE VarDeclaration tokens that have no reference
-    for var_dec in var_names.iter() {
-        if !var_dec.has_ref {
-            tokens[var_dec.index] = Token::Empty;
-        }
-    }
+    // Doesn't work here, because it has to also eliminate all following tokens to do with the variable
+    // for var_dec in var_names.iter() {
+    //     if !var_dec.has_ref {
+    //         tokens[var_dec.index] = Token::Empty;
+    //     }
+    // }
 
     tokens.push(token);
     tokens
@@ -169,8 +170,7 @@ fn get_next_token(
         return Token::CloseParenthesis;
     }
 
-    // All the tokens that are always what they are on their own
-    // Independant of the next character
+    // Context Free Grammars
     if current_char == '=' {
         return Token::Assign;
     }
@@ -360,8 +360,9 @@ fn get_next_token(
         }
     }
 
+    // Exporting variables outside of the module or scope (public declaration)
     if current_char == '@' {
-        return Token::Href;
+        return Token::Export;
     }
 
     if current_char == '~' {
@@ -475,19 +476,22 @@ fn keyword_or_variable(
             // Data Types
             match token_value.as_str() {
                 "int" => return Token::TypeKeyword(DataType::Int),
-                "float" => return Token::TypeKeyword(DataType::Float),
-                "string" => return Token::TypeKeyword(DataType::String),
-                "rune" => return Token::TypeKeyword(DataType::Rune),
+                "idx" => return Token::TypeKeyword(DataType::Int),
+                "flt" => return Token::TypeKeyword(DataType::Float),
+                "str" => return Token::TypeKeyword(DataType::String),
+                "uni" => return Token::TypeKeyword(DataType::Rune),
                 "bool" => return Token::TypeKeyword(DataType::Bool),
-                "decimal" => return Token::TypeKeyword(DataType::Decimal),
-                "scene" => return Token::TypeKeyword(DataType::Scene),
-                "collection" => return Token::TypeKeyword(DataType::Collection),
+                "dec" => return Token::TypeKeyword(DataType::Decimal),
                 _ => {}
             }
 
-            // IO (Standard Library stuff)
+            // IO (printing and other various functions from standard library)
+            // Should eventually not be hardcoded
             if token_value == "io" {
                 return Token::Print;
+            }
+            if token_value == "bs" {
+                return Token::Settings;
             }
 
             // only bother tokenizing / reserving these keywords if inside of a scene head
@@ -801,7 +805,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
 }
 
 
-pub fn new_var_or_ref(name: String, token_index: usize, var_names: &mut Vec<Declaration>) -> Token {
+pub fn new_var_or_ref(name: String, token_index: usize, var_names: &mut Vec<Declaration>, previous_token: &Token) -> Token {
     let check_if_ref = var_names.iter().rposition(|n| n.name == name);
 
     match check_if_ref {
@@ -810,10 +814,18 @@ pub fn new_var_or_ref(name: String, token_index: usize, var_names: &mut Vec<Decl
             return Token::Reference(var_names[index].index);
         }
         None => {
+
+            // If the variable is exported, then it counts as having a reference
+            // (Does not need to be optimised out by the compiler if no other ref to it in the module)
+            let is_public = match previous_token {
+                Token::Export => true,
+                _ => false,
+            };
+
             var_names.push(Declaration {
                 name: name.clone(),
                 index: token_index,
-                has_ref: false,
+                has_ref: is_public,
             });
             return Token::VarDeclaration(var_names.len());
         }

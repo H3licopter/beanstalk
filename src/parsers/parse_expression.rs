@@ -1,11 +1,19 @@
-use super::ast::AstNode;
+use super::{ast::AstNode, collections::new_tuple};
 use crate::{bs_types::DataType, Token};
 
-// Creates an expression node from a list of tokens
-// Will eventually also evaluate the expression at compile time to simplify the AST
+/*  CAN RETURN:
+     - a literal
+     - an expression 
+     - an empty expression for functions
+     - a collection of expressions or literals
 
-// Can return a literal, an expression or a collection of expressions
-pub fn create_expression(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
+
+     DOES NOT CARE ABOUT TYPES (yet)
+     can return a mix of types in the same expression
+     Enforcing the type is done when the expression is evaluated
+     Evaluated expressions must be of the same type
+*/
+pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool) -> AstNode {
     let mut expression = Vec::new();
 
     // Check if value is wrapped in brackets and move on until first value is found
@@ -15,66 +23,41 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
         *i += 1;
     }
 
-    // Find the end of the expression and check if it is assigned a data type at the end
-    let mut expression_end = *i;
-    if bracket_nesting > 0 {
-        // Find the last closing bracket and end expression there
-        let mut total_open_brackets = bracket_nesting;
-        while &expression_end < &tokens.len() {
-            if &tokens[expression_end] == &Token::OpenParenthesis {
-                total_open_brackets += 1;
-            } else if &tokens[expression_end] == &Token::CloseParenthesis {
-                if total_open_brackets < 1 {
-                    break;
-                }
-                total_open_brackets -= 1;
-            }
-
-            expression_end += 1;
-        }
-    } else {
-        // Find the next newline, comma or final closing bracket and end expression there
-        while &expression_end < &tokens.len() {
-            match &tokens[expression_end] {
-                Token::Newline | Token::Comma | Token::SceneClose(_) | Token::CloseParenthesis => {
-                    break;
-                }
-                _ => {
-                    expression_end += 1;
-                }
-            }
-        }
-    }
-
-    // Get the data type of the expression if there is one after the expression
-    let mut data_type = &DataType::Inferred;
-    if expression_end + 1 < tokens.len() {
-        match &tokens[expression_end + 1] {
-            Token::TypeKeyword(type_keyword) => data_type = &type_keyword,
-            _ => {}
-        };
-    }
-
-    // Loop through the expression and create the AST nodes
-    // Figure out the type from the data
-    // If the type does not match the assigned datatype then throw an error
+    // Loop through the expression and create the AST nodes (increment i each time)
+    // Figure out the type it should be from the data
+    // DOES NOT MOVE TOKENS PAST THE CLOSING TOKEN
     while let Some(token) = tokens.get(*i) {
         match token {
             // Conditions that close the expression
-            Token::Newline => {
+            Token::CloseParenthesis => {
+                if bracket_nesting > 0 {
+                    bracket_nesting -= 1;
+
+                    // is empty tuple '()'
+                    if bracket_nesting == 0 && expression.is_empty() {
+                        return AstNode::Empty;
+                    }
+
+                    continue;
+                }
+
+                break;
+            }
+            Token::EOF | Token::Newline | Token::SceneClose(_) => {
                 if bracket_nesting == 0 {
                     break;
                 }
-            }
-            Token::EOF | Token::Comma | Token::CloseParenthesis | Token::SceneClose(_) => {
-                if bracket_nesting > 0 {
-                    bracket_nesting -= 1;
-                    continue;
-                }
                 
                 return AstNode::Error(
-                    "Not enough closing parenthesis for expression. Need more ')'!".to_string(),
+                    "Not enough closing parenthesis for expression. Need more ')' at the end of the expression!".to_string(),
                 );
+            }
+
+            Token::Comma => {
+                if inside_tuple {
+                    break;
+                }
+                return new_tuple(tokens, i, AstNode::Expression(expression));
             }
 
             // Check if name is a reference to another variable or function call
@@ -84,36 +67,12 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
 
             // Check if is a literal
             Token::IntLiteral(int) => {
-                if data_type == &DataType::Inferred {
-                    data_type = &DataType::Int;
-                }
-
-                if data_type != &DataType::Int {
-                    return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
-                }
-
                 expression.push(AstNode::Literal(Token::IntLiteral(*int)));
             }
             Token::StringLiteral(string) => {
-                if data_type == &DataType::Inferred {
-                    data_type = &DataType::String;
-                }
-
-                if data_type != &DataType::String {
-                    return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
-                }
-
                 expression.push(AstNode::Literal(Token::StringLiteral(string.clone())));
             }
             Token::FloatLiteral(float) => {
-                if data_type == &DataType::Inferred {
-                    data_type = &DataType::Float;
-                }
-
-                if data_type != &DataType::Float {
-                    return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
-                }
-
                 expression.push(AstNode::Literal(Token::FloatLiteral(*float)));
             }
 
@@ -208,65 +167,45 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize) -> AstNode {
         *i += 1;
     }
 
-    // TO DO: Evaluate the expression at compile time and return the result
-    // THIS WILL BE DONE IN EVAL_EXPRESSION FUNCTION
-    AstNode::Expression(expression, data_type.clone())
+    AstNode::Expression(expression)
 }
 
 // This function takes in an Expression node that has a Vec of Nodes to evaluate
 // And evaluates everything possible at compile time (Constant Folding)
 // If it returns a literal, then everything was evaluated at compile time
-// Otherwise it will return an expression, which will need runtime evaluation
-pub fn _eval_expression(expr: AstNode, tokens: &Vec<Token>) -> AstNode {
-    let mut result_type = DataType::Inferred;
+// Otherwise it will return an EvaluatedExpression, which has a strict type and will be evaluated at runtime
+pub fn eval_expression(expr: AstNode, tokens: &Vec<Token>, type_declaration: &DataType) -> AstNode {
+    let mut current_type = type_declaration.to_owned();
 
-    let mut constants_queue: Vec<AstNode> = Vec::new();
-    let mut operator_stack: Vec<AstNode> = Vec::new();
+    let mut simplified_expression = Vec::new();
 
+    // TO DO: ACTUALLY IMPLIMENT CONSTAT FOLDING HERE!!!!!
     match expr {
-        AstNode::Expression(e, data_type) => {
+        AstNode::Expression(e) => {
             for node in e {
                 match node {
                     AstNode::Literal(v) => {
-                        constants_queue.push(AstNode::Literal(v));
+                        simplified_expression.push(AstNode::Literal(v));
                     }
                     AstNode::BinaryOperator(op, precedence) => {
-                        if constants_queue.is_empty() { return AstNode::Error("Not enough operands for binary operator".to_string()); }
-                        
-                        if operator_stack.is_empty() {
-                            operator_stack.push(AstNode::BinaryOperator(op, precedence));
-                        } else {
-                            let top_op = operator_stack.pop().unwrap();
-                            match top_op {
-                                AstNode::BinaryOperator(top_op, top_precedence) => {
-                                    if top_precedence > precedence {
-                                        operator_stack.push(AstNode::BinaryOperator(top_op, top_precedence));
-                                        operator_stack.push(AstNode::BinaryOperator(op, precedence));
-                                    } else {
-                                        operator_stack.push(AstNode::BinaryOperator(top_op, top_precedence));
-                                        operator_stack.push(AstNode::BinaryOperator(op, precedence));
-                                    }
-                                }
-                                _ => {}
-                            }
-                        }
+                        simplified_expression.push(AstNode::BinaryOperator(op, precedence));
                     }
                     AstNode::ConstReference(value) => {
                         // Get the value of the constant and push it to the constants queue
                         match &tokens[value] {
                             Token::IntLiteral(int) => {
-                                if data_type == DataType::Inferred {result_type = DataType::Int;}
-                                else if data_type != DataType::Int {
+                                if type_declaration == &DataType::Inferred {current_type = DataType::Int;}
+                                else if type_declaration != &DataType::Int {
                                     return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
                                 }
-                                constants_queue.push(AstNode::Literal(Token::IntLiteral(*int)));
+                                simplified_expression.push(AstNode::Literal(Token::IntLiteral(*int)));
                             }
                             Token::FloatLiteral(float) => {
-                                if data_type == DataType::Inferred {result_type = DataType::Int;}
-                                else if data_type != DataType::Int {
+                                if type_declaration == &DataType::Inferred {current_type = DataType::Int;}
+                                else if type_declaration != &DataType::Int {
                                     return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
                                 }
-                                constants_queue.push(AstNode::Literal(Token::FloatLiteral(*float)));
+                                simplified_expression.push(AstNode::Literal(Token::FloatLiteral(*float)));
                             }
                             _ => {
                                 return AstNode::Error("Invalid Constant Reference".to_string());
@@ -283,9 +222,8 @@ pub fn _eval_expression(expr: AstNode, tokens: &Vec<Token>) -> AstNode {
         }
     }
 
-    let simplified_expression = Vec::new();
 
-    AstNode::Expression(simplified_expression, result_type)
+    AstNode::EvaluatedExpression(simplified_expression, current_type)
 }
 
 /*
@@ -337,5 +275,42 @@ If the operator token on the top of the stack is a parenthesis, then there are m
     pop the operator from the operator stack onto the output queue
 
 
+
+*/
+
+
+
+
+/*
+    // Find the end of the expression and check if it is assigned a data type at the end
+    let mut expression_end = *i;
+    if bracket_nesting > 0 {
+        // Find the last closing bracket and end expression there
+        let mut total_open_brackets = bracket_nesting;
+        while &expression_end < &tokens.len() {
+            if &tokens[expression_end] == &Token::OpenParenthesis {
+                total_open_brackets += 1;
+            } else if &tokens[expression_end] == &Token::CloseParenthesis {
+                if total_open_brackets < 1 {
+                    break;
+                }
+                total_open_brackets -= 1;
+            }
+
+            expression_end += 1;
+        }
+    } else {
+        // Find the next newline, comma or final closing bracket and end expression there
+        while &expression_end < &tokens.len() {
+            match &tokens[expression_end] {
+                Token::Newline | Token::Comma | Token::SceneClose(_) | Token::CloseParenthesis => {
+                    break;
+                }
+                _ => {
+                    expression_end += 1;
+                }
+            }
+        }
+    }
 
 */

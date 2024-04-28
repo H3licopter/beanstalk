@@ -321,7 +321,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
 fn check_if_comptime_value(node: &AstNode) -> bool {
     match node {
         AstNode::Literal(_) | AstNode::ConstReference(_) => true,
-        AstNode::Collection(_, _, is_evaluated) => *is_evaluated,
+        // AstNode::Collection(_, _, is_evaluated) => *is_evaluated,
         _ => {false}
     }
 }

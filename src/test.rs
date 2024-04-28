@@ -35,7 +35,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Print the HTML output
     // Create a regex to match the content between the <main> and </main> tags
-    let re = Regex::new(r"(?s)<body>(.*?)</main>").unwrap();
+    let re = Regex::new(r"(?s)<body>(.*?)</body>").unwrap();
 
     // Extract the content between the <main> and </main> tags
     let main_content = re

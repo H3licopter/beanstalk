@@ -23,8 +23,14 @@
     } 
 `
 
-# Pattern Matching
-The match keyword is used for pattern matching. "else" is used as a catch if there are no previous matches. When match returns a type, it must always be exhaustive, so all possible options must be covered, or an else must be used.
+# Pattern Matching / Switch
+Opening a new scope immediately after a comparison will allow for pattern matching. This is usually done with the "is" keyword, but can also be done with the "in" keyword. The "not" keyword can be appended to these to negate a comparison.
+
+Each branch of the match statement is separated by a comma, and each match is separated by the "then" keyword.
+
+The "or" keyword can be used inside the switch to match multiple values.
+
+"else" is used as a catch if there are no previous matches. When match returns a type, it must always be exhaustive, so all possible options must be covered, or an else must be used.
 
 If the match statement must return a value, each branch must return the same type.
 
@@ -33,21 +39,18 @@ A branch can also contain a function, which can be specified by using an arrow a
 If the match does not return a value, it does not need to be exhaustive.
 
 `
-    content = match some_int {
-        0 : "beans"
-        1 or 2 : "burgers"
-        < 9 : ("multiple 
-            lines of nonsense")
-
-        else -> { return "who cares" }
-    } string
+    content = some_int is {
+        0 then "beans",
+        1 or 2 then "burgers",
+        else "who cares"
+    } str
 
 
     -- No return type, non-exhaustive. No function will run if a choice is not covered.
-    match some_choice {
-        CHOICE.a -> { doThing() }
-        CHOICE.b -> { doOtherThing() }
-        CHOICE.c -> { doAnotherThing() }
+    some_choice is {
+        CHOICE.a then () -> { doThing() },
+        CHOICE.b then () -> { doOtherThing() },
+        CHOICE.c then () -> { doAnotherThing() }
     }
 
 `

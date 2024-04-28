@@ -1,4 +1,4 @@
-use super::{generate_html::create_html_boilerplate, js_parser::{collection_to_vec_of_js, combine_collection_to_js, expression_to_js}, markdown_parser::add_markdown_tags};
+use super::{generate_html::create_html_boilerplate, js_parser::{collection_to_js, collection_to_vec_of_js, expression_to_js}, markdown_parser::add_markdown_tags};
 use crate::{
     parsers::{
         ast::AstNode,
@@ -36,15 +36,20 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
             }
 
             // JAVASCRIPT / WASM
-            AstNode::VarDeclaration(name, expr) => {
+            AstNode::VarDeclaration(name, expr, _) => {
                 js.push_str(&format!(
-                    "let {} = {};",
+                    "let v{} = {};",
                     name,
                     expression_to_js(&expr)
                 ));
             }
-            AstNode::Function(name, args, body) => {
-                js.push_str(&format!("function {}({:?}){{\n{:?}\n}}", name, args, body));
+            AstNode::Function(name, args, body, is_exported) => {
+                js.push_str(&format!("{}function f{}({:?}){{\n{:?}\n}}", 
+                    if is_exported { "export " } else { "" },
+                    name, 
+                    args, // NEED TO PARSE ARGUMENTS
+                    body
+                ));
             }
             AstNode::Print(expr) => {
                 js.push_str(&format!("console.log({});", expression_to_js(&expr)));
@@ -99,10 +104,10 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
                                 .push_str(&format!("margin:{}px;", expression_to_js(&arg)));
                             scene_wrap.tag = Tag::Span;
                         }
-                        Style::TextColor(arg) => {
+                        Style::TextColor(args) => {
                             scene_wrap
                                 .style
-                                .push_str(&format!("color:rgb({});", combine_collection_to_js(&arg)));
+                                .push_str(&format!("color:rgb({});", collection_to_js(&args)));
                             scene_wrap.tag = Tag::Span;
                         }
                         Style::Size(arg) => {

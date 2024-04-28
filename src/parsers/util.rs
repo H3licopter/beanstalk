@@ -6,7 +6,7 @@ use super::{ast::AstNode, parse_expression::create_expression};
 pub fn parse_function_args(scene_head: &Vec<Token>, i: &mut usize) -> AstNode {
     *i += 1;
 
-    create_expression(scene_head, i)
+    create_expression(scene_head, i, false)
 }
 
 pub fn count_newlines_at_end_of_string(s: &str) -> usize {
