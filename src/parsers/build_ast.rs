@@ -1,5 +1,8 @@
 use super::{
-    ast::AstNode, collections::new_array, create_scene_node::new_scene, parse_expression::{create_expression, eval_expression}
+    ast::AstNode,
+    collections::new_array,
+    create_scene_node::new_scene,
+    parse_expression::{create_expression, eval_expression},
 };
 use crate::{bs_types::DataType, Token};
 
@@ -29,13 +32,12 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
 
             // New Function or Variable declaration or reference
             Token::VarDeclaration(id) => {
-                ast.push(
-                    new_variable(
-                        *id, 
-                        &tokens, 
-                        &mut i, 
-                        attributes.contains(&Attribute::Exported))
-                );
+                ast.push(new_variable(
+                    *id,
+                    &tokens,
+                    &mut i,
+                    attributes.contains(&Attribute::Exported),
+                ));
             }
 
             Token::Export => {
@@ -43,9 +45,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
             }
 
             Token::Reference(var_index) => {
-                ast.push(
-                    create_reference(&tokens, var_index)
-                );
+                ast.push(create_reference(&tokens, var_index));
             }
 
             Token::Title => {
@@ -82,7 +82,15 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
 
             Token::Print => {
                 i += 1;
-                ast.push(AstNode::Print(Box::new(create_expression(&tokens, &mut i, false))));
+                ast.push(AstNode::Print(Box::new(create_expression(
+                    &tokens, &mut i, false,
+                ))));
+            }
+
+            Token::DeadVarible => {
+                // Remove entire declaration or scope of variable declaration
+                // So don't put any dead code into the AST
+                skip_dead_code(&tokens, &mut i);
             }
 
             Token::EOF => {
@@ -141,52 +149,43 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
 
     // Check if array/struct/choice/scene
     match &tokens[*i] {
-        Token::OpenScope => {
-            match attribute {
-                Attribute::Constant => {
-                    return AstNode::Struct(
-                        name, 
-                        Box::new(new_array(tokens, i)), 
-                        is_exported
-                    )
-                }
-                Attribute::Mutable => {
-                    return AstNode::VarDeclaration(
-                        name, 
-                        Box::new(new_array(tokens, i)), 
-                        is_exported
-                    )
-                }
-                _ => {
-                    return AstNode::Error("Invalid assignment declaration for collection - possibly not supported yet?".to_string());
-                }
+        Token::OpenScope => match attribute {
+            Attribute::Constant => {
+                return AstNode::Struct(name, Box::new(new_array(tokens, i)), is_exported)
             }
-        }
-        Token::SceneHead(scene_head) => {
-            match attribute {
-                Attribute::Constant => {
-                    return AstNode::Const(
-                        name, 
-                        Box::new(new_scene(scene_head, tokens, i)), 
-                        is_exported
-                    )
-                }
-                Attribute::Mutable => {
-                    return AstNode::VarDeclaration(
-                        name, 
-                        Box::new(new_scene(scene_head, tokens, i)), 
-                        is_exported
-                    )
-                }
-                _ => {
-                    return AstNode::Error("Invalid assignment declaration for scene - possibly not supported yet?".to_string());
-                }
+            Attribute::Mutable => {
+                return AstNode::VarDeclaration(name, Box::new(new_array(tokens, i)), is_exported)
             }
-
-        }
-        _ => {
-            *i -= 1;
-        }
+            _ => {
+                return AstNode::Error(
+                    "Invalid assignment declaration for collection - possibly not supported yet?"
+                        .to_string(),
+                );
+            }
+        },
+        Token::SceneHead(scene_head) => match attribute {
+            Attribute::Constant => {
+                return AstNode::Const(
+                    name,
+                    Box::new(new_scene(scene_head, tokens, i)),
+                    is_exported,
+                )
+            }
+            Attribute::Mutable => {
+                return AstNode::VarDeclaration(
+                    name,
+                    Box::new(new_scene(scene_head, tokens, i)),
+                    is_exported,
+                )
+            }
+            _ => {
+                return AstNode::Error(
+                    "Invalid assignment declaration for scene - possibly not supported yet?"
+                        .to_string(),
+                );
+            }
+        },
+        _ => {}
     }
 
     let mut data_type = &DataType::Inferred;
@@ -215,16 +214,14 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
     match parsed_expr {
         AstNode::Expression(_) => {
             let evaluated_expression = eval_expression(parsed_expr, tokens, data_type);
-            return create_var_node(attribute, name, evaluated_expression, is_exported)
+            return create_var_node(attribute, name, evaluated_expression, is_exported);
         }
-        AstNode::Literal(_) => {
-            return create_var_node(attribute, name, parsed_expr, is_exported)
-        }
+        AstNode::Literal(_) => return create_var_node(attribute, name, parsed_expr, is_exported),
         AstNode::Tuple(items) => {
             return AstNode::Tuple(items);
         }
         // AstNode::Collection(items, collection_type) => {
-            
+
         // }
         AstNode::Empty => {
             return AstNode::Error("Invalid expression for variable assignment".to_string());
@@ -240,10 +237,16 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
 }
 
 // Called from new_variable
-fn new_function(name: usize, args: AstNode, tokens: &Vec<Token>, i: &mut usize, is_exported: bool) -> AstNode {
+fn new_function(
+    name: usize,
+    args: AstNode,
+    tokens: &Vec<Token>,
+    i: &mut usize,
+    is_exported: bool,
+) -> AstNode {
     let function_body = Vec::new();
 
-    // Check 
+    // Check
     *i += 1;
 
     if &tokens[*i] != &Token::CloseScope {
@@ -257,8 +260,7 @@ fn new_function(name: usize, args: AstNode, tokens: &Vec<Token>, i: &mut usize, 
     AstNode::Function(name.clone(), Box::new(args), function_body, is_exported)
 }
 
-fn create_reference(tokens: &Vec<Token>, var_index: &usize) -> AstNode {
-
+pub fn create_reference(tokens: &Vec<Token>, var_index: &usize) -> AstNode {
     // Should never be out of bounds right?
     match &tokens[var_index + 1] {
         Token::Assign => {
@@ -273,7 +275,12 @@ fn create_reference(tokens: &Vec<Token>, var_index: &usize) -> AstNode {
     }
 }
 
-fn create_var_node(attribute: Attribute, var_name: usize, var_value: AstNode, is_exported: bool) -> AstNode {
+fn create_var_node(
+    attribute: Attribute,
+    var_name: usize,
+    var_value: AstNode,
+    is_exported: bool,
+) -> AstNode {
     match attribute {
         Attribute::Constant => {
             return AstNode::Const(var_name, Box::new(var_value), is_exported);
@@ -282,9 +289,49 @@ fn create_var_node(attribute: Attribute, var_name: usize, var_value: AstNode, is
             return AstNode::VarDeclaration(var_name, Box::new(var_value), is_exported);
         }
         _ => {
-            return AstNode::Error("Invalid assignment declaration - possibly not supported yet?".to_string());
+            return AstNode::Error(
+                "Invalid assignment declaration - possibly not supported yet?".to_string(),
+            );
         }
     }
+}
+
+fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {
+    // Check what type of dead code it is
+    // If it is a variable declaration, skip to the end of the declaration
+
+    *i += 1;
+    match tokens.get(*i).unwrap_or(&Token::EOF) {
+        Token::Assign
+        | Token::AssignConstant
+        | Token::AssignComptime
+        | Token::AssignComptimeConstant => {
+            *i += 1;
+        }
+        Token::Newline => {
+            *i += 1;
+            return;
+        }
+        _ => {
+            return;
+        }
+    }
+
+    // TO DO: Skip to end of variable declaration
+
+    // while let Some(token) = tokens.get(*i) {
+    //     Token::OpenParenthesis => {
+    //         *i += 1;
+    //     }
+    //     Token::Newline => {
+    //         *i += 1;
+    //         return;
+    //     }
+    //     _ => {
+    //         return;
+    //     }
+    //     *i += 1;
+    // }
 }
 /*
 match &tokens[*i] {

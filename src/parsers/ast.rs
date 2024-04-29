@@ -9,15 +9,15 @@ pub enum AstNode {
 
     // Blocks
     Function(usize, Box<AstNode>, Vec<AstNode>, bool), // Function name, Args, Body, Public
-    Expression(Vec<AstNode>), // Expression that can contain mixed types
-    EvaluatedExpression(Vec<AstNode>, DataType), //Expression, Result type
+    Expression(Vec<AstNode>),                          // Expression that can contain mixed types
+    EvaluatedExpression(Vec<AstNode>, DataType),       //Expression, Result type
 
     // Basics
     Error(String),
     Comment(String),
     VarDeclaration(usize, Box<AstNode>, bool), // Variable name, Value, Public
-    Const(usize, Box<AstNode>, bool), // Constant name, Value, Public
-    
+    Const(usize, Box<AstNode>, bool),          // Constant name, Value, Public
+
     // IO
     Print(Box<AstNode>),
 
@@ -36,8 +36,8 @@ pub enum AstNode {
 
     // Operators
     // Operator, Precedence
-    UnaryOperator(Token, u8),  // Negative, Not, Exponent
-    BinaryOperator(Token, u8), 
+    UnaryOperator(Token, u8), // Negative, Not, Exponent
+    BinaryOperator(Token, u8),
 
     // HTML
     Element(Token),                 // HTML element content

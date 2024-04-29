@@ -16,18 +16,18 @@ mod tokens;
 mod parsers {
     pub mod ast;
     pub mod build_ast;
+    pub mod collections;
     mod create_scene_node;
     pub mod parse_expression;
     pub mod styles;
     pub mod util;
-    pub mod collections;
 }
 mod html_output {
+    mod dom_hooks;
     mod generate_html;
+    pub mod js_parser;
     mod markdown_parser;
     pub mod web_parser;
-    pub mod js_parser;
-    mod dom_hooks;
 }
 pub use tokens::Token;
 enum Command {

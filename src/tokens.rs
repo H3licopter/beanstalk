@@ -18,9 +18,10 @@ pub struct Declaration {
 pub enum Token {
     // For Compiler
     ModuleStart(String),
-    Comptime,          
+    Comptime,
     Error(String),
-    EOF, // End of file
+    DeadVarible, // Variable that is never used, to be removed in the AST
+    EOF,         // End of file
 
     // Module Import/Export
     Import,
@@ -67,18 +68,18 @@ pub enum Token {
     Dot,
 
     // Declarations
-    Assign,     // =
-    AssignConstant, // :
-    AssignComptime, // :=
+    Assign,                 // =
+    AssignConstant,         // :
+    AssignComptime,         // :=
     AssignComptimeConstant, // ::
 
     // Scope
-    OpenParenthesis, // (
+    OpenParenthesis,  // (
     CloseParenthesis, // )
-    OpenScope, // {
-    CloseScope, // }
-    SceneOpen, // [
-    SceneClose(u32), // Keeps track of the spaces following the scene
+    OpenScope,        // {
+    CloseScope,       // }
+    SceneOpen,        // [
+    SceneClose(u32),  // Keeps track of the spaces following the scene
 
     As, // Type casting
 
@@ -159,7 +160,7 @@ pub enum Token {
     Heading(u8, String), // Max heading size should be 10 or something
     BulletPoint(u8, String),
     Superscript(String),
-    Empty,       // ALSO USED FOR REMOVED TOKENS
+    Empty,
     Pre(String), // Content inside raw elements. Might change to not be a format tag in the future
 
     // named tags

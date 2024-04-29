@@ -144,7 +144,9 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 [table 3:
     [: Type] [: Description] [: Zero Value]
 
-    [: ()] [: Collection] [: () an empty collection]
+    [: ()] [: Tuple] [: () nil]
+    
+    [: {}] [: Collection] [: {} Empty Collection]
 
     [: scene] [: The templating syntax of Beanstalk] [: [] an empty scene]
     

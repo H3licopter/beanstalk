@@ -3,7 +3,7 @@ use crate::{bs_types::DataType, Token};
 
 /*  CAN RETURN:
      - a literal
-     - an expression 
+     - an expression
      - an empty expression for functions
      - a collection of expressions or literals
 
@@ -47,7 +47,7 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool)
                 if bracket_nesting == 0 {
                     break;
                 }
-                
+
                 return AstNode::Error(
                     "Not enough closing parenthesis for expression. Need more ')' at the end of the expression!".to_string(),
                 );
@@ -194,18 +194,22 @@ pub fn eval_expression(expr: AstNode, tokens: &Vec<Token>, type_declaration: &Da
                         // Get the value of the constant and push it to the constants queue
                         match &tokens[value] {
                             Token::IntLiteral(int) => {
-                                if type_declaration == &DataType::Inferred {current_type = DataType::Int;}
-                                else if type_declaration != &DataType::Int {
+                                if type_declaration == &DataType::Inferred {
+                                    current_type = DataType::Int;
+                                } else if type_declaration != &DataType::Int {
                                     return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
                                 }
-                                simplified_expression.push(AstNode::Literal(Token::IntLiteral(*int)));
+                                simplified_expression
+                                    .push(AstNode::Literal(Token::IntLiteral(*int)));
                             }
                             Token::FloatLiteral(float) => {
-                                if type_declaration == &DataType::Inferred {current_type = DataType::Int;}
-                                else if type_declaration != &DataType::Int {
+                                if type_declaration == &DataType::Inferred {
+                                    current_type = DataType::Int;
+                                } else if type_declaration != &DataType::Int {
                                     return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
                                 }
-                                simplified_expression.push(AstNode::Literal(Token::FloatLiteral(*float)));
+                                simplified_expression
+                                    .push(AstNode::Literal(Token::FloatLiteral(*float)));
                             }
                             _ => {
                                 return AstNode::Error("Invalid Constant Reference".to_string());
@@ -213,7 +217,7 @@ pub fn eval_expression(expr: AstNode, tokens: &Vec<Token>, type_declaration: &Da
                         }
                     }
 
-                    _=> {}
+                    _ => {}
                 }
             }
         }
@@ -221,7 +225,6 @@ pub fn eval_expression(expr: AstNode, tokens: &Vec<Token>, type_declaration: &Da
             return AstNode::Error("No Expression to Evaluate".to_string());
         }
     }
-
 
     AstNode::EvaluatedExpression(simplified_expression, current_type)
 }
@@ -277,9 +280,6 @@ If the operator token on the top of the stack is a parenthesis, then there are m
 
 
 */
-
-
-
 
 /*
     // Find the end of the expression and check if it is assigned a data type at the end

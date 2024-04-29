@@ -1,7 +1,10 @@
 use super::{
     ast::AstNode,
+    build_ast::create_reference,
     styles::{Style, Tag},
-    util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string, parse_function_args},
+    util::{
+        count_newlines_at_end_of_string, count_newlines_at_start_of_string, parse_function_args,
+    },
 };
 use crate::Token;
 
@@ -128,6 +131,10 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                         scene.push(AstNode::Error("No src provided for audio".to_string()));
                     }
                 };
+            }
+
+            Token::Reference(name) => {
+                scene.push(create_reference(&tokens, name));
             }
 
             Token::StringLiteral(string_content) | Token::RawStringLiteral(string_content) => {
@@ -322,6 +329,6 @@ fn check_if_comptime_value(node: &AstNode) -> bool {
     match node {
         AstNode::Literal(_) | AstNode::ConstReference(_) => true,
         // AstNode::Collection(_, _, is_evaluated) => *is_evaluated,
-        _ => {false}
+        _ => false,
     }
 }

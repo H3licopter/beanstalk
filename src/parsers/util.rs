@@ -1,5 +1,5 @@
-use crate::Token;
 use super::{ast::AstNode, parse_expression::create_expression};
+use crate::Token;
 
 // Must return one element, but that element can be a collection
 // Should also return whether the argument is a literal (compile time constant)

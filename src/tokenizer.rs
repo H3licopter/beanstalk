@@ -16,8 +16,44 @@ pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
     loop {
         match token {
             Token::Variable(name) => {
-                token = new_var_or_ref(name, tokens.len(), &mut var_names, &tokens[tokens.len() - 1]);
+                token = new_var_or_ref(
+                    name,
+                    tokens.len(),
+                    &mut var_names,
+                    &tokens[tokens.len() - 1],
+                );
             }
+
+            // Check for variables used inside of scenehead
+            // Replace with reference if it's been declared, otherwise remove it as dead code
+            Token::SceneHead(content) => {
+                let mut processed_scenehead: Vec<Token> = Vec::new();
+                for t in content {
+                    match t {
+                        Token::Variable(name) => {
+                            let var = new_var_or_ref(
+                                name,
+                                tokens.len(),
+                                &mut var_names,
+                                &tokens[tokens.len() - 1],
+                            );
+                            match var {
+                                Token::Reference(_) => {
+                                    processed_scenehead.push(Token::Reference(var_names.len()));
+                                }
+                                _ => {
+                                    processed_scenehead.push(Token::DeadVarible);
+                                }
+                            }
+                        }
+                        _ => {
+                            processed_scenehead.push(t);
+                        }
+                    }
+                }
+                token = Token::SceneHead(processed_scenehead);
+            }
+
             Token::EOF => {
                 break;
             }
@@ -28,13 +64,12 @@ pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
         token = get_next_token(&mut chars, &mut tokenize_mode, &mut scene_nesting_level);
     }
 
-    // Elimate any PRIVATE VarDeclaration tokens that have no reference
-    // Doesn't work here, because it has to also eliminate all following tokens to do with the variable
-    // for var_dec in var_names.iter() {
-    //     if !var_dec.has_ref {
-    //         tokens[var_dec.index] = Token::Empty;
-    //     }
-    // }
+    // Mark unused variables for removal in AST
+    for var_dec in var_names.iter() {
+        if !var_dec.has_ref {
+            tokens[var_dec.index] = Token::DeadVarible;
+        }
+    }
 
     tokens.push(token);
     tokens
@@ -189,7 +224,7 @@ fn get_next_token(
             if next_char.is_alphanumeric() || next_char == '_' {
                 token_value.push(chars.next().unwrap());
             } else {
-                return Token::Signal(token_value)
+                return Token::Signal(token_value);
             }
         }
     }
@@ -804,8 +839,12 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
     }
 }
 
-
-pub fn new_var_or_ref(name: String, token_index: usize, var_names: &mut Vec<Declaration>, previous_token: &Token) -> Token {
+pub fn new_var_or_ref(
+    name: String,
+    token_index: usize,
+    var_names: &mut Vec<Declaration>,
+    previous_token: &Token,
+) -> Token {
     let check_if_ref = var_names.iter().rposition(|n| n.name == name);
 
     match check_if_ref {
@@ -814,7 +853,6 @@ pub fn new_var_or_ref(name: String, token_index: usize, var_names: &mut Vec<Decl
             return Token::Reference(var_names[index].index);
         }
         None => {
-
             // If the variable is exported, then it counts as having a reference
             // (Does not need to be optimised out by the compiler if no other ref to it in the module)
             let is_public = match previous_token {

@@ -1,4 +1,9 @@
-use super::{generate_html::create_html_boilerplate, js_parser::{collection_to_js, collection_to_vec_of_js, expression_to_js}, markdown_parser::add_markdown_tags};
+use super::{
+    dom_hooks::{generate_dom_update_js, DOMUpdate},
+    generate_html::create_html_boilerplate,
+    js_parser::{collection_to_js, collection_to_vec_of_js, expression_to_js},
+    markdown_parser::add_markdown_tags,
+};
 use crate::{
     parsers::{
         ast::AstNode,
@@ -11,7 +16,7 @@ use crate::{
 
 // Parse ast into valid JS, HTML and CSS
 pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
-    let mut js = String::new();
+    let mut js = generate_dom_update_js(DOMUpdate::InnerHTML).to_string();
     let _wasm = String::new();
     let mut html = String::new();
     let css = String::new();
@@ -22,7 +27,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
         match node {
             // SCENES (HTML)
             AstNode::Scene(scene) => {
-                html.push_str(&parse_scene(scene, &mut false).0);
+                html.push_str(&parse_scene(scene, &mut false, &mut js).0);
             }
             AstNode::Title(value) => {
                 page_title = value;
@@ -37,16 +42,16 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
 
             // JAVASCRIPT / WASM
             AstNode::VarDeclaration(name, expr, _) => {
-                js.push_str(&format!(
-                    "let v{} = {};",
-                    name,
-                    expression_to_js(&expr)
-                ));
+                js.push_str(&format!("let v{} = {};", name, expression_to_js(&expr)));
+            }
+            AstNode::VarReference(name) => {
+                js.push_str(&format!("v{}", name));
             }
             AstNode::Function(name, args, body, is_exported) => {
-                js.push_str(&format!("{}function f{}({:?}){{\n{:?}\n}}", 
+                js.push_str(&format!(
+                    "{}function f{}({:?}){{\n{:?}\n}}",
                     if is_exported { "export " } else { "" },
-                    name, 
+                    name,
                     args, // NEED TO PARSE ARGUMENTS
                     body
                 ));
@@ -75,7 +80,7 @@ struct SceneTag {
 }
 
 // Returns a string of the HTML and whether the scene is inside a paragraph
-fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
+fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String) -> (String, bool) {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
 
@@ -256,12 +261,19 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool) -> (String, bool) {
             }
 
             AstNode::Scene(scene) => {
-                let new_scene = parse_scene(scene, inside_p);
+                let new_scene = parse_scene(scene, inside_p, js);
                 html.push_str(&new_scene.0);
             }
 
             AstNode::Space => {
                 html.push_str("&nbsp;");
+            }
+
+            AstNode::VarReference(value) => {
+                // Create a span in the HTML with an ID that can be referenced by JS
+                html.push_str(&format!("<span class=\"c{}\"></span>", value));
+
+                js.push_str(&format!("uInnerHTML(\"c{}\", v{});", value, value));
             }
 
             AstNode::Error(value) => {

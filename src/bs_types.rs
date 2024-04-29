@@ -8,8 +8,8 @@ pub enum DataType {
     Bool,
     True,
     False,
-    String,   // UTF-8
-    Rune,     // UTF-32
+    String, // UTF-8
+    Rune,   // UTF-32
     Collection,
     Scene,
     Choice,
@@ -19,7 +19,7 @@ pub enum DataType {
     InferredCollection,
 
     Tuple, // Mixed types (fixed size)
-    
+
     IntArray,
     IdxArray,
     FloatArray,
@@ -30,5 +30,4 @@ pub enum DataType {
     CollectionArray,
     SceneArray,
     ChoiceArray,
-
 }

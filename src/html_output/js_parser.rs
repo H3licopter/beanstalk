@@ -23,7 +23,7 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                             println!("unknown literal found in expression");
                         }
                     },
-            
+
                     AstNode::VarReference(name) => {
                         js.push_str(&format!("v{}", name));
                     }
@@ -39,20 +39,28 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                             AstNode::EvaluatedExpression(_, _) => {
                                 js_args = expression_to_js(arg);
                             }
-                            _=> {
+                            _ => {
                                 println!("unknown AST node found in function call");
                             }
                         }
                         js.push_str(&format!("f{}({:?})", name, js_args));
                     }
-            
+
                     AstNode::Const(name, value, _) => {
                         match &**value {
                             AstNode::EvaluatedExpression(_, _) => {
-                                js.push_str(&format!("const c{} = {}", name, expression_to_js(value)));
+                                js.push_str(&format!(
+                                    "const c{} = {}",
+                                    name,
+                                    expression_to_js(value)
+                                ));
                             }
                             AstNode::Tuple(values) => {
-                                js.push_str(&format!("const c{} = [{}]", name, combine_vec_to_js(values)));
+                                js.push_str(&format!(
+                                    "const c{} = [{}]",
+                                    name,
+                                    combine_vec_to_js(values)
+                                ));
                             }
                             _ => {
                                 println!("unknown AST node found in const declaration");
@@ -60,68 +68,63 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                         }
                         js.push_str(&format!("const c{} = {}", name, expression_to_js(value)));
                     }
-            
-                    AstNode::BinaryOperator(operator, _) => {
-                        match operator {
-                            Token::Add => {
-                                js.push_str(" + ");
-                            }
-                            Token::Subtract => {
-                                js.push_str(" - ");
-                            }
-                            Token::Multiply => {
-                                js.push_str(" * ");
-                            }
-                            Token::Divide => {
-                                js.push_str(" / ");
-                            }
-                            Token::Modulus => {
-                                js.push_str(" % ");
-                            }
-                            Token::Equal => {
-                                js.push_str(" === ");
-                            }
-                            Token::GreaterThan => {
-                                js.push_str(" > ");
-                            }
-                            Token::LessThan => {
-                                js.push_str(" < ");
-                            }
-                            Token::GreaterThanOrEqual => {
-                                js.push_str(" >= ");
-                            }
-                            Token::LessThanOrEqual => {
-                                js.push_str(" <= ");
-                            }
-                            Token::And => {
-                                js.push_str(" && ");
-                            }
-                            Token::Or => {
-                                js.push_str(" || ");
-                            }
-                            _ => {
-                                println!("unknown binary operator found in expression");
-                            }
+
+                    AstNode::BinaryOperator(operator, _) => match operator {
+                        Token::Add => {
+                            js.push_str(" + ");
                         }
-            
-                    }
-            
-                    AstNode::UnaryOperator(operator, _) => {
-                        match operator {
-                            Token::Negative => {
-                                js.push_str(" -");
-                            }
-                            Token::Not => {
-                                js.push_str(" !");
-                            }
-                            Token::Exponent => {
-                                js.push_str(" ** ");
-                            }
-                            _ => {
-                                println!("unknown unary operator found in expression");
-                            }
+                        Token::Subtract => {
+                            js.push_str(" - ");
                         }
-                    }
+                        Token::Multiply => {
+                            js.push_str(" * ");
+                        }
+                        Token::Divide => {
+                            js.push_str(" / ");
+                        }
+                        Token::Modulus => {
+                            js.push_str(" % ");
+                        }
+                        Token::Equal => {
+                            js.push_str(" === ");
+                        }
+                        Token::GreaterThan => {
+                            js.push_str(" > ");
+                        }
+                        Token::LessThan => {
+                            js.push_str(" < ");
+                        }
+                        Token::GreaterThanOrEqual => {
+                            js.push_str(" >= ");
+                        }
+                        Token::LessThanOrEqual => {
+                            js.push_str(" <= ");
+                        }
+                        Token::And => {
+                            js.push_str(" && ");
+                        }
+                        Token::Or => {
+                            js.push_str(" || ");
+                        }
+                        _ => {
+                            println!("unknown binary operator found in expression");
+                        }
+                    },
+
+                    AstNode::UnaryOperator(operator, _) => match operator {
+                        Token::Negative => {
+                            js.push_str(" -");
+                        }
+                        Token::Not => {
+                            js.push_str(" !");
+                        }
+                        Token::Exponent => {
+                            js.push_str(" ** ");
+                        }
+                        _ => {
+                            println!("unknown unary operator found in expression");
+                        }
+                    },
 
                     AstNode::Tuple(values) => {
                         js.push_str(&format!("[{}]", combine_vec_to_js(values)));
@@ -149,14 +152,17 @@ pub fn expression_to_js(expr: &AstNode) -> String {
             }
         },
 
-        // If the expression is just a tuple, 
+        // If the expression is just a tuple,
         // then it should automatically destructure into multiple arguments like this
         AstNode::Tuple(values) => {
             js.push_str(&format!("{}", combine_vec_to_js(values)));
         }
 
-        _=> {
-            println!("Non-expression / Literal AST node given to expression_to_js: {:?}", expr);
+        _ => {
+            println!(
+                "Non-expression / Literal AST node given to expression_to_js: {:?}",
+                expr
+            );
         }
     }
 
@@ -170,7 +176,8 @@ pub fn combine_vec_to_js(collection: &Vec<AstNode>) -> String {
     for node in collection {
         // Make sure correct commas at end of each element but not last one
         js.push_str(&format!(
-            "{}{}", expression_to_js(&node), 
+            "{}{}",
+            expression_to_js(&node),
             if i < collection.len() - 1 { ", " } else { "" }
         ));
         i += 1;

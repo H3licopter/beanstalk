@@ -20,7 +20,11 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
         entry_path = "test_output/src/pages/home.bs".to_string();
     } else {
         let current_dir = std::env::current_dir()?;
-        entry_path = format!("{}/{}", current_dir.to_string_lossy().into_owned(), entry_path);
+        entry_path = format!(
+            "{}/{}",
+            current_dir.to_string_lossy().into_owned(),
+            entry_path
+        );
     }
 
     // Read content from a test file
@@ -44,11 +48,16 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
 
         match source_code {
             Ok(content) => {
-                let file_name = format!("{}.html", 
-                    if new_file_name == "home" { "index" } else { new_file_name }
+                let file_name = format!(
+                    "{}.html",
+                    if new_file_name == "home" {
+                        "index"
+                    } else {
+                        new_file_name
+                    }
                 );
                 CompileType::SingleFile(file_name, content)
-            },
+            }
             Err(_) => CompileType::Error("No file found".to_string()),
         }
     } else {
@@ -131,7 +140,7 @@ fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
         output_dir: String::new(),
         file_name: String::new(),
     });
-    let mut config = get_default_config();
+    let config = get_default_config();
 
     match config_ast {
         Ok(ast) => {
