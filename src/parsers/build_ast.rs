@@ -261,12 +261,12 @@ fn new_function(
 }
 
 pub fn create_reference(tokens: &Vec<Token>, var_index: &usize) -> AstNode {
-    // Should never be out of bounds right?
-    match &tokens[var_index + 1] {
-        Token::Assign => {
+    
+    match &tokens.get(var_index + 1) {
+        Some(Token::Assign) => {
             return AstNode::VarReference(*var_index);
         }
-        Token::AssignConstant => {
+        Some(Token::AssignConstant) => {
             return AstNode::ConstReference(*var_index);
         }
         _ => {

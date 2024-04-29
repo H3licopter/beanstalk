@@ -1,4 +1,4 @@
-variable_test = 80 + 76.7 - 1
+variable_test : 80 + 76.7 - 1
 ---
 
 [variable_test: is the number created in a variable, it can also go inside the paragraph like this: [variable_test]. WOOO!]

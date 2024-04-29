@@ -28,7 +28,7 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                         js.push_str(&format!("v{}", name));
                     }
                     AstNode::ConstReference(name) => {
-                        js.push_str(&format!("c{}", name));
+                        js.push_str(&format!("cv{}", name));
                     }
                     AstNode::FunctionCall(name, arg) => {
                         let mut js_args = "".to_string();
@@ -50,14 +50,14 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                         match &**value {
                             AstNode::EvaluatedExpression(_, _) => {
                                 js.push_str(&format!(
-                                    "const c{} = {}",
+                                    "const cv{} = {}",
                                     name,
                                     expression_to_js(value)
                                 ));
                             }
                             AstNode::Tuple(values) => {
                                 js.push_str(&format!(
-                                    "const c{} = [{}]",
+                                    "const tv{} = [{}]",
                                     name,
                                     combine_vec_to_js(values)
                                 ));
@@ -66,7 +66,6 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                                 println!("unknown AST node found in const declaration");
                             }
                         }
-                        js.push_str(&format!("const c{} = {}", name, expression_to_js(value)));
                     }
 
                     AstNode::BinaryOperator(operator, _) => match operator {

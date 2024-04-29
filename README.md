@@ -15,11 +15,12 @@
 ---
 
 ## Principles
-  - Fast Development of UIs and  content heavy web pages
+  - Fast Development of UIs and content heavy web pages
   - Concise, minimal and consistent syntax
   - All-in-one design with minimal boilerplate
   - The compiler should do most of the annoying work for you and help catch common bugs without compromising on very fast compile times (No slow LLVM backend)
   - Batteries included. Opinionated about how to do common fiddly tasks
+  - Fast to prototype an idea and optimize later
 
 ## Planned Features
 Beanstalk can be thought of as a mega-extended Markdown, a Javascript replacement and a modern UI focused programming language with no constraints on conventions or backwards compatibility.
@@ -51,7 +52,7 @@ Scenes have utility classes built in. Use keywords at the start of scenes to not
 
 **JS/WASM**
 
-*CODE GEN NOT YET IMPLIMENTED, BUT COMING SOON!*
+*ONLY VERY BASIC CODEGEN INTO JS ADDED SO FAR*
 
 Beanstalk will be a full programming language that compiles into JS/WASM on the frontend (and eventually native code on the backend) allowing you to add dynamic and interactive behaviours in your scenes naturally and concisely. 
 
@@ -71,6 +72,6 @@ Technologies currently used in the compiler:
   - Finish implimenting constant folding and basic compile time evaluation
   - Finish basic frontend codegen
   - Dev server built into compiler tools
-  - C target codegen for WASM, server code and native apps
-  - Built-in Raylib intergration 
+  - Basic scene components and reactivity implemented
+  - Cranelift backend for WASM generation
   - Complete all the basic features of the initial compiler so it can actually be downloaded and used easily 

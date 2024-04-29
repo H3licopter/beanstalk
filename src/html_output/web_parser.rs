@@ -44,8 +44,8 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
             AstNode::VarDeclaration(name, expr, _) => {
                 js.push_str(&format!("let v{} = {};", name, expression_to_js(&expr)));
             }
-            AstNode::VarReference(name) => {
-                js.push_str(&format!("v{}", name));
+            AstNode::Const(name, expr, _) => {
+                js.push_str(&format!("const cv{} = {};", name, expression_to_js(&expr)));
             }
             AstNode::Function(name, args, body, is_exported) => {
                 js.push_str(&format!(
@@ -270,10 +270,18 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String) -> (St
             }
 
             AstNode::VarReference(value) => {
-                // Create a span in the HTML with an ID that can be referenced by JS
+                // Create a span in the HTML with a class that can be referenced by JS
+                // TO DO: Should be reactive in future
                 html.push_str(&format!("<span class=\"c{}\"></span>", value));
 
                 js.push_str(&format!("uInnerHTML(\"c{}\", v{});", value, value));
+            }
+
+            AstNode::ConstReference(value) => {
+                // Create a span in the HTML with a class that can be referenced by JS
+                html.push_str(&format!("<span class=\"c{}\"></span>", value));
+
+                js.push_str(&format!("uInnerHTML(\"c{}\", cv{});", value, value));
             }
 
             AstNode::Error(value) => {
