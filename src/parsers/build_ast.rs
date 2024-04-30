@@ -222,18 +222,14 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
             let evaluated_expression = eval_expression(parsed_expr, data_type, ast);
             return create_var_node(attribute, name, evaluated_expression, is_exported);
         }
-        AstNode::Literal(_) => return create_var_node(attribute, name, parsed_expr, is_exported),
         AstNode::Tuple(items) => {
             return AstNode::Tuple(items);
         }
         // AstNode::Collection(items, collection_type) => {
 
         // }
-        AstNode::Empty => {
-            return AstNode::Error("Invalid expression for variable assignment".to_string());
-        }
         AstNode::Error(_) => {
-            return AstNode::Error("Invalid expression for variable assignment".to_string());
+            return AstNode::Error(format!("Invalid expression for variable assignment (creating new variable: {name})").to_string());
         }
         _ => {}
     }
@@ -287,7 +283,7 @@ fn create_var_node(
     }
 }
 
-fn find_var_declaration_index(ast: &Vec<AstNode>, var_name: &usize) -> usize {
+pub fn find_var_declaration_index(ast: &Vec<AstNode>, var_name: &usize) -> usize {
     for (i, node) in ast.iter().enumerate() {
         match node {
             AstNode::VarDeclaration(name, _, _) => {

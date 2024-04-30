@@ -1,4 +1,4 @@
-use super::{ast::AstNode, collections::new_tuple};
+use super::{ast::AstNode, build_ast::find_var_declaration_index, collections::new_tuple};
 use crate::{bs_types::DataType, Token};
 
 /*  CAN RETURN:
@@ -193,9 +193,11 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                     AstNode::BinaryOperator(op, precedence) => {
                         simplified_expression.push(AstNode::BinaryOperator(op, precedence));
                     }
+
+                    // NEED TO GET TYPE FROM VARIABLE DECLARATION
                     AstNode::ConstReference(value) => {
                         // Get the value of the constant and push it to the constants queue
-                        match &ast[value] {
+                        match &ast[find_var_declaration_index(&ast, &value)] {
                             AstNode::VarDeclaration(_, assignment, _) => {
                                 simplified_expression.push(*assignment.clone());
                             }
@@ -213,15 +215,41 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
     }
 
     if current_type == DataType::String {
-        // TO DO - CONCAT ALL STRINGS TOGETHER IF MULTIPLE
-        concat_strings_if_adjacent(&mut simplified_expression);
+        return concat_strings_if_adjacent(&mut simplified_expression);
+    }
+
+    if simplified_expression.len() == 1 {
+        return simplified_expression[0].clone();
     }
 
     AstNode::EvaluatedExpression(simplified_expression, current_type)
 }
 
-fn concat_strings_if_adjacent(simplified_expression: &mut Vec<AstNode>) {
-    
+fn concat_strings_if_adjacent(simplified_expression: &mut Vec<AstNode>) -> AstNode {
+    let mut new_expr = Vec::new();
+    let mut new_string = String::new();
+    let mut previous_node_is_string = false;
+    for node in simplified_expression {
+        match node {
+            AstNode::Literal(Token::StringLiteral(string)) => {
+                if previous_node_is_string || new_string.is_empty() {
+                    new_string.push_str(string)
+                } else {
+                    new_expr.push(AstNode::Literal(Token::StringLiteral(new_string)));
+                    new_string = string.clone();
+                }
+            }
+            _ => {
+                previous_node_is_string = false;
+            }
+        }
+    }
+
+    if new_expr.len() > 0 {
+        AstNode::EvaluatedExpression(new_expr, DataType::String)
+    } else {
+        AstNode::Literal(Token::StringLiteral(new_string))
+    }
 }
 
 fn check_literal(value: Token, type_declaration: &DataType, current_type: &mut DataType) -> AstNode {
@@ -249,6 +277,7 @@ fn check_literal(value: Token, type_declaration: &DataType, current_type: &mut D
             } else if type_declaration != &DataType::String {
                 return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
             }
+            
             AstNode::Literal(value)
         }
         _ => {

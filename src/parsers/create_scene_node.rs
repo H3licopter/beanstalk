@@ -324,7 +324,6 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
         Token::A | Token::StringLiteral(_) => true,
 
         _ => {
-            println!("Previous Element: {:?}", previous_element);
             false
         }
     }
