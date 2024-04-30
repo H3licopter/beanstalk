@@ -1,7 +1,7 @@
 use super::styles::{Style, Tag};
 use crate::{bs_types::DataType, Token};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub enum AstNode {
     // Config settings

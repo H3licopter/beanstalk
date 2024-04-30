@@ -18,9 +18,8 @@ pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
             Token::Variable(name) => {
                 token = new_var_or_ref(
                     name,
-                    tokens.len(),
                     &mut var_names,
-                    &tokens[tokens.len() - 1],
+                    &tokens,
                 );
             }
 
@@ -33,13 +32,15 @@ pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
                         Token::Variable(name) => {
                             let var = new_var_or_ref(
                                 name,
-                                tokens.len(),
                                 &mut var_names,
-                                &tokens[tokens.len() - 1],
+                                &tokens,
                             );
                             match var {
-                                Token::Reference(_) => {
-                                    processed_scenehead.push(Token::Reference(var_names.len()));
+                                Token::VarReference(id) => {
+                                    processed_scenehead.push(Token::VarReference(id));
+                                }
+                                Token::ConstReference(id) => {
+                                    processed_scenehead.push(Token::ConstReference(id));
                                 }
                                 _ => {
                                     processed_scenehead.push(Token::DeadVarible);
@@ -841,31 +842,41 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
 
 pub fn new_var_or_ref(
     name: String,
-    token_index: usize,
     var_names: &mut Vec<Declaration>,
-    previous_token: &Token,
+    tokens: &Vec<Token>,
 ) -> Token {
     let check_if_ref = var_names.iter().rposition(|n| n.name == name);
+    let token_index = tokens.len();
+    let previous_token = &tokens[token_index - 1];
 
     match check_if_ref {
         Some(index) => {
             var_names[index].has_ref = true;
-            return Token::Reference(var_names[index].index);
+            
+            // POSSIBLE OUT OF BOUNDS ERROR TO SORT OUT??? or will that never happen because of the check_if_ref?
+            let token_after = &tokens[var_names[index].next_token_index];
+
+            if token_after == &Token::AssignConstant {
+                return Token::ConstReference(var_names[index].index);
+            }
+
+            return Token::VarReference(var_names[index].index);
         }
         None => {
             // If the variable is exported, then it counts as having a reference
             // (Does not need to be optimised out by the compiler if no other ref to it in the module)
             let is_public = match previous_token {
-                Token::Export => true,
+                &Token::Export => true,
                 _ => false,
             };
 
             var_names.push(Declaration {
-                name: name.clone(),
+                name,
                 index: token_index,
                 has_ref: is_public,
+                next_token_index: token_index + 1,
             });
-            return Token::VarDeclaration(var_names.len());
+            return Token::VarDeclaration(token_index);
         }
     }
 }

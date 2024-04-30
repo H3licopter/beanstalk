@@ -37,6 +37,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                     &tokens,
                     &mut i,
                     attributes.contains(&Attribute::Exported),
+                    &ast,
                 ));
             }
 
@@ -44,8 +45,13 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                 attributes.push(Attribute::Exported);
             }
 
-            Token::Reference(var_index) => {
-                ast.push(create_reference(&tokens, var_index));
+            Token::VarReference(var_index) => {
+                let ref_index = find_var_declaration_index(&ast, var_index);
+                ast.push(AstNode::VarReference(ref_index));
+            }
+            Token::ConstReference(var_index) => {
+                let ref_index = find_var_declaration_index(&ast, var_index);
+                ast.push(AstNode::ConstReference(ref_index));
             }
 
             Token::Title => {
@@ -111,7 +117,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
 
 // CAN RETURN:
 // VarDeclaration, Const, Error, Function, Tuple
-fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bool) -> AstNode {
+fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bool, ast: &Vec<AstNode>) -> AstNode {
     let attribute;
 
     *i += 1;
@@ -213,7 +219,7 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
     // If the expression is an empty expression when the variable is NOT a function, return an error
     match parsed_expr {
         AstNode::Expression(_) => {
-            let evaluated_expression = eval_expression(parsed_expr, tokens, data_type);
+            let evaluated_expression = eval_expression(parsed_expr, data_type, ast);
             return create_var_node(attribute, name, evaluated_expression, is_exported);
         }
         AstNode::Literal(_) => return create_var_node(attribute, name, parsed_expr, is_exported),
@@ -260,21 +266,6 @@ fn new_function(
     AstNode::Function(name.clone(), Box::new(args), function_body, is_exported)
 }
 
-pub fn create_reference(tokens: &Vec<Token>, var_index: &usize) -> AstNode {
-    
-    match &tokens.get(var_index + 1) {
-        Some(Token::Assign) => {
-            return AstNode::VarReference(*var_index);
-        }
-        Some(Token::AssignConstant) => {
-            return AstNode::ConstReference(*var_index);
-        }
-        _ => {
-            return AstNode::Error("Expected variable or reference after '&'".to_string());
-        }
-    }
-}
-
 fn create_var_node(
     attribute: Attribute,
     var_name: usize,
@@ -294,6 +285,21 @@ fn create_var_node(
             );
         }
     }
+}
+
+fn find_var_declaration_index(ast: &Vec<AstNode>, var_name: &usize) -> usize {
+    for (i, node) in ast.iter().enumerate() {
+        match node {
+            AstNode::VarDeclaration(name, _, _) => {
+                if name == var_name {
+                    return i;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    0
 }
 
 fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {

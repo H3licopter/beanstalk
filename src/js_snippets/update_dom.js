@@ -5,3 +5,5 @@ function uInnerHTML(id,update){
       es[i].innerHTML=update
     }
 }
+
+document.getElementById('update').innerHTML();

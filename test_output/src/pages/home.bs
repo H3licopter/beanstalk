@@ -1,4 +1,8 @@
-variable_test : 80 + 76.7 - 1
+some_string : "string 1 WOw super cool string "
+another_string : "string 2 WOW! "
+concatenated_string : some_string another_string
+
+
 ---
 
-[variable_test: is the number created in a variable, it can also go inside the paragraph like this: [variable_test]. WOOO!]
+[concatenated_string]

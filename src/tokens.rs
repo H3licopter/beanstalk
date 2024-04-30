@@ -12,9 +12,10 @@ pub struct Declaration {
     pub name: String,
     pub index: usize,
     pub has_ref: bool,
+    pub next_token_index: usize,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Token {
     // For Compiler
     ModuleStart(String),
@@ -47,7 +48,8 @@ pub enum Token {
 
     // Optimised Variables (Happens just before AST creation)
     VarDeclaration(usize),
-    Reference(usize),
+    VarReference(usize),
+    ConstReference(usize),
 
     // Literals
     TypeInference,

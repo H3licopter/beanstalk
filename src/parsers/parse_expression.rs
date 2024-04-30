@@ -61,8 +61,11 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool)
             }
 
             // Check if name is a reference to another variable or function call
-            Token::Variable(_) => {
-                expression.push(AstNode::Error("NOT IMPLIMENTED YET - GETTING VARIABLE. Variable reference not defined. Maybe you're using a variable that has not yet been declared?".to_string()));
+            Token::ConstReference(id) => {
+                expression.push(AstNode::ConstReference(*id));
+            }
+            Token::VarReference(id) => {
+                expression.push(AstNode::VarReference(*id));
             }
 
             // Check if is a literal
@@ -174,46 +177,29 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool)
 // And evaluates everything possible at compile time (Constant Folding)
 // If it returns a literal, then everything was evaluated at compile time
 // Otherwise it will return an EvaluatedExpression, which has a strict type and will be evaluated at runtime
-pub fn eval_expression(expr: AstNode, tokens: &Vec<Token>, type_declaration: &DataType) -> AstNode {
+pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<AstNode>) -> AstNode {
     let mut current_type = type_declaration.to_owned();
 
     let mut simplified_expression = Vec::new();
 
-    // TO DO: ACTUALLY IMPLIMENT CONSTAT FOLDING HERE!!!!!
+    // TO DO: ACTUALLY IMPLIMENT CONSTANT FOLDING HERE!!!!!
     match expr {
         AstNode::Expression(e) => {
             for node in e {
                 match node {
-                    AstNode::Literal(v) => {
-                        simplified_expression.push(AstNode::Literal(v));
+                    AstNode::Literal(t) => {
+                        simplified_expression.push(check_literal(t, type_declaration, &mut current_type));
                     }
                     AstNode::BinaryOperator(op, precedence) => {
                         simplified_expression.push(AstNode::BinaryOperator(op, precedence));
                     }
                     AstNode::ConstReference(value) => {
                         // Get the value of the constant and push it to the constants queue
-                        match &tokens[value] {
-                            Token::IntLiteral(int) => {
-                                if type_declaration == &DataType::Inferred {
-                                    current_type = DataType::Int;
-                                } else if type_declaration != &DataType::Int {
-                                    return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
-                                }
-                                simplified_expression
-                                    .push(AstNode::Literal(Token::IntLiteral(*int)));
+                        match &ast[value] {
+                            AstNode::VarDeclaration(_, assignment, _) => {
+                                simplified_expression.push(*assignment.clone());
                             }
-                            Token::FloatLiteral(float) => {
-                                if type_declaration == &DataType::Inferred {
-                                    current_type = DataType::Int;
-                                } else if type_declaration != &DataType::Int {
-                                    return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
-                                }
-                                simplified_expression
-                                    .push(AstNode::Literal(Token::FloatLiteral(*float)));
-                            }
-                            _ => {
-                                return AstNode::Error("Invalid Constant Reference".to_string());
-                            }
+                            _ => {}
                         }
                     }
 
@@ -226,7 +212,49 @@ pub fn eval_expression(expr: AstNode, tokens: &Vec<Token>, type_declaration: &Da
         }
     }
 
+    if current_type == DataType::String {
+        // TO DO - CONCAT ALL STRINGS TOGETHER IF MULTIPLE
+        concat_strings_if_adjacent(&mut simplified_expression);
+    }
+
     AstNode::EvaluatedExpression(simplified_expression, current_type)
+}
+
+fn concat_strings_if_adjacent(simplified_expression: &mut Vec<AstNode>) {
+    
+}
+
+fn check_literal(value: Token, type_declaration: &DataType, current_type: &mut DataType) -> AstNode {
+    match value {
+        Token::IntLiteral(_) => {
+            if type_declaration == &DataType::Inferred {
+                *current_type = DataType::Int;
+                
+            } else if type_declaration != &DataType::Int {
+                return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+            }
+            AstNode::Literal(value)
+        }
+        Token::FloatLiteral(_) => {
+            if type_declaration == &DataType::Inferred {
+                *current_type = DataType::Float;
+            } else if type_declaration != &DataType::Float {
+                return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+            }
+            AstNode::Literal(value)
+        }
+        Token::StringLiteral(_) => {
+            if type_declaration == &DataType::Inferred {
+                *current_type = DataType::String;
+            } else if type_declaration != &DataType::String {
+                return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+            }
+            AstNode::Literal(value)
+        }
+        _ => {
+            AstNode::Error("Invalid Literal (check_literal)".to_string())
+        }
+    }
 }
 
 /*

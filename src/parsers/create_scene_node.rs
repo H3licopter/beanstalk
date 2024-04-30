@@ -1,10 +1,7 @@
 use super::{
-    ast::AstNode,
-    build_ast::create_reference,
-    styles::{Style, Tag},
-    util::{
+    ast::AstNode, parse_expression::create_expression, styles::{Style, Tag}, util::{
         count_newlines_at_end_of_string, count_newlines_at_start_of_string, parse_function_args,
-    },
+    }
 };
 use crate::Token;
 
@@ -133,12 +130,20 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
                 };
             }
 
-            Token::Reference(name) => {
-                scene.push(create_reference(&tokens, name));
+            Token::VarReference(name) => {
+                scene.push(AstNode::VarReference(*name));
+            }
+            Token::ConstReference(name) => {
+                scene.push(AstNode::ConstReference(*name));
             }
 
             Token::StringLiteral(string_content) | Token::RawStringLiteral(string_content) => {
                 scene.push(AstNode::Element(Token::Span(string_content.to_string())));
+            }
+
+            // Expressions to Parse
+            Token::FloatLiteral(_) | Token::IntLiteral(_) | Token::DecLiteral(_) => {
+                scene.push(AstNode::Expression(vec![create_expression(scene_head, &mut j, false)]));
             }
 
             Token::ParentScene => {

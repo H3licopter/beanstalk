@@ -1,7 +1,7 @@
 use super::{
     dom_hooks::{generate_dom_update_js, DOMUpdate},
     generate_html::create_html_boilerplate,
-    js_parser::{collection_to_js, collection_to_vec_of_js, expression_to_js},
+    js_parser::{collection_to_js, collection_to_vec_of_js, combine_vec_to_js, expression_to_js},
     markdown_parser::add_markdown_tags,
 };
 use crate::{
@@ -22,12 +22,14 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
     let css = String::new();
     let mut page_title = String::new();
 
+    let mut module_references: Vec<usize> = Vec::new();
+
     // Parse HTML
-    for node in ast {
+    for (i, node) in ast.into_iter().enumerate() {
         match node {
             // SCENES (HTML)
             AstNode::Scene(scene) => {
-                html.push_str(&parse_scene(scene, &mut false, &mut js).0);
+                html.push_str(&parse_scene(scene, &mut false, &mut js, &mut module_references).0);
             }
             AstNode::Title(value) => {
                 page_title = value;
@@ -41,11 +43,11 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
             }
 
             // JAVASCRIPT / WASM
-            AstNode::VarDeclaration(name, expr, _) => {
-                js.push_str(&format!("let v{} = {};", name, expression_to_js(&expr)));
+            AstNode::VarDeclaration(_, expr, _) => {
+                js.push_str(&format!("let v{} = {};", i, expression_to_js(&expr)));
             }
-            AstNode::Const(name, expr, _) => {
-                js.push_str(&format!("const cv{} = {};", name, expression_to_js(&expr)));
+            AstNode::Const(_, expr, _) => {
+                js.push_str(&format!("const cv{} = {};", i, expression_to_js(&expr)));
             }
             AstNode::Function(name, args, body, is_exported) => {
                 js.push_str(&format!(
@@ -80,9 +82,11 @@ struct SceneTag {
 }
 
 // Returns a string of the HTML and whether the scene is inside a paragraph
-fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String) -> (String, bool) {
+fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String, module_references: &mut Vec<usize>) -> (String, bool) {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
+
+    let mut unique_key: u32 = 0;
 
     let mut scene_wrap = SceneTag {
         tag: Tag::None,
@@ -261,7 +265,7 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String) -> (St
             }
 
             AstNode::Scene(scene) => {
-                let new_scene = parse_scene(scene, inside_p, js);
+                let new_scene = parse_scene(scene, inside_p, js, module_references);
                 html.push_str(&new_scene.0);
             }
 
@@ -272,16 +276,28 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String) -> (St
             AstNode::VarReference(value) => {
                 // Create a span in the HTML with a class that can be referenced by JS
                 // TO DO: Should be reactive in future
-                html.push_str(&format!("<span class=\"c{}\"></span>", value));
+                html.push_str(&format!("<span class=\"c{value}\"></span>"));
 
-                js.push_str(&format!("uInnerHTML(\"c{}\", v{});", value, value));
+                if !module_references.contains(&value) {
+                    js.push_str(&format!("uInnerHTML(\"c{value}\", v{value});"));
+                    module_references.push(value);
+                }
             }
 
             AstNode::ConstReference(value) => {
                 // Create a span in the HTML with a class that can be referenced by JS
-                html.push_str(&format!("<span class=\"c{}\"></span>", value));
+                html.push_str(&format!("<span class=\"c{value}\"></span>"));
 
-                js.push_str(&format!("uInnerHTML(\"c{}\", cv{});", value, value));
+                if !module_references.contains(&value) {
+                    js.push_str(&format!("uInnerHTML(\"c{value}\", cv{value});"));
+                    module_references.push(value);
+                }
+            }
+
+            AstNode::Expression(expr) => {
+                html.push_str(&format!("<span id=\"exp{}\"></span>", unique_key));
+                js.push_str(&format!("document.getElementById('exp{}').innerHTML={};", unique_key, &combine_vec_to_js(&expr)));
+                unique_key += 1;
             }
 
             AstNode::Error(value) => {
