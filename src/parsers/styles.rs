@@ -18,6 +18,6 @@ pub enum Style {
     Margin(AstNode),
     Size(AstNode),
     TextColor(AstNode),
-    _BackgroundColor(AstNode),
+    BackgroundColor(AstNode),
     Alt(String),
 }

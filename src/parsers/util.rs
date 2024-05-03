@@ -1,14 +1,3 @@
-use super::{ast::AstNode, parse_expression::create_expression};
-use crate::Token;
-
-// Must return one element, but that element can be a collection
-// Should also return whether the argument is a literal (compile time constant)
-pub fn parse_function_args(scene_head: &Vec<Token>, i: &mut usize) -> AstNode {
-    *i += 1;
-
-    create_expression(scene_head, i, false)
-}
-
 pub fn count_newlines_at_end_of_string(s: &str) -> usize {
     let mut count = 0;
     for c in s.chars().rev() {

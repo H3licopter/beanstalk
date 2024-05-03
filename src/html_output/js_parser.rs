@@ -46,28 +46,6 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                         js.push_str(&format!("f{}({:?})", name, js_args));
                     }
 
-                    AstNode::Const(name, value, _) => {
-                        match &**value {
-                            AstNode::EvaluatedExpression(_, _) => {
-                                js.push_str(&format!(
-                                    "const cv{} = {}",
-                                    name,
-                                    expression_to_js(value)
-                                ));
-                            }
-                            AstNode::Tuple(values) => {
-                                js.push_str(&format!(
-                                    "const tv{} = [{}]",
-                                    name,
-                                    combine_vec_to_js(values)
-                                ));
-                            }
-                            _ => {
-                                println!("unknown AST node found in const declaration");
-                            }
-                        }
-                    }
-
                     AstNode::BinaryOperator(operator, _) => match operator {
                         Token::Add => {
                             js.push_str(" + ");
@@ -212,3 +190,27 @@ pub fn collection_to_vec_of_js(collection: &AstNode) -> Vec<String> {
 
     js
 }
+
+/*
+                    AstNode::Const(name, value, _) => {
+                        match &**value {
+                            AstNode::EvaluatedExpression(_, _) => {
+                                js.push_str(&format!(
+                                    "const cv{} = {}",
+                                    name,
+                                    expression_to_js(value)
+                                ));
+                            }
+                            AstNode::Tuple(values) => {
+                                js.push_str(&format!(
+                                    "const tv{} = [{}]",
+                                    name,
+                                    combine_vec_to_js(values)
+                                ));
+                            }
+                            _ => {
+                                println!("unknown AST node found in const declaration");
+                            }
+                        }
+                    }
+*/

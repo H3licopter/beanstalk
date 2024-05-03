@@ -81,14 +81,8 @@ fn main() {
         }
         Command::Test => {
             println!("Testing...");
-            match test::test_build() {
-                Ok(_) => {
-                    main();
-                }
-                Err(e) => {
-                    println!("Error while testing: {:?}", e);
-                }
-            }
+            let _ = test::test_build();
+            main();
         }
         Command::Dev(path) => {
             println!("Starting dev server...");
@@ -141,8 +135,11 @@ fn collect_user_input() -> Command {
                 None => return Command::Dev("test_output".to_string()),
             };
         }
+
         _ => {
-            return Command::Test;
+            let _ = build::build("test".to_string());
+            let _ = test::test_build();
+            main();
         }
     }
 

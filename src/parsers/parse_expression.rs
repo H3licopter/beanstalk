@@ -13,7 +13,7 @@ use crate::{bs_types::DataType, Token};
      Enforcing the type is done when the expression is evaluated
      Evaluated expressions must be of the same type
 */
-pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool) -> AstNode {
+pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool, ast: &Vec<AstNode>) -> AstNode {
     let mut expression = Vec::new();
 
     // Check if value is wrapped in brackets and move on until first value is found
@@ -41,6 +41,10 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool)
                     continue;
                 }
 
+                if inside_tuple {
+                    *i -= 1;
+                }
+
                 break;
             }
             Token::EOF | Token::Newline | Token::SceneClose(_) => {
@@ -57,15 +61,15 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool)
                 if inside_tuple {
                     break;
                 }
-                return new_tuple(tokens, i, AstNode::Expression(expression));
+                return new_tuple(tokens, i, AstNode::Expression(expression), ast);
             }
 
             // Check if name is a reference to another variable or function call
-            Token::ConstReference(id) => {
-                expression.push(AstNode::ConstReference(*id));
-            }
             Token::VarReference(id) => {
-                expression.push(AstNode::VarReference(*id));
+                expression.push(AstNode::VarReference(find_var_declaration_index(ast, id)));
+            }
+            Token::ConstReference(id) => {
+                expression.push(AstNode::ConstReference(find_var_declaration_index(ast, id)));
             }
 
             // Check if is a literal
@@ -173,7 +177,7 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool)
     AstNode::Expression(expression)
 }
 
-// This function takes in an Expression node that has a Vec of Nodes to evaluate
+// This function takes in an Expression node or Collection of expressions that has a Vec of Nodes to evaluate
 // And evaluates everything possible at compile time (Constant Folding)
 // If it returns a literal, then everything was evaluated at compile time
 // Otherwise it will return an EvaluatedExpression, which has a strict type and will be evaluated at runtime
@@ -194,20 +198,51 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                         simplified_expression.push(AstNode::BinaryOperator(op, precedence));
                     }
 
-                    // NEED TO GET TYPE FROM VARIABLE DECLARATION
                     AstNode::ConstReference(value) => {
-                        // Get the value of the constant and push it to the constants queue
-                        match &ast[find_var_declaration_index(&ast, &value)] {
-                            AstNode::VarDeclaration(_, assignment, _) => {
-                                simplified_expression.push(*assignment.clone());
+                        match &ast[value] {
+                            AstNode::VarDeclaration(_, assignment, _) | AstNode::Const(_, assignment, _) => {
+                                let expr = *assignment.clone();
+
+                                // Get the type and value of the original variable
+                                match expr {
+                                    AstNode::Literal(t) => {
+                                        simplified_expression.push(check_literal(t, type_declaration, &mut current_type));
+                                    }
+                                    AstNode::EvaluatedExpression(e, expr_type) => {
+                                        if current_type == DataType::Inferred || current_type != expr_type {
+                                            return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+                                        }
+                                        simplified_expression.push(AstNode::EvaluatedExpression(e, expr_type));
+                                    }
+                                    _ => {
+                                        return AstNode::Error("Invalid Expression".to_string());
+                                    }
+                                }
                             }
-                            _ => {}
+                            _ => {
+                                println!("ConstReference not found in AST")
+                            }
                         }
                     }
 
                     _ => {}
                 }
             }
+        }
+
+        AstNode::Tuple(e) => {
+            for node in e {
+                match node {
+                    AstNode::Expression(e) | AstNode::Tuple(e) => {
+                        simplified_expression.push(eval_expression(AstNode::Expression(e), type_declaration, ast));
+                    }
+                    _ => {
+                        simplified_expression.push(node);
+                    }
+                }
+            }
+
+            return AstNode::Tuple(simplified_expression);
         }
         _ => {
             return AstNode::Error("No Expression to Evaluate".to_string());
@@ -228,13 +263,14 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
 fn concat_strings_if_adjacent(simplified_expression: &mut Vec<AstNode>) -> AstNode {
     let mut new_expr = Vec::new();
     let mut new_string = String::new();
-    let mut previous_node_is_string = false;
+    let mut previous_node_is_string = true;
     for node in simplified_expression {
         match node {
             AstNode::Literal(Token::StringLiteral(string)) => {
                 if previous_node_is_string || new_string.is_empty() {
-                    new_string.push_str(string)
+                    new_string.push_str(string);
                 } else {
+                    new_string.push_str(string);
                     new_expr.push(AstNode::Literal(Token::StringLiteral(new_string)));
                     new_string = string.clone();
                 }

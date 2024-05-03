@@ -6,12 +6,8 @@ use super::{
 };
 use crate::{
     parsers::{
-        ast::AstNode,
-        styles::{Style, Tag},
-        util::count_newlines_at_end_of_string,
-    },
-    settings::{get_html_config, HTMLMeta},
-    Token,
+        ast::AstNode, styles::{Style, Tag}, util::count_newlines_at_end_of_string
+    }, settings::{get_html_config, HTMLMeta}, Token
 };
 
 // Parse ast into valid JS, HTML and CSS
@@ -25,7 +21,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
     let mut module_references: Vec<usize> = Vec::new();
 
     // Parse HTML
-    for (i, node) in ast.into_iter().enumerate() {
+    for node in ast {
         match node {
             // SCENES (HTML)
             AstNode::Scene(scene) => {
@@ -43,11 +39,11 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
             }
 
             // JAVASCRIPT / WASM
-            AstNode::VarDeclaration(_, expr, _) => {
-                js.push_str(&format!("let v{} = {};", i, expression_to_js(&expr)));
+            AstNode::VarDeclaration(id, expr, _) => {
+                js.push_str(&format!("let v{} = {};", id, expression_to_js(&expr)));
             }
-            AstNode::Const(_, expr, _) => {
-                js.push_str(&format!("const cv{} = {};", i, expression_to_js(&expr)));
+            AstNode::Const(id, expr, _) => {
+                js.push_str(&format!("const cv{} = {};", id, expression_to_js(&expr)));
             }
             AstNode::Function(name, args, body, is_exported) => {
                 js.push_str(&format!(
@@ -104,13 +100,19 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String, module
                         Style::Padding(arg) => {
                             scene_wrap
                                 .style
-                                .push_str(&format!("padding:{}px;", expression_to_js(&arg)));
+                                .push_str(&format!("padding:{}rem;", expression_to_js(&arg)));
                             scene_wrap.tag = Tag::Span;
                         }
                         Style::Margin(arg) => {
                             scene_wrap
                                 .style
-                                .push_str(&format!("margin:{}px;", expression_to_js(&arg)));
+                                .push_str(&format!("margin:{}rem;", expression_to_js(&arg)));
+                            scene_wrap.tag = Tag::Span;
+                        }
+                        Style::BackgroundColor(args) => {
+                            scene_wrap
+                                .style
+                                .push_str(&format!("background-color:rgb({});", collection_to_js(&args)));
                             scene_wrap.tag = Tag::Span;
                         }
                         Style::TextColor(args) => {
@@ -126,14 +128,13 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String, module
                             // And make sure there are no more than 4 arguments
                             scene_wrap
                                 .style
-                                .push_str(&format!("width:{}px;height:{}px", size[0], size[1]));
+                                .push_str(&format!("width:{}rem;height:{}rem", size[0], size[1]));
                         }
                         Style::Alt(value) => {
                             scene_wrap
                                 .properties
                                 .push_str(&format!(" alt=\"{}\"", value));
                         }
-                        _ => {}
                     }
                 }
 

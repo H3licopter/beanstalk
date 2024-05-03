@@ -551,6 +551,9 @@ fn keyword_or_variable(
                     if token_value == "rgb" {
                         return Token::Rgb;
                     }
+                    if token_value == "bg" {
+                        return Token::BG;
+                    }
                     if token_value == "size" {
                         return Token::Size;
                     }

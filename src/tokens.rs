@@ -180,4 +180,5 @@ pub enum Token {
     Margin,
     Size,
     Rgb,
+    BG,
 }

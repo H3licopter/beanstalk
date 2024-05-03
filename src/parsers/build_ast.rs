@@ -27,10 +27,10 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
             }
 
             Token::SceneHead(scene_head) => {
-                ast.push(new_scene(scene_head, &tokens, &mut i));
+                ast.push(new_scene(scene_head, &tokens, &mut i, &ast));
             }
 
-            // New Function or Variable declaration or reference
+            // New Function or Variable declaration
             Token::VarDeclaration(id) => {
                 ast.push(new_variable(
                     *id,
@@ -45,13 +45,11 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                 attributes.push(Attribute::Exported);
             }
 
-            Token::VarReference(var_index) => {
-                let ref_index = find_var_declaration_index(&ast, var_index);
-                ast.push(AstNode::VarReference(ref_index));
+            Token::VarReference(id) => {
+                ast.push(AstNode::VarReference(find_var_declaration_index(&ast, id)));
             }
-            Token::ConstReference(var_index) => {
-                let ref_index = find_var_declaration_index(&ast, var_index);
-                ast.push(AstNode::ConstReference(ref_index));
+            Token::ConstReference(id) => {
+                ast.push(AstNode::ConstReference(find_var_declaration_index(&ast, id)));
             }
 
             Token::Title => {
@@ -88,9 +86,15 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
 
             Token::Print => {
                 i += 1;
-                ast.push(AstNode::Print(Box::new(create_expression(
-                    &tokens, &mut i, false,
-                ))));
+                ast.push(AstNode::Print(Box::new(
+                    eval_expression(
+                        create_expression(
+                                &tokens, 
+                                &mut i, 
+                                false,
+                                &ast
+                            ),
+                    &DataType::Inferred, &ast))));
             }
 
             Token::DeadVarible => {
@@ -157,10 +161,10 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
     match &tokens[*i] {
         Token::OpenScope => match attribute {
             Attribute::Constant => {
-                return AstNode::Struct(name, Box::new(new_array(tokens, i)), is_exported)
+                return AstNode::Struct(name, Box::new(new_array(tokens, i, ast)), is_exported)
             }
             Attribute::Mutable => {
-                return AstNode::VarDeclaration(name, Box::new(new_array(tokens, i)), is_exported)
+                return AstNode::VarDeclaration(name, Box::new(new_array(tokens, i, ast)), is_exported)
             }
             _ => {
                 return AstNode::Error(
@@ -173,14 +177,14 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
             Attribute::Constant => {
                 return AstNode::Const(
                     name,
-                    Box::new(new_scene(scene_head, tokens, i)),
+                    Box::new(new_scene(scene_head, tokens, i, &ast)),
                     is_exported,
                 )
             }
             Attribute::Mutable => {
                 return AstNode::VarDeclaration(
                     name,
-                    Box::new(new_scene(scene_head, tokens, i)),
+                    Box::new(new_scene(scene_head, tokens, i, &ast)),
                     is_exported,
                 )
             }
@@ -196,7 +200,7 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
 
     let mut data_type = &DataType::Inferred;
     // Can be a collection, expression, literal or empty tuple
-    let parsed_expr = create_expression(tokens, i, false);
+    let parsed_expr = create_expression(tokens, i, false, &ast);
 
     // create_expression does not move the token index past the closing token so it is incremented past it here
     *i += 1;
@@ -231,11 +235,10 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
         AstNode::Error(_) => {
             return AstNode::Error(format!("Invalid expression for variable assignment (creating new variable: {name})").to_string());
         }
-        _ => {}
+        _ => {
+            return AstNode::Error("Invalid expression for variable assignment".to_string());
+        }
     }
-
-    AstNode::VarDeclaration(name, Box::new(parsed_expr), is_exported)
-    // AstNode::Error("Invalid variable assignment".to_string())
 }
 
 // Called from new_variable
@@ -284,7 +287,7 @@ fn create_var_node(
 }
 
 pub fn find_var_declaration_index(ast: &Vec<AstNode>, var_name: &usize) -> usize {
-    for (i, node) in ast.iter().enumerate() {
+    for (i, node) in ast.iter().enumerate().rev() {
         match node {
             AstNode::VarDeclaration(name, _, _) => {
                 if name == var_name {

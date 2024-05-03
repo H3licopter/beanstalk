@@ -1,12 +1,12 @@
 use super::{
-    ast::AstNode, parse_expression::create_expression, styles::{Style, Tag}, util::{
-        count_newlines_at_end_of_string, count_newlines_at_start_of_string, parse_function_args,
+    ast::AstNode, parse_expression::{create_expression, eval_expression}, styles::{Style, Tag}, util::{
+        count_newlines_at_end_of_string, count_newlines_at_start_of_string,
     }
 };
-use crate::Token;
+use crate::{bs_types::DataType, Token};
 
 // Recursive function to parse scenes
-pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) -> AstNode {
+pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>) -> AstNode {
     let mut scene = Vec::new();
     *i += 1;
 
@@ -45,38 +45,60 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::Padding => {
-                let arg = parse_function_args(scene_head, &mut j);
-                if check_if_comptime_value(&arg) {
-                    scene_styles.push(Style::Padding(arg));
+                j += 1;
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+
+                if check_if_comptime_value(&eval_arg) {
+                    scene_styles.push(Style::Padding(eval_arg));
                 } else {
                     // Need to add JS DOM hooks to change padding at runtime.
-                    scene_styles.push(Style::Padding(arg));
+                    scene_styles.push(Style::Padding(eval_arg));
                 }
             }
 
             Token::Margin => {
-                let arg = parse_function_args(scene_head, &mut j);
-                if check_if_comptime_value(&arg) {
-                    scene_styles.push(Style::Margin(arg));
+                j += 1;
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    scene_styles.push(Style::Margin(eval_arg));
                 } else {
-                    scene_styles.push(Style::Margin(arg));
+                    scene_styles.push(Style::Margin(eval_arg));
                     // Need to add JS DOM hooks to change margin at runtime.
                 }
             }
 
+            Token::BG => {
+                j += 1;
+                // TO DO: Accept color names and hex values
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    scene_styles.push(Style::BackgroundColor(eval_arg));
+                } else {
+                    // Need to add JS DOM hooks to change background color at runtime.
+                }
+            }
+
             Token::Rgb => {
-                let arg = parse_function_args(scene_head, &mut j);
-                if check_if_comptime_value(&arg) {
-                    scene_styles.push(Style::TextColor(arg));
+                j += 1;
+                // TO DO: Accept color names and hex values
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    scene_styles.push(Style::TextColor(eval_arg));
                 } else {
                     // Need to add JS DOM hooks to change text color at runtime.
                 }
             }
 
             Token::Size => {
-                let arg = parse_function_args(scene_head, &mut j);
-                if check_if_comptime_value(&arg) {
-                    scene_styles.push(Style::Size(arg));
+                j += 1;
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    scene_styles.push(Style::Size(eval_arg));
                 } else {
                     // Need to add JS DOM hooks to change text size at runtime.
                 }
@@ -143,7 +165,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
 
             // Expressions to Parse
             Token::FloatLiteral(_) | Token::IntLiteral(_) | Token::DecLiteral(_) => {
-                scene.push(AstNode::Expression(vec![create_expression(scene_head, &mut j, false)]));
+                scene.push(AstNode::Expression(vec![create_expression(scene_head, &mut j, false, &ast)]));
             }
 
             Token::ParentScene => {
@@ -177,7 +199,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize) ->
             }
 
             Token::SceneHead(new_scenehead) => {
-                let nested_scene = new_scene(&new_scenehead, tokens, i);
+                let nested_scene = new_scene(&new_scenehead, tokens, i, ast);
                 scene.push(nested_scene);
             }
 
@@ -332,7 +354,14 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
 fn check_if_comptime_value(node: &AstNode) -> bool {
     match node {
         AstNode::Literal(_) | AstNode::ConstReference(_) => true,
-        // AstNode::Collection(_, _, is_evaluated) => *is_evaluated,
+        AstNode::Tuple(values) => {
+            for value in values {
+                if !check_if_comptime_value(value) {
+                    return false;
+                }
+            }
+            true
+        },
         _ => false,
     }
 }
