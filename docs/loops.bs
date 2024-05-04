@@ -23,7 +23,7 @@ Using the "in" keyword, you can specify an integer, float or collection to itera
     -- reversed iterator, using the 'to' keyword to specify a range
     -- a range that goes from a higher to a lower value means the iterator will decrement from the last value in the collection
     -- the current value in the iterator will gain proprties that allow you to figure out info such as it's index
-    for t in text_array to 0 (
+    for t in text_array reverse (
         print(t.index)
     )
 
