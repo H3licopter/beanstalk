@@ -31,7 +31,7 @@ pub enum AstNode {
     Collection(Vec<AstNode>, DataType),
     Struct(usize, Box<AstNode>, bool), // Name, Fields, Public
     Tuple(Vec<AstNode>),
-    Scene(Vec<AstNode>),
+    Scene(Vec<AstNode>, Vec<Tag>, Vec<Style>),
     Empty, // Empty collection
 
     // Operators
@@ -42,7 +42,6 @@ pub enum AstNode {
     // HTML
     Element(Token),                 // HTML element content
     Space,                          // Add a space at front of element
-    SceneTag(Vec<Tag>, Vec<Style>), // Scene wrapping tag / Styles
 
     // SCENE META DATA
     Title(String),

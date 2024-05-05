@@ -181,4 +181,5 @@ pub enum Token {
     Size,
     Rgb,
     BG,
+    Table,
 }

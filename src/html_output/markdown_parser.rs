@@ -11,6 +11,9 @@ pub fn add_markdown_tags(content: &mut String) -> String {
         i += 1;
     }
 
+    // TO DO: Parse tables inside of the HTML ->
+    // Wrap every n elements in a table column tag depending on the number of columns
+
     // i = 0;
     // while i < content.len() - 1 {
     //     if !add_superscript_tags(content, &mut i) {

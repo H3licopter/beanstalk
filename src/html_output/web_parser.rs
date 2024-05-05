@@ -24,8 +24,8 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
     for node in ast {
         match node {
             // SCENES (HTML)
-            AstNode::Scene(scene) => {
-                html.push_str(&parse_scene(scene, &mut false, &mut js, &mut module_references).0);
+            AstNode::Scene(scene, scene_tags, scene_styles) => {
+                html.push_str(&parse_scene(scene, scene_tags, scene_styles, &mut Tag::None, &mut js, &mut module_references).0);
             }
             AstNode::Title(value) => {
                 page_title = value;
@@ -78,111 +78,125 @@ struct SceneTag {
 }
 
 // Returns a string of the HTML and whether the scene is inside a paragraph
-fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String, module_references: &mut Vec<usize>) -> (String, bool) {
+fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Style>, parent_tag: &mut Tag, js: &mut String, module_references: &mut Vec<usize>) -> (String, Tag) {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
 
     let mut unique_key: u32 = 0;
+    
+    // For tables
+    let mut ele_count: u32 = 0;
+    let mut columns: u32 = 0;
 
+    let mut images: Vec<String> = Vec::new();
     let mut scene_wrap = SceneTag {
         tag: Tag::None,
         properties: String::new(),
         style: String::new(),
     };
 
-    for node in scene {
-        match node {
-            AstNode::SceneTag(tags, styles) => {
-                let mut images: Vec<String> = Vec::new();
+    for style in scene_styles {
+        match style {
+            Style::Padding(arg) => {
+                scene_wrap
+                    .style
+                    .push_str(&format!("padding:{}rem;", expression_to_js(&arg)));
+                scene_wrap.tag = Tag::Span;
+            }
+            Style::Margin(arg) => {
+                scene_wrap
+                    .style
+                    .push_str(&format!("margin:{}rem;", expression_to_js(&arg)));
+                scene_wrap.tag = Tag::Span;
+            }
+            Style::BackgroundColor(args) => {
+                scene_wrap
+                    .style
+                    .push_str(&format!("background-color:rgb({});", collection_to_js(&args)));
+                scene_wrap.tag = Tag::Span;
+            }
+            Style::TextColor(args) => {
+                scene_wrap
+                    .style
+                    .push_str(&format!("color:rgb({});", collection_to_js(&args)));
+                scene_wrap.tag = Tag::Span;
+            }
+            Style::Size(arg) => {
+                let size = collection_to_vec_of_js(&arg);
 
-                for style in styles {
-                    match style {
-                        Style::Padding(arg) => {
-                            scene_wrap
-                                .style
-                                .push_str(&format!("padding:{}rem;", expression_to_js(&arg)));
-                            scene_wrap.tag = Tag::Span;
-                        }
-                        Style::Margin(arg) => {
-                            scene_wrap
-                                .style
-                                .push_str(&format!("margin:{}rem;", expression_to_js(&arg)));
-                            scene_wrap.tag = Tag::Span;
-                        }
-                        Style::BackgroundColor(args) => {
-                            scene_wrap
-                                .style
-                                .push_str(&format!("background-color:rgb({});", collection_to_js(&args)));
-                            scene_wrap.tag = Tag::Span;
-                        }
-                        Style::TextColor(args) => {
-                            scene_wrap
-                                .style
-                                .push_str(&format!("color:rgb({});", collection_to_js(&args)));
-                            scene_wrap.tag = Tag::Span;
-                        }
-                        Style::Size(arg) => {
-                            let size = collection_to_vec_of_js(&arg);
+                // TO DO: Add or remove parameters based on number of arguments
+                // And make sure there are no more than 4 arguments
+                scene_wrap
+                    .style
+                    .push_str(&format!("width:{}rem;height:{}rem", size[0], size[1]));
+            }
+            Style::Alt(value) => {
+                scene_wrap
+                    .properties
+                    .push_str(&format!(" alt=\"{}\"", value));
+            }
+        }
+    }
 
-                            // TO DO: Add or remove parameters based on number of arguments
-                            // And make sure there are no more than 4 arguments
-                            scene_wrap
-                                .style
-                                .push_str(&format!("width:{}rem;height:{}rem", size[0], size[1]));
-                        }
-                        Style::Alt(value) => {
-                            scene_wrap
-                                .properties
-                                .push_str(&format!(" alt=\"{}\"", value));
-                        }
+    let mut img_count = 0;
+    let img_default_dir = get_html_config().image_folder_url.clone();
+
+    for tag in &scene_tags {
+        match tag {
+            Tag::Img(src) => {
+                images.push(format!("{img_default_dir}{src}"));
+                img_count += 1;
+            }
+            Tag::Table(c) => {
+                match scene_wrap.tag {
+                    Tag::Img(_) | Tag::Video(_) | Tag::Audio(_) => {
+                       // TO DO: Error handling that passes correctly into the AST for the end user
                     }
-                }
-
-                let mut img_count = 0;
-                let img_default_dir = get_html_config().image_folder_url.clone();
-
-                for tag in &tags {
-                    match tag {
-                        Tag::Img(src) => {
-                            images.push(format!("{img_default_dir}{src}"));
-                            img_count += 1;
-                        }
-                        Tag::Video(src) => {
-                            scene_wrap.tag = Tag::Video(format!("{src}"));
-                            if img_count > 0 {
-                                scene_wrap
-                                    .properties
-                                    .push_str(&format!(" poster=\"{}\"", images[0]));
-                            }
-
-                            continue;
-                        }
-                        Tag::Audio(src) => {
-                            scene_wrap.tag = Tag::Audio(src.to_string());
-                        }
-                        _ => {}
-                    }
-                }
-
-                if img_count == 1 && scene_wrap.tag == Tag::None {
-                    scene_wrap.tag = Tag::Img(images[0].to_string());
-                }
-
-                // If there are multiple images, turn it into a grid of images
-                if img_count > 1 {
-                    scene_wrap.tag = Tag::Div;
-                    scene_wrap
-                        .properties
-                        .push_str(&format!(" class=\"bs-img-grid\""));
-                    let img_resize = 100.0 / f32::sqrt(img_count as f32);
-                    for image in images {
-                        html.push_str(&format!(
-                            "<img src=\"{image}\" style=\"width:{img_resize}%;height:{img_resize}%;\"/>"
-                        ));
+                    _ => {
+                        scene_wrap.tag = Tag::Table(columns);
+                        columns = *c;
+                        ele_count = 0;
+                        html.push_str("<table><thead>");
                     }
                 }
             }
+            Tag::Video(src) => {
+                scene_wrap.tag = Tag::Video(format!("{src}"));
+                if img_count > 0 {
+                    scene_wrap
+                        .properties
+                        .push_str(&format!(" poster=\"{}\"", images[0]));
+                }
 
+                continue;
+            }
+            Tag::Audio(src) => {
+                scene_wrap.tag = Tag::Audio(src.to_string());
+            }
+            _ => {}
+        }
+    }
+
+    if img_count == 1 && scene_wrap.tag == Tag::None {
+        scene_wrap.tag = Tag::Img(images[0].to_string());
+    }
+
+    // If there are multiple images, turn it into a grid of images
+    if img_count > 1 {
+        scene_wrap.tag = Tag::Div;
+        scene_wrap
+            .properties
+            .push_str(&format!(" class=\"bs-img-grid\""));
+        let img_resize = 100.0 / f32::sqrt(img_count as f32);
+        for image in images {
+            html.push_str(&format!(
+                "<img src=\"{image}\" style=\"width:{img_resize}%;height:{img_resize}%;\"/>"
+            ));
+        }
+    }
+
+    for node in scene {
+        match node {
             AstNode::Element(token) => {
                 match token {
                     Token::Span(content) => {
@@ -190,46 +204,90 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String, module
                             "<span>{}",
                             add_markdown_tags(&mut content.clone())
                         ));
-                        closing_tags.push("</span>".to_string());
-
-                        if *inside_p && count_newlines_at_end_of_string(&content) > 1 {
-                            html.push_str("</p>");
-                            *inside_p = false;
+                        
+                        match *parent_tag {
+                            Tag::P => {
+                                if count_newlines_at_end_of_string(&content) > 1 {
+                                    html.push_str("</p>");
+                                    *parent_tag = Tag::None;
+                                }
+                            }
+                            Tag::Th => {
+                                closing_tags.push("</th>".to_string());
+                            }
+                            Tag::Td => {
+                                closing_tags.push("</td>".to_string());
+                            }
+                            _ => {
+                                *parent_tag = Tag::Span;
+                            }
                         }
+
+                        closing_tags.push("</span>".to_string());
                     }
 
-                    Token::P(content) => match scene_wrap.tag {
-                        Tag::Img(_) | Tag::Video(_) => {
-                            scene_wrap
-                                .properties
-                                .push_str(&format!(" alt=\"{}\"", content));
-                        }
-                        _ => {
-                            html.push_str(collect_closing_tags(&mut closing_tags).as_str());
-
-                            let parsed_content = add_markdown_tags(&mut content.clone());
-                            if *inside_p {
-                                html.push_str(&parsed_content);
-                                closing_tags.push("</p>".to_string());
-                            } else {
-                                html.push_str(&if scene_wrap.tag == Tag::Span {
-                                    format!(
-                                        "<p><span style=\"{}\">{}</span>",
-                                        scene_wrap.style, parsed_content
-                                    )
-                                } else {
-                                    format!("<p>{}", parsed_content)
-                                });
+                    Token::P(content) => {
+                        match scene_wrap.tag {
+                            Tag::Img(_) | Tag::Video(_) => {
+                                scene_wrap
+                                    .properties
+                                    .push_str(&format!(" alt=\"{}\"", content));
                             }
+                            Tag::Table(_) => {
+                                // basically just don't add any wrapping tags inside tables
+                                html.push_str(collect_closing_tags(&mut closing_tags).as_str());
+                                html.push_str(&add_markdown_tags(&mut content.clone()));
+                            }
+                            _ => {
+                                html.push_str(collect_closing_tags(&mut closing_tags).as_str());
 
-                            if count_newlines_at_end_of_string(&content) > 1 {
-                                html.push_str("</p>");
-                                *inside_p = false;
-                            } else {
-                                *inside_p = true;
+                                let parsed_content = add_markdown_tags(&mut content.clone());
+                                match *parent_tag {
+                                    Tag::P => {
+                                        html.push_str(&parsed_content);
+                                        closing_tags.push("</p>".to_string());
+
+                                        if count_newlines_at_end_of_string(&content) > 1 {
+                                            html.push_str("</p>");
+                                            *parent_tag = Tag::None;
+                                        } else {
+                                            *parent_tag = Tag::P;
+                                        }
+                                    }
+                                    Tag::Table(_) => {
+                                        html.push_str(&parsed_content);
+                                    }
+                                    Tag::Th => {
+                                        html.push_str(&format!("<th>{}", parsed_content));
+                                        closing_tags.push("</th>".to_string());
+                                    }
+                                    Tag::Td => {
+                                        html.push_str(&format!("<td>{}", parsed_content));
+                                        closing_tags.push("</td>".to_string());
+                                    }
+                                    _=> {
+                                        match scene_wrap.tag {
+                                            Tag::Table(_) => {
+                                                html.push_str(&format!("<th>{}</th>", parsed_content));
+                                            }
+                                            Tag::Span => {
+                                                html.push_str(&format!("<span style=\"{}\">{}</span>", scene_wrap.style, parsed_content));
+                                            }
+                                            _ => {
+                                                html.push_str(&format!("<p>{}", parsed_content));
+                                                if count_newlines_at_end_of_string(&content) > 1 {
+                                                    html.push_str("</p>");
+                                                    *parent_tag = Tag::None;
+                                                } else {
+                                                    *parent_tag = Tag::P;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
-                    },
+                    }
 
                     Token::Heading(size, content) => {
                         html.push_str(collect_closing_tags(&mut closing_tags).as_str());
@@ -265,9 +323,11 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String, module
                 };
             }
 
-            AstNode::Scene(scene) => {
-                let new_scene = parse_scene(scene, inside_p, js, module_references);
+            AstNode::Scene(scene, scene_tags, scene_styles) => {
+                add_table_open_tags(&mut html, columns, &mut ele_count, parent_tag);
+                let new_scene = parse_scene(scene, scene_tags, scene_styles, parent_tag, js, module_references);
                 html.push_str(&new_scene.0);
+                add_table_closing_tags(&mut html, columns, &mut ele_count, parent_tag);
             }
 
             AstNode::Space => {
@@ -334,9 +394,9 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String, module
                     scene_wrap.style, scene_wrap.properties
                 ),
             );
-            if *inside_p {
+            if *parent_tag == Tag::P {
                 html.insert_str(0, "</p>");
-                *inside_p = false;
+                *parent_tag = Tag::None;
             }
             html.push_str("</div>");
         }
@@ -358,10 +418,13 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String, module
                     src, scene_wrap.style, scene_wrap.properties
                 ),
             );
-            if *inside_p {
+            if *parent_tag == Tag::P {
                 html.insert_str(0, "</p>");
-                *inside_p = false;
+                *parent_tag = Tag::None;
             }
+        }
+        Tag::Table(_) => {
+            html.push_str("</tbody></table>");
         }
         Tag::Video(src) => {
             html.insert_str(
@@ -371,9 +434,9 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String, module
                     src, scene_wrap.style, scene_wrap.properties
                 ),
             );
-            if *inside_p {
+            if *parent_tag == Tag::P {
                 html.insert_str(0, "</p>");
-                *inside_p = false;
+                *parent_tag = Tag::None;
             }
         }
         Tag::Audio(src) => {
@@ -388,7 +451,62 @@ fn parse_scene(scene: Vec<AstNode>, inside_p: &mut bool, js: &mut String, module
         _ => {}
     };
 
-    (html, *inside_p)
+    (html, parent_tag.to_owned())
+}
+
+fn add_table_open_tags(html: &mut String, columns: u32, ele_count: &mut u32, parent_tag: &mut Tag) {
+    // If this is a table scene, add appropriate table element tags
+    if columns > 0 {
+        *ele_count += 1;
+
+        match *ele_count % columns {
+            // If this is the last element for this column
+            0 => {
+                // Open the table element, should be a td unless there is just one column
+                if columns > 1 && *ele_count > columns {
+                    *parent_tag = Tag::Td;
+                } else {
+                    *parent_tag = Tag::Th;
+                }
+            },
+            // if this is the first element for this column
+            1 => {
+                // If this is the first element for this column, open the table column and first element
+                html.push_str("<tr>");
+                *parent_tag = Tag::Th;
+            },
+            _=> {
+                // If first row, make sure all the table elements are headings
+                if *ele_count < columns {
+                    *parent_tag = Tag::Th;
+                } else {
+                    *parent_tag = Tag::Td;
+                }
+            }
+        }
+    }
+}
+
+fn add_table_closing_tags(html: &mut String, columns: u32, ele_count: &mut u32, parent_tag: &mut Tag) {
+    // If this is a table scene, close the table row (and possibly column)
+    if columns > 0 && *ele_count > 0 {
+        
+        // If this is the last element for this column
+        if *ele_count % columns == 0 {
+            // Close the table element and column, should be a td unless there is just one column
+            if columns > 1 && *ele_count > columns {
+                html.push_str("</tr>");
+            } else {
+                html.push_str("</tr>");
+            }
+
+            // If this is the first row of elements, close the heading tag and open the body tag too
+            if *ele_count == columns {
+                html.push_str("</thead><tbody>");
+                *parent_tag = Tag::None;
+            }
+        }
+    }
 }
 
 fn collect_closing_tags(closing_tags: &mut Vec<String>) -> String {

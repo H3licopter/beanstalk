@@ -557,6 +557,9 @@ fn keyword_or_variable(
                     if token_value == "size" {
                         return Token::Size;
                     }
+                    if token_value == "table" {
+                        return Token::Table;
+                    }
                     if token_value == "video" {
                         return Token::Video;
                     }

@@ -104,6 +104,31 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
                 }
             }
 
+            Token::Table => {
+                j += 1;
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+
+                match eval_arg {
+                    AstNode::Literal(literal_token) => {
+                        match literal_token {
+                            Token::IntLiteral(value) => {
+                                scene_tags.push(Tag::Table(value as u32));
+                            }
+                            Token::FloatLiteral(value) => {
+                                scene_tags.push(Tag::Table(value as u32));
+                            }
+                            _=> {
+                                println!("Incorrect arguments passed into table declaration");
+                            }
+                        }
+                    }
+                    _=> {
+                        println!("Incorrect arguments passed into table declaration");
+                    }
+                }
+            }
+
             Token::Img => {
                 j += 1;
                 match &scene_head[j] {
@@ -250,11 +275,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
         *i += 1;
     }
 
-    if !scene_tags.is_empty() || !scene_styles.is_empty() {
-        scene.insert(0, AstNode::SceneTag(scene_tags, scene_styles));
-    }
-
-    AstNode::Scene(scene)
+    AstNode::Scene(scene, scene_tags, scene_styles)
 }
 
 fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
