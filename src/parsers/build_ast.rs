@@ -226,8 +226,9 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
             let evaluated_expression = eval_expression(parsed_expr, data_type, ast);
             return create_var_node(attribute, name, evaluated_expression, is_exported);
         }
-        AstNode::Tuple(items) => {
-            return AstNode::Tuple(items);
+        AstNode::Tuple(_) => {
+            let evaluated_expression = eval_expression(parsed_expr, data_type, ast);
+            return create_var_node(attribute, name, evaluated_expression, is_exported);
         }
         // AstNode::Collection(items, collection_type) => {
 

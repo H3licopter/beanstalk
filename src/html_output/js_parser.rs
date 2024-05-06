@@ -132,7 +132,7 @@ pub fn expression_to_js(expr: &AstNode) -> String {
         // If the expression is just a tuple,
         // then it should automatically destructure into multiple arguments like this
         AstNode::Tuple(values) => {
-            js.push_str(&format!("{}", combine_vec_to_js(values)));
+            js.push_str(&format!("[{}]", combine_vec_to_js(values)));
         }
 
         _ => {

@@ -258,7 +258,7 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
                                         html.push_str(&parsed_content);
                                     }
                                     Tag::Th => {
-                                        html.push_str(&format!("<th>{}", parsed_content));
+                                        html.push_str(&format!("<th scope='col'>{}", parsed_content));
                                         closing_tags.push("</th>".to_string());
                                     }
                                     Tag::Td => {

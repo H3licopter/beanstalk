@@ -19,14 +19,15 @@
 <!-- <link rel="manifest"href="favicons-folder-url/site.webmanifest"> -->
 <link rel="stylesheet" href="css/pico.min.css" />
 <link rel="stylesheet" href="css/bs.css" />
-<style></style></head><body><main class="container"><table><thead><tr><th>test heading</th><th>test heading</th><th>test heading</th></tr></thead><tbody><tr><th>test element 1 <span>with nested scene inside</span></th></th><td>test element 2</td><td>test element 3</td></tr><tr><th>test element row 2</th><td>test element row 2</td><td>test element row 2</td></tr></tbody></table></main>
+<style></style></head><body><main class="container"><span class="c1"></span></main>
 <script>
   function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }
+            }const cv1 = ["a", "list", "of", "values", "that", "cannot", "be", "changed"];uInnerHTML("c1", cv1);
 </script>
 </body>
 </html>

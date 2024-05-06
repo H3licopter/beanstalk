@@ -23,6 +23,7 @@ pub fn generate_dom_update_js(update: DOMUpdate) -> &'static str {
         DOMUpdate::InnerHTML => {
             &"function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
@@ -31,6 +32,7 @@ pub fn generate_dom_update_js(update: DOMUpdate) -> &'static str {
         DOMUpdate::AppendChild => {
             &"function uAppendChild(id,update){
                 const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].appendChild(update)
                 }
@@ -39,6 +41,7 @@ pub fn generate_dom_update_js(update: DOMUpdate) -> &'static str {
         DOMUpdate::RemoveChild => {
             &"function uRemoveChild(id,update){
                 const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].removeChild(update)
                 }
@@ -47,6 +50,7 @@ pub fn generate_dom_update_js(update: DOMUpdate) -> &'static str {
         DOMUpdate::ReplaceChild => {
             &"function uReplaceChild(id,update){
                 const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].replaceChild(update)
                 }

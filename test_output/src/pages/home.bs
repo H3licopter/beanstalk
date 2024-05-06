@@ -1,16 +1,4 @@
-
+tuple : ("a", "list", "of", "values", "that", "cannot", "be", "changed")
 ---
 
-[table 3:
-    [: test heading]
-    [: test heading]
-    [: test heading]
-
-    [: test element 1 [: with nested scene inside ]]
-    [: test element 2]
-    [: test element 3]
-
-    [: test element row 2]
-    [: test element row 2]
-    [: test element row 2]
-]
+[tuple]
