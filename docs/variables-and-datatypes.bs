@@ -18,84 +18,76 @@ You use this to access properties on the Window object in the browser.
 Assigning a value to a variable using the big arrow => operator will create a signal,
 which means it will reactively update inside of scenes when it is mutated.
 
-### Private mutable Variable
-mutable_var = 0
-
-### Exported mutable Variable
-@mutable_var = 0
+### Compile time immutable variable
+comptime_immutable_var : 0
 
 ### Immutable Variable
-immutable_var : 0
+immutable_var :: 0
 
 ### Exported immutable Variable
-@immutable_var : 0
+@immutable_var :: 0
 
-### Compile time mutable variable
-comptime_var := 0
+### Private mutable Variable
+mutable_var := 0
 
-### Compile time immutable variable
-comptime_immutable_var :: 0
-
-### Signal
-signal_variable => 0
-
-### Exported signal
-@signal_variable = 0
+### Exported mutable Variable
+@mutable_var := 0
 
 # Static Assignment
 `
     -- UTF-8 string
-    my_brain = "Dumb"
+    my_brain := "Dumb"
 
     -- 32 bit integer
-    integer = 69
+    integer := 69
 
     -- 32 bit float
-    float = 69.0
+    float := 69.0
 
     -- Specify the type as an unsigned 32 bit integer by appending the type unit to the value
-    my_brain = 420 uint
+    my_brain := 420 uint
 
     -- Variable initialised with it's zero value
-    uselessness : int
+    uselessness := int
 `
 
-**There is no such thing as Nil, Null or None in Beanstalk.**
-
-Variables must be given a value or a type when they are declared.
+Variables must be given a value or a type when they are declared. There is no such thing as 'null' in Beanstalk.
 
 If an error occurs during assignment of a variable, 
 an option type is created and must be handled during the assignement or passed up the callstack.
 
 `
-    uselessness = int 
+    uselessness := int 
     -- value is 0
 
-    -- Immutable copy
-    thing : a_collection 
+    -- Immutable deep copy
+    thing :: a_collection 
 
     -- Referecnce to a_collection
-    thing = a_collection
+    thing := &a_collection
 
     -- deep copy of a collection
-    thing = a_collection.copy() 
+    thing := a_collection
 
-    number_copy = number
+    -- Shallow copy of a collection
+    thing := a_collection.shallow_copy()
+
+    number_copy := number
 `
 
 # Immutable Variables
 `
-    -- Int constant (type inferred as int)
+    -- Int compile time constant (type inferred as int)
     self_worth : 0
 
     -- Float constant
-    my_iq : 0.0
+    my_iq :: 0.0
 
     best_number : 69 float
 
     -- Int constant evaluated at compile time
-    -- Will throw an error at compile time (int overflow) as the value is too big
-    weird_num :: 69 ** 420
+    -- Will throw an error at compile time (int overflow) becuase the value is too big and will overflow the int type
+    weird_num : 69 ** 420
 `
 
 If you are creating a non-collection variable and need it to be formatted over multiple lines, 
@@ -107,14 +99,12 @@ you must wrap the value in parenthesis.
     ) int
 
     -- Assigning multiple variables at once
-
     var1, var2 : 420
 
     var3, var4 = "cool", "beans"
 
     -- Concatinating a bunch of strings into one variable
-    -- Strings with no spaces between them will be concatenated automatically
-    var5 = "cool " "beans " "are " "cool"
+    var5 = "cool " + "beans " + "are " + "cool"
 `
 
 # Data Types

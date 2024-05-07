@@ -50,6 +50,7 @@ pub enum Token {
     VarDeclaration(usize),
     VarReference(usize),
     ConstReference(usize),
+    Ref, // & operator
 
     // Literals
     TypeInference,
@@ -71,9 +72,10 @@ pub enum Token {
 
     // Declarations
     Assign,                 // =
-    AssignConstant,         // :
-    AssignComptime,         // :=
-    AssignComptimeConstant, // ::
+    AssignVariable,         // :=
+    AssignComptime,         // :
+    AssignConstant,         // ::
+    AssignComptimeVariable, // ::=
 
     // Scope
     OpenParenthesis,  // (

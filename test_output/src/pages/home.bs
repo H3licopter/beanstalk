@@ -1,4 +1,0 @@
-tuple : ("a", "list", "of", "values", "that", "cannot", "be", "changed")
----
-
-[tuple]

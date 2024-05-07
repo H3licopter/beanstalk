@@ -87,6 +87,8 @@ fn get_next_token(
     };
     let mut token_value: String = String::new();
 
+    println!("Current Char: {}", current_char);
+
     // Check for raw strings (backticks)
     // Also used in scenes for raw outputs
     if current_char == '`' {
@@ -151,17 +153,21 @@ fn get_next_token(
     // Check if going into markdown mode
     if current_char == ':' {
         if chars.peek() == Some(&':') {
-            // Might be something in the future ::
+            // ::
+            chars.next();
+            return Token::AssignConstant;
         }
 
         if chars.peek() == Some(&'=') {
-            // Might be something in the future :=
+            chars.next();
+            // :=
+            return Token::AssignVariable;
         }
 
         if tokenize_mode == &TokenizeMode::SceneHead {
             *tokenize_mode = TokenizeMode::Markdown;
         }
-        return Token::AssignConstant;
+        return Token::AssignComptime;
     }
 
     //Window
@@ -219,6 +225,10 @@ fn get_next_token(
     if current_char == ';' {
         return Token::Semicolon;
     }
+    if current_char == '&' {
+        return Token::Ref;
+    }
+
     if current_char == '$' {
         // Create new signal variable
         while let Some(&next_char) = chars.peek() {
@@ -410,6 +420,12 @@ fn get_next_token(
         token_value.push(current_char);
 
         while let Some(&next_char) = chars.peek() {
+
+            if next_char == '_' {
+                chars.next();
+                continue;
+            }
+
             if next_char.is_numeric() {
                 token_value.push(chars.next().unwrap());
 
@@ -440,6 +456,10 @@ fn get_next_token(
     if current_char.is_alphabetic() {
         token_value.push(current_char);
         return keyword_or_variable(&mut token_value, chars, tokenize_mode);
+    }
+
+    if current_char == '_' {
+        
     }
 
     Token::Error(format!("Invalid Token Used. Token: {}", current_char))
@@ -862,7 +882,7 @@ pub fn new_var_or_ref(
             // POSSIBLE OUT OF BOUNDS ERROR TO SORT OUT??? or will that never happen because of the check_if_ref?
             let token_after = &tokens[var_names[index].next_token_index];
 
-            if token_after == &Token::AssignConstant {
+            if token_after == &Token::AssignConstant || token_after == &Token::AssignComptime {
                 return Token::ConstReference(var_names[index].index);
             }
 

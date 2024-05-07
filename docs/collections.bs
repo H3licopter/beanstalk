@@ -2,7 +2,7 @@
 #date "2024-2-5"
 ---
 # Collections
-All Collections are refernece types in Beanstalk, which means they are references to underlying data. There are three main types of collection, tuples, prototypes and arrays.
+All Collections are reference types in Beanstalk, which means they are references to underlying data. There are three main types of collection, tuples, prototypes and arrays.
 
 Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
 

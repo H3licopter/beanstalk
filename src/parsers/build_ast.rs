@@ -12,7 +12,7 @@ enum Attribute {
     Constant,
     Mutable,
     Comptime,
-    ComptimeConstant,
+    ComptimeVariable,
 }
 
 pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
@@ -129,16 +129,15 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
         &Token::AssignConstant => {
             attribute = Attribute::Constant;
         }
-        &Token::Assign => {
+        &Token::AssignVariable => {
             attribute = Attribute::Mutable;
         }
         &Token::AssignComptime => {
             attribute = Attribute::Comptime;
         }
-        &Token::AssignComptimeConstant => {
-            attribute = Attribute::ComptimeConstant;
+        &Token::AssignComptimeVariable => {
+            attribute = Attribute::ComptimeVariable;
         }
-
         &Token::Comma => {
             // TO DO: Multiple assignments
             attribute = Attribute::Constant;
@@ -160,11 +159,17 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
     // Check if array/struct/choice/scene
     match &tokens[*i] {
         Token::OpenScope => match attribute {
-            Attribute::Constant => {
+            Attribute::Comptime => {
                 return AstNode::Struct(name, Box::new(new_array(tokens, i, ast)), is_exported)
             }
             Attribute::Mutable => {
                 return AstNode::VarDeclaration(name, Box::new(new_array(tokens, i, ast)), is_exported)
+            }
+            Attribute::Constant => {
+                return AstNode::Error(
+                    "Invalid assignment declaration for collection - possibly not supported yet?"
+                        .to_string(),
+                );
             }
             _ => {
                 return AstNode::Error(
@@ -311,7 +316,7 @@ fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {
         Token::Assign
         | Token::AssignConstant
         | Token::AssignComptime
-        | Token::AssignComptimeConstant => {
+        | Token::AssignComptimeVariable=> {
             *i += 1;
         }
         Token::Newline => {
