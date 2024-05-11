@@ -87,8 +87,6 @@ fn get_next_token(
     };
     let mut token_value: String = String::new();
 
-    println!("Current Char: {}", current_char);
-
     // Check for raw strings (backticks)
     // Also used in scenes for raw outputs
     if current_char == '`' {
@@ -589,6 +587,9 @@ fn keyword_or_variable(
                     if token_value == "slot" {
                         return Token::Slot;
                     }
+                    if token_value == "ignore" {
+                        return Token::Ignore;
+                    }
                 }
 
                 TokenizeMode::Window => {
@@ -639,7 +640,7 @@ fn tokenize_scenehead(
     while tokenize_mode == &TokenizeMode::SceneHead {
         let next_token = get_next_token(chars, tokenize_mode, scene_nesting_level);
         match next_token {
-            Token::EOF | Token::AssignConstant => {
+            Token::EOF | Token::AssignComptime => {
                 break;
             }
             Token::SceneClose(_) => {

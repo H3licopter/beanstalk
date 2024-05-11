@@ -199,6 +199,20 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
 
             Token::Comma | Token::Newline => {}
 
+            Token::Ignore => {
+                // Just create a comment
+                while *i < tokens.len() {
+                    match &tokens[*i] {
+                        Token::SceneClose(_) | Token::EOF => {
+                            break;
+                        }
+                        _=> {}
+                    }
+                    *i += 1;
+                }
+                return AstNode::Comment("Ignored Scene".to_string());
+            }
+
             _ => {
                 scene.push(AstNode::Error(format!(
                     "Invalid Token Used inside Scene Head: '{:?}'",
@@ -263,7 +277,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
                 scene.push(AstNode::Element(Token::Pre(content.to_string())));
             }
 
-            Token::Empty | Token::AssignConstant => {}
+            Token::Empty | Token::AssignComptime => {}
 
             _ => {
                 scene.push(AstNode::Error(
@@ -300,7 +314,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     while j > 0 {
         match &tokens[j] {
             // Ignore these tokens
-            Token::AssignConstant | Token::SceneClose(_) => {
+            Token::AssignComptime | Token::SceneClose(_) => {
                 j -= 1;
             }
 

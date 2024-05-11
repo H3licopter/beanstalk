@@ -21,16 +21,16 @@ which means it will reactively update inside of scenes when it is mutated.
 ### Compile time immutable variable
 comptime_immutable_var : 0
 
-### Immutable Variable
+### Immutable Runtime Variable
 immutable_var :: 0
 
-### Exported immutable Variable
+### Exported immutable Runtime Variable
 @immutable_var :: 0
 
-### Private mutable Variable
+### Private mutable Runtime Variable
 mutable_var := 0
 
-### Exported mutable Variable
+### Exported mutable Runtime Variable
 @mutable_var := 0
 
 # Static Assignment

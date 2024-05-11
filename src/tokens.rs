@@ -167,6 +167,8 @@ pub enum Token {
     Empty,
     Pre(String), // Content inside raw elements. Might change to not be a format tag in the future
 
+    Ignore, // for commenting out an entire scene
+
     // named tags
     A,   // href, content
     Img, // src, alt

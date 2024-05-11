@@ -366,7 +366,7 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
             }
 
             _ => {
-                println!("unknown AST node found in scene");
+                println!("unknown AST node found in scene: {:?}", node);
             }
         }
     }
