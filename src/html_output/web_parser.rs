@@ -354,10 +354,19 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
                     module_references.push(value);
                 }
             }
-
+            
+            // NASTY OLD JS EXPRESSION - TO BE REMOVED FOR WASM IN FUTURE
             AstNode::Expression(expr) => {
                 html.push_str(&format!("<span id=\"exp{}\"></span>", unique_key));
                 js.push_str(&format!("document.getElementById('exp{}').innerHTML={};", unique_key, &combine_vec_to_js(&expr)));
+                unique_key += 1;
+            }
+
+            // WILL CALL WASM FUNCTIONS
+            AstNode::RuntimeExpression(expr, expr_type) => {
+                let js_expr = expression_to_js(&AstNode::RuntimeExpression(expr, expr_type));
+                html.push_str(&format!("<span id=\"exp{}\"></span>", unique_key));
+                js.push_str(&format!("document.getElementById('exp{}').innerHTML={};", unique_key, js_expr));
                 unique_key += 1;
             }
 

@@ -70,6 +70,7 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
 
     match config {
         CompileType::SingleFile(name, code) => {
+
             // Compile the induvidual file
             let entry_file_dir = entry_path.split("/").collect::<Vec<&str>>();
             let default_output_dir = format!(

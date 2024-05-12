@@ -71,6 +71,7 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool,
                 expression.push(AstNode::VarReference(find_var_declaration_index(ast, id)));
             }
             Token::ConstReference(id) => {
+                println!("Const Reference: {:?}", id);
                 expression.push(AstNode::ConstReference(find_var_declaration_index(ast, id)));
             }
 
@@ -153,6 +154,7 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool,
         *i += 1;
     }
 
+    println!("Expression: {:?}", expression);
     AstNode::Expression(expression)
 }
 
@@ -185,7 +187,7 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                         }
                         simplified_expression.push(AstNode::Operator(op));
                     }
-                    AstNode::ConstReference(value) => {
+                    AstNode::ConstReference(value) | AstNode::VarReference(value) => {
                         compile_time_eval = false;
                         match &ast[value] {
                             AstNode::VarDeclaration(_, assignment, _) | AstNode::Const(_, assignment, _) => {
@@ -208,7 +210,7 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                                 }
                             }
                             _ => {
-                                println!("ConstReference not found in AST")
+                                println!("Reference not found in AST")
                             }
                         }
                     }

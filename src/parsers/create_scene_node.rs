@@ -177,20 +177,21 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
                 };
             }
 
-            Token::VarReference(name) => {
-                scene.push(AstNode::VarReference(*name));
-            }
-            Token::ConstReference(name) => {
-                scene.push(AstNode::ConstReference(*name));
-            }
-
-            Token::StringLiteral(string_content) | Token::RawStringLiteral(string_content) => {
-                scene.push(AstNode::Element(Token::Span(string_content.to_string())));
-            }
-
             // Expressions to Parse
-            Token::FloatLiteral(_) | Token::IntLiteral(_) | Token::DecLiteral(_) => {
-                scene.push(AstNode::Expression(vec![create_expression(scene_head, &mut j, false, &ast)]));
+            Token::VarReference(_) | Token::ConstReference(_) | Token::FloatLiteral(_) | Token::IntLiteral(_) | Token::DecLiteral(_)=> {
+                scene.push(eval_expression(
+                    create_expression(scene_head, &mut j, false, &ast),
+                    &DataType::Inferred,
+                    &ast
+                ));
+            }
+
+            Token::StringLiteral(_) | Token::RawStringLiteral(_) => {
+                scene.push(eval_expression(
+                    create_expression(scene_head, &mut j, false, &ast),
+                    &DataType::String,
+                    &ast
+                ));
             }
 
             Token::ParentScene => {

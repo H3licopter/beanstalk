@@ -7,22 +7,6 @@ pub fn expression_to_js(expr: &AstNode) -> String {
     match expr {
         // CREATE THE JS CODE FOR THE EXPRESSION -> Uses webassembly functions to handle types properly
         AstNode::RuntimeExpression(nodes, expression_type) => {
-            
-            // OPEN UP THE WEBASSEMBLY FUNCTION CALL
-            match expression_type {
-                DataType::Int => {
-                    js.push_str("parse_int_expr(`");
-                }
-                DataType::Float => {
-                    js.push_str("parse_float_expr(`");
-                }
-                DataType::String => {
-                    js.push_str("parse_string_expr(`");
-                }
-                _ => {
-                    println!("Have not implimented this type yet in expression_to_js");
-                }
-            }
 
             for node in nodes {
                 match node {
@@ -78,8 +62,21 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                 }
             }
 
-            // CLOSE THE WEBASSEMBLY FUNCTION CALL
-            js.push_str("`)");
+            // WRAP IN THE WEBASSEMBLY FUNCTION CALL
+            match expression_type {
+                DataType::Int => {
+                    js.insert_str(0, "parse_int_expr(`");
+                    js.push_str("`)");
+                }
+                DataType::Float => {
+                    js.insert_str(0, "parse_float_expr(`");
+                    js.push_str("`)");
+                }
+                DataType::String => {}
+                _ => {
+                    println!("Have not implimented this type yet in expression_to_js");
+                }
+            }
         }
 
         AstNode::Literal(token) => match token {

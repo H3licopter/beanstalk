@@ -162,14 +162,8 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
             Attribute::Comptime => {
                 return AstNode::Struct(name, Box::new(new_array(tokens, i, ast)), is_exported)
             }
-            Attribute::Mutable => {
+            Attribute::Mutable | Attribute::Constant => {
                 return AstNode::VarDeclaration(name, Box::new(new_array(tokens, i, ast)), is_exported)
-            }
-            Attribute::Constant => {
-                return AstNode::Error(
-                    "Invalid assignment declaration for collection - possibly not supported yet?"
-                        .to_string(),
-                );
             }
             _ => {
                 return AstNode::Error(
@@ -179,14 +173,14 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
             }
         },
         Token::SceneHead(scene_head) => match attribute {
-            Attribute::Constant => {
+            Attribute::Comptime => {
                 return AstNode::Const(
                     name,
                     Box::new(new_scene(scene_head, tokens, i, &ast)),
                     is_exported,
                 )
             }
-            Attribute::Mutable => {
+            Attribute::Mutable | Attribute::Constant => {
                 return AstNode::VarDeclaration(
                     name,
                     Box::new(new_scene(scene_head, tokens, i, &ast)),
@@ -293,9 +287,10 @@ fn create_var_node(
 }
 
 pub fn find_var_declaration_index(ast: &Vec<AstNode>, var_name: &usize) -> usize {
+    println!("looking for var: {}", var_name);
     for (i, node) in ast.iter().enumerate().rev() {
         match node {
-            AstNode::VarDeclaration(name, _, _) => {
+            AstNode::VarDeclaration(name, _, _) | AstNode::Const(name, _, _) => {
                 if name == var_name {
                     return i;
                 }

@@ -1,3 +1,4 @@
-number := 3 + 4
+stringOne :: "eh"
+stringTwo :: "   nah"
 ---
-[number]
+[stringOne + stringTwo]
