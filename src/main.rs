@@ -86,7 +86,7 @@ fn main() {
         }
         Command::Dev(path) => {
             println!("Starting dev server...");
-            dev_server::launch_server(path);
+            dev_server::start_dev_server(path);
         }
     }
 }

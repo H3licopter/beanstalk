@@ -1,3 +1,5 @@
+// use math_parse::MathParse;
+
 use super::{ast::AstNode, build_ast::find_var_declaration_index, collections::new_tuple};
 use crate::{bs_types::DataType, Token};
 
@@ -84,84 +86,61 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool,
             }
 
             // OPERATORS
-            // Assign precedence
+            // Will push as a string so shunting yard can handle it later just as a string
 
             // UNARY OPERATORS
             Token::Negative => {
-                expression.push(AstNode::UnaryOperator(Token::Negative, 10));
+                expression.push(AstNode::Operator(" -".to_string()));
             }
             Token::Exponent => {
-                expression.push(AstNode::UnaryOperator(Token::Exponent, 8));
+                expression.push(AstNode::Operator(" ** ".to_string()));
             }
 
             // BINARY OPERATORS
             Token::Add => {
-                expression.push(AstNode::BinaryOperator(Token::Add, 6));
+                expression.push(AstNode::Operator(" + ".to_string()));
             }
             Token::Subtract => {
-                expression.push(AstNode::BinaryOperator(Token::Subtract, 6));
+                expression.push(AstNode::Operator(" - ".to_string()));
             }
             Token::Multiply => {
-                expression.push(AstNode::BinaryOperator(Token::Multiply, 7));
+                expression.push(AstNode::Operator(" * ".to_string()));
             }
             Token::Divide => {
-                expression.push(AstNode::BinaryOperator(Token::Divide, 7));
-            }
-            Token::AddAssign => {
-                expression.push(AstNode::BinaryOperator(Token::AddAssign, 6));
-            }
-            Token::SubtractAssign => {
-                expression.push(AstNode::BinaryOperator(Token::SubtractAssign, 6));
-            }
-            Token::Equal => {
-                expression.push(AstNode::BinaryOperator(Token::Equal, 5));
-            }
-            Token::LessThan => {
-                expression.push(AstNode::BinaryOperator(Token::LessThan, 5));
-            }
-            Token::LessThanOrEqual => {
-                expression.push(AstNode::BinaryOperator(Token::LessThanOrEqual, 5));
-            }
-            Token::GreaterThan => {
-                expression.push(AstNode::BinaryOperator(Token::GreaterThan, 5));
-            }
-            Token::GreaterThanOrEqual => {
-                expression.push(AstNode::BinaryOperator(Token::GreaterThanOrEqual, 5));
+                expression.push(AstNode::Operator(" / ".to_string()));
             }
             Token::Modulus => {
-                expression.push(AstNode::BinaryOperator(Token::Modulus, 7));
+                expression.push(AstNode::Operator(" % ".to_string()));
             }
             Token::Remainder => {
-                expression.push(AstNode::BinaryOperator(Token::Remainder, 7));
+                expression.push(AstNode::Operator(" %% ".to_string()));
             }
             Token::Root => {
-                expression.push(AstNode::BinaryOperator(Token::Root, 8));
-            }
-            Token::ExponentAssign => {
-                expression.push(AstNode::BinaryOperator(Token::ExponentAssign, 8));
-            }
-            Token::MultiplyAssign => {
-                expression.push(AstNode::BinaryOperator(Token::MultiplyAssign, 7));
-            }
-            Token::DivideAssign => {
-                expression.push(AstNode::BinaryOperator(Token::DivideAssign, 7));
-            }
-            Token::ModulusAssign => {
-                expression.push(AstNode::BinaryOperator(Token::ModulusAssign, 7));
-            }
-            Token::RootAssign => {
-                expression.push(AstNode::BinaryOperator(Token::RootAssign, 8));
-            }
-            Token::RemainderAssign => {
-                expression.push(AstNode::BinaryOperator(Token::RemainderAssign, 7));
+                expression.push(AstNode::Operator(" // ".to_string()));
             }
 
+
             // LOGICAL OPERATORS
+            Token::Equal => {
+                expression.push(AstNode::LogicalOperator(Token::Equal, 5));
+            }
+            Token::LessThan => {
+                expression.push(AstNode::LogicalOperator(Token::LessThan, 5));
+            }
+            Token::LessThanOrEqual => {
+                expression.push(AstNode::LogicalOperator(Token::LessThanOrEqual, 5));
+            }
+            Token::GreaterThan => {
+                expression.push(AstNode::LogicalOperator(Token::GreaterThan, 5));
+            }
+            Token::GreaterThanOrEqual => {
+                expression.push(AstNode::LogicalOperator(Token::GreaterThanOrEqual, 5));
+            }
             Token::And => {
-                expression.push(AstNode::BinaryOperator(Token::And, 4));
+                expression.push(AstNode::LogicalOperator(Token::And, 4));
             }
             Token::Or => {
-                expression.push(AstNode::BinaryOperator(Token::Or, 3));
+                expression.push(AstNode::LogicalOperator(Token::Or, 3));
             }
 
             _ => {
@@ -183,10 +162,9 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool,
 // Otherwise it will return an EvaluatedExpression, which has a strict type and will be evaluated at runtime
 pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<AstNode>) -> AstNode {
     let mut current_type = type_declaration.to_owned();
-
     let mut simplified_expression = Vec::new();
+    let mut compile_time_eval = true;
 
-    // TO DO: ACTUALLY IMPLIMENT CONSTANT FOLDING HERE!!!!!
     match expr {
         AstNode::Expression(e) => {
             for node in e {
@@ -194,11 +172,21 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                     AstNode::Literal(t) => {
                         simplified_expression.push(check_literal(t, type_declaration, &mut current_type));
                     }
-                    AstNode::BinaryOperator(op, precedence) => {
-                        simplified_expression.push(AstNode::BinaryOperator(op, precedence));
+                    // AstNode::LogicalOperator(op, precedence) => {
+                    //     simplified_expression.push(AstNode::LogicalOperator(op, precedence));
+                    // }
+                    AstNode::Operator(op) => {
+                        // If the current type is a string, then must be a + operator or create an error
+                        if current_type == DataType::String && op != " + " {
+                            return AstNode::Error("Can only use the + operator to manipulate strings inside string expressions".to_string());
+                        }
+                        if simplified_expression.len() < 1 {
+                            return AstNode::Error("Must have a value to the left of an operator".to_string());
+                        }
+                        simplified_expression.push(AstNode::Operator(op));
                     }
-
                     AstNode::ConstReference(value) => {
+                        compile_time_eval = false;
                         match &ast[value] {
                             AstNode::VarDeclaration(_, assignment, _) | AstNode::Const(_, assignment, _) => {
                                 let expr = *assignment.clone();
@@ -208,11 +196,11 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                                     AstNode::Literal(t) => {
                                         simplified_expression.push(check_literal(t, type_declaration, &mut current_type));
                                     }
-                                    AstNode::EvaluatedExpression(e, expr_type) => {
+                                    AstNode::RuntimeExpression(e, expr_type) => {
                                         if current_type == DataType::Inferred || current_type != expr_type {
                                             return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
                                         }
-                                        simplified_expression.push(AstNode::EvaluatedExpression(e, expr_type));
+                                        simplified_expression.push(AstNode::RuntimeExpression(e, expr_type));
                                     }
                                     _ => {
                                         return AstNode::Error("Invalid Expression".to_string());
@@ -249,43 +237,47 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
         }
     }
 
-    if current_type == DataType::String {
-        return concat_strings_if_adjacent(&mut simplified_expression);
-    }
-
+    // If nothing to evaluate at compile time
     if simplified_expression.len() == 1 {
         return simplified_expression[0].clone();
     }
+    // If the expression is a string, then either return a string or a runtime expression
+    if current_type == DataType::String && compile_time_eval {
+        return concat_strings(&mut simplified_expression);
+    }
 
-    AstNode::EvaluatedExpression(simplified_expression, current_type)
+    // Maths expression constant folding will go here eventually
+    // Will need to evaluate anything possible in the expression at compiletime
+    // For now, just have the whole the expression evaluated at runtime
+    AstNode::RuntimeExpression(simplified_expression, current_type)
 }
 
-fn concat_strings_if_adjacent(simplified_expression: &mut Vec<AstNode>) -> AstNode {
-    let mut new_expr = Vec::new();
+// Concat strings at COMPILE TIME ONLY
+fn concat_strings(simplified_expression: &mut Vec<AstNode>) -> AstNode {
     let mut new_string = String::new();
-    let mut previous_node_is_string = true;
+    let mut previous_node_is_plus = false;
+
     for node in simplified_expression {
         match node {
             AstNode::Literal(Token::StringLiteral(string)) => {
-                if previous_node_is_string || new_string.is_empty() {
+                if previous_node_is_plus || new_string.is_empty() {
                     new_string.push_str(string);
+                    previous_node_is_plus = false;
                 } else {
-                    new_string.push_str(string);
-                    new_expr.push(AstNode::Literal(Token::StringLiteral(new_string)));
-                    new_string = string.clone();
+                    // Syntax error, must have a + operator between strings when concatinating
                 }
             }
+            AstNode::Operator(_) => {
+                // Should always be a plus operator, this is enforced in the eval_expression function
+                previous_node_is_plus = true;
+            }
             _ => {
-                previous_node_is_string = false;
+                return AstNode::Error("Cannot evaluate string expression at compile time. Compiler should be creating a runtime string expression".to_string());
             }
         }
     }
 
-    if new_expr.len() > 0 {
-        AstNode::EvaluatedExpression(new_expr, DataType::String)
-    } else {
-        AstNode::Literal(Token::StringLiteral(new_string))
-    }
+    AstNode::Literal(Token::StringLiteral(new_string))
 }
 
 fn check_literal(value: Token, type_declaration: &DataType, current_type: &mut DataType) -> AstNode {
@@ -321,89 +313,3 @@ fn check_literal(value: Token, type_declaration: &DataType, current_type: &mut D
         }
     }
 }
-
-/*
-while there are tokens to be read:
-    read a token
-    if the token is:
-
-    - a number:
-        put it into the output queue
-
-
-    - a function:
-        push it onto the operator stack
-
-
-    - an operator o1:
-        while (
-            there is an operator o2 at the top of the operator stack which is not a left parenthesis,
-            and (o2 has greater precedence than o1 or (o1 and o2 have the same precedence and o1 is left-associative))
-        ):
-            pop o2 from the operator stack into the output queue
-        push o1 onto the operator stack
-
-
-    - a ",":
-        while the operator at the top of the operator stack is not a left parenthesis:
-             pop the operator from the operator stack into the output queue
-
-
-    - a left parenthesis (i.e. "("):
-        push it onto the operator stack
-
-
-    - a right parenthesis (i.e. ")"):
-        while the operator at the top of the operator stack is not a left parenthesis:
-            {assert the operator stack is not empty}
-            /* If the stack runs out without finding a left parenthesis, then there are mismatched parentheses. */
-            pop the operator from the operator stack into the output queue
-        {assert there is a left parenthesis at the top of the operator stack}
-        pop the left parenthesis from the operator stack and discard it
-        if there is a function token at the top of the operator stack, then:
-            pop the function from the operator stack into the output queue
-
-            After the while loop, pop the remaining items from the operator stack into the output queue.
-
-while there are tokens on the operator stack:
-If the operator token on the top of the stack is a parenthesis, then there are mismatched parentheses.
-    {assert the operator on top of the stack is not a (left) parenthesis}
-    pop the operator from the operator stack onto the output queue
-
-
-
-*/
-
-/*
-    // Find the end of the expression and check if it is assigned a data type at the end
-    let mut expression_end = *i;
-    if bracket_nesting > 0 {
-        // Find the last closing bracket and end expression there
-        let mut total_open_brackets = bracket_nesting;
-        while &expression_end < &tokens.len() {
-            if &tokens[expression_end] == &Token::OpenParenthesis {
-                total_open_brackets += 1;
-            } else if &tokens[expression_end] == &Token::CloseParenthesis {
-                if total_open_brackets < 1 {
-                    break;
-                }
-                total_open_brackets -= 1;
-            }
-
-            expression_end += 1;
-        }
-    } else {
-        // Find the next newline, comma or final closing bracket and end expression there
-        while &expression_end < &tokens.len() {
-            match &tokens[expression_end] {
-                Token::Newline | Token::Comma | Token::SceneClose(_) | Token::CloseParenthesis => {
-                    break;
-                }
-                _ => {
-                    expression_end += 1;
-                }
-            }
-        }
-    }
-
-*/

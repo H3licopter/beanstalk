@@ -13,23 +13,24 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="images/favicons//favicon.ico">
-<!-- <link rel="icon"href="images/favicons//favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="images/favicons//apple-touch-icon.png">
+<link rel="icon"href="images/favicons/favicon.ico">
+<!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
+<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
 <!-- <link rel="manifest"href="favicons-folder-url/site.webmanifest"> -->
 <link rel="stylesheet" href="css/pico.min.css" />
 <link rel="stylesheet" href="css/bs.css" />
-<style></style></head><body><main class="container"><p>SOme text at the start of the scene. <span style="color:rgb(100, 100, 0);" ><span>some colourful text&nbsp;</span></span><span>and some more text.
-
-</p></span><p>But this content should be visible.</main>
-<script>
-  function uInnerHTML(id,update){
+<style></style></head><body><main class="container"><span class="c1"></span></main>
+<script type="module">
+  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  init().then(() => {
+    function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }
+            }let v1 = parse_int_expr(`3 + 4`);uInnerHTML("c1", v1);
+  });
 </script>
 </body>
 </html>

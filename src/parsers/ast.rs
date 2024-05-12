@@ -10,7 +10,7 @@ pub enum AstNode {
     // Blocks
     Function(usize, Box<AstNode>, Vec<AstNode>, bool), // Function name, Args, Body, Public
     Expression(Vec<AstNode>),                          // Expression that can contain mixed types
-    EvaluatedExpression(Vec<AstNode>, DataType),       //Expression, Result type
+    RuntimeExpression(Vec<AstNode>, DataType),       //Expression, Result type
 
     // Basics
     Error(String),
@@ -36,8 +36,8 @@ pub enum AstNode {
 
     // Operators
     // Operator, Precedence
-    UnaryOperator(Token, u8), // Negative, Not, Exponent
-    BinaryOperator(Token, u8),
+    LogicalOperator(Token, u8), // Negative, Not, Exponent
+    Operator(String), // For shunting yard to handle later as a string
 
     // HTML
     Element(Token),                 // HTML element content

@@ -1,12 +1,29 @@
-use crate::{parsers::ast::AstNode, Token};
+use crate::{bs_types::DataType, parsers::ast::AstNode, Token};
 
-// JS will also need to call into the prebuilt webassembly functions
-// Also parses literals
+
 pub fn expression_to_js(expr: &AstNode) -> String {
-    let mut js = String::new();
+    let mut js = String::new(); //Open the template string
 
     match expr {
-        AstNode::EvaluatedExpression(nodes, _) | AstNode::Expression(nodes) => {
+        // CREATE THE JS CODE FOR THE EXPRESSION -> Uses webassembly functions to handle types properly
+        AstNode::RuntimeExpression(nodes, expression_type) => {
+            
+            // OPEN UP THE WEBASSEMBLY FUNCTION CALL
+            match expression_type {
+                DataType::Int => {
+                    js.push_str("parse_int_expr(`");
+                }
+                DataType::Float => {
+                    js.push_str("parse_float_expr(`");
+                }
+                DataType::String => {
+                    js.push_str("parse_string_expr(`");
+                }
+                _ => {
+                    println!("Have not implimented this type yet in expression_to_js");
+                }
+            }
+
             for node in nodes {
                 match node {
                     AstNode::Literal(token) => match token {
@@ -25,82 +42,30 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     },
 
                     AstNode::VarReference(name) => {
-                        js.push_str(&format!("v{}", name));
+                        js.push_str(&format!(" ${{v{name}}} "));
                     }
                     AstNode::ConstReference(name) => {
-                        js.push_str(&format!("cv{}", name));
-                    }
-                    AstNode::FunctionCall(name, arg) => {
-                        let mut js_args = "".to_string();
-                        match &**arg {
-                            AstNode::Tuple(values) => {
-                                js_args = combine_vec_to_js(values);
-                            }
-                            AstNode::EvaluatedExpression(_, _) => {
-                                js_args = expression_to_js(arg);
-                            }
-                            _ => {
-                                println!("unknown AST node found in function call");
-                            }
-                        }
-                        js.push_str(&format!("f{}({:?})", name, js_args));
+                        js.push_str(&format!(" ${{cv{name}}} "));
                     }
 
-                    AstNode::BinaryOperator(operator, _) => match operator {
-                        Token::Add => {
-                            js.push_str(" + ");
-                        }
-                        Token::Subtract => {
-                            js.push_str(" - ");
-                        }
-                        Token::Multiply => {
-                            js.push_str(" * ");
-                        }
-                        Token::Divide => {
-                            js.push_str(" / ");
-                        }
-                        Token::Modulus => {
-                            js.push_str(" % ");
-                        }
-                        Token::Equal => {
-                            js.push_str(" === ");
-                        }
-                        Token::GreaterThan => {
-                            js.push_str(" > ");
-                        }
-                        Token::LessThan => {
-                            js.push_str(" < ");
-                        }
-                        Token::GreaterThanOrEqual => {
-                            js.push_str(" >= ");
-                        }
-                        Token::LessThanOrEqual => {
-                            js.push_str(" <= ");
-                        }
-                        Token::And => {
-                            js.push_str(" && ");
-                        }
-                        Token::Or => {
-                            js.push_str(" || ");
-                        }
-                        _ => {
-                            println!("unknown binary operator found in expression");
-                        }
-                    },
+                    // AstNode::FunctionCall(name, arg) => {
+                    //     let mut js_args = "".to_string();
+                    //     match &**arg {
+                    //         AstNode::Tuple(values) => {
+                    //             js_args = combine_vec_to_js(values);
+                    //         }
+                    //         AstNode::EvaluatedExpression(_, _) => {
+                    //             js_args = expression_to_js(arg);
+                    //         }
+                    //         _ => {
+                    //             println!("unknown AST node found in function call");
+                    //         }
+                    //     }
+                    //     js.push_str(&format!("f{}({:?})", name, js_args));
+                    // }
 
-                    AstNode::UnaryOperator(operator, _) => match operator {
-                        Token::Negative => {
-                            js.push_str(" -");
-                        }
-                        Token::Not => {
-                            js.push_str(" !");
-                        }
-                        Token::Exponent => {
-                            js.push_str(" ** ");
-                        }
-                        _ => {
-                            println!("unknown unary operator found in expression");
-                        }
+                    AstNode::Operator(op) => {
+                        js.push_str(op);
                     },
 
                     AstNode::Tuple(values) => {
@@ -112,6 +77,9 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     }
                 }
             }
+
+            // CLOSE THE WEBASSEMBLY FUNCTION CALL
+            js.push_str("`)");
         }
 
         AstNode::Literal(token) => match token {

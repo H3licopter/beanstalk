@@ -1,8 +1,3 @@
+number := 3 + 4
 ---
-SOme text at the start of the scene. [rgb(100,100,0): some colourful text] and some more text.
-
-[ignore: 
-    all of this content should not be in the scene
-]
-
-But this content should be visible.
+[number]

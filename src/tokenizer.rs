@@ -445,10 +445,7 @@ fn get_next_token(
         }
 
         // If no dot, parse as an integer
-        // return Token::IntLiteral(token_value.parse::<i64>().unwrap());
-
-        // TEMPORARILY JUST SUPPORTING FLOATS UNTIL LATER
-        return Token::FloatLiteral(token_value.parse::<f64>().unwrap());
+        return Token::IntLiteral(token_value.parse::<i64>().unwrap());
     }
 
     if current_char.is_alphabetic() {
