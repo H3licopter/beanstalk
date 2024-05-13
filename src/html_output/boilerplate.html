@@ -25,6 +25,18 @@
   init().then(() => {
     //js
   });
+  
+  function checkIfFileChanged() {
+    fetch('/check')
+      .then(response => {
+        if (response.status == 205) {
+          location.reload();
+        }
+      }).catch(console.error);
+  }
+
+  // Call this function periodically to check if the file has changed
+  setInterval(() => checkIfFileChanged(), 800);
 </script>
 </body>
 </html>

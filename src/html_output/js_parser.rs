@@ -73,6 +73,10 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     js.push_str("`)");
                 }
                 DataType::String => {}
+                DataType::CoerseToString => {
+                    js.insert_str(0, "String(");
+                    js.push_str(")");
+                }
                 _ => {
                     println!("Have not implimented this type yet in expression_to_js");
                 }

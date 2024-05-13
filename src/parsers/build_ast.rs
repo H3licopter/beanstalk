@@ -287,7 +287,6 @@ fn create_var_node(
 }
 
 pub fn find_var_declaration_index(ast: &Vec<AstNode>, var_name: &usize) -> usize {
-    println!("looking for var: {}", var_name);
     for (i, node) in ast.iter().enumerate().rev() {
         match node {
             AstNode::VarDeclaration(name, _, _) | AstNode::Const(name, _, _) => {

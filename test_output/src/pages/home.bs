@@ -1,4 +1,4 @@
-stringOne :: "eh"
-stringTwo :: "   nah"
 ---
-[stringOne + stringTwo]
+[:
+   Updating Automatically
+]

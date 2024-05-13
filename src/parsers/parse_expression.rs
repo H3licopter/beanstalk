@@ -71,7 +71,6 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool,
                 expression.push(AstNode::VarReference(find_var_declaration_index(ast, id)));
             }
             Token::ConstReference(id) => {
-                println!("Const Reference: {:?}", id);
                 expression.push(AstNode::ConstReference(find_var_declaration_index(ast, id)));
             }
 
@@ -154,7 +153,6 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool,
         *i += 1;
     }
 
-    println!("Expression: {:?}", expression);
     AstNode::Expression(expression)
 }
 
@@ -210,7 +208,7 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                                 }
                             }
                             _ => {
-                                println!("Reference not found in AST")
+                                return AstNode::Error("Reference not found in AST".to_string());
                             }
                         }
                     }
@@ -283,6 +281,9 @@ fn concat_strings(simplified_expression: &mut Vec<AstNode>) -> AstNode {
 }
 
 fn check_literal(value: Token, type_declaration: &DataType, current_type: &mut DataType) -> AstNode {
+    if type_declaration == &DataType::CoerseToString {
+        return AstNode::Literal(value);
+    }
     match value {
         Token::IntLiteral(_) => {
             if type_declaration == &DataType::Inferred {

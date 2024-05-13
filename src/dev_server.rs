@@ -1,6 +1,6 @@
 use crate::build;
 use std::{
-    fs,
+    fs::{self, metadata},
     io::{prelude::*, BufReader},
     net::{TcpListener, TcpStream},
     time::Instant,
@@ -23,14 +23,15 @@ pub fn start_dev_server(mut path: String) {
         }
     }
 
+    build_project(&"test".to_string());
+    let mut modified = get_last_modified(&format!("{}/src/", &path));
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        build_project(&"test".to_string());
-        handle_connection(stream, path.clone());
+        handle_connection(stream, path.clone(), &mut modified);
     }
 }
 
-fn handle_connection(mut stream: TcpStream, path: String) {
+fn handle_connection(mut stream: TcpStream, path: String, last_modified: &mut std::time::SystemTime) {
     let buf_reader = BufReader::new(&mut stream);
     let current_dir = std::env::current_dir();
     let entry_path = match current_dir {
@@ -58,6 +59,20 @@ fn handle_connection(mut stream: TcpStream, path: String) {
                 length = contents.len();
                 status_line = "HTTP/1.1 200 OK";
                 println!("Sending Home page");
+            } else if request.starts_with("GET /check") {
+                // check if anything has changed in the src folder since the last check,
+                // send a response to the client indicating there has been a change
+
+                // Get the metadata of the file
+                let check_modified = get_last_modified(&format!("{}/src/pages/home.bs", &path));
+                if *last_modified < check_modified {
+                    println!("Changes detected in src folder");
+                    build_project(&"test".to_string());
+                    *last_modified = check_modified;
+                    status_line = "HTTP/1.1 205 Reset Content";
+                } else {
+                    status_line = "HTTP/1.1 200 OK";
+                }
             } else if request.starts_with("GET /") {
                 // Get requested path
                 let file_path = request.split_whitespace().collect::<Vec<&str>>()[1];
@@ -109,9 +124,7 @@ fn handle_connection(mut stream: TcpStream, path: String) {
     let response = &[string_response.as_bytes(), &contents].concat();
 
     match stream.write_all(response) {
-        Ok(_) => {
-            println!("Response sent");
-        }
+        Ok(_) => {}
         Err(e) => {
             println!("Error sending response: {:?}", e);
         }
@@ -131,4 +144,9 @@ fn build_project(build_path: &String) {
             return;
         }
     }
+}
+
+fn get_last_modified(path: &String) -> std::time::SystemTime {
+    let meta = metadata(path).unwrap();
+    meta.modified().unwrap()
 }
