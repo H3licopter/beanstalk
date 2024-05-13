@@ -8,7 +8,9 @@
 
   *The only BS in programming should be in the filename*
 
-  ⚠️  <sub>This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</sub>  ⚠️
+  ⚠️  <p>This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</p>  ⚠️
+  ⚠️  <p>Core parts of the design are still subject to large changes and iteration as the compiler is developed</p>  ⚠️
+  ⚠️  <p>The CLI interface is not yet user friendly or designed for use outside of developing the compiler (yet)</p>  ⚠️
 
 </div>
 
@@ -23,18 +25,18 @@
   - Fast to prototype an idea and optimize later
 
 ## Planned Features
-Beanstalk can be thought of as a mega-extended Markdown, a Javascript replacement and a modern UI focused programming language with no constraints on conventions or backwards compatibility.
+Beanstalk can be thought of as a mega-extended Markdown, or a high level modern UI focused programming language with no constraints on programming conventions or backwards compatibility.
 
-Beanstalk outputs HTML, CSS and JS/WASM all in one consistent syntax without having to switch between any languages, or even a different file.
+Beanstalk outputs HTML, CSS and JS/WASM all in one consistent syntax without having to switch between any languages, or even a different files if you want to centralise all of your logic.
 
-All the basic stuff needed for quickly building a good website will be built into the compiler, so you can focus on the content and high level design decisions, not the boilerplate. 
+All the basic stuff needed for quickly building a good website will be built into the compiler, so you can focus on the content and high level design decisions, not the boilerplate. There is no Node.js or javascript framework hell to navigate and no verbose lower level language noise to distract from building what you want.
 
-Beanstalk aims to become an entire self-contained ecosystem for building webpages, UIs and even server side code and native applications, with a focus on simplicity and speed of development.
+Beanstalk aims to become a self-contained ecosystem that can interop with exsisting javascript / wasm libraries. The long term goal is to impliment full WASM codegen so you can build server side or native code using a WASM runtime with the same high level syntax.
 
 ## Overview
-When creating a page or UI in Beanstalk, you make Scenes. 
+When creating a page or UI in Beanstalk, you make Scenes.
 
-Scenes are a markup syntax that can be used to write text content, HTML, CSS and JS/WASM all in one file with it's own consistent syntax. It is designed to be very concise and easy to read.
+Scenes are a markup syntax that can be used to write text content, HTML, CSS and JS/WASM all in one file with it's own consistent syntax. It is designed to be very concise, easy to read and flexibly interop with regular code with build in reactivity.
 
 **Content**
 
@@ -52,8 +54,6 @@ Scenes have utility classes built in. Use keywords at the start of scenes to not
 
 **JS/WASM**
 
-*ONLY VERY BASIC CODEGEN INTO JS ADDED SO FAR*
-
 Beanstalk will be a full programming language that compiles into JS/WASM on the frontend (and eventually native code on the backend) allowing you to add dynamic and interactive behaviours in your scenes naturally and concisely. 
 
 The goal is to create a language, designed from the ground up, to be able to handle most of a techstack within one ecosystem.
@@ -68,10 +68,8 @@ Technologies currently used in the compiler:
 ---
 
 ## Current Goals
-  - Finish implementing all basic scene styling and keywords
+  - Finish implementing all basic scene styling and keywords for scenes
   - Finish implimenting constant folding and basic compile time evaluation
-  - Finish basic frontend codegen
-  - Dev server built into compiler tools
   - Basic scene components and reactivity implemented
-  - Cranelift backend for WASM generation
+  - Cranelift backend for full WASM codegen and wasm runtime compile targets
   - Complete all the basic features of the initial compiler so it can actually be downloaded and used easily 
