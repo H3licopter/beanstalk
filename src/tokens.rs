@@ -150,6 +150,7 @@ pub enum Token {
 
     // Scenes
     ParentScene,
+    EmptyScene(u32), // Used for templating values in scene heads in the body of scenes, value is numnber of spaces after the scene template
     SceneHead(Vec<Token>), // Scene head properties, inline?
     SceneBody(Vec<Token>),
     Signal(String),

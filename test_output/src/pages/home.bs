@@ -1,4 +1,4 @@
 ---
-[:
-   Updating Automatically
+["inside", "!!!!":
+   some things [] a template[]
 ]

@@ -105,6 +105,20 @@ fn get_next_token(
                 return Token::Error("Cannot have nested scenes inside of a scene head, must be inside the scene body".to_string());
             }
             _ => {
+                // [] is an empty scene
+                if chars.peek() == Some(&']') {
+                    chars.next();
+                    let mut spaces_after_scene = 0;
+                    while let Some(ch) = chars.peek() {
+                        if !ch.is_whitespace() || ch == &'\n' {
+                            break;
+                        }
+                        spaces_after_scene += 1;
+                        chars.next();
+                    }
+                    return Token::EmptyScene(spaces_after_scene);
+                }
+
                 *tokenize_mode = TokenizeMode::SceneHead;
             }
         }
@@ -319,7 +333,6 @@ fn get_next_token(
                 return Token::AddAssign;
             }
         }
-        chars.next();
         return Token::Add;
     }
     if current_char == '*' {

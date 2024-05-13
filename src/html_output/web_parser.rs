@@ -82,7 +82,7 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
     let mut html = String::new();
     let mut closing_tags = Vec::new();
 
-    let mut unique_key: u32 = 0;
+    let mut template_ids: u32 = 0;
     
     // For tables
     let mut ele_count: u32 = 0;
@@ -194,6 +194,8 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
             ));
         }
     }
+
+    let mut scenehead_literals: Vec<AstNode> = Vec::new();
 
     for node in scene {
         match node {
@@ -334,6 +336,8 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
                 html.push_str("&nbsp;");
             }
 
+            // STUFF THAT IS INSIDE SCENE HEAD THAT NEEDS TO BE PASSED INTO SCENE BODY
+
             AstNode::VarReference(value) => {
                 // Create a span in the HTML with a class that can be referenced by JS
                 // TO DO: Should be reactive in future
@@ -355,29 +359,87 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
                 }
             }
             
-            // NASTY OLD JS EXPRESSION - TO BE REMOVED FOR WASM IN FUTURE
-            AstNode::Expression(expr) => {
-                html.push_str(&format!("<span id=\"exp{}\"></span>", unique_key));
-                js.push_str(&format!("document.getElementById('exp{}').innerHTML={};", unique_key, &combine_vec_to_js(&expr)));
-                unique_key += 1;
-            }
-
             // WILL CALL WASM FUNCTIONS
             AstNode::RuntimeExpression(expr, expr_type) => {
-                let js_expr = expression_to_js(&AstNode::RuntimeExpression(expr, expr_type));
-                html.push_str(&format!("<span id=\"exp{}\"></span>", unique_key));
-                js.push_str(&format!("document.getElementById('exp{}').innerHTML={};", unique_key, js_expr));
-                unique_key += 1;
+                scenehead_literals.push(
+                    AstNode::RuntimeExpression(expr, expr_type)
+                );
             }
 
+            AstNode::Tuple(items) => {
+                for item in items {
+                    scenehead_literals.push(item);
+                }
+            }
+
+            AstNode::Literal(token) => {
+                scenehead_literals.push(AstNode::Literal(token));
+            }
+
+            AstNode::SceneTemplate => {
+                html.push_str(&format!("<span id=\"exp{template_ids}\"></span>"));
+                template_ids += 1;
+            }
+
+            // ERROR HANDLING
             AstNode::Error(value) => {
                 println!("Error: {}", value);
             }
-
             _ => {
                 println!("unknown AST node found in scene: {:?}", node);
             }
         }
+    }
+
+
+    // Take all scenehead variables and add them into any templates inside of the scene body
+    // When there are no templates left, create a new span element to hold the literal
+    let mut id: u32 = 0;
+    for literal in scenehead_literals {        
+        let number_of_templates = template_ids;
+        let mut js_string = String::new();
+
+        match literal {
+            AstNode::RuntimeExpression(expr, expr_type) => {
+                js_string = expression_to_js(&AstNode::RuntimeExpression(expr, expr_type));
+            }
+            AstNode::Literal(token) => {
+                match token {
+                    Token::StringLiteral(value) | Token::RawStringLiteral(value) => {
+                        js_string = format!("'{}'", value);
+                    }
+                    Token::RuneLiteral(char) => {
+                        js_string = format!("'{}'", char);
+                    }
+                    Token::IntLiteral(value) =>{
+                        js_string = value.to_string();
+                    }
+                    Token::FloatLiteral(value) => {
+                        js_string = value.to_string();
+                    }
+                    Token::DecLiteral(value) => {
+                        js_string = value.to_string();
+                    }
+                    Token::BoolLiteral(value) => {
+                        js_string = value.to_string();
+                    }
+                    _ => {}
+                }
+            }
+            _=> {
+                println!("Scene Head literal not yet supported in scene body");
+            }
+        }
+
+
+        // If there are no more templates inside the scene
+        if id > number_of_templates {
+            html.push_str(&format!("<span id=\"exp{id}\"></span>"));
+        }
+
+        js.push_str(&format!("document.getElementById('exp{id}').innerHTML={js_string};"));
+
+        id += 1;
     }
 
     for tag in closing_tags.iter().rev() {

@@ -32,6 +32,7 @@ pub enum AstNode {
     Struct(usize, Box<AstNode>, bool), // Name, Fields, Public
     Tuple(Vec<AstNode>),
     Scene(Vec<AstNode>, Vec<Tag>, Vec<Style>),
+    SceneTemplate,
     Empty, // Empty collection
 
     // Operators

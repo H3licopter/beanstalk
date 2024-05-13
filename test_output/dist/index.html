@@ -19,7 +19,7 @@
 <!-- <link rel="manifest"href="favicons-folder-url/site.webmanifest"> -->
 <link rel="stylesheet" href="css/pico.min.css" />
 <link rel="stylesheet" href="css/bs.css" />
-<style></style></head><body><main class="container"><p>Updating Automatically</main>
+<style></style></head><body><main class="container"><p>some things <span id="exp0"></span>&nbsp;a template<span id="exp1"></span></p></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {
@@ -29,11 +29,11 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }
+            }document.getElementById('exp0').innerHTML='inside';document.getElementById('exp1').innerHTML='!!!!';
   });
   
   function checkIfFileChanged() {
-    fetch('/check')
+    fetch('/check', { method: 'HEAD' })
       .then(response => {
         if (response.status == 205) {
           location.reload();
@@ -42,7 +42,7 @@
   }
 
   // Call this function periodically to check if the file has changed
-  setInterval(() => checkIfFileChanged(), 800);
+  setInterval(() => checkIfFileChanged(), 900);
 </script>
 </body>
 </html>

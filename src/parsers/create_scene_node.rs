@@ -180,7 +180,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
             // Expressions to Parse
             Token::VarReference(_) | Token::ConstReference(_) | Token::FloatLiteral(_) | Token::IntLiteral(_) | Token::DecLiteral(_)=> {
                 scene.push(eval_expression(
-                    create_expression(scene_head, &mut j, false, &ast),
+                    create_expression(scene_head, &mut j, true, &ast),
                     &DataType::CoerseToString,
                     &ast
                 ));
@@ -188,7 +188,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
 
             Token::StringLiteral(_) | Token::RawStringLiteral(_) => {
                 scene.push(eval_expression(
-                    create_expression(scene_head, &mut j, false, &ast),
+                    create_expression(scene_head, &mut j, true, &ast),
                     &DataType::CoerseToString,
                     &ast
                 ));
@@ -276,6 +276,15 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
 
             Token::Pre(content) => {
                 scene.push(AstNode::Element(Token::Pre(content.to_string())));
+            }
+
+
+            // For templating values in scene heads in the body of scenes
+            Token::EmptyScene(spaces) => {
+                scene.push(AstNode::SceneTemplate);
+                for _ in 0..*spaces {
+                    scene.push(AstNode::Space);
+                }
             }
 
             Token::Empty | Token::AssignComptime => {}
