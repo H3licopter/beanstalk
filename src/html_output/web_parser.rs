@@ -1,7 +1,7 @@
 use super::{
     dom_hooks::{generate_dom_update_js, DOMUpdate},
     generate_html::create_html_boilerplate,
-    js_parser::{collection_to_js, collection_to_vec_of_js, combine_vec_to_js, expression_to_js},
+    js_parser::{collection_to_js, collection_to_vec_of_js, expression_to_js},
     markdown_parser::add_markdown_tags,
 };
 use crate::{
@@ -337,7 +337,6 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
             }
 
             // STUFF THAT IS INSIDE SCENE HEAD THAT NEEDS TO BE PASSED INTO SCENE BODY
-
             AstNode::VarReference(value) => {
                 // Create a span in the HTML with a class that can be referenced by JS
                 // TO DO: Should be reactive in future
@@ -348,7 +347,6 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
                     module_references.push(value);
                 }
             }
-
             AstNode::ConstReference(value) => {
                 // Create a span in the HTML with a class that can be referenced by JS
                 html.push_str(&format!("<span class=\"c{value}\"></span>"));

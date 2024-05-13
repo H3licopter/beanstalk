@@ -178,12 +178,19 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
             }
 
             // Expressions to Parse
-            Token::VarReference(_) | Token::ConstReference(_) | Token::FloatLiteral(_) | Token::IntLiteral(_) | Token::DecLiteral(_)=> {
+            Token::FloatLiteral(_) | Token::IntLiteral(_) | Token::DecLiteral(_)=> {
                 scene.push(eval_expression(
                     create_expression(scene_head, &mut j, true, &ast),
                     &DataType::CoerseToString,
                     &ast
                 ));
+            }
+
+            Token::VarReference(name)  => {
+                scene.push(AstNode::VarReference(*name));
+            }
+            Token::ConstReference(name) => {
+                scene.push(AstNode::ConstReference(*name));
             }
 
             Token::StringLiteral(_) | Token::RawStringLiteral(_) => {
@@ -388,7 +395,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
 
         Token::Pre(_) => false,
 
-        Token::A | Token::StringLiteral(_) => true,
+        Token::A | Token::StringLiteral(_) | Token::EmptyScene(_) => true,
 
         _ => {
             false

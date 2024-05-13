@@ -1,4 +1,6 @@
+var := "VARIABLEDFJNDAJFNKAJDN"
+
 ---
 ["inside", "!!!!":
-   some things [] a template[]
+   some things [] a template[]. Here's a variable inside the scene as well: [var]!
 ]

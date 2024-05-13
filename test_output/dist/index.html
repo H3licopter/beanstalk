@@ -19,7 +19,7 @@
 <!-- <link rel="manifest"href="favicons-folder-url/site.webmanifest"> -->
 <link rel="stylesheet" href="css/pico.min.css" />
 <link rel="stylesheet" href="css/bs.css" />
-<style></style></head><body><main class="container"><p>some things <span id="exp0"></span>&nbsp;a template<span id="exp1"></span></p></main>
+<style></style></head><body><main class="container"><p>some things <span id="exp0"></span>&nbsp;<span>a template<span id="exp1"></span><span>. Here's a variable inside the scene as well: <span class="c1"></span><span>!</span></span></span></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {
@@ -29,7 +29,7 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }document.getElementById('exp0').innerHTML='inside';document.getElementById('exp1').innerHTML='!!!!';
+            }let v1 = "VARIABLEDFJNDAJFNKAJDN";uInnerHTML("c1", v1);document.getElementById('exp0').innerHTML='inside';document.getElementById('exp1').innerHTML='!!!!';
   });
   
   function checkIfFileChanged() {
