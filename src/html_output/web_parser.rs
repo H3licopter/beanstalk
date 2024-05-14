@@ -6,8 +6,12 @@ use super::{
 };
 use crate::{
     parsers::{
-        ast::AstNode, styles::{Style, Tag}, util::count_newlines_at_end_of_string
-    }, settings::{get_html_config, HTMLMeta}, Token
+        ast::AstNode,
+        styles::{Style, Tag},
+        util::count_newlines_at_end_of_string,
+    },
+    settings::{get_html_config, HTMLMeta},
+    Token,
 };
 
 // Parse ast into valid JS, HTML and CSS
@@ -25,7 +29,17 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
         match node {
             // SCENES (HTML)
             AstNode::Scene(scene, scene_tags, scene_styles) => {
-                html.push_str(&parse_scene(scene, scene_tags, scene_styles, &mut Tag::None, &mut js, &mut module_references).0);
+                html.push_str(
+                    &parse_scene(
+                        scene,
+                        scene_tags,
+                        scene_styles,
+                        &mut Tag::None,
+                        &mut js,
+                        &mut module_references,
+                    )
+                    .0,
+                );
             }
             AstNode::Title(value) => {
                 page_title = value;
@@ -57,9 +71,12 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
             AstNode::Print(expr) => {
                 js.push_str(&format!("console.log({});", expression_to_js(&expr)));
             }
+            AstNode::Comment(_) => {
+                // Comments are not added to the final output (Atm). Maybe there will be some documentation thing eventually.
+            }
 
             _ => {
-                println!("unknown AST node found");
+                println!("unknown AST node found: {:?}", node);
             }
         }
     }
@@ -78,12 +95,17 @@ struct SceneTag {
 }
 
 // Returns a string of the HTML and whether the scene is inside a paragraph
-fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Style>, parent_tag: &mut Tag, js: &mut String, module_references: &mut Vec<usize>) -> (String, Tag) {
+fn parse_scene(
+    scene: Vec<AstNode>,
+    scene_tags: Vec<Tag>,
+    scene_styles: Vec<Style>,
+    parent_tag: &mut Tag,
+    js: &mut String,
+    module_references: &mut Vec<usize>,
+) -> (String, Tag) {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
 
-    let mut template_ids: u32 = 0;
-    
     // For tables
     let mut ele_count: u32 = 0;
     let mut columns: u32 = 0;
@@ -110,9 +132,10 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
                 scene_wrap.tag = Tag::Span;
             }
             Style::BackgroundColor(args) => {
-                scene_wrap
-                    .style
-                    .push_str(&format!("background-color:rgb({});", collection_to_js(&args)));
+                scene_wrap.style.push_str(&format!(
+                    "background-color:rgb({});",
+                    collection_to_js(&args)
+                ));
                 scene_wrap.tag = Tag::Span;
             }
             Style::TextColor(args) => {
@@ -150,7 +173,7 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
             Tag::Table(c) => {
                 match scene_wrap.tag {
                     Tag::Img(_) | Tag::Video(_) | Tag::Audio(_) => {
-                       // TO DO: Error handling that passes correctly into the AST for the end user
+                        // TO DO: Error handling that passes correctly into the AST for the end user
                     }
                     _ => {
                         scene_wrap.tag = Tag::Table(columns);
@@ -195,7 +218,8 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
         }
     }
 
-    let mut scenehead_literals: Vec<AstNode> = Vec::new();
+    let mut scenehead_literals: Vec<(AstNode, usize)> = Vec::new();
+    let mut scenehead_templates: Vec<usize> = Vec::new();
 
     for node in scene {
         match node {
@@ -206,7 +230,7 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
                             "<span>{}",
                             add_markdown_tags(&mut content.clone())
                         ));
-                        
+
                         match *parent_tag {
                             Tag::P => {
                                 if count_newlines_at_end_of_string(&content) > 1 {
@@ -260,32 +284,36 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
                                         html.push_str(&parsed_content);
                                     }
                                     Tag::Th => {
-                                        html.push_str(&format!("<th scope='col'>{}", parsed_content));
+                                        html.push_str(&format!(
+                                            "<th scope='col'>{}",
+                                            parsed_content
+                                        ));
                                         closing_tags.push("</th>".to_string());
                                     }
                                     Tag::Td => {
                                         html.push_str(&format!("<td>{}", parsed_content));
                                         closing_tags.push("</td>".to_string());
                                     }
-                                    _=> {
-                                        match scene_wrap.tag {
-                                            Tag::Table(_) => {
-                                                html.push_str(&format!("<th>{}</th>", parsed_content));
-                                            }
-                                            Tag::Span => {
-                                                html.push_str(&format!("<span style=\"{}\">{}</span>", scene_wrap.style, parsed_content));
-                                            }
-                                            _ => {
-                                                html.push_str(&format!("<p>{}", parsed_content));
-                                                if count_newlines_at_end_of_string(&content) > 1 {
-                                                    html.push_str("</p>");
-                                                    *parent_tag = Tag::None;
-                                                } else {
-                                                    *parent_tag = Tag::P;
-                                                }
+                                    _ => match scene_wrap.tag {
+                                        Tag::Table(_) => {
+                                            html.push_str(&format!("<th>{}</th>", parsed_content));
+                                        }
+                                        Tag::Span => {
+                                            html.push_str(&format!(
+                                                "<span style=\"{}\">{}</span>",
+                                                scene_wrap.style, parsed_content
+                                            ));
+                                        }
+                                        _ => {
+                                            html.push_str(&format!("<p>{}", parsed_content));
+                                            if count_newlines_at_end_of_string(&content) > 1 {
+                                                html.push_str("</p>");
+                                                *parent_tag = Tag::None;
+                                            } else {
+                                                *parent_tag = Tag::P;
                                             }
                                         }
-                                    }
+                                    },
                                 }
                             }
                         }
@@ -325,9 +353,16 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
                 };
             }
 
-            AstNode::Scene(scene, scene_tags, scene_styles) => {
+            AstNode::Scene(new_scene_nodes, new_scene_tags, new_scene_styles) => {
                 add_table_open_tags(&mut html, columns, &mut ele_count, parent_tag);
-                let new_scene = parse_scene(scene, scene_tags, scene_styles, parent_tag, js, module_references);
+                let new_scene = parse_scene(
+                    new_scene_nodes,
+                    new_scene_tags,
+                    new_scene_styles,
+                    parent_tag,
+                    js,
+                    module_references,
+                );
                 html.push_str(&new_scene.0);
                 add_table_closing_tags(&mut html, columns, &mut ele_count, parent_tag);
             }
@@ -356,27 +391,24 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
                     module_references.push(value);
                 }
             }
-            
+
             // WILL CALL WASM FUNCTIONS
             AstNode::RuntimeExpression(expr, expr_type) => {
-                scenehead_literals.push(
-                    AstNode::RuntimeExpression(expr, expr_type)
-                );
+                scenehead_literals.push((AstNode::RuntimeExpression(expr, expr_type), html.len()));
             }
 
             AstNode::Tuple(items) => {
                 for item in items {
-                    scenehead_literals.push(item);
+                    scenehead_literals.push((item, html.len()));
                 }
             }
 
             AstNode::Literal(token) => {
-                scenehead_literals.push(AstNode::Literal(token));
+                scenehead_literals.push((AstNode::Literal(token), html.len()));
             }
 
             AstNode::SceneTemplate => {
-                html.push_str(&format!("<span id=\"exp{template_ids}\"></span>"));
-                template_ids += 1;
+                scenehead_templates.push(html.len());
             }
 
             // ERROR HANDLING
@@ -389,59 +421,56 @@ fn parse_scene(scene: Vec<AstNode>, scene_tags: Vec<Tag>, scene_styles: Vec<Styl
         }
     }
 
+    for tag in closing_tags.iter().rev() {
+        html.push_str(tag);
+    }
 
     // Take all scenehead variables and add them into any templates inside of the scene body
     // When there are no templates left, create a new span element to hold the literal
     let mut id: u32 = 0;
-    for literal in scenehead_literals {        
-        let number_of_templates = template_ids;
+    for literal in scenehead_literals.into_iter().rev() {
         let mut js_string = String::new();
 
-        match literal {
+        match literal.0 {
             AstNode::RuntimeExpression(expr, expr_type) => {
                 js_string = expression_to_js(&AstNode::RuntimeExpression(expr, expr_type));
             }
-            AstNode::Literal(token) => {
-                match token {
-                    Token::StringLiteral(value) | Token::RawStringLiteral(value) => {
-                        js_string = format!("'{}'", value);
-                    }
-                    Token::RuneLiteral(char) => {
-                        js_string = format!("'{}'", char);
-                    }
-                    Token::IntLiteral(value) =>{
-                        js_string = value.to_string();
-                    }
-                    Token::FloatLiteral(value) => {
-                        js_string = value.to_string();
-                    }
-                    Token::DecLiteral(value) => {
-                        js_string = value.to_string();
-                    }
-                    Token::BoolLiteral(value) => {
-                        js_string = value.to_string();
-                    }
-                    _ => {}
+            AstNode::Literal(token) => match token {
+                Token::StringLiteral(value) | Token::RawStringLiteral(value) => {
+                    js_string = format!("'{}'", value);
                 }
-            }
-            _=> {
+                Token::RuneLiteral(char) => {
+                    js_string = format!("'{}'", char);
+                }
+                Token::IntLiteral(value) => {
+                    js_string = value.to_string();
+                }
+                Token::FloatLiteral(value) => {
+                    js_string = value.to_string();
+                }
+                Token::DecLiteral(value) => {
+                    js_string = value.to_string();
+                }
+                Token::BoolLiteral(value) => {
+                    js_string = value.to_string();
+                }
+                _ => {}
+            },
+            _ => {
                 println!("Scene Head literal not yet supported in scene body");
             }
         }
 
+        // If there are templates inside the scene, use that index.
+        // Otherwise just use the index of where the literal would be inserted.
+        let index = scenehead_templates.pop().unwrap_or(literal.1);
+        html.insert_str(index, &format!("<span id=\"exp{id}\"></span>"));
 
-        // If there are no more templates inside the scene
-        if id > number_of_templates {
-            html.push_str(&format!("<span id=\"exp{id}\"></span>"));
-        }
-
-        js.push_str(&format!("document.getElementById('exp{id}').innerHTML={js_string};"));
+        js.push_str(&format!(
+            "document.getElementById('exp{id}').innerHTML={js_string};"
+        ));
 
         id += 1;
-    }
-
-    for tag in closing_tags.iter().rev() {
-        html.push_str(tag);
     }
 
     match scene_wrap.tag {
@@ -537,14 +566,14 @@ fn add_table_open_tags(html: &mut String, columns: u32, ele_count: &mut u32, par
                 } else {
                     *parent_tag = Tag::Th;
                 }
-            },
+            }
             // if this is the first element for this column
             1 => {
                 // If this is the first element for this column, open the table column and first element
                 html.push_str("<tr>");
                 *parent_tag = Tag::Th;
-            },
-            _=> {
+            }
+            _ => {
                 // If first row, make sure all the table elements are headings
                 if *ele_count < columns {
                     *parent_tag = Tag::Th;
@@ -556,10 +585,14 @@ fn add_table_open_tags(html: &mut String, columns: u32, ele_count: &mut u32, par
     }
 }
 
-fn add_table_closing_tags(html: &mut String, columns: u32, ele_count: &mut u32, parent_tag: &mut Tag) {
+fn add_table_closing_tags(
+    html: &mut String,
+    columns: u32,
+    ele_count: &mut u32,
+    parent_tag: &mut Tag,
+) {
     // If this is a table scene, close the table row (and possibly column)
     if columns > 0 && *ele_count > 0 {
-        
         // If this is the last element for this column
         if *ele_count % columns == 0 {
             // Close the table element and column, should be a td unless there is just one column

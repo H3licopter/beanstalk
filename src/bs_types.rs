@@ -8,8 +8,8 @@ pub enum DataType {
     Bool,
     True,
     False,
-    String, // UTF-8 (will probably just be utf 16 because js for now)
-    Rune,   // UTF-32
+    String,         // UTF-8 (will probably just be utf 16 because js for now)
+    Rune,           // UTF-32
     CoerseToString, // Any type can be used in the expression and will be coerced to a string (for scenes only)
     Collection,
     Scene,

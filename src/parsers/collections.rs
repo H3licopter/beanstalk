@@ -3,7 +3,12 @@ use super::parse_expression::eval_expression;
 use crate::parsers::parse_expression::create_expression;
 use crate::{bs_types::DataType, Token};
 
-pub fn new_tuple(tokens: &Vec<Token>, i: &mut usize, first_item: AstNode, ast: &Vec<AstNode>) -> AstNode {
+pub fn new_tuple(
+    tokens: &Vec<Token>,
+    i: &mut usize,
+    first_item: AstNode,
+    ast: &Vec<AstNode>,
+) -> AstNode {
     let first_item_eval = eval_expression(first_item, &DataType::Inferred, ast);
     let mut items: Vec<AstNode> = vec![first_item_eval];
 
@@ -18,7 +23,7 @@ pub fn new_tuple(tokens: &Vec<Token>, i: &mut usize, first_item: AstNode, ast: &
                 items.push(create_expression(tokens, i, true, &ast));
             }
 
-            _=> {
+            _ => {
                 items.push(create_expression(tokens, i, true, &ast));
             }
         }

@@ -15,7 +15,12 @@ use crate::{bs_types::DataType, Token};
      Enforcing the type is done when the expression is evaluated
      Evaluated expressions must be of the same type
 */
-pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool, ast: &Vec<AstNode>) -> AstNode {
+pub fn create_expression(
+    tokens: &Vec<Token>,
+    i: &mut usize,
+    inside_tuple: bool,
+    ast: &Vec<AstNode>,
+) -> AstNode {
     let mut expression = Vec::new();
 
     // Check if value is wrapped in brackets and move on until first value is found
@@ -119,7 +124,6 @@ pub fn create_expression(tokens: &Vec<Token>, i: &mut usize, inside_tuple: bool,
                 expression.push(AstNode::Operator(" // ".to_string()));
             }
 
-
             // LOGICAL OPERATORS
             Token::Equal => {
                 expression.push(AstNode::LogicalOperator(Token::Equal, 5));
@@ -170,7 +174,11 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
             for node in e {
                 match node {
                     AstNode::Literal(t) => {
-                        simplified_expression.push(check_literal(t, type_declaration, &mut current_type));
+                        simplified_expression.push(check_literal(
+                            t,
+                            type_declaration,
+                            &mut current_type,
+                        ));
                     }
                     // AstNode::LogicalOperator(op, precedence) => {
                     //     simplified_expression.push(AstNode::LogicalOperator(op, precedence));
@@ -181,26 +189,36 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                             return AstNode::Error("Can only use the + operator to manipulate strings inside string expressions".to_string());
                         }
                         if simplified_expression.len() < 1 {
-                            return AstNode::Error("Must have a value to the left of an operator".to_string());
+                            return AstNode::Error(
+                                "Must have a value to the left of an operator".to_string(),
+                            );
                         }
                         simplified_expression.push(AstNode::Operator(op));
                     }
                     AstNode::ConstReference(value) | AstNode::VarReference(value) => {
                         compile_time_eval = false;
                         match &ast[value] {
-                            AstNode::VarDeclaration(_, assignment, _) | AstNode::Const(_, assignment, _) => {
+                            AstNode::VarDeclaration(_, assignment, _)
+                            | AstNode::Const(_, assignment, _) => {
                                 let expr = *assignment.clone();
 
                                 // Get the type and value of the original variable
                                 match expr {
                                     AstNode::Literal(t) => {
-                                        simplified_expression.push(check_literal(t, type_declaration, &mut current_type));
+                                        simplified_expression.push(check_literal(
+                                            t,
+                                            type_declaration,
+                                            &mut current_type,
+                                        ));
                                     }
                                     AstNode::RuntimeExpression(e, expr_type) => {
-                                        if current_type == DataType::Inferred || current_type != expr_type {
+                                        if current_type == DataType::Inferred
+                                            || current_type != expr_type
+                                        {
                                             return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
                                         }
-                                        simplified_expression.push(AstNode::RuntimeExpression(e, expr_type));
+                                        simplified_expression
+                                            .push(AstNode::RuntimeExpression(e, expr_type));
                                     }
                                     _ => {
                                         return AstNode::Error("Invalid Expression".to_string());
@@ -222,7 +240,11 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
             for node in e {
                 match node {
                     AstNode::Expression(e) | AstNode::Tuple(e) => {
-                        simplified_expression.push(eval_expression(AstNode::Expression(e), type_declaration, ast));
+                        simplified_expression.push(eval_expression(
+                            AstNode::Expression(e),
+                            type_declaration,
+                            ast,
+                        ));
                     }
                     _ => {
                         simplified_expression.push(node);
@@ -280,7 +302,11 @@ fn concat_strings(simplified_expression: &mut Vec<AstNode>) -> AstNode {
     AstNode::Literal(Token::StringLiteral(new_string))
 }
 
-fn check_literal(value: Token, type_declaration: &DataType, current_type: &mut DataType) -> AstNode {
+fn check_literal(
+    value: Token,
+    type_declaration: &DataType,
+    current_type: &mut DataType,
+) -> AstNode {
     if type_declaration == &DataType::CoerseToString {
         return AstNode::Literal(value);
     }
@@ -288,7 +314,6 @@ fn check_literal(value: Token, type_declaration: &DataType, current_type: &mut D
         Token::IntLiteral(_) => {
             if type_declaration == &DataType::Inferred {
                 *current_type = DataType::Int;
-                
             } else if type_declaration != &DataType::Int {
                 return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
             }
@@ -308,11 +333,9 @@ fn check_literal(value: Token, type_declaration: &DataType, current_type: &mut D
             } else if type_declaration != &DataType::String {
                 return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
             }
-            
+
             AstNode::Literal(value)
         }
-        _ => {
-            AstNode::Error("Invalid Literal (check_literal)".to_string())
-        }
+        _ => AstNode::Error("Invalid Literal (check_literal)".to_string()),
     }
 }

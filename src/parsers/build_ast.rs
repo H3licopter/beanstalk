@@ -49,7 +49,9 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                 ast.push(AstNode::VarReference(find_var_declaration_index(&ast, id)));
             }
             Token::ConstReference(id) => {
-                ast.push(AstNode::ConstReference(find_var_declaration_index(&ast, id)));
+                ast.push(AstNode::ConstReference(find_var_declaration_index(
+                    &ast, id,
+                )));
             }
 
             Token::Title => {
@@ -86,15 +88,11 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
 
             Token::Print => {
                 i += 1;
-                ast.push(AstNode::Print(Box::new(
-                    eval_expression(
-                        create_expression(
-                                &tokens, 
-                                &mut i, 
-                                false,
-                                &ast
-                            ),
-                    &DataType::Inferred, &ast))));
+                ast.push(AstNode::Print(Box::new(eval_expression(
+                    create_expression(&tokens, &mut i, false, &ast),
+                    &DataType::Inferred,
+                    &ast,
+                ))));
             }
 
             Token::DeadVarible => {
@@ -121,7 +119,13 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
 
 // CAN RETURN:
 // VarDeclaration, Const, Error, Function, Tuple
-fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bool, ast: &Vec<AstNode>) -> AstNode {
+fn new_variable(
+    name: usize,
+    tokens: &Vec<Token>,
+    i: &mut usize,
+    is_exported: bool,
+    ast: &Vec<AstNode>,
+) -> AstNode {
     let attribute;
 
     *i += 1;
@@ -163,7 +167,11 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
                 return AstNode::Struct(name, Box::new(new_array(tokens, i, ast)), is_exported)
             }
             Attribute::Mutable | Attribute::Constant => {
-                return AstNode::VarDeclaration(name, Box::new(new_array(tokens, i, ast)), is_exported)
+                return AstNode::VarDeclaration(
+                    name,
+                    Box::new(new_array(tokens, i, ast)),
+                    is_exported,
+                )
             }
             _ => {
                 return AstNode::Error(
@@ -233,7 +241,12 @@ fn new_variable(name: usize, tokens: &Vec<Token>, i: &mut usize, is_exported: bo
 
         // }
         AstNode::Error(_) => {
-            return AstNode::Error(format!("Invalid expression for variable assignment (creating new variable: {name})").to_string());
+            return AstNode::Error(
+                format!(
+                    "Invalid expression for variable assignment (creating new variable: {name})"
+                )
+                .to_string(),
+            );
         }
         _ => {
             return AstNode::Error("Invalid expression for variable assignment".to_string());
@@ -310,7 +323,7 @@ fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {
         Token::Assign
         | Token::AssignConstant
         | Token::AssignComptime
-        | Token::AssignComptimeVariable=> {
+        | Token::AssignComptimeVariable => {
             *i += 1;
         }
         Token::Newline => {

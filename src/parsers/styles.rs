@@ -5,7 +5,7 @@ pub enum Tag {
     None,
     Span,
     Div,
-    P, // To check whether scene is already inside a P tag
+    P,             // To check whether scene is already inside a P tag
     A(String),     // src
     Img(String),   // src
     Video(String), // src

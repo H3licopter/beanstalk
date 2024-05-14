@@ -1,12 +1,18 @@
 use super::{
-    ast::AstNode, parse_expression::{create_expression, eval_expression}, styles::{Style, Tag}, util::{
-        count_newlines_at_end_of_string, count_newlines_at_start_of_string,
-    }
+    ast::AstNode,
+    parse_expression::{create_expression, eval_expression},
+    styles::{Style, Tag},
+    util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
 };
 use crate::{bs_types::DataType, Token};
 
 // Recursive function to parse scenes
-pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>) -> AstNode {
+pub fn new_scene(
+    scene_head: &Vec<Token>,
+    tokens: &Vec<Token>,
+    i: &mut usize,
+    ast: &Vec<AstNode>,
+) -> AstNode {
     let mut scene = Vec::new();
     *i += 1;
 
@@ -16,7 +22,6 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
 
     // Look at all the possible properties that can be added to the scene head
     let mut j = 0;
-
     while j < scene_head.len() {
         match &scene_head[j] {
             Token::SceneClose(spaces) => {
@@ -110,20 +115,18 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
                 let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
 
                 match eval_arg {
-                    AstNode::Literal(literal_token) => {
-                        match literal_token {
-                            Token::IntLiteral(value) => {
-                                scene_tags.push(Tag::Table(value as u32));
-                            }
-                            Token::FloatLiteral(value) => {
-                                scene_tags.push(Tag::Table(value as u32));
-                            }
-                            _=> {
-                                println!("Incorrect arguments passed into table declaration");
-                            }
+                    AstNode::Literal(literal_token) => match literal_token {
+                        Token::IntLiteral(value) => {
+                            scene_tags.push(Tag::Table(value as u32));
                         }
-                    }
-                    _=> {
+                        Token::FloatLiteral(value) => {
+                            scene_tags.push(Tag::Table(value as u32));
+                        }
+                        _ => {
+                            println!("Incorrect arguments passed into table declaration");
+                        }
+                    },
+                    _ => {
                         println!("Incorrect arguments passed into table declaration");
                     }
                 }
@@ -178,15 +181,15 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
             }
 
             // Expressions to Parse
-            Token::FloatLiteral(_) | Token::IntLiteral(_) | Token::DecLiteral(_)=> {
+            Token::FloatLiteral(_) | Token::IntLiteral(_) | Token::DecLiteral(_) => {
                 scene.push(eval_expression(
                     create_expression(scene_head, &mut j, true, &ast),
                     &DataType::CoerseToString,
-                    &ast
+                    &ast,
                 ));
             }
 
-            Token::VarReference(name)  => {
+            Token::VarReference(name) => {
                 scene.push(AstNode::VarReference(*name));
             }
             Token::ConstReference(name) => {
@@ -197,7 +200,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
                 scene.push(eval_expression(
                     create_expression(scene_head, &mut j, true, &ast),
                     &DataType::CoerseToString,
-                    &ast
+                    &ast,
                 ));
             }
 
@@ -214,7 +217,7 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
                         Token::SceneClose(_) | Token::EOF => {
                             break;
                         }
-                        _=> {}
+                        _ => {}
                     }
                     *i += 1;
                 }
@@ -284,7 +287,6 @@ pub fn new_scene(scene_head: &Vec<Token>, tokens: &Vec<Token>, i: &mut usize, as
             Token::Pre(content) => {
                 scene.push(AstNode::Element(Token::Pre(content.to_string())));
             }
-
 
             // For templating values in scene heads in the body of scenes
             Token::EmptyScene(spaces) => {
@@ -397,9 +399,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
 
         Token::A | Token::StringLiteral(_) | Token::EmptyScene(_) => true,
 
-        _ => {
-            false
-        }
+        _ => false,
     }
 }
 
@@ -413,7 +413,7 @@ fn check_if_comptime_value(node: &AstNode) -> bool {
                 }
             }
             true
-        },
+        }
         _ => false,
     }
 }

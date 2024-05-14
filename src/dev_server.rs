@@ -25,7 +25,7 @@ pub fn start_dev_server(mut path: String) {
 
     build_project(&"test".to_string());
     let _ = test::test_build();
-    
+
     let mut modified = get_last_modified(&format!("{}/src/", &path));
     for stream in listener.incoming() {
         let stream = stream.unwrap();
@@ -33,7 +33,11 @@ pub fn start_dev_server(mut path: String) {
     }
 }
 
-fn handle_connection(mut stream: TcpStream, path: String, last_modified: &mut std::time::SystemTime) {
+fn handle_connection(
+    mut stream: TcpStream,
+    path: String,
+    last_modified: &mut std::time::SystemTime,
+) {
     let buf_reader = BufReader::new(&mut stream);
     let current_dir = std::env::current_dir();
     let entry_path = match current_dir {
@@ -45,8 +49,7 @@ fn handle_connection(mut stream: TcpStream, path: String, last_modified: &mut st
     };
 
     // println!("{}", format!("{}/{}/dist/any file should be here", entry_path, path));
-    let mut contents =
-        fs::read(format!("{}/{}/dist/404.html", entry_path, path)).unwrap();
+    let mut contents = fs::read(format!("{}/{}/dist/404.html", entry_path, path)).unwrap();
     let mut length = contents.len();
     let mut status_line = "HTTP/1.1 404 NOT FOUND";
     let mut content_type = "text/html";
@@ -54,7 +57,6 @@ fn handle_connection(mut stream: TcpStream, path: String, last_modified: &mut st
     let request_line = buf_reader.lines().next().unwrap();
     match request_line {
         Ok(request) => {
-
             // HANDLE REQUESTS
             if request == "GET / HTTP/1.1" {
                 contents = fs::read(format!("{}/dist/index.html", path)).unwrap();
@@ -90,10 +92,11 @@ fn handle_connection(mut stream: TcpStream, path: String, last_modified: &mut st
 
                 println!("Requested path: {}", file_path);
                 let file_requested = if file_path.ends_with(".wasm") {
-                        fs::read(format!("{}/dist{}", path, file_path))
-                    } else {
-                        fs::read_to_string(format!("{}/dist{}", path, file_path)).map(|c| c.into_bytes())
-                    };
+                    fs::read(format!("{}/dist{}", path, file_path))
+                } else {
+                    fs::read_to_string(format!("{}/dist{}", path, file_path))
+                        .map(|c| c.into_bytes())
+                };
 
                 match file_requested {
                     Ok(c) => {
@@ -118,9 +121,7 @@ fn handle_connection(mut stream: TcpStream, path: String, last_modified: &mut st
 
     let string_response = format!(
         "{}\r\nContent-Length: {}\r\nContent-Type: {}\r\n\r\n",
-        status_line,
-        length,
-        content_type,
+        status_line, length, content_type,
     );
 
     let response = &[string_response.as_bytes(), &contents].concat();

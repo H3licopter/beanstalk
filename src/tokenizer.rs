@@ -16,11 +16,7 @@ pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
     loop {
         match token {
             Token::Variable(name) => {
-                token = new_var_or_ref(
-                    name,
-                    &mut var_names,
-                    &tokens,
-                );
+                token = new_var_or_ref(name, &mut var_names, &tokens);
             }
 
             // Check for variables used inside of scenehead
@@ -30,11 +26,7 @@ pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
                 for t in content {
                     match t {
                         Token::Variable(name) => {
-                            let var = new_var_or_ref(
-                                name,
-                                &mut var_names,
-                                &tokens,
-                            );
+                            let var = new_var_or_ref(name, &mut var_names, &tokens);
                             match var {
                                 Token::VarReference(id) => {
                                     processed_scenehead.push(Token::VarReference(id));
@@ -431,7 +423,6 @@ fn get_next_token(
         token_value.push(current_char);
 
         while let Some(&next_char) = chars.peek() {
-
             if next_char == '_' {
                 chars.next();
                 continue;
@@ -466,9 +457,7 @@ fn get_next_token(
         return keyword_or_variable(&mut token_value, chars, tokenize_mode);
     }
 
-    if current_char == '_' {
-        
-    }
+    if current_char == '_' {}
 
     Token::Error(format!("Invalid Token Used. Token: {}", current_char))
 }
@@ -889,7 +878,7 @@ pub fn new_var_or_ref(
     match check_if_ref {
         Some(index) => {
             var_names[index].has_ref = true;
-            
+
             // POSSIBLE OUT OF BOUNDS ERROR TO SORT OUT??? or will that never happen because of the check_if_ref?
             let token_after = &tokens[var_names[index].next_token_index];
 

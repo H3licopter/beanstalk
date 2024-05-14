@@ -1,13 +1,11 @@
 use crate::{bs_types::DataType, parsers::ast::AstNode, Token};
 
-
 pub fn expression_to_js(expr: &AstNode) -> String {
     let mut js = String::new(); //Open the template string
 
     match expr {
         // CREATE THE JS CODE FOR THE EXPRESSION -> Uses webassembly functions to handle types properly
         AstNode::RuntimeExpression(nodes, expression_type) => {
-
             for node in nodes {
                 match node {
                     AstNode::Literal(token) => match token {
@@ -47,10 +45,9 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     //     }
                     //     js.push_str(&format!("f{}({:?})", name, js_args));
                     // }
-
                     AstNode::Operator(op) => {
                         js.push_str(op);
-                    },
+                    }
 
                     AstNode::Tuple(values) => {
                         js.push_str(&format!("[{}]", combine_vec_to_js(values)));
