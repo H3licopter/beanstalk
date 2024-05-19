@@ -26,21 +26,28 @@
 
 ## Example
 
-    -- Beanstalk example!
+    -- Beanstalk example! (this is a comment)
     variable := "variables"
 
     float_constant :: 5 * 68.9
 
     beans_img : "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg"
 
+    -- The following 3 dashes start a new scene body
     ---
     
-    # Beanstalk looks a bit like markdown
-    But all of a sudden you can start using *scenes*.
+    # Beanstalk scene bodies looks a bit like markdown
+    But all of a sudden you can start nesting *scenes* inside of them!
 
-    [rgb(140, 200, 255): Scenes are a way to group and style sections of your content. 
+    [rgb(140, 200, 255): 
+    
+    Scenes are a way to group and style sections of your content. 
     They can easily import [variable], and can contain expressions. 
-    And it's all [ 60 + 40 ]% clean, concise and readable.]
+    And it's all [ 60 + 40 ]% clean, concise and readable.
+    
+    ]
+
+    The scene head can contain a lot of useful keywords to style and position your content.
 
     ## Why use Beanstalk?
     - You can write your content naturally, without any HTML or CSS boilerplate.
@@ -48,7 +55,7 @@
     - Modern programming language syntax and modern UI sensibilities all in one file.
 
     You can easily add variables into your scenes such as that float defined earlier ([float_constant]). 
-    And all of this content automatically gets wrapped in the approrpriate HTML tags and CSS classes.
+    And all of this content automatically gets wrapped in the correct HTML tags and CSS classes.
 
     # Cool Things
     You can easily add images, videos, and other media to your content,
@@ -75,7 +82,7 @@ Beanstalk aims to become a self-contained ecosystem that can interop with exsist
 ## Overview
 When creating a page or UI in Beanstalk, you make Scenes.
 
-Scenes are a markup syntax that can be used to write text content, HTML, CSS and JS/WASM all in one file with it's own consistent syntax. It is designed to be very concise, easy to read and flexibly interop with regular code with build in reactivity.
+Scenes are a markup syntax that can be used to write text content, HTML, CSS and JS/WASM all in one file with it's own consistent syntax. It is designed to be very concise, easy to read and flexibly interop with regular code with built in reactivity.
 
 **Content**
 
