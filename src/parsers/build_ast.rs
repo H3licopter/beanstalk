@@ -53,6 +53,16 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                     &ast, id,
                 )));
             }
+            Token::CompileTimeConstReference(id) => {
+                ast.push(AstNode::CompileTimeConstReference(
+                    find_var_declaration_index(&ast, id),
+                ));
+            }
+            Token::CompileTimeVarReference(id) => {
+                ast.push(AstNode::CompileTimeVarReference(
+                    find_var_declaration_index(&ast, id),
+                ));
+            }
 
             Token::Title => {
                 i += 1;
@@ -285,16 +295,17 @@ fn create_var_node(
     is_exported: bool,
 ) -> AstNode {
     match attribute {
-        Attribute::Constant => {
+        Attribute::Constant | Attribute::Comptime => {
             return AstNode::Const(var_name, Box::new(var_value), is_exported);
         }
         Attribute::Mutable => {
             return AstNode::VarDeclaration(var_name, Box::new(var_value), is_exported);
         }
-        _ => {
-            return AstNode::Error(
-                "Invalid assignment declaration - possibly not supported yet?".to_string(),
-            );
+        Attribute::ComptimeVariable => {
+            return AstNode::Error("Comptime variable not yet supported".to_string());
+        }
+        Attribute::Exported => {
+            return AstNode::Error("Exported variable not yet supported".to_string());
         }
     }
 }

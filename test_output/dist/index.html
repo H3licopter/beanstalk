@@ -24,7 +24,10 @@
 </p><span style=""  class='bs-0'><p>Scenes are a way to group and style sections of your content. They can easily import <span class="c2"></span><span>, and can contain expressions. And it's all <span id="exp0"></span><span>% clean, concise and readable.</span></p></span><h2>Why use Beanstalk?
 </h2><li>You can write your content naturally, without any HTML or CSS boilerplate.</li><li>Break out into using powerful compiled expressions anytime</li><li>Modern programming language syntax and modern UI sensibilities all in one file.</li>You can easily add variables into your scenes such as that float defined earlier (<span class="c6"></span><span>). And all of this content automatically gets wrapped in the approrpriate HTML tags and CSS classes.
 
-</p><div style="display:flex;flex-wrap:wrap;justify-content:center;"  ><img src="images/default.png" style="width:57.735027%;height:57.735027%;"/><img src="images/default.png" style="width:57.735027%;height:57.735027%;"/><img src="images/default.png" style="width:57.735027%;height:57.735027%;"/></div></span></p></span></main>
+</p></p></span><h1>Cool Things
+</h1><p>You can easily add images, videos, and other media to your content, and even add multiple within the same scenehead for them to automatically be placed in a grid.
+
+</p><div style="display:flex;flex-wrap:wrap;justify-content:center;"  ><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/></div></span></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {
@@ -34,7 +37,7 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }let v2 = "variables";const cv6 = parse_float_expr(`5 * 68.9`);uInnerHTML("c2", v2);document.getElementById('exp0').innerHTML=String(60 + 40);uInnerHTML("c6", cv6);
+            }let v2 = "variables";const cv6 = parse_float_expr(`5 * 68.9`);const cv12 = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg";uInnerHTML("c2", v2);document.getElementById('exp0').innerHTML=String(60 + 40);uInnerHTML("c6", cv6);
   });
   
   function checkIfFileChanged() {

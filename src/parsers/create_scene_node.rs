@@ -35,18 +35,14 @@ pub fn new_scene(
 
             Token::A => {
                 j += 1;
-                let href = match &scene_head[j] {
-                    Token::StringLiteral(value) => {
-                        format!("\"https://{}\"", value)
-                    }
-                    _ => {
-                        scene.push(AstNode::Error(
-                            "No string literal provided for a href".to_string(),
-                        ));
-                        "".to_string()
-                    }
-                };
-                scene_tags.push(Tag::A(href));
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::String, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    scene_tags.push(Tag::A(eval_arg));
+                } else {
+                    // Need to add JS DOM hooks to change href at runtime.
+                    scene_tags.push(Tag::A(eval_arg));
+                }
             }
 
             Token::Padding => {
@@ -134,14 +130,14 @@ pub fn new_scene(
 
             Token::Img => {
                 j += 1;
-                match &scene_head[j] {
-                    Token::StringLiteral(value) => {
-                        scene_tags.push(Tag::Img(value.clone()));
-                    }
-                    _ => {
-                        scene.push(AstNode::Error("No src provided for img".to_string()));
-                    }
-                };
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::String, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    scene_tags.push(Tag::Img(eval_arg));
+                } else {
+                    // Need to add JS DOM hooks to change img src at runtime.
+                    scene_tags.push(Tag::Img(eval_arg));
+                }
             }
 
             Token::Alt => {
@@ -158,26 +154,26 @@ pub fn new_scene(
 
             Token::Video => {
                 j += 1;
-                match &scene_head[j] {
-                    Token::StringLiteral(value) => {
-                        scene_tags.push(Tag::Video(value.clone()));
-                    }
-                    _ => {
-                        scene.push(AstNode::Error("No src provided for video".to_string()));
-                    }
-                };
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::String, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    scene_tags.push(Tag::Video(eval_arg));
+                } else {
+                    // Need to add JS DOM hooks to change img src at runtime.
+                    scene_tags.push(Tag::Video(eval_arg));
+                }
             }
 
             Token::Audio => {
                 j += 1;
-                match &scene_head[j] {
-                    Token::StringLiteral(value) => {
-                        scene_tags.push(Tag::Audio(value.clone()));
-                    }
-                    _ => {
-                        scene.push(AstNode::Error("No src provided for audio".to_string()));
-                    }
-                };
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::String, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    scene_tags.push(Tag::Audio(eval_arg));
+                } else {
+                    // Need to add JS DOM hooks to change img src at runtime.
+                    scene_tags.push(Tag::Audio(eval_arg));
+                }
             }
 
             // Expressions to Parse

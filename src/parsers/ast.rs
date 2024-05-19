@@ -24,6 +24,8 @@ pub enum AstNode {
     // References to existing variables
     VarReference(usize),
     ConstReference(usize),
+    CompileTimeConstReference(usize),
+    CompileTimeVarReference(usize),
     FunctionCall(usize, Box<AstNode>),
 
     // Literals

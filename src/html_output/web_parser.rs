@@ -5,13 +5,11 @@ use super::{
     markdown_parser::add_markdown_tags,
 };
 use crate::{
-    parsers::{
+    bs_types::DataType, parsers::{
         ast::AstNode,
         styles::{Style, Tag},
         util::count_newlines_at_end_of_string,
-    },
-    settings::{get_html_config, HTMLMeta},
-    Token,
+    }, settings::{get_html_config, HTMLMeta}, Token
 };
 
 // Parse ast into valid JS, HTML and CSS
@@ -116,7 +114,7 @@ fn parse_scene(
     let mut ele_count: u32 = 0;
     let mut columns: u32 = 0;
 
-    let mut images: Vec<String> = Vec::new();
+    let mut images: Vec<&AstNode> = Vec::new();
     let mut scene_wrap = SceneTag {
         tag: Tag::None,
         properties: String::new(),
@@ -173,8 +171,8 @@ fn parse_scene(
 
     for tag in &scene_tags {
         match tag {
-            Tag::Img(src) => {
-                images.push(format!("{img_default_dir}/{src}"));
+            Tag::Img(value) => {
+                images.push(value);
                 img_count += 1;
             }
             Tag::Table(c) => {
@@ -190,25 +188,39 @@ fn parse_scene(
                     }
                 }
             }
-            Tag::Video(src) => {
-                scene_wrap.tag = Tag::Video(format!("{src}"));
-                if img_count > 0 {
-                    scene_wrap
-                        .properties
-                        .push_str(&format!(" poster=\"{}\"", images[0]));
-                }
+            Tag::Video(value) => {
+                scene_wrap.tag = Tag::Video(value.clone());
+
+                // TO DO, add poster after images are parsed
+                // if img_count > 0 {
+                //     let poster = format!("{}{}", img_default_dir, images[0]);
+                //     scene_wrap
+                //         .properties
+                //         .push_str(&format!(" poster=\"{}\"", poster));
+                // }
 
                 continue;
             }
             Tag::Audio(src) => {
-                scene_wrap.tag = Tag::Audio(src.to_string());
+                scene_wrap.tag = Tag::Audio(src.clone());
             }
             _ => {}
         }
     }
 
-    if img_count == 1 && scene_wrap.tag == Tag::None {
-        scene_wrap.tag = Tag::Img(images[0].to_string());
+    if img_count == 1 {
+        match scene_wrap.tag {
+            Tag::None => {
+                scene_wrap.tag = Tag::Img(images[0].clone());
+            }
+            Tag::Video(_) => {
+                let poster = format!("{}{}", img_default_dir, get_src(images[0]));
+                scene_wrap
+                    .properties
+                    .push_str(&format!(" poster=\"{}\"", poster));
+            }
+            _ => {}
+        }
     }
 
     // If there are multiple images, turn it into a grid of images
@@ -218,9 +230,10 @@ fn parse_scene(
             "display:flex;flex-wrap:wrap;justify-content:center;"
         ));
         let img_resize = 100.0 / f32::sqrt(img_count as f32);
-        for image in images {
+        for node in images {
+            let img = get_src(node);
             html.push_str(&format!(
-                "<img src=\"{image}\" style=\"width:{img_resize}%;height:{img_resize}%;\"/>"
+                "<img src=\"{img}\" style=\"width:{img_resize}%;height:{img_resize}%;\"/>"
             ));
         }
     }
@@ -502,7 +515,10 @@ fn parse_scene(
                     scene_wrap.style, scene_wrap.properties
                 ),
             );
-            if *parent_tag == Tag::P {
+            if match *parent_tag {
+                Tag::P => true,
+                _ => false,
+            } {
                 html.insert_str(0, "</p>");
                 *parent_tag = Tag::None;
             }
@@ -512,8 +528,10 @@ fn parse_scene(
             html.insert_str(
                 0,
                 &format!(
-                    "<a href=\"{}\" style=\"{}\" {}>",
-                    href, scene_wrap.style, scene_wrap.properties
+                    "<a href={} style=\"{}\" {}>",
+                    expression_to_js(&href),
+                    scene_wrap.style,
+                    scene_wrap.properties
                 ),
             );
             html.push_str("</a>");
@@ -522,11 +540,16 @@ fn parse_scene(
             html.insert_str(
                 0,
                 &format!(
-                    "<img src=\"{}\" style=\"{}\" {} />",
-                    src, scene_wrap.style, scene_wrap.properties
+                    "<img src={} style=\"{}\" {} />",
+                    expression_to_js(&src),
+                    scene_wrap.style,
+                    scene_wrap.properties
                 ),
             );
-            if *parent_tag == Tag::P {
+            if match *parent_tag {
+                Tag::P => true,
+                _ => false,
+            } {
                 html.insert_str(0, "</p>");
                 *parent_tag = Tag::None;
             }
@@ -539,10 +562,15 @@ fn parse_scene(
                 0,
                 &format!(
                     "<video src=\"{}\" style=\"{}\" {} controls />",
-                    src, scene_wrap.style, scene_wrap.properties
+                    expression_to_js(&src),
+                    scene_wrap.style,
+                    scene_wrap.properties
                 ),
             );
-            if *parent_tag == Tag::P {
+            if match *parent_tag {
+                Tag::P => true,
+                _ => false,
+            } {
                 html.insert_str(0, "</p>");
                 *parent_tag = Tag::None;
             }
@@ -552,7 +580,9 @@ fn parse_scene(
                 0,
                 &format!(
                     "<audio src=\"{}\" style=\"{}\" {} controls />",
-                    src, scene_wrap.style, scene_wrap.properties
+                    expression_to_js(&src),
+                    scene_wrap.style,
+                    scene_wrap.properties
                 ),
             );
         }
@@ -630,4 +660,29 @@ fn collect_closing_tags(closing_tags: &mut Vec<String>) -> String {
     }
 
     tags
+}
+
+fn get_src(value: &AstNode) -> String {
+    let mut src: String = String::new();
+    match value {
+        AstNode::Literal(Token::StringLiteral(value)) => {
+            src = value.clone();
+        }
+        AstNode::RuntimeExpression(expr, data_type) => {
+            if *data_type == DataType::String {
+                src = expression_to_js(&AstNode::RuntimeExpression(expr.clone(), DataType::String))
+            } else {
+                println!("Error: src attribute must be a string literal (Webparser - get src)");
+            }
+        }
+        _ => {
+            println!("Error: src attribute must be a string literal (Webparser - get src)");
+        }
+    }
+
+    if src.starts_with("http") {
+        return src;
+    } else {
+        return format!("{}/{}", get_html_config().image_folder_url, src);
+    }
 }

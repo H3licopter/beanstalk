@@ -34,6 +34,12 @@ pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
                                 Token::ConstReference(id) => {
                                     processed_scenehead.push(Token::ConstReference(id));
                                 }
+                                Token::CompileTimeVarReference(id) => {
+                                    processed_scenehead.push(Token::CompileTimeVarReference(id));
+                                }
+                                Token::CompileTimeConstReference(id) => {
+                                    processed_scenehead.push(Token::CompileTimeConstReference(id));
+                                }
                                 _ => {
                                     processed_scenehead.push(Token::DeadVarible);
                                 }
@@ -882,8 +888,16 @@ pub fn new_var_or_ref(
             // POSSIBLE OUT OF BOUNDS ERROR TO SORT OUT??? or will that never happen because of the check_if_ref?
             let token_after = &tokens[var_names[index].next_token_index];
 
-            if token_after == &Token::AssignConstant || token_after == &Token::AssignComptime {
+            if token_after == &Token::AssignConstant {
                 return Token::ConstReference(var_names[index].index);
+            }
+
+            if token_after == &Token::AssignComptimeVariable {
+                return Token::CompileTimeVarReference(var_names[index].index);
+            }
+
+            if token_after == &Token::AssignComptime {
+                return Token::CompileTimeConstReference(var_names[index].index);
             }
 
             return Token::VarReference(var_names[index].index);
