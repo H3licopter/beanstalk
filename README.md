@@ -47,7 +47,8 @@
     - Break out into using powerful compiled expressions anytime
     - Modern programming language syntax and modern UI sensibilities all in one file.
 
-    You can easily add variables into your scenes such as that float defined earlier ([float_constant]). And all of this content automatically gets wrapped in the approrpriate HTML tags and CSS classes.
+    You can easily add variables into your scenes such as that float defined earlier ([float_constant]). 
+    And all of this content automatically gets wrapped in the approrpriate HTML tags and CSS classes.
 
     # Cool Things
     You can easily add images, videos, and other media to your content,
