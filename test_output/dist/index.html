@@ -18,16 +18,25 @@
 <link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="images/favicons/site.webmanifest">
 <link rel="stylesheet" href="css/pico.min.css" />
-<style>.bs-0 > * {color:rgb(140, 200, 255);}</style></head><body><main class="container"><h1>Beanstalk looks a bit like markdown
-</h1><p>But all of a sudden you can start using <em>scenes</em>.
+<style>.bs-0 > * {color:rgb(140, 200, 255);}</style></head><body><main class="container"><h1>Beanstalk scene bodies looks a bit like markdown
+</h1><p>But all of a sudden you can start nesting <em>scenes</em> inside of them!
 
-</p><span style=""  class='bs-0'><p>Scenes are a way to group and style sections of your content. They can easily import <span class="c2"></span><span>, and can contain expressions. And it's all <span id="exp0"></span><span>% clean, concise and readable.</span></p></span><h2>Why use Beanstalk?
-</h2><li>You can write your content naturally, without any HTML or CSS boilerplate.</li><li>Break out into using powerful compiled expressions anytime</li><li>Modern programming language syntax and modern UI sensibilities all in one file.</li>You can easily add variables into your scenes such as that float defined earlier (<span class="c6"></span><span>). And all of this content automatically gets wrapped in the approrpriate HTML tags and CSS classes.
+</p><span style=""  class='bs-0'><p>Scenes are a way to group and style sections of your content. 
+They can easily import <span class="c2"></span><span>, and can contain expressions. 
+And it's all <span id="exp0"></span><span>% clean, concise and readable.
+
+</p></span></p></span><p>The scene head can contain a lot of useful keywords to style and position your content.
+
+</p><h2>Why use Beanstalk?
+</h2><li>You can write your content naturally, without any HTML or CSS boilerplate.</li><li>Break out into using powerful compiled expressions anytime</li><li>Modern programming language syntax and modern UI sensibilities all in one file.</li><p>You can easily add variables into your scenes such as that float defined earlier (<span class="c7"></span><span>). 
+And all of this content automatically gets wrapped in the correct HTML tags and CSS classes.
 
 </p></p></span><h1>Cool Things
-</h1><p>You can easily add images, videos, and other media to your content, and even add multiple within the same scenehead for them to automatically be placed in a grid.
+</h1><p>You can easily add images, videos, and other media to your content,
+and even add multiple within the same scenehead for them to automatically form a grid.
 
-</p><div style="display:flex;flex-wrap:wrap;justify-content:center;"  ><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/></div></span></main>
+</p><p><strong>Here's a grid of beans you didn't ask for</strong>
+</p><div style="display:flex;flex-wrap:wrap;justify-content:center;"  alt="BEANS" ><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg" style="width:50%;height:50%;"/></div></p></span></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {
@@ -37,7 +46,7 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }let v2 = "variables";const cv6 = parse_float_expr(`5 * 68.9`);const cv12 = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg";uInnerHTML("c2", v2);document.getElementById('exp0').innerHTML=String(60 + 40);uInnerHTML("c6", cv6);
+            }let v2 = "variables";const cv7 = parse_float_expr(`5 * 68.9`);const cv14 = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg";uInnerHTML("c2", v2);document.getElementById('exp0').innerHTML=String(60 + 40);uInnerHTML("c7", cv7);
   });
   
   function checkIfFileChanged() {

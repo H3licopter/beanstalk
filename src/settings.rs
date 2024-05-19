@@ -1,6 +1,6 @@
 pub struct Config {
     pub project: String,
-    pub main: String,
+    pub src: String,
     pub output_folder: String,
     pub name: String,
     pub version: String,
@@ -10,7 +10,7 @@ pub struct Config {
 pub fn get_default_config() -> Config {
     Config {
         project: String::from("html"),
-        main: String::from("src/pages/home.bs"),
+        src: String::from("src"),
         output_folder: String::from("dist"),
         name: String::from("html_project"),
         version: String::from("0.1.0"),

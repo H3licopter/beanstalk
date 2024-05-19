@@ -6,6 +6,7 @@ use crate::tokenizer;
 use crate::tokens::Token;
 use std::error::Error;
 use std::fs;
+use std::path::Path;
 
 struct OutputFile {
     source_code: String,
@@ -91,23 +92,8 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
         CompileType::MultiFile(source_code) => {
             // Get config settings from config file
             let project_config = get_config_data(&source_code)?;
-
-            // TO DO, READ WHOLE PROJECT FROM CONFIG ENTRY POINT AND ADD EVERYTHING TO COMPILE LIST
-
-            let main_code = fs::read_to_string(project_config.main);
-
-            match main_code {
-                Ok(content) => {
-                    source_code_to_parse.push(OutputFile {
-                        source_code: content,
-                        output_dir: format!("{}/", project_config.output_folder),
-                        file_name: "index.html".to_string(),
-                    });
-                }
-                Err(e) => {
-                    return Err(e.into());
-                }
-            }
+            let src_dir = fs::read_to_string(&format!("{}/{}", entry_path, project_config.src));
+            add_bs_files_to_parse(&mut source_code_to_parse, src_dir, &entry_path);
         }
     }
 
@@ -119,19 +105,58 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+// Look for every subdirectory inside of dir and add all .bs files to the source_code_to_parse
+fn add_bs_files_to_parse(source_code_to_parse: &mut Vec<OutputFile>, dir: Result<String, std::io::Error>, root_dir: &String) {
+    match dir {
+        Ok(dir) => {
+            for file in dir.split("\n") {
+                if file.ends_with(".bs") {
+                    let file_name = file.split("/").last().unwrap();
+                    let new_file_name = file_name.split(".").next().unwrap();
+                    let output_dir = format!("{}/dist", root_dir);
+                    let output_file = format!("{new_file_name}.html");
+
+                    source_code_to_parse.push(OutputFile {
+                        source_code: fs::read_to_string(&format!("{}/{}", root_dir, file)).unwrap(),
+                        output_dir: format!("{}/", output_dir),
+                        file_name: output_file,
+                    });
+
+                    continue;
+                }
+
+                // HANDLE USING JS / HTML / CSS / MARKDOWN FILES MIXED INTO THE PROJECT IN THE FUTURE
+
+                // If directory, recursively call add_bs_files_to_parse
+                let file_path = format!("{}/{}", root_dir, file);
+                if Path::new(&file_path).is_dir() {
+                    add_bs_files_to_parse(source_code_to_parse, fs::read_to_string(&file_path), root_dir);
+                }
+
+            }
+        }
+        Err(e) => {
+            println!("Error reading directory: {:?}", e);
+        }
+    }
+}
+
 fn compile(output: OutputFile) -> Result<Vec<AstNode>, Box<dyn Error>> {
     let tokens: Vec<Token> = tokenizer::tokenize(&output.source_code, &output.file_name);
     let ast = parsers::build_ast::new_ast(tokens, 0).0;
 
-    // If no output path, just return the AST
-    if !output.output_dir.is_empty() {
-        let output_path = format!("{}{}", output.output_dir, output.file_name);
-        println!("Compiling: {}", output_path);
-        fs::write(output_path, web_parser::parse(ast, get_html_config()))?;
-        return Ok(Vec::new());
+    // If no output path, create the path
+    if output.output_dir.is_empty() {
+        let current_dir = std::env::current_dir()?;
+        let output_dir = format!("{}/dist", current_dir.to_string_lossy().into_owned());
+        fs::create_dir_all(&output_dir)?;
     }
-
-    Ok(ast)
+    
+    let output_path = format!("{}{}", output.output_dir, output.file_name);
+    println!("Compiling: {}", output_path);
+    fs::write(output_path, web_parser::parse(ast, get_html_config()))?;
+    
+    Ok(Vec::new())
 }
 
 fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {

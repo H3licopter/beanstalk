@@ -2,7 +2,7 @@ bs.project = (
     name "html_project",
     version "0.1.0",
     description "",
-    root "index",
+    main "src/pages/home.bs",
     output_folder "dist",
     author "",
     license "MIT"

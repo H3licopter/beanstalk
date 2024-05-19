@@ -86,7 +86,14 @@ fn main() {
         }
         Command::Dev(path) => {
             println!("Starting dev server...");
-            dev_server::start_dev_server(path);
+            match dev_server::start_dev_server(path) {
+                Ok(_) => {
+                    println!("Dev server shutting down ... ");
+                }
+                Err(e) => {
+                    println!("Error with dev server: {:?}", e);
+                }
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
 use crate::{build, test};
+use std::error::Error;
+
 use std::{
     fs::{self, metadata},
     io::{prelude::*, BufReader},
@@ -6,22 +8,16 @@ use std::{
     time::Instant,
 };
 
-pub fn start_dev_server(mut path: String) {
+pub fn start_dev_server(mut path: String) -> Result<(), Box<dyn Error>> {
     let listener = TcpListener::bind("127.0.0.1:6969").unwrap();
     println!("Server listening on port 6969");
 
-    if path.is_empty() {
-        let current_dir = std::env::current_dir();
-
-        match current_dir {
-            Ok(dir) => {
-                path = dir.to_string_lossy().into_owned();
-            }
-            Err(e) => {
-                println!("Error getting current directory: {:?}", e);
-            }
-        }
-    }
+    let current_dir = std::env::current_dir()?;
+    path = format!(
+        "{}/{}",
+        current_dir.to_string_lossy().into_owned(),
+        path
+    );
 
     build_project(&"test".to_string());
     let _ = test::test_build();
@@ -31,6 +27,8 @@ pub fn start_dev_server(mut path: String) {
         let stream = stream.unwrap();
         handle_connection(stream, path.clone(), &mut modified);
     }
+
+    Ok(())
 }
 
 fn handle_connection(
