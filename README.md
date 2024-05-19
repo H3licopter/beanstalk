@@ -38,7 +38,9 @@
     # Beanstalk looks a bit like markdown
     But all of a sudden you can start using *scenes*.
 
-    [rgb(140, 200, 255): Scenes are a way to group and style sections of your content. They can easily import [variable], and can contain expressions. And it's all [ 60 + 40 ]% clean, concise and readable.]
+    [rgb(140, 200, 255): Scenes are a way to group and style sections of your content. 
+    They can easily import [variable], and can contain expressions. 
+    And it's all [ 60 + 40 ]% clean, concise and readable.]
 
     ## Why use Beanstalk?
     - You can write your content naturally, without any HTML or CSS boilerplate.
@@ -48,7 +50,8 @@
     You can easily add variables into your scenes such as that float defined earlier ([float_constant]). And all of this content automatically gets wrapped in the approrpriate HTML tags and CSS classes.
 
     # Cool Things
-    You can easily add images, videos, and other media to your content, and even add multiple within the same scenehead for them to automatically form a grid.
+    You can easily add images, videos, and other media to your content,
+    and even add multiple within the same scenehead for them to automatically form a grid.
 
     **Here's a grid of beans you didn't ask for**
     [
