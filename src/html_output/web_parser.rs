@@ -19,10 +19,11 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
     let mut js = generate_dom_update_js(DOMUpdate::InnerHTML).to_string();
     let _wasm = String::new();
     let mut html = String::new();
-    let css = String::new();
+    let mut css = String::new();
     let mut page_title = String::new();
 
     let mut module_references: Vec<usize> = Vec::new();
+    let mut class_id: usize = 0;
 
     // Parse HTML
     for node in ast {
@@ -36,7 +37,9 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
                         scene_styles,
                         &mut Tag::None,
                         &mut js,
+                        &mut css,
                         &mut module_references,
+                        &mut class_id,
                     )
                     .0,
                 );
@@ -92,6 +95,7 @@ struct SceneTag {
     tag: Tag,
     properties: String,
     style: String,
+    child_styles: String,
 }
 
 // Returns a string of the HTML and whether the scene is inside a paragraph
@@ -101,7 +105,9 @@ fn parse_scene(
     scene_styles: Vec<Style>,
     parent_tag: &mut Tag,
     js: &mut String,
+    css: &mut String,
     module_references: &mut Vec<usize>,
+    class_id: &mut usize,
 ) -> (String, Tag) {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
@@ -115,6 +121,7 @@ fn parse_scene(
         tag: Tag::None,
         properties: String::new(),
         style: String::new(),
+        child_styles: String::new(),
     };
 
     for style in scene_styles {
@@ -132,7 +139,7 @@ fn parse_scene(
                 scene_wrap.tag = Tag::Span;
             }
             Style::BackgroundColor(args) => {
-                scene_wrap.style.push_str(&format!(
+                scene_wrap.child_styles.push_str(&format!(
                     "background-color:rgb({});",
                     collection_to_js(&args)
                 ));
@@ -140,7 +147,7 @@ fn parse_scene(
             }
             Style::TextColor(args) => {
                 scene_wrap
-                    .style
+                    .child_styles
                     .push_str(&format!("color:rgb({});", collection_to_js(&args)));
                 scene_wrap.tag = Tag::Span;
             }
@@ -167,7 +174,7 @@ fn parse_scene(
     for tag in &scene_tags {
         match tag {
             Tag::Img(src) => {
-                images.push(format!("{img_default_dir}{src}"));
+                images.push(format!("{img_default_dir}/{src}"));
                 img_count += 1;
             }
             Tag::Table(c) => {
@@ -207,9 +214,9 @@ fn parse_scene(
     // If there are multiple images, turn it into a grid of images
     if img_count > 1 {
         scene_wrap.tag = Tag::Div;
-        scene_wrap
-            .properties
-            .push_str(&format!(" class=\"bs-img-grid\""));
+        scene_wrap.style.push_str(&format!(
+            "display:flex;flex-wrap:wrap;justify-content:center;"
+        ));
         let img_resize = 100.0 / f32::sqrt(img_count as f32);
         for image in images {
             html.push_str(&format!(
@@ -244,11 +251,8 @@ fn parse_scene(
                             Tag::Td => {
                                 closing_tags.push("</td>".to_string());
                             }
-                            _ => {
-                                *parent_tag = Tag::Span;
-                            }
+                            _ => {}
                         }
-
                         closing_tags.push("</span>".to_string());
                     }
 
@@ -294,26 +298,16 @@ fn parse_scene(
                                         html.push_str(&format!("<td>{}", parsed_content));
                                         closing_tags.push("</td>".to_string());
                                     }
-                                    _ => match scene_wrap.tag {
-                                        Tag::Table(_) => {
-                                            html.push_str(&format!("<th>{}</th>", parsed_content));
+                                    _ => {
+                                        html.push_str(&format!("<p>{}", parsed_content));
+                                        if count_newlines_at_end_of_string(&content) > 1 {
+                                            html.push_str("</p>");
+                                            *parent_tag = Tag::None;
+                                        } else {
+                                            closing_tags.push("</p>".to_string());
+                                            *parent_tag = Tag::P;
                                         }
-                                        Tag::Span => {
-                                            html.push_str(&format!(
-                                                "<span style=\"{}\">{}</span>",
-                                                scene_wrap.style, parsed_content
-                                            ));
-                                        }
-                                        _ => {
-                                            html.push_str(&format!("<p>{}", parsed_content));
-                                            if count_newlines_at_end_of_string(&content) > 1 {
-                                                html.push_str("</p>");
-                                                *parent_tag = Tag::None;
-                                            } else {
-                                                *parent_tag = Tag::P;
-                                            }
-                                        }
-                                    },
+                                    }
                                 }
                             }
                         }
@@ -361,8 +355,12 @@ fn parse_scene(
                     new_scene_styles,
                     parent_tag,
                     js,
+                    css,
                     module_references,
+                    class_id,
                 );
+
+                // Need to check if need to close some tags before the end of this scene
                 html.push_str(&new_scene.0);
                 add_table_closing_tags(&mut html, columns, &mut ele_count, parent_tag);
             }
@@ -471,6 +469,18 @@ fn parse_scene(
         ));
 
         id += 1;
+    }
+
+    // Create class for all child elements
+    if !scene_wrap.child_styles.is_empty() {
+        scene_wrap
+            .properties
+            .push_str(&format!(" class='bs-{class_id}'"));
+        css.push_str(&format!(
+            ".bs-{class_id} > * {{{}}}",
+            scene_wrap.child_styles
+        ));
+        *class_id += 1;
     }
 
     match scene_wrap.tag {

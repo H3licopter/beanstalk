@@ -55,6 +55,7 @@ fn handle_connection(
     let mut content_type = "text/html";
 
     let request_line = buf_reader.lines().next().unwrap();
+    println!("Request: {:?}", request_line);
     match request_line {
         Ok(request) => {
             // HANDLE REQUESTS
@@ -88,10 +89,20 @@ fn handle_connection(
                     content_type = "application/wasm";
                 } else if file_path.ends_with(".css") {
                     content_type = "text/css";
+                } else if file_path.ends_with(".png") {
+                    content_type = "image/png";
+                } else if file_path.ends_with(".jpg") {
+                    content_type = "image/jpeg";
+                } else if file_path.ends_with(".ico") {
+                    content_type = "image/ico";
                 }
 
                 println!("Requested path: {}", file_path);
-                let file_requested = if file_path.ends_with(".wasm") {
+                let file_requested = if file_path.ends_with(".wasm")
+                    || file_path.ends_with(".png")
+                    || file_path.ends_with(".jpg")
+                    || file_path.ends_with(".ico")
+                {
                     fs::read(format!("{}/dist{}", path, file_path))
                 } else {
                     fs::read_to_string(format!("{}/dist{}", path, file_path))

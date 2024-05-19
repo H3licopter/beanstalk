@@ -16,9 +16,8 @@
 <link rel="icon"href="site-favicons-folder-url/favicon.ico">
 <!-- <link rel="icon"href="site-favicons-folder-url/favicon.svg"type="image/svg+xml"> -->
 <link rel="apple-touch-icon"href="site-favicons-folder-url/apple-touch-icon.png">
-<!-- <link rel="manifest"href="favicons-folder-url/site.webmanifest"> -->
+<link rel="manifest"href="site-favicons-folder-url/site.webmanifest">
 <link rel="stylesheet" href="css/pico.min.css" />
-<link rel="stylesheet" href="css/bs.css" />
 <style>@page-css</style></head><body><main class="container">page-template</main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
@@ -35,7 +34,6 @@
       }).catch(console.error);
   }
 
-  // Call this function periodically to check if the file has changed
   setInterval(() => checkIfFileChanged(), 900);
 </script>
 </body>
