@@ -29,7 +29,7 @@
 </p><p>The source code for this site on <a href="https://github.com/H3licopter/beanstalk/tree/main/docs/src" style="" ><span>Github</span></a><span>. You can view the output of the Beanstalk compiler </span><a href="https://github.com/H3licopter/beanstalk/tree/main/docs/dist" style="" ><span>here</span></a><span>!
 
 </span></p><h2>Documentation
-</h2><a href="/docs/variables-and-datatypes.html" style="" ><span>Variables And Datatypes</span></a><p>More info will be added soon!
+</h2><a href="./docs/variables-and-datatypes.html" style="" ><span>Variables And Datatypes</span></a><p>More info will be added soon!
 
 </p></span></main>
 <script type="module">
@@ -43,17 +43,6 @@
                 }
             }
   });
-  
-  function checkIfFileChanged() {
-    fetch('/check', { method: 'HEAD' })
-      .then(response => {
-        if (response.status == 205) {
-          location.reload();
-        }
-      }).catch(console.error);
-  }
-
-  setInterval(() => checkIfFileChanged(), 500);
 </script>
 </body>
 </html>
