@@ -216,18 +216,24 @@ fn compile(output: OutputFile, release_build: bool) -> Result<Vec<AstNode>, Box<
     }
 
     let output_path = format!("{}{}", output.output_dir, output.file_name);
-    fs::write(output_path, web_parser::parse(ast, get_html_config(), release_build))?;
+    fs::write(
+        output_path,
+        web_parser::parse(ast, get_html_config(), release_build),
+    )?;
 
     Ok(Vec::new())
 }
 
 #[allow(dead_code)]
 fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
-    let config_ast = compile(OutputFile {
-        source_code: config_source_code.to_string(),
-        output_dir: String::new(),
-        file_name: String::new(),
-    }, false);
+    let config_ast = compile(
+        OutputFile {
+            source_code: config_source_code.to_string(),
+            output_dir: String::new(),
+            file_name: String::new(),
+        },
+        false,
+    );
     let config = get_default_config();
 
     match config_ast {

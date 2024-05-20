@@ -1,3 +1,5 @@
+use colour::red_ln;
+
 use crate::settings::HTMLMeta;
 use std::fs;
 
@@ -9,7 +11,7 @@ pub fn create_html_boilerplate(meta_tags: HTMLMeta, release_build: bool) -> Stri
         true => fs::read_to_string("src/html_output/boilerplate-release.html"),
         false => fs::read_to_string("src/html_output/boilerplate.html"),
     };
-    
+
     match file {
         Ok(html) => {
             boilerplate = html
@@ -31,7 +33,7 @@ pub fn create_html_boilerplate(meta_tags: HTMLMeta, release_build: bool) -> Stri
                 .replace("theme-color-light", &meta_tags.theme_color_light)
                 .replace("theme-color-dark", &meta_tags.theme_color_dark)
         }
-        Err(err) => println!("Error Reading HTML boilerplate file: {}", err),
+        Err(err) => red_ln!("Error Reading HTML boilerplate file: {}", err),
     };
 
     boilerplate

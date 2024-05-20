@@ -167,7 +167,9 @@ fn parse_scene(
                     .push_str(&format!(" alt=\"{}\"", value));
             }
             Style::Center(vertical) => {
-                scene_wrap.style.push_str("display:flex;align-items:center;flex-direction:column;");
+                scene_wrap
+                    .style
+                    .push_str("display:flex;align-items:center;flex-direction:column;");
                 if vertical {
                     scene_wrap.style.push_str("justify-content:center;");
                 }
@@ -177,7 +179,7 @@ fn parse_scene(
     }
 
     let mut img_count = 0;
-    let img_default_dir = get_html_config().image_folder_url.clone();
+    let img_default_dir = get_html_config().image_folder_url.to_owned();
 
     for tag in &scene_tags {
         match tag {
@@ -199,7 +201,7 @@ fn parse_scene(
                 }
             }
             Tag::Video(value) => {
-                scene_wrap.tag = Tag::Video(value.clone());
+                scene_wrap.tag = Tag::Video(value.to_owned());
 
                 // TO DO, add poster after images are parsed
                 // if img_count > 0 {
@@ -212,7 +214,10 @@ fn parse_scene(
                 continue;
             }
             Tag::Audio(src) => {
-                scene_wrap.tag = Tag::Audio(src.clone());
+                scene_wrap.tag = Tag::Audio(src.to_owned());
+            }
+            Tag::A(node) => {
+                scene_wrap.tag = Tag::A(node.to_owned());
             }
             _ => {}
         }
@@ -228,6 +233,10 @@ fn parse_scene(
                 scene_wrap
                     .properties
                     .push_str(&format!(" poster=\"{}\"", poster));
+            }
+            Tag::A(_) => {
+                let img_src = get_src(images[0]);
+                html.push_str(&format!("<img src=\"{img_src}\" />"));
             }
             _ => {}
         }
@@ -286,7 +295,7 @@ fn parse_scene(
                                     .properties
                                     .push_str(&format!(" alt=\"{}\"", content));
                             }
-                            Tag::Table(_) => {
+                            Tag::Table(_) | Tag::A(_) => {
                                 // basically just don't add any wrapping tags inside tables
                                 html.push_str(collect_closing_tags(&mut closing_tags).as_str());
                                 html.push_str(&add_markdown_tags(&mut content.clone()));

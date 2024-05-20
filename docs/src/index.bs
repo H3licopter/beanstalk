@@ -1,5 +1,16 @@
+#title "The Beanstalk Book"
 ---
 [center p(1):
     # THE BEANSTALK BOOK!
-    testing adding a bunch of stuff
+    # &#127793;
+    This whole site was written entirely using Beanstalk! Beanstalk compiled it all into HTML/CSS/JS/WASM for you to see.
+
+    This is a work in progress site for Beanstalk documentation as it's being developed. 
+
+    As the language and compiler are in the earliest stages of development, the documentation isn't complete and is subject to frequent changes.
+
+
+    The source code for this site on [link "https://github.com/H3licopter/beanstalk/tree/main/docs/src": Github]. You can view the output of the Beanstalk compiler [link "https://github.com/H3licopter/beanstalk/tree/main/docs/dist": here]!
+
+
 ]

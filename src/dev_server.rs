@@ -17,7 +17,7 @@ pub fn start_dev_server(mut path: String) -> Result<(), Box<dyn Error>> {
     let current_dir = std::env::current_dir()?;
     path = format!("{}/{}", current_dir.to_string_lossy().into_owned(), path);
 
-    build_project(&path, true);
+    build_project(&path, false);
 
     let mut modified = get_last_modified(&format!("{}/src", &path));
     for stream in listener.incoming() {
