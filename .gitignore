@@ -1,5 +1,6 @@
 debug/
 target/
+test_output/
 .vscode
 **/*.rs.bk
 *.pdb
