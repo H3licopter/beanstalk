@@ -64,17 +64,6 @@ You can also use this to bypass the directory based routing of the compiler.
                 }
             }
   });
-  
-  function checkIfFileChanged() {
-    fetch('/check', { method: 'HEAD' })
-      .then(response => {
-        if (response.status == 205) {
-          location.reload();
-        }
-      }).catch(console.error);
-  }
-
-  setInterval(() => checkIfFileChanged(), 900);
 </script>
 </body>
 </html>

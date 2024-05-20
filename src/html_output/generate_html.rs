@@ -1,11 +1,15 @@
 use crate::settings::HTMLMeta;
 use std::fs;
 
-pub fn create_html_boilerplate(meta_tags: HTMLMeta) -> String {
+pub fn create_html_boilerplate(meta_tags: HTMLMeta, release_build: bool) -> String {
     let mut boilerplate = String::new();
 
     // Add basic HTML boilerplate to output
-    let file = fs::read_to_string("src/html_output/boilerplate.html");
+    let file = match release_build {
+        true => fs::read_to_string("src/html_output/boilerplate-release.html"),
+        false => fs::read_to_string("src/html_output/boilerplate.html"),
+    };
+    
     match file {
         Ok(html) => {
             boilerplate = html

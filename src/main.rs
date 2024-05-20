@@ -34,6 +34,7 @@ pub use tokens::Token;
 enum Command {
     NewHTMLProject(String),
     Build(String),
+    Release(String),
     Test,
     Dev(String), // Runs local dev server
 }
@@ -69,7 +70,23 @@ fn main() {
         Command::Build(path) => {
             dark_cyan!("Building project...");
             let start = Instant::now();
-            match build::build(path) {
+            match build::build(path, false) {
+                Ok(_) => {
+                    let duration = start.elapsed();
+                    print!("Project built in: ");
+                    green_ln_bold!("{:?}", duration);
+
+                    main();
+                }
+                Err(e) => {
+                    red_ln!("Error building project: {:?}", e);
+                }
+            }
+        }
+        Command::Release(path) => {
+            dark_cyan!("Building project...");
+            let start = Instant::now();
+            match build::build(path, true) {
                 Ok(_) => {
                     let duration = start.elapsed();
                     print!("Project built in: ");
@@ -138,6 +155,25 @@ fn collect_user_input() -> Command {
                 }
             }
         }
+        Some("release") => {
+            let entry_path = match std::env::current_dir() {
+                Ok(dir) => dir.to_str().unwrap().to_owned(),
+                Err(e) => {
+                    red_ln!("Error getting current directory: {:?}", e);
+                    "".to_owned()
+                }
+            };
+
+            match args.get(1).map(String::as_str) {
+                Some(string) => {
+                    return Command::Release(format!("{}/{}", entry_path, string));
+                }
+                _ => {
+                    // Return current working directory path
+                    return Command::Release(entry_path);
+                }
+            }
+        }
         Some("test") => {
             return Command::Test;
         }
@@ -155,7 +191,7 @@ fn collect_user_input() -> Command {
         }
 
         _ => {
-            let _ = build::build("test".to_string());
+            let _ = build::build("test".to_string(), false);
             let _ = test::test_build();
             main();
         }

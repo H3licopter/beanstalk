@@ -16,7 +16,7 @@ use crate::{
 };
 
 // Parse ast into valid JS, HTML and CSS
-pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
+pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String {
     let mut js = generate_dom_update_js(DOMUpdate::InnerHTML).to_string();
     let _wasm = String::new();
     let mut html = String::new();
@@ -85,7 +85,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta) -> String {
         }
     }
 
-    create_html_boilerplate(config)
+    create_html_boilerplate(config, release_build)
         .replace("page-template", &html)
         .replace("@page-css", &css)
         .replace("page-title", &page_title)

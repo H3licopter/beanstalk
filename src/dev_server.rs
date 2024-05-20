@@ -17,7 +17,7 @@ pub fn start_dev_server(mut path: String) -> Result<(), Box<dyn Error>> {
     let current_dir = std::env::current_dir()?;
     path = format!("{}/{}", current_dir.to_string_lossy().into_owned(), path);
 
-    build_project(&path);
+    build_project(&path, true);
 
     let mut modified = get_last_modified(&format!("{}/src", &path));
     for stream in listener.incoming() {
@@ -59,7 +59,7 @@ fn handle_connection(
 
                 if *last_modified < check_modified {
                     blue_ln!("Changes detected in src folder");
-                    build_project(&path);
+                    build_project(&path, false);
                     *last_modified = check_modified;
                     status_line = "HTTP/1.1 205 Reset Content";
                 } else {
@@ -134,10 +134,10 @@ fn handle_connection(
     };
 }
 
-fn build_project(build_path: &String) {
+fn build_project(build_path: &String, release: bool) {
     dark_cyan_ln!("Building project...");
     let start = Instant::now();
-    match build::build(build_path.to_string()) {
+    match build::build(build_path.to_string(), release) {
         Ok(_) => {
             let duration = start.elapsed();
             print_bold!("Project built in: ");

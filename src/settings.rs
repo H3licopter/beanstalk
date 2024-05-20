@@ -37,6 +37,7 @@ pub struct HTMLMeta {
     pub theme_color_light: String,
     pub theme_color_dark: String,
     pub auto_site_title: bool,
+    pub release_build: bool,
 }
 
 pub fn get_html_config() -> HTMLMeta {
@@ -58,5 +59,6 @@ pub fn get_html_config() -> HTMLMeta {
         theme_color_light: String::from("#fafafa"),
         theme_color_dark: String::from("#101010"),
         auto_site_title: true,
+        release_build: false,
     }
 }

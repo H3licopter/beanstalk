@@ -16,7 +16,7 @@ struct OutputFile {
 }
 
 #[allow(unused_variables)]
-pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
+pub fn build(mut entry_path: String, release_build: bool) -> Result<(), Box<dyn Error>> {
     // If entry_path is "test", use the compiler test directory
     if entry_path == "test" {
         entry_path = "test_output/src/home.bs".to_string();
@@ -114,7 +114,7 @@ pub fn build(mut entry_path: String) -> Result<(), Box<dyn Error>> {
 
     // Compile all output files
     for file in source_code_to_parse {
-        compile(file)?;
+        compile(file, release_build)?;
     }
 
     Ok(())
@@ -203,7 +203,7 @@ fn add_bs_files_to_parse(
     Ok(())
 }
 
-fn compile(output: OutputFile) -> Result<Vec<AstNode>, Box<dyn Error>> {
+fn compile(output: OutputFile, release_build: bool) -> Result<Vec<AstNode>, Box<dyn Error>> {
     print_bold!("Compiling: ");
     dark_yellow_ln!("{}", output.file_name);
 
@@ -216,7 +216,7 @@ fn compile(output: OutputFile) -> Result<Vec<AstNode>, Box<dyn Error>> {
     }
 
     let output_path = format!("{}{}", output.output_dir, output.file_name);
-    fs::write(output_path, web_parser::parse(ast, get_html_config()))?;
+    fs::write(output_path, web_parser::parse(ast, get_html_config(), release_build))?;
 
     Ok(Vec::new())
 }
@@ -227,7 +227,7 @@ fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
         source_code: config_source_code.to_string(),
         output_dir: String::new(),
         file_name: String::new(),
-    });
+    }, false);
     let config = get_default_config();
 
     match config_ast {
