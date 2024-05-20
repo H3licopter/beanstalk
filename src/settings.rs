@@ -56,7 +56,7 @@ pub fn get_html_config() -> HTMLMeta {
         page_type: String::from("website"),
         page_twitter_large_image: String::from(""),
         page_canonical_url: String::from(""),
-        page_dist_url: String::from("/"),
+        page_dist_url: String::from(""),
         image_folder_url: String::from("images"),
         favicons_folder_url: String::from("images/favicons"),
         theme_color_light: String::from("#fafafa"),

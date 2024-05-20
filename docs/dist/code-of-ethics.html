@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="./images/favicons/favicon.ico">
+<link rel="icon"href="images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="./images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="./images/favicons/site.webmanifest">
-<link rel="stylesheet" href="./css/pico.min.css" />
+<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="images/favicons/site.webmanifest">
+<link rel="stylesheet" href="css/pico.min.css" />
 <style></style></head><body><main class="container"><p>0. Don't take ethical codes too seriously
 1. Don't take yourself too seriously
 2. Don't take life too seriously
@@ -37,6 +37,17 @@
                 }
             }
   });
+  
+  function checkIfFileChanged() {
+    fetch('/check', { method: 'HEAD' })
+      .then(response => {
+        if (response.status == 205) {
+          location.reload();
+        }
+      }).catch(console.error);
+  }
+
+  setInterval(() => checkIfFileChanged(), 500);
 </script>
 </body>
 </html>

@@ -46,7 +46,7 @@
     for ( io{":("} )
 </span></main>
 <script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "../pkg/bs_wasm_generator.js";
+  import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {
     function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
@@ -56,6 +56,17 @@
                 }
             }
   });
+  
+  function checkIfFileChanged() {
+    fetch('/check', { method: 'HEAD' })
+      .then(response => {
+        if (response.status == 205) {
+          location.reload();
+        }
+      }).catch(console.error);
+  }
+
+  setInterval(() => checkIfFileChanged(), 500);
 </script>
 </body>
 </html>

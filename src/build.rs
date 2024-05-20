@@ -241,8 +241,6 @@ fn compile(output: OutputFile, release_build: bool) -> Result<Vec<AstNode>, Box<
 
     if dist_subfolders > 0 {
         html_config.page_dist_url = (0..dist_subfolders).map(|_| "../").collect::<String>();
-    } else {
-        html_config.page_dist_url = String::from("./");
     }
 
     fs::write(
