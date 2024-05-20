@@ -10,9 +10,9 @@
 
   <br>
 
-  ⚠️<p>This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</p>
-  ⚠️<p>Core parts of the design are still subject to large changes and iteration as the compiler is developed</p>
-  ⚠️<p>The CLI interface is not yet user friendly or designed for use outside of developing the compiler (yet)</p>
+  <p>⚠️ This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</p>
+  <p>⚠️ Core parts of the design are still subject to large changes and iteration as the compiler is developed</p>
+  <p>⚠️ The CLI interface is not yet user friendly or designed for use outside of developing the compiler (yet)</p>
 
   <h3>
     <a href="https://h3licopter.github.io/beanstalk">
