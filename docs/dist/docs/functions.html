@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport"content="width=device-width, initial-scale=1">
+<title>Functions | Website Title</title>
+<meta name="description"content="Website Description"/>
+<meta property="og:title"content=""/>
+<meta property="og:description"content=""/>
+<meta property="og:image"content="localhost:6969/"/>
+<meta property="og:image:alt"content=""/>
+<meta property="og:locale"content="en_US"/>
+<meta property="og:type"content="website"/>
+<meta property="og:url"content="localhost:6969/"/>
+<meta name="twitter:card"content=""/>
+<meta name="color-scheme" content="light dark" />
+<link rel="canonical"href="">
+<link rel="icon"href="images/favicons/favicon.ico">
+<!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
+<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="images/favicons/site.webmanifest">
+<link rel="stylesheet" href="css/pico.min.css" />
+<style></style></head><body><main class="container"><h1>Functions
+</h1><p>Functions are first class citizens in Beanstalk. They can be assigned to variables, passed as arguments, and returned from other functions.
+
+</p><p>Their structure is: 
+1. the function name (can be omited for anonymous functions)
+2. A colon (or double colon for compile time only)
+3. An argument (A collection is specified for multiple arguments and will be automatically destructured into the scope of the function), if no arguments are required, you must use an empty tuple.
+4. An arrow symbol (always required, even for functions that don't return anything)
+5. An optional return type.
+6. the the body of the function enclosed in curly braces
+
+</p><p>If the function can only return an error, you can use a '?' as the specified return type.  
+
+</p><h2>The arrow operator
+</h2><p>The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
+
+</p><span>-- Returns a tuple of values (private function)
+    multipleReturns : () -&gt; (int, int, int) {
+        return 1, 2, 3
+    }
+
+    -- When assigning mutliple values to a single variable, the variable becomes a tuple
+    a = multipleReturns()
+
+    a.0 is 1 -- true
+</span><p>concatString : (a string, b string) -&gt; string {
+        return a b
+    }
+
+    myself = concatString(
+        a "I am ",
+        b "really cool"
+    )
+
+    -- Using an exsisting collection Type as an argument
+    -- Public function
+    @ NormalizeVectors : Vec -&gt; Vec {
+        return (
+            x = Vec.x / Vec.length, 
+            y = Vec.y / Vec.length 
+        )
+    }
+
+    NormalizeVectors(
+        x 3, y 4
+    )
+
+    -- inlined function with no return value or args
+    inlineSideEffect : () -&gt; { state = "beans" }
+
+    -- With default args
+    addNumbers : (a = 1, b = 1) -&gt; {
+        return a + b
+    }
+
+    -- named args access
+    result = addNumbers(a 3, b 16)
+
+    sayThing : (phrase string) -&gt; string {
+        return "{phrase}"
+    }
+
+    -- returns a tuple
+    multipleReturns : () -&gt; (int, int, int) {
+        return 1, 2, 3
+    }
+
+    a, b, c = multipleReturns
+
+    -- Anonymous functions
+    (arg int) -&gt; {arg + 1}
+
+    () -&gt; { "Hello" }
+</p><h1>Methods
+</h1>Method chaining is a core part of how data can be transformed in Beanstalk. 
+The standard library imports methods that will extend certain data types.
+
+</p></p><p>Methods are instead created similarly to functions but will impliment themselves on the specified types.
+
+</p><p>Create a new method by using the Self keyword as the name of an argument. 
+To impliment the method on one or more types, specify them as types of the Self argument.
+
+</p><span>increment : (self int or float) -&gt; () { self += 1 }
+
+    number = 0
+    number.incrementInt 
+    io number -- 1
+
+    randomizeAge : (self Person) -&gt; () ( 
+        self.age = int.rng(min 0, max 100) 
+    )
+</span><h1>Generic Functions
+</h1><p>The type keyword has some useful generic types that can be used in functions and methods.
+
+</p><span>add : (a type.number, b type.number) -&gt; type.number {
+        return a + b
+    }
+
+    -- This function will now work with any numerical type
+    add(3, 4) -- 7
+    add(3.23, 53.9) -- 57.13
+</span><p>Any operations in the function must be valid for all types that could be passed in.
+
+</p><p>Here is an example using generics with collections:
+    
+</p><p>sortCollection : (collection type.collection) -&gt; type.collection? {
+            match collection type {
+                string : return collection.sort()
+                int    : return collection.sort()
+                else   : return error "Invalid type"
+            }
+        }
+    </p><h1>Using the arrow operator to pipe values
+</h1>The arrow operator can be used to pipe values directly from one function to another. 
+You must provide the expected returned type after the arrow for this to work.
+
+</p><span>result = func1(420) -&gt; int func2() -&gt; int func3() -&gt; int func4()
+</p></span><p>You can also specify the type of the value being passed to the next function.
+
+</p><span>result = func1(value1 a, value2 b) -&gt; int func2(value1 a, value2 b) -&gt; int func3(value1 a) -&gt; int func4(value2 b)
+</span><p>And just like any expression in beanstalk, you can wrap the whole expression in pathenthesis to make it more readable over mutliple lines and specify the final type of the result.
+
+</p><span>result = (
+        func1(value a, value b) -&gt; int 
+        func2(value a, value b) -&gt; int 
+        func3() -&gt; int 
+        func4()
+    ) int
+</span></main>
+<script type="module">
+  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  init().then(() => {
+    function uInnerHTML(id,update){
+                const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
+                for (let i = 0;i<es.length;i++) {
+                  es[i].innerHTML=update
+                }
+            }
+  });
+  
+  function checkIfFileChanged() {
+    fetch('/check', { method: 'HEAD' })
+      .then(response => {
+        if (response.status == 205) {
+          location.reload();
+        }
+      }).catch(console.error);
+  }
+
+  setInterval(() => checkIfFileChanged(), 900);
+</script>
+</body>
+</html>

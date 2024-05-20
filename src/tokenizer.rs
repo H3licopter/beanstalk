@@ -83,6 +83,7 @@ fn get_next_token(
         Some(ch) => ch,
         None => return Token::EOF,
     };
+
     let mut token_value: String = String::new();
 
     // Check for raw strings (backticks)
@@ -815,10 +816,10 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                 }
                 '-' => {
                     if !content.trim().is_empty() && previous_newlines > 0 {
+                        token = Token::BulletPoint(0, String::new());
                         break;
                     }
-
-                    token = Token::BulletPoint(0, String::new());
+                    *current_char = chars.next().unwrap();
                 }
                 _ => {
                     *current_char = chars.next().unwrap();

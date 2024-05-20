@@ -15,10 +15,17 @@ dependencies = [
 name = "beanstalk"
 version = "0.0.1-alpha"
 dependencies = [
+ "colour",
  "fs_extra",
  "math-parse",
  "regex",
 ]
+
+[[package]]
+name = "colour"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "692e39ee1f14432931eb080a5e8e8930a7eff3d19e638cd04091534ebc40b928"
 
 [[package]]
 name = "fs_extra"

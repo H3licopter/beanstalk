@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport"content="width=device-width, initial-scale=1">
+<title>Starting a Beanstalk Project | Website Title</title>
+<meta name="description"content="Website Description"/>
+<meta property="og:title"content=""/>
+<meta property="og:description"content=""/>
+<meta property="og:image"content="localhost:6969/"/>
+<meta property="og:image:alt"content=""/>
+<meta property="og:locale"content="en_US"/>
+<meta property="og:type"content="website"/>
+<meta property="og:url"content="localhost:6969/"/>
+<meta name="twitter:card"content=""/>
+<meta name="color-scheme" content="light dark" />
+<link rel="canonical"href="">
+<link rel="icon"href="images/favicons/favicon.ico">
+<!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
+<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="images/favicons/site.webmanifest">
+<link rel="stylesheet" href="css/pico.min.css" />
+<style></style></head><body><main class="container"><h1>Setting up a Project
+</h1><p>The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
+This file is called "main.bs" and is placed in an /src folder by default. A configuration file is also created in the root directory.
+All Beanstalk files use the .bs file extension.
+
+</p><p>Any Beanstalk file tied into the project can specify compiler settings and the config for your project as long as it is part of, or imported into this main file. 
+The compiler will read through any configuration settings first, then it will run any compile time evaluations inside the code.
+
+</p><p>To talk to the compiler and set project configurations, the # symbol is used. 
+
+</p><h1>Project Configuration
+</h1><p>When creating a new Beanstalk html project, a configuration file will be created in the root directory. 
+This is called "config.bs" by default and it will specify the entry point and structure of the program. 
+
+</p><p>A /media folder will also be created, and an /src folder which will contain the entry point and file structure for your project. 
+There is also a /dependencies folder which contains all the libraries and dependencies for your project.
+
+</p><p>Using compiler directives, the config file specifies all the default behavior for the project. 
+Most of the compiler directives are objects that already have their structure specified. The config file is also written in Beanstalk and looks a bit like this:
+
+</p><span>#project "html"
+    #main "./src/main.bs"
+    #title "Definitely not a scam website"
+    #url "www.fateorchaos.com"
+    #favicons "./media/favicons"
+</span><h1>Imports
+</h1><p>The import keyword can be accessed from the # symbol and will accept strings to paths for other modules or libraries you want to import into your project. 
+
+</p><span>#import "some_lib_maker/crazy_lib"
+</span><p>Beanstalk imports its entire standard library of built in functions by default. 
+But you can also exclude the default libraries by using the exclude compiler command. 
+You can also use this to bypass the directory based routing of the compiler.
+
+</p><span>#exclude "standard"
+</span></main>
+<script type="module">
+  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  init().then(() => {
+    function uInnerHTML(id,update){
+                const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
+                for (let i = 0;i<es.length;i++) {
+                  es[i].innerHTML=update
+                }
+            }
+  });
+  
+  function checkIfFileChanged() {
+    fetch('/check', { method: 'HEAD' })
+      .then(response => {
+        if (response.status == 205) {
+          location.reload();
+        }
+      }).catch(console.error);
+  }
+
+  setInterval(() => checkIfFileChanged(), 900);
+</script>
+</body>
+</html>

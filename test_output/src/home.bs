@@ -1,0 +1,7 @@
+---
+If you are creating a non-collection variable and need it to be formatted over multiple lines, you must wrap the value in parenthesis.
+
+testing some text afterwards.
+
+- bullet point?
+- another bullet point?

@@ -1,5 +1,5 @@
 #title "Operators"
-#date “2024-2-5”
+#date "2024-2-5"
 ---
 
 # Keywords
@@ -18,14 +18,14 @@ Only false, ! and ? are falsy values. Any other check with an if statement will 
 ~>    --Bitwise zero fill right shift
 <~    --Bitwise zero fill left shift
 
-{table 3, style "bg-blue-499":
-    {: Operator} {: Description}          {: Precedence}
-    {: **}       {: Exponents}            {xcol: 8}
-    {: //}       {: Roots}                {xcol: 8}
-    {: *}        {: Multiplication}       {xcol 3: 7}
-    {: /}        {: Division}             {xcol: 7}
-    {: %}        {: Modulo (truncated)}   {xcol: 7}
-    {: %%}       {: Remainder (floored)}  {xcol: 7}
-    {: +}        {: Sum}                  {xcol: 6}
-    {: -}        {: Subtraction}          {xcol: 6}
-}
+[table 3:
+    [: Operator] [: Description]          [: Precedence]
+    [: **]       [: Exponents]            [: 8]
+    [: //]       [: Roots]                [: 8]
+    [: *]        [: Multiplication]       [: 7]
+    [: /]        [: Division]             [: 7]
+    [: %]        [: Modulo (truncated)]   [: 7]
+    [: %%]       [: Remainder (floored)]  [: 7]
+    [: +]        [: Sum]                  [: 6]
+    [: -]        [: Subtraction]          [: 6]
+]

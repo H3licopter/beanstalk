@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport"content="width=device-width, initial-scale=1">
-<title></title>
+<title>Commends and Code Style | Website Title</title>
 <meta name="description"content="Website Description"/>
 <meta property="og:title"content=""/>
 <meta property="og:description"content=""/>
@@ -18,11 +18,27 @@
 <link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="images/favicons/site.webmanifest">
 <link rel="stylesheet" href="css/pico.min.css" />
-<style></style></head><body><main class="container"><p>If you are creating a non-collection variable and need it to be formatted over multiple lines, you must wrap the value in parenthesis.
+<style></style></head><body><main class="container"><h1>Style Guide
+</h1><li>The recommended style guide is:
+</li><li>camelCase for functions</li><li>PascalCase for objects</li><li>SCREAMING_SNAKE_CASE for Choices</li><li>snake_case as the default choice for variables and other things</li><p>4 spaces are recommended for indentation.
 
-</p><p>testing some text afterwards.
+</p><p>A scoped block of code is defined with regular brackets. 
+Commas are not needed for seperating items in a list, and can be used in numbers for readability.
 
-</p><li>bullet point?</li><li>another bullet point?</li></main>
+</p><h1>Comments
+</h1><p>Comments use a double minus sign '--'. 
+
+</p><p>If you put a newline immediately after a comment mark, the comment will become multi line and must be closed with - again. 
+Comments are read by the compiler and can be nested.
+
+</p><span>-- normal comment
+
+    --
+    Multiline comment
+
+    Woo
+    --
+</span></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {

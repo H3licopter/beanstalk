@@ -10,7 +10,7 @@ use std::fs;
 pub fn test_build() -> Result<(), Box<dyn Error>> {
     // Read content from a test file
     println!("READNING TEST FILE\n");
-    let content = fs::read_to_string("test_output/src/pages/home.bs")?;
+    let content = fs::read_to_string("test_output/src/home.bs")?;
 
     // Tokenize File
     println!("TOKENIZING FILE\n");

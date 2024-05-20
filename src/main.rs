@@ -29,6 +29,7 @@ mod html_output {
     mod markdown_parser;
     pub mod web_parser;
 }
+use colour::{dark_cyan, green_ln_bold, red_ln};
 pub use tokens::Token;
 enum Command {
     NewHTMLProject(String),
@@ -61,21 +62,23 @@ fn main() {
                     main();
                 }
                 Err(e) => {
-                    println!("Error creating project: {:?}", e);
+                    red_ln!("Error creating project: {:?}", e);
                 }
             }
         }
         Command::Build(path) => {
-            println!("Building project...");
+            dark_cyan!("Building project...");
             let start = Instant::now();
             match build::build(path) {
                 Ok(_) => {
                     let duration = start.elapsed();
-                    println!("Project built in: {:?}", duration);
+                    print!("Project built in: ");
+                    green_ln_bold!("{:?}", duration);
+
                     main();
                 }
                 Err(e) => {
-                    println!("Error building project: {:?}", e);
+                    red_ln!("Error building project: {:?}", e);
                 }
             }
         }
@@ -91,7 +94,7 @@ fn main() {
                     println!("Dev server shutting down ... ");
                 }
                 Err(e) => {
-                    println!("Error with dev server: {:?}", e);
+                    red_ln!("Error with dev server: {:?}", e);
                 }
             }
         }
@@ -112,18 +115,26 @@ fn collect_user_input() -> Command {
                     }
                 }
                 _ => {
-                    println!("Invalid project type");
+                    red_ln!("Invalid project type");
                 }
             }
         }
         Some("build") => {
+            let entry_path = match std::env::current_dir() {
+                Ok(dir) => dir.to_str().unwrap().to_owned(),
+                Err(e) => {
+                    red_ln!("Error getting current directory: {:?}", e);
+                    "".to_owned()
+                }
+            };
+
             match args.get(1).map(String::as_str) {
                 Some(string) => {
-                    return Command::Build(string.to_string());
+                    return Command::Build(format!("{}/{}", entry_path, string));
                 }
                 _ => {
                     // Return current working directory path
-                    return Command::Build("".to_string());
+                    return Command::Build(entry_path);
                 }
             }
         }
@@ -166,20 +177,20 @@ fn check_if_valid_directory_path(path: &str) -> bool {
 
     // Check if the path exists
     if !path.exists() {
-        println!("Path does not exist: {}", path.display());
+        red_ln!("Path does not exist: {}", path.display());
         return false;
     }
 
     // Check if the path is a directory
     if !path.is_dir() {
-        println!("Path is not a directory: {}", path.display());
+        red_ln!("Path is not a directory: {}", path.display());
         return false;
     }
 
     // Check if the directory is writable
     let metadata = fs::metadata(path).expect("Unable to read metadata");
     if metadata.permissions().readonly() {
-        println!("Directory is not writable: {}", path.display());
+        red_ln!("Directory is not writable: {}", path.display());
         return false;
     }
 

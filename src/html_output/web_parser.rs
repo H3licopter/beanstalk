@@ -5,11 +5,14 @@ use super::{
     markdown_parser::add_markdown_tags,
 };
 use crate::{
-    bs_types::DataType, parsers::{
+    bs_types::DataType,
+    parsers::{
         ast::AstNode,
         styles::{Style, Tag},
         util::count_newlines_at_end_of_string,
-    }, settings::{get_html_config, HTMLMeta}, Token
+    },
+    settings::{get_html_config, HTMLMeta},
+    Token,
 };
 
 // Parse ast into valid JS, HTML and CSS

@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport"content="width=device-width, initial-scale=1">
-<title></title>
+<title>Choices (enums) | Website Title</title>
 <meta name="description"content="Website Description"/>
 <meta property="og:title"content=""/>
 <meta property="og:description"content=""/>
@@ -18,11 +18,40 @@
 <link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="images/favicons/site.webmanifest">
 <link rel="stylesheet" href="css/pico.min.css" />
-<style></style></head><body><main class="container"><p>If you are creating a non-collection variable and need it to be formatted over multiple lines, you must wrap the value in parenthesis.
+<style></style></head><body><main class="container"><h1>Choices (enums)
+</h1><p>Choices are a way to define a set of possible values for a variable.
 
-</p><p>testing some text afterwards.
+</p><p>Choices are created by creating a variable that is assigned multiple definitions separated by |<span>.
 
-</p><li>bullet point?</li><li>another bullet point?</li></main>
+</p></p></span><p>Choices are written in SCREAMING_SNAKE_CASE. 
+
+</p><p>Each choice can optionally contain data that can be accessed inside that Choice.
+
+</p><span>RESPONSE: Data string | Error string
+
+    STATE : (
+        paused | 
+        running | 
+        error_message string | 
+        person Person 
+    )
+
+    now = STATE.Running
+
+    if now is STATE.Running {
+        now = STATE.Paused
+    }
+
+    -- Getting a value from a choice
+    choice_value = now.value
+
+    -- Getting a value from a choice, using the this keyword to access it's value in a match statement
+    now is {
+        STATE.error_message then (this) -&gt; {
+            io(this.value) 
+        }
+    }
+</span></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {

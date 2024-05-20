@@ -1,0 +1,105 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport"content="width=device-width, initial-scale=1">
+<title>Errors | Website Title</title>
+<meta name="description"content="Website Description"/>
+<meta property="og:title"content=""/>
+<meta property="og:description"content=""/>
+<meta property="og:image"content="localhost:6969/"/>
+<meta property="og:image:alt"content=""/>
+<meta property="og:locale"content="en_US"/>
+<meta property="og:type"content="website"/>
+<meta property="og:url"content="localhost:6969/"/>
+<meta name="twitter:card"content=""/>
+<meta name="color-scheme" content="light dark" />
+<link rel="canonical"href="">
+<link rel="icon"href="images/favicons/favicon.ico">
+<!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
+<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="images/favicons/site.webmanifest">
+<link rel="stylesheet" href="css/pico.min.css" />
+<style></style></head><body><main class="container"><h1>Error Handling
+</h1><p>Any function that can return an error will return an Option type. This type can be checked for an error and handled / unpacked accordingly using the ! or ? operator.
+
+</p><p>Both the ! and ? can append any statement or expression. 
+
+</p><h2>The '!' operator
+</h2><p>The ! operator will unpack the Option type and handle the error or pass the error up the call stack if one is present. 
+
+</p><h2>The '?' operator
+</h2><p>The ? operator will unpack the Option type and create a new scope to handle the value if there was no error. It is also used to define an option type by appending a type with it. 
+
+</p><p>This is useful if you want to only run a block of code if there was no error without having to nest the code inside an if statement.
+
+</p><p>Option type examples: int? string? bool?
+
+</p><h2>The '!?' operator
+</h2><p>The !? operator is an assert that will force the program to panic and halt if the previous condition is false or an error. This is useful for debugging and ensuring that the program will not continue if a critical condition is not met.
+
+</p><h2>The '!!' Operator
+</h2><p>Double bang !! will force the program to panic and halt if the previous expression or function call returned an error as one of it's options.
+
+</p><h2>Using the ! and ? operators
+</h2><p>These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code, as well as providing a way to avoid opening a new scope for every error check.
+
+</p><span>-- Always returns a string even if an error is thrown by getNetworkRequest()
+    -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
+    getURL : -&gt; string {
+        return getNetworkRequest() ! {
+            io "Network Request Error: {error}"
+            return "example.com"
+        }
+    }
+
+    -- 
+    Returns an error to the calling function, just printing out information about the error without returning a value to replace the empty string.
+    
+    A question mark must be added to the return type of the function to specify that it can return an error. This enforces that the error must be handled by the calling function.
+    --
+    
+    getURL : -&gt; string? {
+        return getNetworkRequest() ! {
+            io "Network Request Error: {error}"
+        }
+    }
+
+    -- This function also specifies it can return an error so no explicit error handling is needed inside
+    dodgyFunction : -&gt; string? {
+        return getURL()
+    }
+
+    -- The compiler will give a warning about unhandled error cases inside this function
+    callingFunction : -&gt; () {
+        thing := dodgyFunction()
+    }
+
+    -- So it must be handled like this
+    callingFunction : -&gt; () {
+        thing = dodgyFunction ! return "default_thing"
+    }
+</span></main>
+<script type="module">
+  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  init().then(() => {
+    function uInnerHTML(id,update){
+                const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
+                for (let i = 0;i<es.length;i++) {
+                  es[i].innerHTML=update
+                }
+            }
+  });
+  
+  function checkIfFileChanged() {
+    fetch('/check', { method: 'HEAD' })
+      .then(response => {
+        if (response.status == 205) {
+          location.reload();
+        }
+      }).catch(console.error);
+  }
+
+  setInterval(() => checkIfFileChanged(), 900);
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport"content="width=device-width, initial-scale=1">
-<title></title>
+<title>Standard Library | Website Title</title>
 <meta name="description"content="Website Description"/>
 <meta property="og:title"content=""/>
 <meta property="og:description"content=""/>
@@ -18,11 +18,68 @@
 <link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="images/favicons/site.webmanifest">
 <link rel="stylesheet" href="css/pico.min.css" />
-<style></style></head><body><main class="container"><p>If you are creating a non-collection variable and need it to be formatted over multiple lines, you must wrap the value in parenthesis.
+<style></style></head><body><main class="container"><h1>Standard Library
+</h1><p>Standard library in Beanstalk comprises methods and scene properties. The standard library is automatically added to projects, but can be explicitly excluded using the #exclude directive.
 
-</p><p>testing some text afterwards.
+</p><h2>HTML project standard library
+</h2><p>When starting a new HTML project, Beanstalk will implicitly import relevant scene properties and global keywords. Other keywords that are added into the global scope include:
 
-</p><li>bullet point?</li><li>another bullet point?</li></main>
+</p><li><em>Global keywords:</em>
+</li><li>io</li><li>window</li><h2>Scene Properties:
+</h2><h3>Style
+</h3><p>{table 2:
+    {: Property} {: Description}
+    
+</p><p>{: style}
+    {: theme}
+    {: size}
+    {: img}
+    {: pad}
+    {: space}
+    {: rgb}
+    {: hex}
+    {: raw}
+}
+
+</p><h3>Interactive 
+</h3><p>{table 2:
+    {: Property} {: Description}
+
+</p><p>{: input}
+    {: audio}
+    {: video}
+    {: click}
+    {: form}
+    {: option}
+    {: dropdown}
+}
+
+</p><h3>HTTP 
+</h3><p>{table 2:
+    {: Property} {: Description}
+
+</p><p>{: post}
+    {: get}
+    {: delete}
+    {: swap}
+}
+
+</p><h3>Dynamic
+</h3><p>{table 2: 
+    {: Property} {: Description}
+
+</p><p>{: slot}
+    {: canvas}
+}
+
+</p><h3>Comments
+</h3><p>{table 2: 
+    {: Property} {: Description}
+
+</p><p>{: comment}
+}
+
+</p></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {
