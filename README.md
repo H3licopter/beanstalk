@@ -8,9 +8,11 @@
 
   *The only BS in programming should be in the filename*
 
-  ⚠️  <p>This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</p>
-  ⚠️  <p>Core parts of the design are still subject to large changes and iteration as the compiler is developed</p>
-  ⚠️  <p>The CLI interface is not yet user friendly or designed for use outside of developing the compiler (yet)</p>
+  ⚠️<p>This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</p>
+  ⚠️<p>Core parts of the design are still subject to large changes and iteration as the compiler is developed</p>
+  ⚠️<p>The CLI interface is not yet user friendly or designed for use outside of developing the compiler (yet)</p>
+
+  <a href="https://h3licopter.github.io/beanstalk"><h3>The Documentation!<h3></a>
 
 </div>
 
@@ -114,6 +116,7 @@ Technologies currently used in the compiler:
 ---
 
 ## Current Goals
+  - Get the core scene nesting code robustly working in all cases
   - Finish implementing all basic scene styling and keywords for scenes
   - Finish implimenting constant folding and basic compile time evaluation
   - Basic scene components and reactivity implemented
