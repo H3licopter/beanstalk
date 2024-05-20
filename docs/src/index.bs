@@ -14,7 +14,7 @@ The source code for this site on [link "https://github.com/H3licopter/beanstalk/
 
 
 ## Documentation
-[link "/docs/variables-and-datatypes.html" "Overview": Variables And Datatypes]
+[link "./docs/variables-and-datatypes.html" "Overview": Variables And Datatypes]
 
 More info will be added soon!
 
