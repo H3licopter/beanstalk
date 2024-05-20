@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="images/favicons/favicon.ico">
+<link rel="icon"href="../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="images/favicons/site.webmanifest">
-<link rel="stylesheet" href="css/pico.min.css" />
+<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><h1>Keywords
 </h1><h2>Logical Operators
 </h2><p>The 'is' keyword is used to check equality. Not ==. The "and / or" keywords are used for logical and / or and 'not' is used to invert a truthy value to falsy or vice versa.
@@ -33,9 +33,9 @@
 ~&gt;    --Bitwise zero fill right shift
 &lt;~    --Bitwise zero fill left shift
 
-</p><table><thead><tr><th scope='col'>Operator&nbsp;</th><span>Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></th><span>Precedence</span></th></tr></thead><tbody><tr><th scope='col'>**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><span>Exponents&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><span>8</span></td></tr><tr><th scope='col'>//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><span>Roots&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><span>8</span></td></tr><tr><th scope='col'>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><span>Multiplication&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><span>7</span></td></tr><tr><th scope='col'>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><span>Division&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><span>7</span></td></tr><tr><th scope='col'>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><span>Modulo (truncated)&nbsp;&nbsp;&nbsp;</span></td><span>7</span></td></tr><tr><th scope='col'>%%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><span>Remainder (floored)&nbsp;&nbsp;</span></td><span>7</span></td></tr><tr><th scope='col'>+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><span>Sum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><span>6</span></td></tr><tr><li>]        <span>Subtraction&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></th><span>6</span></th></li></tbody></table></main>
+</p><table><thead><tr><th scope='col'>Operator&nbsp;</th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>**&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></td></tr><tr><th scope='col'>//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></td></tr><tr><th scope='col'>*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></td></tr><tr><th scope='col'>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></td></tr><tr><th scope='col'>%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>&nbsp;&nbsp;&nbsp;</td></td></tr><tr><th scope='col'>%%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>&nbsp;&nbsp;</td></td></tr><tr><th scope='col'>+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></td></tr><tr><li>]        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th></th></li></tbody></table></main>
 <script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  import init, { parse_int_expr, parse_float_expr } from "../pkg/bs_wasm_generator.js";
   init().then(() => {
     function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);

@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="images/favicons/favicon.ico">
+<link rel="icon"href="../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="images/favicons/site.webmanifest">
-<link rel="stylesheet" href="css/pico.min.css" />
+<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><h1>Functions
 </h1><p>Functions are first class citizens in Beanstalk. They can be assigned to variables, passed as arguments, and returned from other functions.
 
@@ -92,15 +92,15 @@
 
     () -&gt; { "Hello" }
 </p><h1>Methods
-</h1>Method chaining is a core part of how data can be transformed in Beanstalk. 
+</h1><span>Method chaining is a core part of how data can be transformed in Beanstalk. 
 The standard library imports methods that will extend certain data types.
 
-</p></p><p>Methods are instead created similarly to functions but will impliment themselves on the specified types.
+</span><span>Methods are instead created similarly to functions but will impliment themselves on the specified types.
 
-</p><p>Create a new method by using the Self keyword as the name of an argument. 
+</span><span>Create a new method by using the Self keyword as the name of an argument. 
 To impliment the method on one or more types, specify them as types of the Self argument.
 
-</p><span>increment : (self int or float) -&gt; () { self += 1 }
+</span><span>increment : (self int or float) -&gt; () { self += 1 }
 
     number = 0
     number.incrementInt 
@@ -110,37 +110,37 @@ To impliment the method on one or more types, specify them as types of the Self 
         self.age = int.rng(min 0, max 100) 
     )
 </span><h1>Generic Functions
-</h1><p>The type keyword has some useful generic types that can be used in functions and methods.
+</h1><span>The type keyword has some useful generic types that can be used in functions and methods.
 
-</p><span>add : (a type.number, b type.number) -&gt; type.number {
+</span><span>add : (a type.number, b type.number) -&gt; type.number {
         return a + b
     }
 
     -- This function will now work with any numerical type
     add(3, 4) -- 7
     add(3.23, 53.9) -- 57.13
-</span><p>Any operations in the function must be valid for all types that could be passed in.
+</span></p><p>Any operations in the function must be valid for all types that could be passed in.
 
-</p><p>Here is an example using generics with collections:
+<span>Here is an example using generics with collections:
     
-</p><p>sortCollection : (collection type.collection) -&gt; type.collection? {
+</span><span>sortCollection : (collection type.collection) -&gt; type.collection? {
             match collection type {
                 string : return collection.sort()
                 int    : return collection.sort()
                 else   : return error "Invalid type"
             }
         }
-    </p><h1>Using the arrow operator to pipe values
-</h1>The arrow operator can be used to pipe values directly from one function to another. 
+    </span><h1>Using the arrow operator to pipe values
+</h1><span>The arrow operator can be used to pipe values directly from one function to another. 
 You must provide the expected returned type after the arrow for this to work.
 
-</p><span>result = func1(420) -&gt; int func2() -&gt; int func3() -&gt; int func4()
-</p></span><p>You can also specify the type of the value being passed to the next function.
+</span><span>result = func1(420) -&gt; int func2() -&gt; int func3() -&gt; int func4()
+</span></p><p>You can also specify the type of the value being passed to the next function.
 
-</p><span>result = func1(value1 a, value2 b) -&gt; int func2(value1 a, value2 b) -&gt; int func3(value1 a) -&gt; int func4(value2 b)
-</span><p>And just like any expression in beanstalk, you can wrap the whole expression in pathenthesis to make it more readable over mutliple lines and specify the final type of the result.
+<span>result = func1(value1 a, value2 b) -&gt; int func2(value1 a, value2 b) -&gt; int func3(value1 a) -&gt; int func4(value2 b)
+</span></p><p>And just like any expression in beanstalk, you can wrap the whole expression in pathenthesis to make it more readable over mutliple lines and specify the final type of the result.
 
-</p><span>result = (
+<span>result = (
         func1(value a, value b) -&gt; int 
         func2(value a, value b) -&gt; int 
         func3() -&gt; int 
@@ -148,7 +148,7 @@ You must provide the expected returned type after the arrow for this to work.
     ) int
 </span></main>
 <script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  import init, { parse_int_expr, parse_float_expr } from "../pkg/bs_wasm_generator.js";
   init().then(() => {
     function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);

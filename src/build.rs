@@ -3,7 +3,7 @@ use colour::{dark_cyan_ln, dark_yellow_ln, print_bold, print_ln_bold, red_ln};
 use crate::html_output::web_parser;
 use crate::parsers;
 use crate::parsers::ast::AstNode;
-use crate::settings::{get_default_config, get_html_config, Config};
+use crate::settings::{get_default_config, get_html_config};
 use crate::tokenizer;
 use crate::tokens::Token;
 use std::error::Error;
@@ -19,7 +19,16 @@ struct OutputFile {
 pub fn build(mut entry_path: String, release_build: bool) -> Result<(), Box<dyn Error>> {
     // If entry_path is "test", use the compiler test directory
     if entry_path == "test" {
-        entry_path = "test_output/src/home.bs".to_string();
+        entry_path = match std::env::current_dir() {
+            Ok(dir) => format!(
+                "{}/test_output/src/index.bs",
+                dir.to_str().unwrap().to_owned()
+            ),
+            Err(e) => {
+                println!("Error getting current directory: {:?}", e);
+                return Err(e.into());
+            }
+        };
     }
 
     if entry_path == "" {
@@ -216,41 +225,60 @@ fn compile(output: OutputFile, release_build: bool) -> Result<Vec<AstNode>, Box<
     }
 
     let output_path = format!("{}{}", output.output_dir, output.file_name);
+
+    // TO BE REPLACED WITH LOADING CONFIG.BS FILE (When all config tokens are in tokenizer)
+    let mut html_config = get_html_config();
+    let config = get_default_config();
+
+    // For each subdirectory from the dist folder of the output_dir, add a ../ to the image_folder_url
+    let dist_subfolders = output
+        .output_dir
+        .split(&format!("{}/", config.output_folder))
+        .collect::<Vec<&str>>()[1]
+        .split("/")
+        .count()
+        - 1;
+
+    if dist_subfolders > 0 {
+        html_config.page_dist_url = (0..dist_subfolders).map(|_| "../").collect::<String>();
+    } else {
+        html_config.page_dist_url = String::from("./");
+    }
+
     fs::write(
         output_path,
-        web_parser::parse(ast, get_html_config(), release_build),
+        web_parser::parse(ast, html_config, release_build),
     )?;
 
     Ok(Vec::new())
 }
 
-#[allow(dead_code)]
-fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
-    let config_ast = compile(
-        OutputFile {
-            source_code: config_source_code.to_string(),
-            output_dir: String::new(),
-            file_name: String::new(),
-        },
-        false,
-    );
-    let config = get_default_config();
+// fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {
+//     let config_ast = compile(
+//         OutputFile {
+//             source_code: config_source_code.to_string(),
+//             output_dir: String::new(),
+//             file_name: String::new(),
+//         },
+//         false,
+//     );
+//     let config = get_default_config();
 
-    match config_ast {
-        Ok(ast) => {
-            for node in ast {
-                match node {
-                    AstNode::Error(e) => {
-                        return Err(e.into());
-                    }
-                    _ => {}
-                }
-            }
-        }
-        Err(e) => {
-            return Err(e.into());
-        }
-    }
+//     match config_ast {
+//         Ok(ast) => {
+//             for node in ast {
+//                 match node {
+//                     AstNode::Error(e) => {
+//                         return Err(e.into());
+//                     }
+//                     _ => {}
+//                 }
+//             }
+//         }
+//         Err(e) => {
+//             return Err(e.into());
+//         }
+//     }
 
-    Ok(config)
-}
+//     Ok(config)
+// }

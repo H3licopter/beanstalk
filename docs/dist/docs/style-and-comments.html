@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="images/favicons/favicon.ico">
+<link rel="icon"href="../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="images/favicons/site.webmanifest">
-<link rel="stylesheet" href="css/pico.min.css" />
+<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><h1>Style Guide
 </h1><li>The recommended style guide is:
 </li><li>camelCase for functions</li><li>PascalCase for objects</li><li>SCREAMING_SNAKE_CASE for Choices</li><li>snake_case as the default choice for variables and other things</li><p>4 spaces are recommended for indentation.
@@ -40,7 +40,7 @@ Comments are read by the compiler and can be nested.
     --
 </span></main>
 <script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  import init, { parse_int_expr, parse_float_expr } from "../pkg/bs_wasm_generator.js";
   init().then(() => {
     function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);

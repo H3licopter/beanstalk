@@ -9,7 +9,7 @@ use crate::{
     parsers::{
         ast::AstNode,
         styles::{Style, Tag},
-        util::count_newlines_at_end_of_string,
+        util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
     },
     settings::{get_html_config, HTMLMeta},
     Token,
@@ -167,9 +167,9 @@ fn parse_scene(
                     .push_str(&format!(" alt=\"{}\"", value));
             }
             Style::Center(vertical) => {
-                scene_wrap
-                    .style
-                    .push_str("display:flex;align-items:center;flex-direction:column;");
+                scene_wrap.style.push_str(
+                    "display:flex;align-items:center;flex-direction:column;text-align:center;",
+                );
                 if vertical {
                     scene_wrap.style.push_str("justify-content:center;");
                 }
@@ -265,16 +265,25 @@ fn parse_scene(
             AstNode::Element(token) => {
                 match token {
                     Token::Span(content) => {
-                        html.push_str(&format!(
-                            "<span>{}",
-                            add_markdown_tags(&mut content.clone())
-                        ));
-
                         match *parent_tag {
                             Tag::P => {
+                                html.push_str(&format!(
+                                    "<span>{}</span>",
+                                    add_markdown_tags(&mut content.clone())
+                                ));
                                 if count_newlines_at_end_of_string(&content) > 1 {
-                                    html.push_str("</p>");
                                     *parent_tag = Tag::None;
+                                    html.push_str("</p>");
+
+                                    // Find the last p tag in closing tags and remove it
+                                    let mut i = closing_tags.len();
+                                    while i > 0 {
+                                        i -= 1;
+                                        if closing_tags[i] == "</p>" {
+                                            closing_tags.remove(i);
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                             Tag::Th => {
@@ -283,9 +292,13 @@ fn parse_scene(
                             Tag::Td => {
                                 closing_tags.push("</td>".to_string());
                             }
-                            _ => {}
+                            _ => {
+                                html.push_str(&format!(
+                                    "<span>{}</span>",
+                                    add_markdown_tags(&mut content.clone())
+                                ));
+                            }
                         }
-                        closing_tags.push("</span>".to_string());
                     }
 
                     Token::P(content) => {
@@ -306,14 +319,14 @@ fn parse_scene(
                                 let parsed_content = add_markdown_tags(&mut content.clone());
                                 match *parent_tag {
                                     Tag::P => {
-                                        html.push_str(&parsed_content);
-                                        closing_tags.push("</p>".to_string());
-
-                                        if count_newlines_at_end_of_string(&content) > 1 {
+                                        if count_newlines_at_start_of_string(&content) > 1 {
                                             html.push_str("</p>");
-                                            *parent_tag = Tag::None;
+                                            html.push_str(&format!("<p>{}", parsed_content));
                                         } else {
-                                            *parent_tag = Tag::P;
+                                            html.push_str(&format!(
+                                                "<span>{}</span>",
+                                                parsed_content
+                                            ));
                                         }
                                     }
                                     Tag::Table(_) => {

@@ -1,0 +1,11 @@
+---
+[center p(1):
+
+[link "https://github.com/H3licopter/beanstalk/tree/main/docs/dist": here]!
+
+
+
+
+[link "/docs/variables-and-datatypes.html" "Overview": A brief overview of Beanstalk]
+
+]

@@ -7,6 +7,7 @@ pub struct Config {
     pub author: String,
     pub license: String,
 }
+
 pub fn get_default_config() -> Config {
     Config {
         project: String::from("html"),
@@ -32,6 +33,7 @@ pub struct HTMLMeta {
     pub page_type: String,
     pub page_twitter_large_image: String,
     pub page_canonical_url: String,
+    pub page_dist_url: String,
     pub image_folder_url: String,
     pub favicons_folder_url: String,
     pub theme_color_light: String,
@@ -54,6 +56,7 @@ pub fn get_html_config() -> HTMLMeta {
         page_type: String::from("website"),
         page_twitter_large_image: String::from(""),
         page_canonical_url: String::from(""),
+        page_dist_url: String::from("/"),
         image_folder_url: String::from("images"),
         favicons_folder_url: String::from("images/favicons"),
         theme_color_light: String::from("#fafafa"),

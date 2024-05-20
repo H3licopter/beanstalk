@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="images/favicons/favicon.ico">
+<link rel="icon"href="../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="images/favicons/site.webmanifest">
-<link rel="stylesheet" href="css/pico.min.css" />
+<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><h1>Scenes
 </h1><p>Beanstalk has its own templating language. Elements are defined using keywords and can be given an ID (exported to the module scope) using an '@' symbol.
 
@@ -77,7 +77,7 @@
     ]
 </p></main>
 <script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  import init, { parse_int_expr, parse_float_expr } from "../pkg/bs_wasm_generator.js";
   init().then(() => {
     function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);

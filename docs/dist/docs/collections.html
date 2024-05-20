@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="images/favicons/favicon.ico">
+<link rel="icon"href="../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="images/favicons/site.webmanifest">
-<link rel="stylesheet" href="css/pico.min.css" />
+<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><h1>Collections
 </h1><p>All Collections are reference types in Beanstalk, which means they are references to underlying data. There are three main types of collection, tuples, prototypes and arrays.
 
@@ -58,33 +58,33 @@
 
     array = {3, 4, 5}
     array.0 -- returns 3
-</p>Specifying the type of the collection is optional for arrays, but if your collection is empty or only contains one value, you must specify the type as a collection of that type.
+</p></p><p>Specifying the type of the collection is optional for arrays, but if your collection is empty or only contains one value, you must specify the type as a collection of that type.
 
-</p></p><p>Empty parentheses are how you specify a collection type.
+<span>Empty parentheses are how you specify a collection type.
 
-</p><span>-- Empty array of integers
+</span><span>-- Empty array of integers
     empty_array = {}int
 
     empty_array.push(3)
     empty_array.0 -- returns 3
-</span><p>An empty, dynamically sized collection of strings.
+</span></p><p>An empty, dynamically sized collection of strings.
 
-</p><span>strings = {}string
+<span>strings = {}string
     strings.push("Hello")
     strings.push("World")
     strings.0 -- returns "Hello"
-</span><p>Dynamic collections can also have named values.
+</span></p><p>Dynamic collections can also have named values.
 
-</p><span>values = {
+<span>values = {
         default_number 0,
         6, 
         7,
         8
     }
 </span><h2>Prototypes (Structs)
-</h2><p>By creating a collection using a colon (constant), you create a prototype, which is a fixed collection of named properties or methods. 
+</h2><span>By creating a collection using a colon (constant), you create a prototype, which is a fixed collection of named properties or methods. 
 
-</p><span>-- Prototype for a vector
+</span><span>-- Prototype for a vector
     -- Has an optional Z property with a default value of 0
     -- Each new instance of this prototype will have a value for z
     Vec : {
@@ -102,9 +102,9 @@
         this.z = 0
     }
 </span><h2>Creating a new collection from a prototype
-</h2><p>If you specify the type as a prototype, you can create a new collection that makes sure the values are the same structure as the prototype.
+</h2><span>If you specify the type as a prototype, you can create a new collection that makes sure the values are the same structure as the prototype.
 
-</p><span>coordinates = {
+</span><span>coordinates = {
         x 3.45,
         y 7.93,
     } Vec
@@ -114,7 +114,7 @@
     coordinates.reset() -- sets all values to 0.0
 </span></main>
 <script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  import init, { parse_int_expr, parse_float_expr } from "../pkg/bs_wasm_generator.js";
   init().then(() => {
     function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);

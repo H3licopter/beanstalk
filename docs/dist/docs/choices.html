@@ -13,17 +13,17 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="images/favicons/favicon.ico">
+<link rel="icon"href="../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="images/favicons/site.webmanifest">
-<link rel="stylesheet" href="css/pico.min.css" />
+<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><h1>Choices (enums)
 </h1><p>Choices are a way to define a set of possible values for a variable.
 
 </p><p>Choices are created by creating a variable that is assigned multiple definitions separated by |<span>.
 
-</p></p></span><p>Choices are written in SCREAMING_SNAKE_CASE. 
+</span></p><p>Choices are written in SCREAMING_SNAKE_CASE. 
 
 </p><p>Each choice can optionally contain data that can be accessed inside that Choice.
 
@@ -53,7 +53,7 @@
     }
 </span></main>
 <script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  import init, { parse_int_expr, parse_float_expr } from "../pkg/bs_wasm_generator.js";
   init().then(() => {
     function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);

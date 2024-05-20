@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="images/favicons/favicon.ico">
+<link rel="icon"href="../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="images/favicons/site.webmanifest">
-<link rel="stylesheet" href="css/pico.min.css" />
+<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><h1>Variables
 </h1><p>Beanstalk uses a name, value, type syntax for variable assignment. 
 This is to make the code readable, concise and allows for a unique unit type syntax. 
@@ -117,26 +117,23 @@ you must wrap the value in parenthesis.
 The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
 
 </p><h2>Primative Types
-</h2><table><thead><tr><th scope='col'>Type&nbsp;</th><span>Description&nbsp;</span></th><span>Zero Value</span></th></tr></thead><tbody><tr><th scope='col'>int&nbsp;</th><span>32 bit signed integer&nbsp;</span></td><span>0</span></td></tr><tr><th scope='col'>idx&nbsp;</th><span>Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible.&nbsp;</span></td><span>0</span></td></tr><tr><th scope='col'>flt&nbsp;</th><span>32 bit floating point number&nbsp;</span></td><span>0.0</span></td></tr><tr><th scope='col'>dec&nbsp;</th><span>A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision&nbsp;</span></td><span>0.00</span></td></tr><tr><th scope='col'>str&nbsp;</th><span>UTF-8&nbsp;</span></td><span>""</span></td></tr><tr><th scope='col'>uni&nbsp;</th><span>Unicode strings are UTF-32 strings. They are created using single quotes.&nbsp;</span></td><span>''</span></td></tr><tr><th scope='col'>bool&nbsp;</th><span>Boolean, including true and false as types&nbsp;</span></td><span>false</span></td></tr></tbody></table><h2>Collection Types
-</h2><table><thead><tr><th scope='col'>Type&nbsp;</th><span>Description&nbsp;</span></th><span>Zero Value</span></th></tr></thead><tbody><tr><th scope='col'>()&nbsp;</th><span>Tuple&nbsp;</span></td><span>() nil</span></td></tr><tr><th scope='col'>{}&nbsp;</th><span>Collection&nbsp;</span></td><span>{} Empty Collection</span></td></tr><tr><th scope='col'>scene&nbsp;</th><span>The templating syntax of Beanstalk&nbsp;</span></td>&nbsp;<span>an empty scene</span></td></tr><tr><th scope='col'>choice&nbsp;</th><span>Rust style enums&nbsp;</span></td><span>error</span></td></tr><tr><th scope='col'>type&nbsp;</th><span>For generics and datatype related operations&nbsp;</span></td><span>error</span></td></tr><tr><th scope='col'>error&nbsp;</th><span>Contains a string detailing the error&nbsp;</span></td></tr></tbody></table><h2>Generic Types
+</h2><table><thead><tr><th scope='col'>Type&nbsp;</th>&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>int&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>idx&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>flt&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>dec&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>str&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>uni&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>bool&nbsp;</th>&nbsp;</td></td></tr></tbody></table><h2>Collection Types
+</h2><table><thead><tr><th scope='col'>Type&nbsp;</th>&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>()&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>{}&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>scene&nbsp;</th>&nbsp;</td>&nbsp;</td></tr><tr><th scope='col'>choice&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>type&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>error&nbsp;</th>&nbsp;</td></tr></tbody></table><h2>Generic Types
 </h2><td>Generics are used to create a type that can be used with multiple types. 
 Beanstalk has a few built in generic types that can be accessed as properties on the type keyword.
 
-<table><thead><tr><th scope='col'>Type&nbsp;</th><span>Description&nbsp;</span></th><span>Zero Value</span></th></tr></thead><tbody><tr><th scope='col'>type.number&nbsp;</th><span>A tagged union of integers, floats and decimals&nbsp;</span></td><span>0</span></td></tr><tr><th scope='col'>type.string&nbsp;</th><span>A tagged union of strings and unicode strings&nbsp;</span></td><span>""</span></td></tr><tr><th scope='col'>type.collection&nbsp;</th><span>A tagged union of collections of any type&nbsp;</span></td><span>()</span></td></tr><tr><th scope='col'>type.function&nbsp;</th><span>Any function as a value&nbsp;</span></td><span>{}</span></td></tr></tbody></table></td><td>See <a href="../functions#Generic_Functions" style="" ><span>Function generics&nbsp;</span></td></a><span>for more information.
-
-</td></td></span><h1>Strings
+<table><thead><tr><th scope='col'>Type&nbsp;</th>&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>type.number&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>type.string&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>type.collection&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>type.function&nbsp;</th>&nbsp;</td></td></tr></tbody></table></td><td>See <a href="../functions#Generic_Functions" style="" >&nbsp;</td></a></td></td><h1>Strings
 </h1><td>String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
 
 </td><td>"Double quotes for a utf8 string literal"
 
 </td><td>Curly braces are used to add expressions into the string. 
 
-<span>"9 is {5 + 4}" -- 9 is 9
-</td></td></span><td>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
+</td></td><td>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 
 </td><td>"string literal with \{curly braces} in it that is escaped" 
 
-<span></td></td></span><td>9 "is" {5 + 4} -- 9 "is" {5 + 4}
+</td></td><td>9 "is" {5 + 4} -- 9 "is" {5 + 4}
 </td><h1>Unicode Strings
 </h1><td>Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 
 
@@ -152,23 +149,9 @@ You don't need to have a space between a literal value and the unit type, but va
 
 </td><td>If you are mixing unit types in an operation, the first unit type will be used for the result.
 
-<span>#unit m = float -- Specifies the base type as a float
-    #unit cm = m <em> 0.01
-    #unit mm = cm </em> 0.1
+</td></td><td>You can also create boolean unit types that allow for strict type checking. 
 
-    width = 5m <em> 230cm
-    -- result is 5.23
-
-    height = (3m </em> 2m) cm
-    -- result is 500
-</td></td></span><td>You can also create boolean unit types that allow for strict type checking. 
-
-<span>#unit Age_Range = 0 to 120
-
-    person_age = age_input.value Age_Range !(
-        print("Invalid age input: {error}")
-    )
-</td></td></span><h1>References
+</td></td><h1>References
 </h1><td>References are used to create a reference to a variable.
 
 </td><h1>Comptime
@@ -187,11 +170,9 @@ Any comptime function calls that return values will be replaced with the value t
 
 </td><td>To turn any variable into a signal, you add a $ to the front of the variable name. 
 
-<span>my_signal =&gt; 0
-
-</span></td></td></main>
+</td></td></main>
 <script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  import init, { parse_int_expr, parse_float_expr } from "../pkg/bs_wasm_generator.js";
   init().then(() => {
     function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);

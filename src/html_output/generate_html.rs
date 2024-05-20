@@ -28,6 +28,7 @@ pub fn create_html_boilerplate(meta_tags: HTMLMeta, release_build: bool) -> Stri
                     "page-twitter-large-image",
                     &meta_tags.page_twitter_large_image,
                 )
+                .replace("page-dist-url/", &meta_tags.page_dist_url)
                 .replace("page-canonical-url", &meta_tags.page_canonical_url)
                 .replace("site-favicons-folder-url", &meta_tags.favicons_folder_url)
                 .replace("theme-color-light", &meta_tags.theme_color_light)
