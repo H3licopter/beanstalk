@@ -575,6 +575,9 @@ fn keyword_or_variable(
                     if token_value == "rgb" {
                         return Token::Rgb;
                     }
+                    if token_value == "center" {
+                        return Token::Center;
+                    }
                     if token_value == "bg" {
                         return Token::BG;
                     }

@@ -94,6 +94,10 @@ pub fn new_scene(
                 }
             }
 
+            Token::Center => {
+                scene_styles.push(Style::Center(false));
+            }
+
             Token::Size => {
                 j += 1;
                 let arg = create_expression(scene_head, &mut j, false, ast);

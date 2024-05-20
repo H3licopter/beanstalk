@@ -189,4 +189,5 @@ pub enum Token {
     Rgb,
     BG,
     Table,
+    Center,
 }

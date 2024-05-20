@@ -1,0 +1,16 @@
+{
+  "name": "bs-wasm-generator",
+  "description": "A sample project with wasm-pack",
+  "version": "0.1.0",
+  "license": "MIT/Apache-2.0",
+  "files": [
+    "bs_wasm_generator_bg.wasm",
+    "bs_wasm_generator.js",
+    "bs_wasm_generator.d.ts"
+  ],
+  "module": "bs_wasm_generator.js",
+  "types": "bs_wasm_generator.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

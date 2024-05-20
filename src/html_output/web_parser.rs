@@ -166,6 +166,13 @@ fn parse_scene(
                     .properties
                     .push_str(&format!(" alt=\"{}\"", value));
             }
+            Style::Center(vertical) => {
+                scene_wrap.style.push_str("display:flex;align-items:center;flex-direction:column;");
+                if vertical {
+                    scene_wrap.style.push_str("justify-content:center;");
+                }
+                scene_wrap.tag = Tag::Div;
+            }
         }
     }
 

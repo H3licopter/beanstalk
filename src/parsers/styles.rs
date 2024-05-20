@@ -24,4 +24,5 @@ pub enum Style {
     TextColor(AstNode),
     BackgroundColor(AstNode),
     Alt(String),
+    Center(bool), // true = also center vertically
 }
