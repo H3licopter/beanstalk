@@ -1,6 +1,3 @@
-#title "Functions"
-#date "2024-4-14"
----
 # Functions
 Functions are first class citizens in Beanstalk. They can be assigned to variables, passed as arguments, and returned from other functions.
 

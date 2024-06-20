@@ -1,7 +1,3 @@
-#title "Commends and Code Style"
-#date "2024-2-4"
----
-
 # Style Guide
 The recommended style guide is:
 - camelCase for functions

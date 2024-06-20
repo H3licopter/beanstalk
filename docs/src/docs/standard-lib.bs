@@ -1,7 +1,3 @@
-#title "Standard Library"
-#date "2024-2-5"
----
-
 # Standard Library
 Standard library in Beanstalk comprises methods and scene properties. The standard library is automatically added to projects, but can be explicitly excluded using the #exclude directive.
 

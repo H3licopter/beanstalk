@@ -1,10 +1,8 @@
-#title "The Beanstalk Book"
----
 [center p(1):
 
 # THE BEANSTALK BOOK!
 # &#127793;
-This whole site was created using Beanstalk!
+This website was created using Beanstalk!
 
 This is a work in progress site for Beanstalk documentation as it's being developed. 
 

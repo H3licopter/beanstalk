@@ -1,6 +1,3 @@
-#title "Variables and Datatypes"
-#date "2024-2-4"
----
 # Variables
 Beanstalk uses a name, value, type syntax for variable assignment. 
 This is to make the code readable, concise and allows for a unique unit type syntax. 

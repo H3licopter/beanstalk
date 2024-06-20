@@ -1,7 +1,3 @@
-#title "If Statements"
-#date "2024-2-5"
----
-
 # If Statements
 `
     v = 1

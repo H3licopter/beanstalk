@@ -6,13 +6,14 @@ use std::str::Chars;
 pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut chars: Peekable<Chars<'_>> = source_code.chars().peekable();
-    let mut tokenize_mode: TokenizeMode = TokenizeMode::Normal;
+    let mut tokenize_mode: TokenizeMode = TokenizeMode::Markdown;
     let mut scene_nesting_level: &mut i64 = &mut 0;
 
     // For variable optimisation
     let mut var_names: Vec<Declaration> = Vec::new();
 
     let mut token: Token = Token::ModuleStart(module_name.to_string());
+
     loop {
         match token {
             Token::Variable(name) => {
@@ -642,7 +643,7 @@ fn tokenize_scenehead(
 ) -> Token {
     let mut scene_head: Vec<Token> = Vec::new();
 
-    if scene_nesting_level == &1 {
+    if scene_nesting_level == &0 {
         scene_head.push(Token::ParentScene);
     }
 
@@ -661,6 +662,7 @@ fn tokenize_scenehead(
             }
         }
     }
+
     Token::SceneHead(scene_head)
 }
 

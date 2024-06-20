@@ -9,7 +9,7 @@ use std::fs;
 
 pub fn test_build() -> Result<(), Box<dyn Error>> {
     // Read content from a test file
-    println!("READNING TEST FILE\n");
+    println!("READING TEST FILE\n");
     let content = fs::read_to_string("test_output/src/index.bs")?;
 
     // Tokenize File

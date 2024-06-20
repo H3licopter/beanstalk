@@ -1,69 +1,56 @@
-#title "Scenes"
-#date "2024-2-4"
----
-
 # Scenes
-Beanstalk has its own templating language. Elements are defined using keywords and can be given an ID (exported to the module scope) using an '@' symbol.
+Beanstalk has its own templating language. These are called scenes.
 
-Scenes describe both the content and state of the UI. If you create an immutable scene, then it cannot change at runtime even if it contains signals. 
+Scenes use square brackets and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
 
-You can specify a name for the scene by naming it on the same line as the triple dash. This will allow you to export multiple scenes into other files.
+Inside of scenes, you can nest more scenes using square brackets or blocks of code using curly brackets.
 
-Scenes use curly braces and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
+Scenes are defined using keywords and can be given an ID (exported out of the scope of the file) using an '@' symbol.
 
 ## Beanstalk Markdown
-
-Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a Beanstalk scene.
+Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a Beanstalk scene. Beanstalk markdown supports the familiar heading, bold and italic syntax from most markdown parsers.
 
 `
-    ---
     # A Heading
 
     Some text that has a [link "www.example.com", alt "alt text"] link inside it.
 
-    [ variable_from_the_code ]
+    {
+        constant : "some text"
+    }
 
-    The main difference is square brackets [rgb(170,0,0): *cannot*] be used without an escape character.
+    [ constant ]
 
-    The scene will be automatically closed if it reaches the end of the file. So files that are entirely the content of a scene don't have to be indented or closed.
+    The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets and curly brackets [rgb(170,0,0): *cannot*] be used without an escape character or by using backticks to create a raw string.
 `
 
 ## Scene exmaple
 
 `
-    ---
+    [ head_of_element: content of element that renders as text (markdown / more templates) {string : "this is a code block inside of the scene body, that is scoped to the scene"} ]
 
-    [ head_of_element: content of element that renders as text (markdown / more templates) ]
+    [img "images/meme.jpg"]
 
-    reactiveVariable = "some text"
-    changeText : (text string) -> ()
-        reactiveVariable => text;
+    { io.click{ io "scene clicked" } }
 
-    @scene_id -- An element from a scene (getting the element’s ID)
-
-    scene_component_example := [ theme=example_theme:
-
-        [img "images/meme.jpg", click(reactiveVariable => "WOW")]
-
-        # A Cool Table
-        [ @scene_id, style "cool":
-            Some grid text
-            [ reactiveVariable ]
-            [link "example.com/page": here's a link!]
-        ]
-
-        [ for text in text_array: 
-            [ text ]
-        ]
-
-        [ style "big-text", if not text.isBlank():
-            [ text: plus some extra text in the same element as the variable text ]
-        ]
-
-        [rgb{230,20,150}: bunch of text with rgb color]
-
-        [ imported_bs_markdown ]
-        [ slot "main content" ]
+    # A Cool Table
+    [ @scene_id, style "cool":
+        Some grid text
+        [ reactiveVariable ]
+        [link "example.com/page": here's a link!]
     ]
+
+    [ for text in text_array: 
+        [ text ]
+    ]
+
+    [ style "big-text", if not text.isBlank():
+        [ text: plus some extra text in the same element as the variable text ]
+    ]
+
+    [rgb 230,20,150 : bunch of text with rgb color]
+
+    [ imported_bs_markdown ]
+    [ slot "main content" ]
 `
 

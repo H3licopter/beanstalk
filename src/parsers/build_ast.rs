@@ -29,6 +29,9 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
             Token::SceneHead(scene_head) => {
                 ast.push(new_scene(scene_head, &tokens, &mut i, &ast));
             }
+            Token::ModuleStart(_) => {
+                ast.push(new_scene(&Vec::new(), &tokens, &mut i, &ast));
+            }
 
             // New Function or Variable declaration
             Token::VarDeclaration(id) => {
@@ -92,7 +95,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                 }
             }
 
-            Token::Newline | Token::Empty | Token::ModuleStart(_) => {
+            Token::Newline | Token::Empty => {
                 // Do nothing for now
             }
 

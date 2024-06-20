@@ -1,7 +1,3 @@
-#title "Loops"
-#date "2024-4-5"
----
-
 # Loops
 Only 1 keyword for loops "for". 
 

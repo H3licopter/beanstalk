@@ -1,6 +1,3 @@
-#title "Errors"
-#date "2024-2-5"
----
 # Error Handling
 Any function that can return an error will return an Option type. This type can be checked for an error and handled / unpacked accordingly using the ! or ? operator.
 

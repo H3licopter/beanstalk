@@ -1,7 +1,3 @@
-#title "Operators"
-#date "2024-2-5"
----
-
 # Keywords
 
 ## Logical Operators
