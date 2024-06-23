@@ -166,7 +166,29 @@ fn add_bs_files_to_parse(
                         eprintln!("'src' not found in the path");
                     }
 
-                    let output_file = format!("{file_name}.html");
+                    // turn whitespace in file name to dashes
+                    let no_whitespace = file_name.replace(|c: char| c.is_whitespace(), "-");
+                    let mut name_iter = no_whitespace.chars().peekable();
+                    
+                    // Remove duplicate dashes
+                    let mut file_name_formatted = String::new();
+                    loop {
+                        let c = name_iter.next();
+                        match c {
+                            Some(c) => {
+                                if c == '-' && name_iter.peek() == Some(&'-') {
+                                    continue;
+                                }
+
+                                file_name_formatted.push(c);
+                            },
+                            None => break,
+                        }
+                    }
+                    
+
+                    
+                    let output_file = format!("{file_name_formatted}.html");
                     let file_dir = file.to_str().unwrap();
 
                     let code = match fs::read_to_string(&file_dir) {

@@ -296,11 +296,11 @@ pub fn new_scene(
                 }
             }
 
-            Token::Empty | Token::AssignComptime => {}
+            Token::Empty | Token::Newline | Token::AssignComptime | Token::DeadVarible => {}
 
             _ => {
                 scene.push(AstNode::Error(
-                    "Invalid Syntax Used Inside scene body".to_string(),
+                    format!("Invalid Syntax Used Inside scene body when creating scene node: {:?}", tokens[*i]),
                 ));
             }
         }
