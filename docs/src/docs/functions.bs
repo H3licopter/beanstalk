@@ -1,151 +1,73 @@
 # Functions
-Functions are first class citizens in Beanstalk. They can be assigned to variables, passed as arguments, and returned from other functions.
 
 Their structure is: 
 1. the function name (can be omited for anonymous functions)
-2. A colon (or double colon for compile time only)
-3. An argument (A collection is specified for multiple arguments and will be automatically destructured into the scope of the function), if no arguments are required, you must use an empty tuple.
+2. A colon 
+3. A list of the arguments for the function (optional)
 4. An arrow symbol (always required, even for functions that don't return anything)
-5. An optional return type.
-6. the the body of the function enclosed in curly braces
+5. A list of return types (optional)
+6. A colon before the body of the function
+7. A return statement at the end of the function (always required, even for functions that don't return anything)
 
-If the function can only return an error, you can use a '?' as the specified return type.  
+If the function can only return an error, you can use a '!' as the specified return type.  
 
 ## The arrow operator
 The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
 
-`
-    -- Returns a tuple of values (private function)
-    multipleReturns : () -> (int, int, int) {
-        return 1, 2, 3
-    }
-
-    -- When assigning mutliple values to a single variable, the variable becomes a tuple
-    a = multipleReturns()
-
-    a.0 is 1 -- true
-`
+A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
 
 `
-    concatString : (a string, b string) -> string {
-        return a b
-    }
+    doNothing : () -> () : return
 
-    myself = concatString(
-        a "I am ",
-        b "really cool"
-    )
+    -- Returns a tuple of values
+    multipleReturns : () -> (int, int, int) :
+        return (1, 2, 3)
 
-    -- Using an exsisting collection Type as an argument
-    -- Public function
-    @ NormalizeVectors : Vec -> Vec {
-        return (
-            x = Vec.x / Vec.length, 
-            y = Vec.y / Vec.length 
+    differentReturns : (spicy : bool = false) -> (int, int, int) :
+        if spicy:
+            return (69, 420, 1337)
+        
+        return (1, 2, 3)
+
+    nestedReturns : () -> bool :
+        if state is (
+            STATE.normal => return true
+            => return false
         )
-    }
 
-    NormalizeVectors(
-        x 3, y 4
-    )
 
-    -- inlined function with no return value or args
-    inlineSideEffect : () -> { state = "beans" }
+    defaultReturn: () -> (int) :
+        if time now is time last (
+            time now += 1
+        )
 
-    -- With default args
-    addNumbers : (a = 1, b = 1) -> {
+        return time now
+
+`
+
+# Generics
+The type keyword is used to create generic types that can be used in functions and methods.
+
+These types will converge into a single possible type when initialised within a type definition, but within the same scope they remain 'generic'.
+
+`
+    -- Creating a generic type
+    number : type : int or float
+
+    add : (a : number, b : number) -> number :
         return a + b
-    }
 
-    -- named args access
-    result = addNumbers(a 3, b 16)
-
-    sayThing : (phrase string) -> string {
-        return "{phrase}"
-    }
-
-    -- returns a tuple
-    multipleReturns : () -> (int, int, int) {
-        return 1, 2, 3
-    }
-
-    a, b, c = multipleReturns
-
-    -- Anonymous functions
-    (arg int) -> {arg + 1}
-
-    () -> { "Hello" }
-`
-
-# Methods
-Method chaining is a core part of how data can be transformed in Beanstalk. 
-The standard library imports methods that will extend certain data types.
-
-Methods are instead created similarly to functions but will impliment themselves on the specified types.
-
-Create a new method by using the Self keyword as the name of an argument. 
-To impliment the method on one or more types, specify them as types of the Self argument.
-
-`
-    increment : (self int or float) -> () { self += 1 }
-
-    number = 0
-    number.incrementInt 
-    io number -- 1
-
-    randomizeAge : (self Person) -> () ( 
-        self.age = int.rng(min 0, max 100) 
-    )
-`
-
-# Generic Functions
-The type keyword has some useful generic types that can be used in functions and methods.
-
-`
-    add : (a type.number, b type.number) -> type.number {
-        return a + b
-    }
-
-    -- This function will now work with any numerical type
+    -- This function will now work with floats and ints
     add(3, 4) -- 7
     add(3.23, 53.9) -- 57.13
-`
 
-Any operations in the function must be valid for all types that could be passed in.
+    -- Converges to int type
+    example1 : number = 3
 
-Here is an example using generics with collections:
-    
-    `
-        sortCollection : (collection type.collection) -> type.collection? {
-            match collection type {
-                string : return collection.sort()
-                int    : return collection.sort()
-                else   : return error "Invalid type"
-            }
-        }
-    `
+    -- Converges to float type
+    example2 : number = 3.23
 
-# Using the arrow operator to pipe values
-The arrow operator can be used to pipe values directly from one function to another. 
-You must provide the expected returned type after the arrow for this to work.
+    -- Type Error, only one type can be converged
+    example3 : number = example1 + example2
 
-`
-    result = func1(420) -> int func2() -> int func3() -> int func4()
-`
-
-You can also specify the type of the value being passed to the next function.
-
-`
-    result = func1(value1 a, value2 b) -> int func2(value1 a, value2 b) -> int func3(value1 a) -> int func4(value2 b)
-`
-
-And just like any expression in beanstalk, you can wrap the whole expression in pathenthesis to make it more readable over mutliple lines and specify the final type of the result.
-
-`
-    result = (
-        func1(value a, value b) -> int 
-        func2(value a, value b) -> int 
-        func3() -> int 
-        func4()
-    ) int
 `

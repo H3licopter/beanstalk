@@ -1,52 +1,40 @@
 # If Statements
-`
-    v = 1
-    if v is not 1 {
-        io "nope"
-    } else {
-        io "yep"
-    }
 
-    -- Compiler will warn that condition always evaluates to true
-    if 4 / 2 is 2 {
-        v += 1
-    }
-
-    if thing {
-        doThing()
-    } else {
-        dontDoThing()
-    } 
-`
-
-# Pattern Matching / Switch
-Opening a new scope immediately after a comparison will allow for pattern matching. This is usually done with the "is" keyword, but can also be done with the "in" keyword. The "not" keyword can be appended to these to negate a comparison.
-
-Each branch of the match statement is separated by a comma, and each match is separated by the "then" keyword.
-
-The "or" keyword can be used inside the switch to match multiple values.
-
-"else" is used as a catch if there are no previous matches. When match returns a type, it must always be exhaustive, so all possible options must be covered, or an else must be used.
-
-If the match statement must return a value, each branch must return the same type.
-
-A branch can also contain a function, which can be specified by using an arrow and creating a new scope with curly braces. If the branch must return a value, the function of that brach must have a return of that type.
-
-If the match does not return a value, it does not need to be exhaustive.
+If statements can be used as expressions or statements. They can also be used for pattern matching, all with a similar syntax.
 
 `
-    content = some_int is {
-        0 then "beans",
-        1 or 2 then "burgers",
-        else "who cares"
-    } str
+    v := 1
 
+    if v is not 1 (
+        print "nope"
+    ) else (
+        print "yep"
+    )
 
-    -- No return type, non-exhaustive. No function will run if a choice is not covered.
-    some_choice is {
-        CHOICE.a then () -> { doThing() },
-        CHOICE.b then () -> { doOtherThing() },
-        CHOICE.c then () -> { doAnotherThing() }
-    }
+    -- If as a statement
+    if v is (
+        0 => print "nope"
+        1 => print "yep"
+        => print "defintely nope"
+    )
 
+    -- If as an expression
+    msg := if v is (
+        0 => return "nope"
+        1 => return "yep"
+        => return "defintely nope"
+    )
+
+    print(msg)
+
+    v = 69
+
+    if v is (
+        0 => (
+            v += 1
+            print "yep"
+        )
+        1 => print "yep"
+        => print "defintely nope"
+    )
 `

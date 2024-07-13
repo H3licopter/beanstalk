@@ -6,8 +6,6 @@ All Beanstalk files use the .bs file extension.
 Any Beanstalk file tied into the project can specify compiler settings and the config for your project as long as it is part of, or imported into this main file. 
 The compiler will read through any configuration settings first, then it will run any compile time evaluations inside the code.
 
-To talk to the compiler and set project configurations, the # symbol is used. 
-
 # Project Configuration
 When creating a new Beanstalk html project, a configuration file will be created in the root directory. 
 This is called "config.bs" by default and it will specify the entry point and structure of the program. 

@@ -1,35 +1,26 @@
 # Choices (enums)
 Choices are a way to define a set of possible values for a variable.
 
-Choices are created by creating a variable that is assigned multiple definitions separated by `|`.
+Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
 
 Choices are written in SCREAMING_SNAKE_CASE. 
 
 Each choice can optionally contain data that can be accessed inside that Choice.
 
 `
-    RESPONSE: Data string | Error string
+    RESPONSE : choice : (data: string, error: !)
 
-    STATE : (
-        paused | 
-        running | 
-        error_message string | 
-        person Person 
+    STATE : choice : (
+        paused,
+        running,
+        error_message: string,
     )
 
-    now = STATE.Running
+    now := STATE.error_message("Something went wrong")
 
-    if now is STATE.Running {
-        now = STATE.Paused
-    }
-
-    -- Getting a value from a choice
-    choice_value = now.value
-
-    -- Getting a value from a choice, using the this keyword to access it's value in a match statement
-    now is {
-        STATE.error_message then (this) -> {
-            io(this.value) 
-        }
-    }
+    if now is STATE.error_message (
+        if now is (
+            STATE.error_message => print( now value )
+        )
+    )
 `

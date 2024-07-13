@@ -3,9 +3,10 @@ Beanstalk has its own templating language. These are called scenes.
 
 Scenes use square brackets and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
 
-Inside of scenes, you can nest more scenes using square brackets or blocks of code using curly brackets.
+Inside of scenes, you can nest more scenes using square brackets or blocks of code using more brackets.
 
-Scenes are defined using keywords and can be given an ID (exported out of the scope of the file) using an '@' symbol.
+The # hash symbol is used to access properties and methods from the window or page you are creating. 
+You use this to access properties on the Window object in the browser.
 
 ## Beanstalk Markdown
 Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a Beanstalk scene. Beanstalk markdown supports the familiar heading, bold and italic syntax from most markdown parsers.
@@ -14,10 +15,6 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
     # A Heading
 
     Some text that has a [link "www.example.com", alt "alt text"] link inside it.
-
-    {
-        constant : "some text"
-    }
 
     [ constant ]
 
@@ -31,7 +28,7 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
 
     [img "images/meme.jpg"]
 
-    { io.click{ io "scene clicked" } }
+    { io.click( print("scene clicked") ) }
 
     # A Cool Table
     [ @scene_id, style "cool":

@@ -1,9 +1,7 @@
 # Collections
-All Collections are reference types in Beanstalk, which means they are references to underlying data. There are three main types of collection, tuples, prototypes and arrays.
+All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
 
 Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
-
-All collections can have their data accessed using the dot operator, either by index or by name if they are named values.
 
 ## Literals
 By simply wrapping a list of values in parethesis and not specifying a type, you create a tuple literal.
@@ -23,93 +21,48 @@ When creating a tuple using a colon, the values inside become immutable.
 
 `
     -- Fixed size tuple of immutable integers
-    tuple : (1, 2, 3)
-    tuple.0 -- returns 1
+    tuple :: (1, 2, 3)
+    tuple 0 -- returns 1
 
     -- Named tuple element (mutable)
-    tuple_of_one = (number 69)
-    int_value = 69
-    tuple_of_one is int_value -- returns true
+    tuple_of_one := (number 69)
+    int_value := 69
+    tuple_of_one number is int_value -- returns true
 
     -- Named value with type (mutable)
-    tuple_of_one = (number 420 float)
-    float_value = 420.0
-    tuple_of_one is int_value -- returns true
+    tuple_of_one : float = (number 420)
+    int_value := 420
+    tuple_of_one number is int_value -- returns false
 `
 ## Dynamic Collections (Arrays)
-Values wrapping in curly braces become and assigning using an equals, you can create a dynamic collection.
+When creating a variable collection rather than a constant collection, it becomes a dynamic collection.
 
 Dynamic collections can only contain one data type.
 `
-    array = {3, 4, 5}
-    array.0 -- returns 3
+    array := (3, 4, 5)
+    array push(9)
+    array 3 -- returns 9
 `
 
-Specifying the type of the collection is optional for arrays, but if your collection is empty or only contains one value, you must specify the type as a collection of that type.
-
-Empty parentheses are how you specify a collection type.
+Specifying the type of your collection.
 
 `
     -- Empty array of integers
-    empty_array = {}int
+    empty_array : (int)
 
-    empty_array.push(3)
-    empty_array.0 -- returns 3
+    empty_array push(3)
+    empty_array 0 -- returns 3
+
+    strings : (string) = ("hello", "world")
 `
 
-An empty, dynamically sized collection of strings.
+Collections can also have named values or keys. These values can now be defined as mutable or immutable.
 
 `
-    strings = {}string
-    strings.push("Hello")
-    strings.push("World")
-    strings.0 -- returns "Hello"
-`
-
-Dynamic collections can also have named values.
-
-`
-    values = {
-        default_number 0,
-        6, 
+    values :: (
+        default_number :: 0,
+        "cool number" :: 6,
         7,
         8
-    }
-`
-
-## Prototypes (Structs)
-By creating a collection using a colon (constant), you create a prototype, which is a fixed collection of named properties or methods. 
-
-`
-    -- Prototype for a vector
-    -- Has an optional Z property with a default value of 0
-    -- Each new instance of this prototype will have a value for z
-    Vec : {
-        x float,
-        y float,
-        z = 0.0
-    }
-
-    Vec.x -- returns 0
-
-    -- Creating a method for the prototype
-    reset : this Vec -> {
-        this.x = 0
-        this.y = 0
-        this.z = 0
-    }
-`
-
-## Creating a new collection from a prototype
-If you specify the type as a prototype, you can create a new collection that makes sure the values are the same structure as the prototype.
-
-`
-    coordinates = {
-        x 3.45,
-        y 7.93,
-    } Vec
-
-    coordinates.x -- returns 3.45
-    coordinates.z -- returns 0.0
-    coordinates.reset() -- sets all values to 0.0
+    )
 `
