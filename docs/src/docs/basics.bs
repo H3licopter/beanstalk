@@ -1,3 +1,28 @@
+# Style Guide
+The style guide is:
+- snake_case as the default choice for variables and other things
+- camelCase for functions
+- PascalCase for objects
+- SCREAMING_SNAKE_CASE for Choices
+
+4 spaces are recommended for indentation.
+
+# Comments
+Comments use a double minus sign '--'. 
+
+If you put a newline immediately after a comment mark, the comment will become multi line and must be closed with - again. 
+Comments are read by the compiler and can be nested.
+
+`
+    -- normal comment
+
+    --
+    Multiline comment
+
+    Woo
+    --
+`
+
 # Variables
 Beanstalk uses pointer semantics by default. This means that a variable is a reference to a value unless it is explicitly copied or assigned to a new value.
 

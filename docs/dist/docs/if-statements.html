@@ -18,68 +18,44 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><main class="container"><h1>Standard Library
-</h1><p>Standard library in Beanstalk comprises methods and scene properties. The standard library is automatically added to projects, but can be explicitly excluded using the #exclude directive.
+<style></style></head><body><main class="container"><h1>If Statements
+</h1><p>If statements can be used as expressions or statements. They can also be used for pattern matching, all with a similar syntax.
 
-</p><h2>HTML project standard library
-</h2><p>When starting a new HTML project, Beanstalk will implicitly import relevant scene properties and global keywords. Other keywords that are added into the global scope include:
+</p><span>v := 1
 
-</p><li><em>Global keywords:</em>
-</li><li>io</li><li>window</li><h2>Scene Properties:
-</h2><h3>Style
-</h3><p>{table 2:
-    {: Property} {: Description}
-    
-</p><p>{: style}
-    {: theme}
-    {: size}
-    {: img}
-    {: pad}
-    {: space}
-    {: rgb}
-    {: hex}
-    {: raw}
-}
+    if v is not 1 (
+        print "nope"
+    ) else (
+        print "yep"
+    )
 
-</p><h3>Interactive 
-</h3><p>{table 2:
-    {: Property} {: Description}
+    -- If as a statement
+    if v is (
+        0 =&gt; print "nope"
+        1 =&gt; print "yep"
+        =&gt; print "defintely nope"
+    )
 
-</p><p>{: input}
-    {: audio}
-    {: video}
-    {: click}
-    {: form}
-    {: option}
-    {: dropdown}
-}
+    -- If as an expression
+    msg := if v is (
+        0 =&gt; return "nope"
+        1 =&gt; return "yep"
+        =&gt; return "defintely nope"
+    )
 
-</p><h3>HTTP 
-</h3><p>{table 2:
-    {: Property} {: Description}
+    print(msg)
 
-</p><p>{: post}
-    {: get}
-    {: delete}
-    {: swap}
-}
+    v = 69
 
-</p><h3>Dynamic
-</h3><p>{table 2: 
-    {: Property} {: Description}
-
-</p><p>{: slot}
-    {: canvas}
-}
-
-</p><h3>Comments
-</h3><p>{table 2: 
-    {: Property} {: Description}
-
-</p><p>{: comment}
-}
-
-</p></main>
+    if v is (
+        0 =&gt; (
+            v += 1
+            print "yep"
+        )
+        1 =&gt; print "yep"
+        =&gt; print "defintely nope"
+    )
+</span></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

@@ -51,3 +51,56 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
     [ slot "main content" ]
 `
 
+### Style
+[table 2:
+    [: Property] [: Description]
+    
+    [: style]
+    [: theme]
+    [: size]
+    [: img]
+    [: pad]
+    [: space]
+    [: rgb]
+    [: hex]
+    [: raw]
+]
+
+### Interactive 
+[table 2:
+    [: Property] [: Description]
+
+    [: input]
+    [: audio]
+    [: video]
+    [: click]
+    [: form]
+    [: option]
+    [: dropdown]
+]
+
+### HTTP 
+[table 2:
+    [: Property] [: Description]
+
+    [: post]
+    [: get]
+    [: delete]
+    [: swap]
+]
+
+### Dynamic
+[table 2: 
+    [: Property] [: Description]
+
+    [: slot]
+    [: canvas]
+]
+
+### Comments
+[table 2: 
+    [: Property] [: Description]
+
+    [: comment]
+]
+

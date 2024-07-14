@@ -18,27 +18,36 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><main class="container"><h1>Style Guide
-</h1><li>The recommended style guide is:
-</li><li>camelCase for functions</li><li>PascalCase for objects</li><li>SCREAMING_SNAKE_CASE for Choices</li><li>snake_case as the default choice for variables and other things</li><p>4 spaces are recommended for indentation.
+<style></style></head><body><main class="container"><h1>Setting up a Project
+</h1><p>Running the command 'new html' followed by your directory path will create a new Beanstalk project in that directory. The path is relative to the current directory.
 
-</p><p>A scoped block of code is defined with regular brackets. 
-Commas are not needed for seperating items in a list, and can be used in numbers for readability.
+</p><p>The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
+This file is called "config.bs" and is placed in the root folder of your project by default. A configuration file is also created in the root directory.
+All Beanstalk files use the .bs file extension.
 
-</p><h1>Comments
-</h1><p>Comments use a double minus sign '--'. 
+</p><p>The compiler will read through any configuration settings first.
 
-</p><p>If you put a newline immediately after a comment mark, the comment will become multi line and must be closed with - again. 
-Comments are read by the compiler and can be nested.
+</p><p>The src folder will contain your bs files and inform the structure of your pages. 
 
-</p><span>-- normal comment
+</p><p>The dist folder contains the compiled files.
 
-    --
-    Multiline comment
+</p><h1>Project Configuration
+</h1><p>When creating a new Beanstalk html project, a configuration file will be created in the root directory. 
+This is called "config.bs" by default and it will specify the entry point and structure of the program. 
 
-    Woo
-    --
-</span></main>
+</p><h2>Compiling your BS files
+</h2><h3>Build
+</h3><p>While in the root directory of your project, where the config.bs file is, run the command 'build' to compile your whole project. 
+
+</p><p>If you specify a specific bs file, build will only compile that file.
+
+</p><h3>Dev
+</h3><p>To create a development server with a watcher, run the command 'dev' in the root directory of your project.
+
+</p><p>Any changes to your bs files will be automatically compiled and the server will reload the page.
+
+</p><h1>File Paths
+</h1><p>Any index.bs files will become the main page of the folder they are in, so your main page will be index.bs in the root directory.</p></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

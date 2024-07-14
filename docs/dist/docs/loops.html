@@ -28,7 +28,7 @@
     )
 
     for thing in 5 (
-        io(thing)
+        print(thing)
     )
 
     for checkIfTrue() (
@@ -36,14 +36,14 @@
     )
 
     -- reversed iterator, using the 'to' keyword to specify a range
-    -- a range that goes from a higher to a lower value means the iterator will decrement from the last value in the collection
-    -- the current value in the iterator will gain proprties that allow you to figure out info such as it's index
-    for t in text_array reverse (
-        print(t.index)
+    for t in text_array length to 0 (
+        print(text_array t)
     )
 
-    --- infinite loop (a break statement is required to exit)
-    for ( io{":("} )
+    for (
+        print("ye")
+        break
+    )
 </span></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";

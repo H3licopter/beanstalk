@@ -1,5 +1,3 @@
 # Reserved Keywords and symbols
-^ - pointers (Like in Odin)
-& - References
 << - Concurrency Channel
 >> - Concurrency Channel

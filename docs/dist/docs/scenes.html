@@ -23,9 +23,10 @@
 
 </p><p>Scenes use square brackets and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
 
-</p><p>Inside of scenes, you can nest more scenes using square brackets or blocks of code using curly brackets.
+</p><p>Inside of scenes, you can nest more scenes using square brackets or blocks of code using more brackets.
 
-</p><p>Scenes are defined using keywords and can be given an ID (exported out of the scope of the file) using an '@' symbol.
+</p><p>The # hash symbol is used to access properties and methods from the window or page you are creating. 
+You use this to access properties on the Window object in the browser.
 
 </p><h2>Beanstalk Markdown
 </h2><p>Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a Beanstalk scene. Beanstalk markdown supports the familiar heading, bold and italic syntax from most markdown parsers.
@@ -33,10 +34,6 @@
 </p><span># A Heading
 
     Some text that has a [link "www.example.com", alt "alt text"] link inside it.
-
-    {
-        constant : "some text"
-    }
 
     [ constant ]
 
@@ -46,7 +43,7 @@
 
     [img "images/meme.jpg"]
 
-    { io.click{ io "scene clicked" } }
+    { io.click( print("scene clicked") ) }
 
     # A Cool Table
     [ @scene_id, style "cool":
@@ -67,7 +64,8 @@
 
     [ imported_bs_markdown ]
     [ slot "main content" ]
-</p></main>
+</p><h3>Style
+</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>style</th><td>theme</td></tr><tr><th scope='col'>size</th><td>img</td></tr><tr><th scope='col'>pad</th><td>space</td></tr><tr><th scope='col'>rgb</th><td>hex</td></tr><tr><th scope='col'>raw</th></tbody></table>&nbsp;<p>Description</p><p>input</p><p>audio</p><p>video</p><p>click</p><p>form</p><p>option</p><p>dropdown</p><table><thead><tr><th scope='col'>Property&nbsp;</th><th scope='col'>Description</th></tr></thead><tbody><tr><th scope='col'>post</th><td>get</td></tr><tr><th scope='col'>delete</th><td>swap</td></tr></tbody></table><table><thead><tr><th scope='col'>Property&nbsp;</th><th scope='col'>Description</th></tr></thead><tbody><tr><th scope='col'>slot</th><td>canvas</td></tr></tbody></table><table><thead><tr><th scope='col'>Property&nbsp;</th><th scope='col'>Description</th></tr></thead><tbody><tr><th scope='col'>comment</th></tbody></table></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

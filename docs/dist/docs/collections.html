@@ -19,11 +19,9 @@
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><h1>Collections
-</h1><p>All Collections are reference types in Beanstalk, which means they are references to underlying data. There are three main types of collection, tuples, prototypes and arrays.
+</h1><p>All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
 
 </p><p>Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
-
-</p><p>All collections can have their data accessed using the dot operator, either by index or by name if they are named values.
 
 </p><h2>Literals
 </h2><p>By simply wrapping a list of values in parethesis and not specifying a type, you create a tuple literal.
@@ -39,79 +37,43 @@
 </p><p>When creating a tuple using a colon, the values inside become immutable.
 
 </p><span>-- Fixed size tuple of immutable integers
-    tuple : (1, 2, 3)
-    tuple.0 -- returns 1
+    tuple :: (1, 2, 3)
+    tuple 0 -- returns 1
 
     -- Named tuple element (mutable)
-    tuple_of_one = (number 69)
-    int_value = 69
-    tuple_of_one is int_value -- returns true
+    tuple_of_one := (number 69)
+    int_value := 69
+    tuple_of_one number is int_value -- returns true
 
     -- Named value with type (mutable)
-    tuple_of_one = (number 420 float)
-    float_value = 420.0
-    tuple_of_one is int_value -- returns true
+    tuple_of_one : float = (number 420)
+    int_value := 420
+    tuple_of_one number is int_value -- returns false
 </span><h2>Dynamic Collections (Arrays)
-</h2><p>Values wrapping in curly braces become and assigning using an equals, you can create a dynamic collection.
+</h2><p>When creating a variable collection rather than a constant collection, it becomes a dynamic collection.
 
 </p><p>Dynamic collections can only contain one data type.
 
-    array = {3, 4, 5}
-    array.0 -- returns 3
-</p></p><p>Specifying the type of the collection is optional for arrays, but if your collection is empty or only contains one value, you must specify the type as a collection of that type.
+    array := (3, 4, 5)
+    array push(9)
+    array 3 -- returns 9
+</p></p><p>Specifying the type of your collection.
 
-<span>Empty parentheses are how you specify a collection type.
+<span>-- Empty array of integers
+    empty_array : (int)
 
-</span><span>-- Empty array of integers
-    empty_array = {}int
+    empty_array push(3)
+    empty_array 0 -- returns 3
 
-    empty_array.push(3)
-    empty_array.0 -- returns 3
-</span></p><p>An empty, dynamically sized collection of strings.
+    strings : (string) = ("hello", "world")
+</span></p><p>Collections can also have named values or keys. These values can now be defined as mutable or immutable.
 
-<span>strings = {}string
-    strings.push("Hello")
-    strings.push("World")
-    strings.0 -- returns "Hello"
-</span></p><p>Dynamic collections can also have named values.
-
-<span>values = {
-        default_number 0,
-        6, 
+<span>values :: (
+        default_number :: 0,
+        "cool number" :: 6,
         7,
         8
-    }
-</span><h2>Prototypes (Structs)
-</h2><span>By creating a collection using a colon (constant), you create a prototype, which is a fixed collection of named properties or methods. 
-
-</span><span>-- Prototype for a vector
-    -- Has an optional Z property with a default value of 0
-    -- Each new instance of this prototype will have a value for z
-    Vec : {
-        x float,
-        y float,
-        z = 0.0
-    }
-
-    Vec.x -- returns 0
-
-    -- Creating a method for the prototype
-    reset : this Vec -&gt; {
-        this.x = 0
-        this.y = 0
-        this.z = 0
-    }
-</span><h2>Creating a new collection from a prototype
-</h2><span>If you specify the type as a prototype, you can create a new collection that makes sure the values are the same structure as the prototype.
-
-</span><span>coordinates = {
-        x 3.45,
-        y 7.93,
-    } Vec
-
-    coordinates.x -- returns 3.45
-    coordinates.z -- returns 0.0
-    coordinates.reset() -- sets all values to 0.0
+    )
 </span></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";

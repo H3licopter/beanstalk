@@ -1,40 +1,31 @@
 # Setting up a Project
+
+Running the command 'new html' followed by your directory path will create a new Beanstalk project in that directory. The path is relative to the current directory.
+
 The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
-This file is called "main.bs" and is placed in an /src folder by default. A configuration file is also created in the root directory.
+This file is called "config.bs" and is placed in the root folder of your project by default. A configuration file is also created in the root directory.
 All Beanstalk files use the .bs file extension.
 
-Any Beanstalk file tied into the project can specify compiler settings and the config for your project as long as it is part of, or imported into this main file. 
-The compiler will read through any configuration settings first, then it will run any compile time evaluations inside the code.
+The compiler will read through any configuration settings first.
+
+The src folder will contain your bs files and inform the structure of your pages. 
+
+The dist folder contains the compiled files.
 
 # Project Configuration
 When creating a new Beanstalk html project, a configuration file will be created in the root directory. 
 This is called "config.bs" by default and it will specify the entry point and structure of the program. 
 
-A /media folder will also be created, and an /src folder which will contain the entry point and file structure for your project. 
-There is also a /dependencies folder which contains all the libraries and dependencies for your project.
+## Compiling your BS files
+### Build
+While in the root directory of your project, where the config.bs file is, run the command 'build' to compile your whole project. 
 
-Using compiler directives, the config file specifies all the default behavior for the project. 
-Most of the compiler directives are objects that already have their structure specified. The config file is also written in Beanstalk and looks a bit like this:
+If you specify a specific bs file, build will only compile that file.
 
-` 
-    #project "html"
-    #main "./src/main.bs"
-    #title "Definitely not a scam website"
-    #url "www.fateorchaos.com"
-    #favicons "./media/favicons"
-`
+### Dev
+To create a development server with a watcher, run the command 'dev' in the root directory of your project.
 
-# Imports
-The import keyword can be accessed from the # symbol and will accept strings to paths for other modules or libraries you want to import into your project. 
+Any changes to your bs files will be automatically compiled and the server will reload the page.
 
-`
-    #import "some_lib_maker/crazy_lib"
-`
-
-Beanstalk imports its entire standard library of built in functions by default. 
-But you can also exclude the default libraries by using the exclude compiler command. 
-You can also use this to bypass the directory based routing of the compiler.
-
-`
-    #exclude "standard"
-`
+# File Paths
+Any index.bs files will become the main page of the folder they are in, so your main page will be index.bs in the root directory.

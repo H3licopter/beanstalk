@@ -13,7 +13,6 @@ The source code for this site on [link "https://github.com/H3licopter/beanstalk/
 
 ## Documentation
 
-[link "./docs/if-statements.html": Scenes]
 More info will be added soon!
 
 ]
