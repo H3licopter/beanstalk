@@ -1,14 +1,4 @@
 # Functions
-
-Their structure is: 
-1. the function name (can be omited for anonymous functions)
-2. A colon 
-3. A list of the arguments for the function (optional)
-4. An arrow symbol (always required, even for functions that don't return anything)
-5. A list of return types (optional)
-6. A colon before the body of the function
-7. A return statement at the end of the function (always required, even for functions that don't return anything)
-
 If the function can only return an error, you can use a '!' as the specified return type.  
 
 ## The arrow operator
@@ -17,31 +7,34 @@ The arrow operator can be thought of as a way to pass arguments into a scope and
 A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
 
 `
-    doNothing : () -> () : return
+    doNothing : () -> {}
 
     -- Returns a tuple of values
-    multipleReturns : () -> (int, int, int) :
+    multipleReturns : () -> (int, int, int) {
         return (1, 2, 3)
+    }
 
-    differentReturns : (spicy : bool = false) -> (int, int, int) :
+    differentReturns : (spicy : bool = false) -> (int, int, int) {
         if spicy:
             return (69, 420, 1337)
         
         return (1, 2, 3)
+    }
 
-    nestedReturns : () -> bool :
+    nestedReturns : () -> bool {
         if state is (
             STATE.normal => return true
             => return false
         )
+    }
 
-
-    defaultReturn: () -> (int) :
+    defaultReturn: () -> (int) {
         if time now is time last (
             time now += 1
         )
 
         return time now
+    }
 
 `
 
@@ -54,8 +47,9 @@ These types will converge into a single possible type when initialised within a 
     -- Creating a generic type
     number : type : int or float
 
-    add : (a : number, b : number) -> number :
+    add : (a : number, b : number) -> number {
         return a + b
+    }
 
     -- This function will now work with floats and ints
     add(3, 4) -- 7

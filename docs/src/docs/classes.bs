@@ -1,0 +1,32 @@
+# Classes
+
+Classes are a way to group together variables and functions that are related to each other. In Beanstalk, their simplest form is very similar to a struct in other languages. 
+
+But you can optionally add some constructor syntax to make it more like a class.
+
+When creating a class, it is similar to just creating a new scope in a module, with normal variable declarations and functions. But now you can instantiate a new object of that class and use it like a struct.
+
+## Class like a struct
+
+Player : class {
+    name :: string
+    score := int
+    health := int
+}
+
+player : Player("Player 1", 100, 100)
+
+## Class with a constructor
+
+Player : class(name: string, hp_modifier: int = 0) {
+    _base_hp :: 100
+
+    name :: name
+    score : int
+    health := _base_hp + hp_modifier
+
+    increase_hp : (amount: int) -> {
+        health += amount
+    }
+}
+
