@@ -49,7 +49,7 @@ fn handle_connection(
                 contents = fs::read(format!("{}/dist/index.html", path)).unwrap();
                 length = contents.len();
                 status_line = "HTTP/1.1 200 OK";
-                dark_cyan_ln!("Sending Home page");
+                // dark_cyan_ln!("Sending Home page");
             } else if request.starts_with("HEAD /check") {
                 // check if anything has changed in the src folder since the last check,
                 // send a response to the client indicating there has been a change
@@ -84,8 +84,8 @@ fn handle_connection(
                     content_type = "image/ico";
                 }
 
-                dark_cyan!("Requested path: ");
-                dark_yellow_ln!("{}", file_path);
+                // dark_cyan!("Requested path: ");
+                // dark_yellow_ln!("{}", file_path);
 
                 let file_requested = if file_path.ends_with(".wasm")
                     || file_path.ends_with(".png")
@@ -105,7 +105,6 @@ fn handle_connection(
                             contents = c;
                             length = contents.len();
                             status_line = "HTTP/1.1 200 OK";
-                            println!("Sending requested file");
                         }
                     }
                     Err(_) => {

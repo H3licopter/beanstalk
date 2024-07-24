@@ -2,6 +2,7 @@
 
 # THE BEANSTALK BOOK!
 # &#127793;
+
 This website was created using Beanstalk!
 
 This is a work in progress site for Beanstalk documentation as it's being developed. 
@@ -14,5 +15,3 @@ The source code for this site on [link "https://github.com/H3licopter/beanstalk/
 ## Documentation
 
 More info will be added soon!
-
-]

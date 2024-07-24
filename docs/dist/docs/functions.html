@@ -19,47 +19,41 @@
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><h1>Functions
-</h1><p>Their structure is: 
-1. the function name (can be omited for anonymous functions)
-2. A colon 
-3. A list of the arguments for the function (optional)
-4. An arrow symbol (always required, even for functions that don't return anything)
-5. A list of return types (optional)
-6. A colon before the body of the function
-7. A return statement at the end of the function (always required, even for functions that don't return anything)
-
-</p><p>If the function can only return an error, you can use a '!' as the specified return type.  
+</h1><p>If the function can only return an error, you can use a '!' as the specified return type.  
 
 </p><h2>The arrow operator
 </h2><p>The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
 
 </p><p>A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
 
-</p><span>doNothing : () -&gt; () : return
+</p><span>doNothing : () -&gt; {}
 
     -- Returns a tuple of values
-    multipleReturns : () -&gt; (int, int, int) :
+    multipleReturns : () -&gt; (int, int, int) {
         return (1, 2, 3)
+    }
 
-    differentReturns : (spicy : bool = false) -&gt; (int, int, int) :
+    differentReturns : (spicy : bool = false) -&gt; (int, int, int) {
         if spicy:
             return (69, 420, 1337)
         
         return (1, 2, 3)
+    }
 
-    nestedReturns : () -&gt; bool :
+    nestedReturns : () -&gt; bool {
         if state is (
             STATE.normal =&gt; return true
             =&gt; return false
         )
+    }
 
-
-    defaultReturn: () -&gt; (int) :
+    defaultReturn: () -&gt; (int) {
         if time now is time last (
             time now += 1
         )
 
         return time now
+    }
 
 </span><h1>Generics
 </h1><p>The type keyword is used to create generic types that can be used in functions and methods.
@@ -69,8 +63,9 @@
 </p><span>-- Creating a generic type
     number : type : int or float
 
-    add : (a : number, b : number) -&gt; number :
+    add : (a : number, b : number) -&gt; number {
         return a + b
+    }
 
     -- This function will now work with floats and ints
     add(3, 4) -- 7
@@ -106,8 +101,7 @@
         }
       }).catch(console.error);
   }
-
-  setInterval(() => checkIfFileChanged(), 500);
+  setInterval(() => checkIfFileChanged(), 512);
 </script>
 </body>
 </html>

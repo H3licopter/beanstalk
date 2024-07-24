@@ -1,3 +1,5 @@
+[:
+
 # Collections
 All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
 

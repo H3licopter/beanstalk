@@ -1,3 +1,0 @@
-# Reserved Keywords and symbols
-<< - Concurrency Channel
->> - Concurrency Channel

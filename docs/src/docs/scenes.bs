@@ -1,3 +1,5 @@
+[:
+
 # Scenes
 Beanstalk has its own templating language. These are called scenes.
 

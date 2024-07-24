@@ -6,7 +6,7 @@ use std::str::Chars;
 pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut chars: Peekable<Chars<'_>> = source_code.chars().peekable();
-    let mut tokenize_mode: TokenizeMode = TokenizeMode::Markdown;
+    let mut tokenize_mode: TokenizeMode = TokenizeMode::Normal;
     let mut scene_nesting_level: &mut i64 = &mut 0;
 
     // For variable optimisation

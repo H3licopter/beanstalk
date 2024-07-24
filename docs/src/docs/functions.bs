@@ -1,3 +1,5 @@
+[:
+
 # Functions
 If the function can only return an error, you can use a '!' as the specified return type.  
 

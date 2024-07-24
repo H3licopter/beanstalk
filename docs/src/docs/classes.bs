@@ -1,3 +1,5 @@
+[:
+
 # Classes
 
 Classes are a way to group together variables and functions that are related to each other. In Beanstalk, their simplest form is very similar to a struct in other languages. 

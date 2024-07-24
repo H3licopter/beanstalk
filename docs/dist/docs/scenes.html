@@ -65,7 +65,11 @@ You use this to access properties on the Window object in the browser.
     [ imported_bs_markdown ]
     [ slot "main content" ]
 </p><h3>Style
-</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>style</th><td>theme</td></tr><tr><th scope='col'>size</th><td>img</td></tr><tr><th scope='col'>pad</th><td>space</td></tr><tr><th scope='col'>rgb</th><td>hex</td></tr><tr><th scope='col'>raw</th></tbody></table>&nbsp;<p>Description</p><p>input</p><p>audio</p><p>video</p><p>click</p><p>form</p><p>option</p><p>dropdown</p><table><thead><tr><th scope='col'>Property&nbsp;</th><th scope='col'>Description</th></tr></thead><tbody><tr><th scope='col'>post</th><td>get</td></tr><tr><th scope='col'>delete</th><td>swap</td></tr></tbody></table><table><thead><tr><th scope='col'>Property&nbsp;</th><th scope='col'>Description</th></tr></thead><tbody><tr><th scope='col'>slot</th><td>canvas</td></tr></tbody></table><table><thead><tr><th scope='col'>Property&nbsp;</th><th scope='col'>Description</th></tr></thead><tbody><tr><th scope='col'>comment</th></tbody></table></main>
+</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>style</th><td>theme</td></tr><tr><th scope='col'>size</th><td>img</td></tr><tr><th scope='col'>pad</th><td>space</td></tr><tr><th scope='col'>rgb</th><td>hex</td></tr><tr><th scope='col'>raw</th></tbody></table><h3>Interactive 
+</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>input</th><td>audio</td></tr><tr><th scope='col'>video</th><td>click</td></tr><tr><th scope='col'>form</th><td>option</td></tr><tr><th scope='col'>dropdown</th></tbody></table><h3>HTTP 
+</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>post</th><td>get</td></tr><tr><th scope='col'>delete</th><td>swap</td></tr></tbody></table><h3>Dynamic
+</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>slot</th><td>canvas</td></tr></tbody></table><h3>Comments
+</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>comment</th></tbody></table></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {
@@ -86,8 +90,7 @@ You use this to access properties on the Window object in the browser.
         }
       }).catch(console.error);
   }
-
-  setInterval(() => checkIfFileChanged(), 500);
+  setInterval(() => checkIfFileChanged(), 512);
 </script>
 </body>
 </html>

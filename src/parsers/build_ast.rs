@@ -30,7 +30,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                 ast.push(new_scene(scene_head, &tokens, &mut i, &ast));
             }
             Token::ModuleStart(_) => {
-                ast.push(new_scene(&Vec::new(), &tokens, &mut i, &ast));
+                // In future, need to structure into code blocks
             }
 
             // New Function or Variable declaration

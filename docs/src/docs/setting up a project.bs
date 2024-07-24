@@ -1,3 +1,5 @@
+[:
+
 # Setting up a Project
 
 Running the command 'new html' followed by your directory path will create a new Beanstalk project in that directory. The path is relative to the current directory.

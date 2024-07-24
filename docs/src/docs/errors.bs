@@ -1,3 +1,5 @@
+[:
+
 # Error Handling
 Any function that can return an error can return the error as one of it's values.
 

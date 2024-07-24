@@ -1,3 +1,5 @@
+[:
+
 # Choices (enums)
 Choices are a way to define a set of possible values for a variable.
 
