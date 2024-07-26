@@ -95,7 +95,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                 }
             }
 
-            Token::Newline | Token::Empty => {
+            Token::Newline | Token::Empty | Token::SceneClose(_) => {
                 // Do nothing for now
             }
 

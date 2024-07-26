@@ -30,7 +30,7 @@ Beanstalk uses pointer semantics by default. This means that a variable is a ref
 
 Colon means initialise, equals means assign. The type of a variable goes after the colon, but can be omitted if the type is inferred.
 
-The @ symbol is used to access compile time keywords. You usually use it to define what you are exporting or importing from a module. indicates that a variable is exported (public), and can be accessed outside of the module. 
+The @ symbol is used to export variables and methods/functions outside of a module or object.
 
 ## Exporting / Importing at the top of a module
 This will export existing variables and functions from the module. The variables and functions being exported must be declared somewhere inside the module.
@@ -127,7 +127,7 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 [table 3:
     [: Type] [: Description] [: Zero Value]
 
-    [: ()] [: Collection ] [: ()]
+    [: ()] [: Collection. Any number of items seperated by commas. See [link "../collections.bs"] for more information] [: ()]
 
     [: scene] [: The templating syntax of Beanstalk] [: [] an empty scene]
     

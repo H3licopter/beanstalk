@@ -30,27 +30,27 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     println!("{:?}", ast);
     println!("\n");
 
-    println!("CREATING HTML OUTPUT\n");
-    let html_output = web_parser::parse(ast, get_html_config(), false);
+    // println!("CREATING HTML OUTPUT\n");
+    // let html_output = web_parser::parse(ast, get_html_config(), false);
 
-    // Print the HTML output
-    // Create a regex to match the content between the <main> and </main> tags
-    let re = Regex::new(r"(?s)<body>(.*?)</body>").unwrap();
+    // // Print the HTML output
+    // // Create a regex to match the content between the <main> and </main> tags
+    // let re = Regex::new(r"(?s)<body>(.*?)</body>").unwrap();
 
-    // Extract the content between the <main> and </main> tags
-    let main_content = re
-        .captures(&html_output)
-        .and_then(|cap| cap.get(1))
-        .map_or("", |m| m.as_str());
+    // // Extract the content between the <main> and </main> tags
+    // let main_content = re
+    //     .captures(&html_output)
+    //     .and_then(|cap| cap.get(1))
+    //     .map_or("", |m| m.as_str());
 
-    // Create a regex to match HTML tags
-    let re_tags = Regex::new(r"(</?\w+[^>]*>)").unwrap();
+    // // Create a regex to match HTML tags
+    // let re_tags = Regex::new(r"(</?\w+[^>]*>)").unwrap();
 
-    // Insert a newline before each HTML tag
-    let formatted_content = re_tags.replace_all(main_content, "\n$1");
+    // // Insert a newline before each HTML tag
+    // let formatted_content = re_tags.replace_all(main_content, "\n$1");
 
-    // Print the formatted content
-    println!("\nHTML:\n{}", formatted_content);
+    // // Print the formatted content
+    // println!("\nHTML:\n{}", formatted_content);
 
     Ok(())
 }

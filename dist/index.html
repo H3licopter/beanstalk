@@ -18,155 +18,10 @@
 <link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="images/favicons/site.webmanifest">
 <link rel="stylesheet" href="css/pico.min.css" />
-<style></style></head><body><main class="container"><h1>Variables
-</h1><p>Beanstalk uses a name, value, type syntax for variable assignment. 
-This is to make the code readable, concise and allows for a unique unit type syntax. 
-It also means Beanstalk values are written like values with units you would see in a physics equation, 
-with the value being appended by it's unit.
+<style></style></head><body><main class="container"><h3>Documentation <a href="google.com" style="" ><span>with a link in there</span>&nbsp;</a></h3><li>!
+</li><li> <a href="./docs/basics.bs" style="" ><span>The basics of Beanstalk</span></a></li><p>More info will be added soon!
 
-</p><h2>Assignment
-</h2><p>When creating a new variable, there are several different declarations to be aware of. 
-The @ export symbol indicates that a variable is exported (public), and can be accessed outside of the module or scene. 
-Once a variable has been initialised as exported, it does not need to have the export symbol added to it again.
-
-</p><p>The # hash symbol is used to access properties and methods from the window or page you are creating. 
-You use this to access properties on the Window object in the browser.
-
-</p><p>Assigning a value to a variable using the big arrow =&gt; operator will create a signal,
-which means it will reactively update inside of scenes when it is mutated.
-
-</p><h3>Compile time immutable variable
-</h3><p>comptime_immutable_var : 0
-
-</p><h3>Exported immutable Runtime Variable
-</h3><p>@immutable_var :: 0
-
-</p><h3>Private mutable Runtime Variable
-</h3><p>mutable_var := 0
-
-</p><h3>Exported mutable Runtime Variable
-</h3><p>@mutable_var := 0
-
-</p><h1>Static Assignment
-</h1><span>-- UTF-8 string
-    my_brain := "Dumb"
-
-    -- 32 bit integer
-    integer := 69
-
-    -- 32 bit float
-    float := 69.0
-
-    -- Specify the type as an unsigned 32 bit integer by appending the type unit to the value
-    my_brain := 420 uint
-
-    -- Variable initialised with it's zero value
-    uselessness := int
-</span><p>Variables must be given a value or a type when they are declared. There is no such thing as 'null' in Beanstalk.
-
-</p><p>If an error occurs during assignment of a variable, 
-an option type is created and must be handled during the assignement or passed up the callstack.
-
-</p><span>uselessness := int 
-    -- value is 0
-
-    -- Immutable deep copy
-    thing :: a_collection 
-
-    -- Referecnce to a_collection
-    thing := &a_collection
-
-    -- deep copy of a collection
-    thing := a_collection
-
-    -- Shallow copy of a collection
-    thing := a_collection.shallow_copy()
-
-    number_copy := number
-</span><h1>Immutable Variables
-</h1><span>-- Int compile time constant (type inferred as int)
-    self_worth : 0
-
-    -- Float constant
-    my_iq :: 0.0
-
-    best_number : 69 float
-
-    -- Int constant evaluated at compile time
-    -- Will throw an error at compile time (int overflow) becuase the value is too big and will overflow the int type
-    weird_num : 69 ** 420
-</span><p>If you are creating a non-collection variable and need it to be formatted over multiple lines, 
-you must wrap the value in parenthesis. 
-
-</p><span>var1, var2, var3, var4 : (
-        4 + 5 + 6 + 7 + 8 + 9 + 10
-    ) int
-
-    -- Assigning multiple variables at once
-    var1, var2 : 420
-
-    var3, var4 = "cool", "beans"
-
-    -- Concatinating a bunch of strings into one variable
-    var5 = "cool " + "beans " + "are " + "cool"
-</span><h1>Data Types
-</h1><p>All data type keywords contain methods from the standard library for common manipulation of types. 
-The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
-
-</p><h2>Primative Types
-</h2><table><thead><tr><th scope='col'>Type&nbsp;</th>&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>int&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>idx&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>flt&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>dec&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>str&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>uni&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>bool&nbsp;</th>&nbsp;</td></td></tr></tbody></table><table><thead><tr><th scope='col'>Type&nbsp;</th>&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>()&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>{}&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>scene&nbsp;</th>&nbsp;</td>&nbsp;</td></tr><tr><th scope='col'>choice&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>type&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>error&nbsp;</th>&nbsp;</td></tr></tbody></table><h2>Generic Types
-</h2><td>Generics are used to create a type that can be used with multiple types. 
-Beanstalk has a few built in generic types that can be accessed as properties on the type keyword.
-
-<table><thead><tr><th scope='col'>Type&nbsp;</th>&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>type.number&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>type.string&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>type.collection&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>type.function&nbsp;</th>&nbsp;</td></td></tr></tbody></table></td><td>See <a href="../functions#Generic_Functions" style="" >&nbsp;</td></a></td></td><h1>Strings
-</h1><td>String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
-
-</td><td>"Double quotes for a utf8 string literal"
-
-</td><td>Curly braces are used to add expressions into the string. 
-
-</td></td><td>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
-
-</td><td>"string literal with \{curly braces} in it that is escaped" 
-
-</td></td><td>9 "is" {5 + 4} -- 9 "is" {5 + 4}
-</td><h1>Unicode Strings
-</h1><td>Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 
-
-</td><td>cool_emoji : '😂'
-
-</td><h1>Unit Types
-</h1><td>Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
-
-</td><td>These are extensions to exsisting base types.
-
-</td><td>The first unit in the operation will be used if no unit type is specified in the type parameter. 
-You don't need to have a space between a literal value and the unit type, but variables must have a space between the value and the unit type.
-
-</td><td>If you are mixing unit types in an operation, the first unit type will be used for the result.
-
-</td></td><td>You can also create boolean unit types that allow for strict type checking. 
-
-</td></td><h1>References
-</h1><td>References are used to create a reference to a variable.
-
-</td><h1>Comptime
-</h1><td>For functions and variables that will only exsist during compile time, you can use the double colon '::' or colon equals ':=' operator. 
-This allows you to create variables and functions that will only run at compile time. 
-Any comptime function calls that return values will be replaced with the value they return at compile time.
-
-</td><td>createRandomString :: -&gt; string {
-    return "a string"
-}
-
-</td><td>random_string = createRandomString() -- random_string will just be "a string" at runtime.
-
-</td><h1>Signals
-</h1><td>Signals are built in attributes in Beanstalk and allow for reactivity inside scenes.
-
-</td><td>To turn any variable into a signal, you add a $ to the front of the variable name. 
-
-</td></td></main>
+</p></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {
@@ -187,8 +42,7 @@ Any comptime function calls that return values will be replaced with the value t
         }
       }).catch(console.error);
   }
-
-  setInterval(() => checkIfFileChanged(), 500);
+  setInterval(() => checkIfFileChanged(), 512);
 </script>
 </body>
 </html>

@@ -270,10 +270,14 @@ pub fn new_scene(
             }
 
             Token::BulletPoint(indentation, content) => {
-                scene.push(AstNode::Element(Token::BulletPoint(
-                    *indentation,
-                    content.clone(),
-                )));
+                scene.push(if !check_if_inline(tokens, *i) {
+                    AstNode::Element(Token::BulletPoint(
+                        *indentation,
+                        content.clone(),
+                    ))
+                } else {
+                    AstNode::Element(Token::Span(content.clone()))
+                });
             }
 
             Token::Superscript(content) => {

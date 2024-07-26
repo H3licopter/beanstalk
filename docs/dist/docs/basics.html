@@ -40,7 +40,7 @@ Comments are read by the compiler and can be nested.
 
 </p><p>Colon means initialise, equals means assign. The type of a variable goes after the colon, but can be omitted if the type is inferred.
 
-</p><p>The @ symbol is used to access compile time keywords. You usually use it to define what you are exporting or importing from a module. indicates that a variable is exported (public), and can be accessed outside of the module. 
+</p><p>The @ symbol is used to export variables and methods/functions outside of a module or object.
 
 </p><h2>Exporting / Importing at the top of a module
 </h2><p>This will export existing variables and functions from the module. The variables and functions being exported must be declared somewhere inside the module.
@@ -105,30 +105,30 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 
 </p><h2>Primative Types
 </h2><table><thead><tr><th scope='col'>Type&nbsp;</th>&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>int&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>index&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>float&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>decimal&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>string&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>unicode&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>bool&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>error&nbsp;</th>&nbsp;</td></tr></tbody></table><h2>Collection Types
-</h2><table><thead><tr><th scope='col'>Type&nbsp;</th>&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>()&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>scene&nbsp;</th>&nbsp;</td>&nbsp;</td></tr><tr><th scope='col'>choice&nbsp;</th>&nbsp;</td></td></tr><tr><th scope='col'>type&nbsp;</th>&nbsp;</td></td></tr></tbody></table><h1>Strings
-</h1><td>String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
+</h2><table><thead><tr><th scope='col'>Type&nbsp;</th>&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>()&nbsp;</th><a href="../collections.bs" style="" >&nbsp;</td></a></td><td>scene&nbsp;</td>&nbsp;</td>&nbsp;</td><td>choice&nbsp;</td>&nbsp;</td></td><td>type&nbsp;</td>&nbsp;</td></td></td><h1>Strings
+</h1>String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
 
-</td><td>"Double quotes for a utf8 string literal"
+"Double quotes for a utf8 string literal"
 
-</td><td>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
+Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 
-</td><td>"string literal with \{curly braces} in it that is escaped" 
+"string literal with \{curly braces} in it that is escaped" 
 
-</td></td><td>9 "is" {5 + 4} -- 9 "is" {5 + 4}
-</td><h1>Unicode Strings
-</h1><td>Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 
+</td>9 "is" {5 + 4} -- 9 "is" {5 + 4}
+<h1>Unicode Strings
+</h1>Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 
 
-</td><td>cool_emoji : '😂'
+cool_emoji : '😂'
 
-</td><h1>Numeric Units
-</h1><td>Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
+<h1>Numeric Units
+</h1>Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
 
-</td><td>The first unit in the operation will be used if no unit type is specified in the type parameter. 
+The first unit in the operation will be used if no unit type is specified in the type parameter. 
 You don't need to have a space between a literal value and the unit type, but variables must have a space between the value and the unit type.
 
-</td><td>If you are mixing unit types in an operation, the first unit type will be used for the result.
+If you are mixing unit types in an operation, the first unit type will be used for the result.
 
-</td></td></main>
+</td></tbody></table></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

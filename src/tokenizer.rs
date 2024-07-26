@@ -290,12 +290,6 @@ fn get_next_token(
                                 );
                             }
                         }
-                    } else if next_next_char == '-' {
-                        chars.next();
-                        // New Parent Scene
-                        *scene_nesting_level += 1;
-                        *tokenize_mode = TokenizeMode::Markdown;
-                        return tokenize_scenehead(chars, tokenize_mode, scene_nesting_level);
                     }
 
                     // Inline Comment
@@ -643,7 +637,7 @@ fn tokenize_scenehead(
 ) -> Token {
     let mut scene_head: Vec<Token> = Vec::new();
 
-    if scene_nesting_level == &0 {
+    if scene_nesting_level == &1 {
         scene_head.push(Token::ParentScene);
     }
 
@@ -689,7 +683,8 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                     break;
                 }
                 _ => {
-                    *current_char = chars.next().unwrap();
+                    *current_char = *ch;
+                    chars.next();
                 }
             },
             None => return Token::EOF,
@@ -702,8 +697,19 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
         previous_newlines = 0;
 
         loop {
-            *current_char = match chars.next() {
-                Some(ch) => ch,
+            match chars.peek() {
+                Some(ch) => {
+                    match ch {
+                        '[' => {
+                            content.push('\u{0002}');
+                            break;
+                        }
+                        _ => {
+                            *current_char = *ch;
+                            chars.next()
+                        }
+                    }
+                },
                 None => return Token::EOF,
             };
 
@@ -728,8 +734,19 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
     } else if current_char == &'-' {
         let mut bullet_strength: u8 = 0;
         loop {
-            *current_char = match chars.next() {
-                Some(ch) => ch,
+            match chars.peek() {
+                Some(ch) => {
+                    match ch {
+                        '[' => {
+                            content.push('\u{0002}');
+                            break;
+                        }
+                        _ => {
+                            *current_char = *ch;
+                            chars.next();
+                        }
+                    }
+                },
                 None => return Token::EOF,
             };
 

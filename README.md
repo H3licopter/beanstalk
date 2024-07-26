@@ -39,10 +39,9 @@
 
     float_constant :: 5 * 68.9
 
-    beans_img : "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg"
+    beans_img :: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg"
 
-    -- The following 3 dashes start a new scene body
-    ---
+    [:
     
     # Beanstalk scene bodies looks a bit like markdown
     But all of a sudden you can start nesting *scenes* inside of them!
@@ -75,7 +74,7 @@
       img(beans_img)
       img(beans_img)
       img(beans_img) 
-      alt "BEANS"
+      alt("BEANS")
     ]
 
 ## Planned Features
