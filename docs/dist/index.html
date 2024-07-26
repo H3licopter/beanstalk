@@ -37,7 +37,9 @@
 </p><p>The source code for this site on <a href="https://github.com/H3licopter/beanstalk/tree/main/docs/src" style="" ><span>Github</span></a><span>. You can view the output of the Beanstalk compiler </span><a href="https://github.com/H3licopter/beanstalk/tree/main/docs/dist" style="" ><span>here</span>&nbsp;</a><span>!
 
 </span></p><h3>Documentation
-</h3><li>[link "./docs/basics.bs": The basics of Beanstalk</li></main>
+</h3><li> <a href="./docs/basics.bs" style="" ><span>The basics of Beanstalk</span></a></li><p>More info will be added soon!
+
+</p></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {
@@ -49,16 +51,6 @@
                 }
             }
   });
-  
-  function checkIfFileChanged() {
-    fetch('/check', { method: 'HEAD' })
-      .then(response => {
-        if (response.status == 205) {
-          location.reload();
-        }
-      }).catch(console.error);
-  }
-  setInterval(() => checkIfFileChanged(), 512);
 </script>
 </body>
 </html>

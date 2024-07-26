@@ -81,16 +81,6 @@ You use this to access properties on the Window object in the browser.
                 }
             }
   });
-  
-  function checkIfFileChanged() {
-    fetch('/check', { method: 'HEAD' })
-      .then(response => {
-        if (response.status == 205) {
-          location.reload();
-        }
-      }).catch(console.error);
-  }
-  setInterval(() => checkIfFileChanged(), 512);
 </script>
 </body>
 </html>
