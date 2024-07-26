@@ -666,6 +666,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
     let mut content = String::new(); // To keep track of current chars being parsed
     let mut token: Token = Token::P(String::new());
     let mut previous_newlines = 0;
+    let mut empty_before_nested_scene = false;
 
     //Ignore starting whitespace (except newlines)
     while current_char.is_whitespace() {
@@ -701,7 +702,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                 Some(ch) => {
                     match ch {
                         '[' => {
-                            content.push('\u{0002}');
+                            empty_before_nested_scene = true;
                             break;
                         }
                         _ => {
@@ -738,7 +739,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                 Some(ch) => {
                     match ch {
                         '[' => {
-                            content.push('\u{0002}');
+                            empty_before_nested_scene = true;
                             break;
                         }
                         _ => {
@@ -864,7 +865,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
         }
 
         Token::Heading(count, _) => {
-            if content.trim().is_empty() {
+            if content.trim().is_empty() && !empty_before_nested_scene {
                 let mut p_content = String::new();
                 for _ in 0..count {
                     p_content.push('#');
@@ -876,7 +877,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
         }
 
         Token::BulletPoint(strength, _) => {
-            if content.trim().is_empty() {
+            if content.trim().is_empty() && !empty_before_nested_scene {
                 return Token::Empty;
             }
 
