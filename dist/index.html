@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport"content="width=device-width, initial-scale=1">
-<title></title>
+<title> | Website Title</title>
 <meta name="description"content="Website Description"/>
 <meta property="og:title"content=""/>
 <meta property="og:description"content=""/>
@@ -18,10 +18,13 @@
 <link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="images/favicons/site.webmanifest">
 <link rel="stylesheet" href="css/pico.min.css" />
-<style></style></head><body><main class="container"><h3>Documentation <a href="google.com" style="" ><span>with a link in there</span>&nbsp;</a></h3><li>!
-</li><li> <a href="./docs/basics.bs" style="" ><span>The basics of Beanstalk</span></a></li><p>More info will be added soon!
-
-</p></main>
+<style></style></head><body><main class="container"><h1>Style Guide
+</h1><p>The style guide is:
+</p><li>snake_case as the default choice for variables and other things
+</li><li>camelCase for functions
+</li><li>PascalCase for objects <span>nested sceene inside bullet point</span>&nbsp;<span>woo!
+</span></li><li>SCREAMING_SNAKE_CASE for Choices
+</li><span>4 spaces are recommended for indentation. </span></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {
@@ -35,14 +38,17 @@
   });
   
   function checkIfFileChanged() {
-    fetch('/check', { method: 'HEAD' })
+    const currentUrl = window.location.pathname;
+    const requestUrl = `/check?page=${currentUrl}`;
+
+    fetch(requestUrl, { method: 'HEAD' })
       .then(response => {
         if (response.status == 205) {
           location.reload();
         }
       }).catch(console.error);
-  }
-  setInterval(() => checkIfFileChanged(), 512);
+  };
+  setInterval(() => checkIfFileChanged(), 600);
 </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 use crate::build;
-use colour::{blue_ln, dark_cyan, dark_cyan_ln, dark_yellow_ln, green_ln_bold, print_bold, red_ln};
+use colour::{blue_ln, dark_cyan_ln, green_ln_bold, print_bold, red_ln};
 use std::error::Error;
 use std::time::SystemTime;
 
@@ -11,15 +11,15 @@ use std::{
 };
 
 pub fn start_dev_server(mut path: String) -> Result<(), Box<dyn Error>> {
-    let listener = TcpListener::bind("127.0.0.1:6969").unwrap();
-    println!("Server listening on port 6969");
+    let url = "localhost:6969";
+    let listener = TcpListener::bind(url).unwrap();
+    print_bold!("Dev Server created on: ");
+    green_ln_bold!("http://{}", url);
 
     let current_dir = std::env::current_dir()?;
     path = format!("{}/{}", current_dir.to_string_lossy().into_owned(), path);
 
-    build_project(&path, false);
-
-    let mut modified = get_last_modified(&format!("{}/src", &path));
+    let mut modified = SystemTime::UNIX_EPOCH;
     for stream in listener.incoming() {
         let stream = stream.unwrap();
         handle_connection(stream, path.clone(), &mut modified);
@@ -35,8 +35,8 @@ fn handle_connection(
 ) {
     let buf_reader = BufReader::new(&mut stream);
 
-    // println!("{}", format!("{}/{}/dist/any file should be here", entry_path, path));
-    let mut contents = fs::read(format!("{}/dist/404.html", path)).unwrap();
+    // println!("{}", format!("{}/{}/dev/any file should be here", entry_path, path));
+    let mut contents = fs::read(format!("{}/dev/404.html", path)).unwrap();
     let mut length = contents.len();
     let mut status_line = "HTTP/1.1 404 NOT FOUND";
     let mut content_type = "text/html";
@@ -46,21 +46,31 @@ fn handle_connection(
         Ok(request) => {
             // HANDLE REQUESTS
             if request == "GET / HTTP/1.1" {
-                contents = fs::read(format!("{}/dist/index.html", path)).unwrap();
+                contents = fs::read(format!("{}/dev/index.html", path)).unwrap();
                 length = contents.len();
                 status_line = "HTTP/1.1 200 OK";
-                // dark_cyan_ln!("Sending Home page");
             } else if request.starts_with("HEAD /check") {
-                // check if anything has changed in the src folder since the last check,
-                // send a response to the client indicating there has been a change
+                // the check request has the page url as a query parameter after the /check
+                let request_path = request.split("?page=").nth(1);
+
+                let parsed_url = match request_path {
+                    Some(p) => {
+                        let page_path = p.split_whitespace().collect::<Vec<&str>>()[0];
+                        if page_path == "/" {
+                            format!("{}/src/index.bs", path)
+                        } else {
+                            format!("{}/src{}.bs", path, page_path)
+                        }
+                    }
+                    None => {
+                        format!("{}/src/index.bs", path)
+                    }
+                };
 
                 // Get the metadata of the file
-                let check_modified = get_last_modified(&format!("{}/src", &path));
-
-                if *last_modified < check_modified {
-                    blue_ln!("Changes detected in src folder");
+                if has_been_modified(&parsed_url, last_modified) {
+                    blue_ln!("Changes detected for {:?}", parsed_url);
                     build_project(&path, false);
-                    *last_modified = check_modified;
                     status_line = "HTTP/1.1 205 Reset Content";
                 } else {
                     status_line = "HTTP/1.1 200 OK";
@@ -70,37 +80,36 @@ fn handle_connection(
                 let file_path = request.split_whitespace().collect::<Vec<&str>>()[1];
 
                 // Set the Content-Type based on the file extension
-                if file_path.ends_with(".js") {
+                let file_requested = if file_path.ends_with(".js") {
                     content_type = "application/javascript";
+                    fs::read(format!("{}/dev{}", path, file_path))
                 } else if file_path.ends_with(".wasm") {
                     content_type = "application/wasm";
+                    fs::read(format!("{}/dev{}", path, file_path))
                 } else if file_path.ends_with(".css") {
                     content_type = "text/css";
+                    fs::read(format!("{}/dev{}", path, file_path))
                 } else if file_path.ends_with(".png") {
                     content_type = "image/png";
+                    fs::read(format!("{}/dev{}", path, file_path))
                 } else if file_path.ends_with(".jpg") {
                     content_type = "image/jpeg";
+                    fs::read(format!("{}/dev{}", path, file_path))
                 } else if file_path.ends_with(".ico") {
                     content_type = "image/ico";
-                }
-
-                // dark_cyan!("Requested path: ");
-                // dark_yellow_ln!("{}", file_path);
-
-                let file_requested = if file_path.ends_with(".wasm")
-                    || file_path.ends_with(".png")
-                    || file_path.ends_with(".jpg")
-                    || file_path.ends_with(".ico")
-                {
-                    fs::read(format!("{}/dist{}", path, file_path))
+                    fs::read(format!("{}/dev{}", path, file_path))
+                } else if file_path.ends_with(".webmanifest") {
+                    content_type = "application/manifest+json";
+                    fs::read(format!("{}/dev{}", path, file_path))
                 } else {
-                    fs::read_to_string(format!("{}/dist{}", path, file_path))
-                        .map(|c| c.into_bytes())
+                    let page_path = format!("{}/dev{}.html", path, file_path);
+
+                    fs::read_to_string(page_path).map(|c| c.into_bytes())
                 };
 
                 match file_requested {
                     Ok(c) => {
-                        // Make sure the path does not try to access any directories outside of /dist
+                        // Make sure the path does not try to access any directories outside of /dev
                         if !file_path.contains("..") {
                             contents = c;
                             length = contents.len();
@@ -108,7 +117,7 @@ fn handle_connection(
                         }
                     }
                     Err(_) => {
-                        red_ln!("File not found");
+                        red_ln!("File not found: {}", file_path);
                     }
                 }
             }
@@ -149,45 +158,71 @@ fn build_project(build_path: &String, release: bool) {
     }
 }
 
-fn get_last_modified(path: &String) -> SystemTime {
-    let mut latest_mod_time = SystemTime::UNIX_EPOCH;
-    let entries = match fs::read_dir(path) {
-        Ok(all) => all,
+fn has_been_modified(path: &String, modified: &mut std::time::SystemTime) -> bool {
+    // Check if it's a file or directory
+    let path_metadata = match fs::metadata(path) {
+        Ok(m) => m,
         Err(_) => {
-            red_ln!("Error reading directory");
-            return latest_mod_time;
+            red_ln!("Error reading directory: {}", path);
+            return false;
         }
     };
 
-    for entry in entries {
-        let entry = match entry {
-            Ok(e) => e,
+    if path_metadata.is_dir() {
+        let entries = match fs::read_dir(path) {
+            Ok(all) => all,
             Err(_) => {
-                red_ln!("Error reading entry");
-                return latest_mod_time;
+                red_ln!("Error reading directory: {}", path);
+                return false;
             }
         };
 
-        let meta = match metadata(entry.path()) {
-            Ok(m) => m,
-            Err(_) => {
-                red_ln!("Error reading file modified metadata");
-                return latest_mod_time;
-            }
-        };
+        for entry in entries {
+            let entry = match entry {
+                Ok(e) => e,
+                Err(_) => {
+                    red_ln!("Error reading entry");
+                    return false;
+                }
+            };
 
-        let modified_time = match meta.modified() {
-            Ok(t) => t,
-            Err(_) => {
-                red_ln!("Error reading file modified time in it's metadata");
-                return latest_mod_time;
-            }
-        };
+            let meta = match metadata(entry.path()) {
+                Ok(m) => m,
+                Err(_) => {
+                    red_ln!("Error reading file modified metadata");
+                    return false;
+                }
+            };
 
-        if modified_time > latest_mod_time {
-            latest_mod_time = modified_time;
+            let modified_time = match meta.modified() {
+                Ok(t) => t,
+                Err(_) => {
+                    red_ln!("Error reading file modified time in it's metadata");
+                    *modified
+                }
+            };
+
+            if modified_time > *modified {
+                *modified = modified_time;
+                return true;
+            }
         }
     }
 
-    latest_mod_time
+    if path_metadata.is_file() {
+        match path_metadata.modified() {
+            Ok(t) => {
+                if t > *modified {
+                    *modified = t;
+                    return true;
+                }
+            }
+            Err(_) => {
+                red_ln!("Error reading file modified time in it's metadata");
+                return false;
+            }
+        }
+    }
+
+    false
 }

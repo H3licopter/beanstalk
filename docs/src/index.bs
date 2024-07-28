@@ -21,7 +21,7 @@ The source code for this site on [link "https://github.com/H3licopter/beanstalk/
 
 
 ### Documentation
-- [link "./docs/basics.bs": The basics of Beanstalk]
+- [link "./docs/basics": The basics of Beanstalk]
 
 More info will be added soon!
 

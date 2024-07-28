@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport"content="width=device-width, initial-scale=1">
+<title> | Website Title</title>
+<meta name="description"content="Website Description"/>
+<meta property="og:title"content=""/>
+<meta property="og:description"content=""/>
+<meta property="og:image"content="localhost:6969/"/>
+<meta property="og:image:alt"content=""/>
+<meta property="og:locale"content="en_US"/>
+<meta property="og:type"content="website"/>
+<meta property="og:url"content="localhost:6969/"/>
+<meta name="twitter:card"content=""/>
+<meta name="color-scheme" content="light dark" />
+<link rel="canonical"href="">
+<link rel="icon"href="../images/favicons/favicon.ico">
+<!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
+<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../css/pico.min.css" />
+<style></style></head><body><main class="container"><h1>Scenes
+</h1><p>Beanstalk has its own templating language. These are called scenes.
+
+</p><p>Scenes use square brackets and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
+
+</p><p>Inside of scenes, you can nest more scenes using square brackets or blocks of code using more brackets.
+
+</p><p>The # hash symbol is used to access properties and methods from the window or page you are creating. 
+You use this to access properties on the Window object in the browser.
+
+</p><h2>Beanstalk Markdown
+</h2><p>Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a Beanstalk scene. Beanstalk markdown supports the familiar heading, bold and italic syntax from most markdown parsers.
+
+</p><span># A Heading
+
+    Some text that has a [link "www.example.com", alt "alt text"] link inside it.
+
+    [ constant ]
+
+    The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets and curly brackets [rgb(170,0,0): <em>cannot</em>] be used without an escape character or by using backticks to create a raw string.
+</span><h2>Scene exmaple
+</h2><p>[ head_of_element: content of element that renders as text (markdown / more templates) {string : "this is a code block inside of the scene body, that is scoped to the scene"} ]
+
+    [img "images/meme.jpg"]
+
+    { io.click( print("scene clicked") ) }
+
+    # A Cool Table
+    [ @scene_id, style "cool":
+        Some grid text
+        [ reactiveVariable ]
+        [link "example.com/page": here's a link!]
+    ]
+
+    [ for text in text_array: 
+        [ text ]
+    ]
+
+    [ style "big-text", if not text.isBlank():
+        [ text: plus some extra text in the same element as the variable text ]
+    ]
+
+    [rgb 230,20,150 : bunch of text with rgb color]
+
+    [ imported_bs_markdown ]
+    [ slot "main content" ]
+</p><h3>Style
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>style</span></td><td><span>theme</span></td></tr><tr><td><span>size</span></td><td><span>img</span></td></tr><tr><td><span>pad</span></td><td><span>space</span></td></tr><tr><td><span>rgb</span></td><td><span>hex</span></td></tr><tr><td><span>raw</span></td><td></td></tbody></table><h3>Interactive 
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>input</span></td><td><span>audio</span></td></tr><tr><td><span>video</span></td><td><span>click</span></td></tr><tr><td><span>form</span></td><td><span>option</span></td></tr><tr><td><span>dropdown</span></td><td></td></tbody></table><h3>HTTP 
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>post</span></td><td><span>get</span></td></tr><tr><td><span>delete</span></td><td><span>swap</span></td></tr></tbody></table><h3>Dynamic
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>slot</span></td><td><span>canvas</span></td></tr></tbody></table><h3>Comments
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>comment</span></td><td></td></tbody></table></main>
+<script type="module">
+  import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
+  init().then(() => {
+    function uInnerHTML(id,update){
+                const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
+                for (let i = 0;i<es.length;i++) {
+                  es[i].innerHTML=update
+                }
+            }
+  });
+  
+  function checkIfFileChanged() {
+    const currentUrl = window.location.pathname;
+    const requestUrl = `/check?page=${currentUrl}`;
+
+    fetch(requestUrl, { method: 'HEAD' })
+      .then(response => {
+        if (response.status == 205) {
+          location.reload();
+        }
+      }).catch(console.error);
+  };
+  setInterval(() => checkIfFileChanged(), 600);
+</script>
+</body>
+</html>

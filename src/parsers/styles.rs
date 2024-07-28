@@ -5,14 +5,13 @@ pub enum Tag {
     None,
     Span,
     Div,
-    P,              // To check whether scene is already inside a P tag
-    A(AstNode),     // src
-    Img(AstNode),   // src
-    Video(AstNode), // src
-    Audio(AstNode), // src
+    P,                 // To check whether scene is already inside a P tag
+    A(AstNode),        // src
+    Img(AstNode),      // src
+    Video(AstNode),    // src
+    Audio(AstNode),    // src
     Table(u32),
-    Th,
-    Td,
+    Code(String), // Language
 }
 
 // Will contain an expression or collection of expressions to be parsed in the target language

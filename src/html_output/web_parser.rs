@@ -14,6 +14,7 @@ use crate::{
     settings::{get_html_config, HTMLMeta},
     Token,
 };
+use colour::red_ln;
 
 // Parse ast into valid JS, HTML and CSS
 pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String {
@@ -47,10 +48,6 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
             }
             AstNode::Title(value) => {
                 page_title = value;
-
-                if config.auto_site_title {
-                    page_title += &(" | ".to_owned() + &config.site_title.clone());
-                }
             }
             AstNode::Date(_value) => {
                 // Eventually a way to get date information about the page
@@ -85,6 +82,10 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
         }
     }
 
+    if config.auto_site_title {
+        page_title += &(" | ".to_owned() + &config.site_title.clone());
+    }
+
     create_html_boilerplate(config, release_build)
         .replace("page-template", &html)
         .replace("@page-css", &css)
@@ -99,7 +100,7 @@ struct SceneTag {
     child_styles: String,
 }
 
-// Returns a string of the HTML and whether the scene is inside a paragraph
+// Returns a string of the HTML and the tag the scene is inside of
 fn parse_scene(
     scene: Vec<AstNode>,
     scene_tags: Vec<Tag>,
@@ -195,7 +196,6 @@ fn parse_scene(
                     _ => {
                         scene_wrap.tag = Tag::Table(columns);
                         columns = *c;
-                        ele_count = 0;
                         html.push_str("<table><thead>");
                     }
                 }
@@ -286,12 +286,6 @@ fn parse_scene(
                                     }
                                 }
                             }
-                            Tag::Th => {
-                                closing_tags.push("</th>".to_string());
-                            }
-                            Tag::Td => {
-                                closing_tags.push("</td>".to_string());
-                            }
                             _ => {
                                 html.push_str(&format!(
                                     "<span>{}</span>",
@@ -308,13 +302,12 @@ fn parse_scene(
                                     .properties
                                     .push_str(&format!(" alt=\"{}\"", content));
                             }
-                            Tag::Table(_) | Tag::A(_) => {
-                                // basically just don't add any wrapping tags inside tables
-                                html.push_str(collect_closing_tags(&mut closing_tags).as_str());
+                            Tag::A(_) => {
+                                html.push_str(&collect_closing_tags(&mut closing_tags));
                                 html.push_str(&add_markdown_tags(&mut content.clone()));
                             }
                             _ => {
-                                html.push_str(collect_closing_tags(&mut closing_tags).as_str());
+                                html.push_str(&collect_closing_tags(&mut closing_tags));
 
                                 let parsed_content = add_markdown_tags(&mut content.clone());
                                 match *parent_tag {
@@ -330,18 +323,10 @@ fn parse_scene(
                                         }
                                     }
                                     Tag::Table(_) => {
-                                        html.push_str(&parsed_content);
-                                    }
-                                    Tag::Th => {
                                         html.push_str(&format!(
-                                            "<th scope='col'>{}",
-                                            parsed_content
+                                            "<span>{}</span>",
+                                            add_markdown_tags(&mut content.clone())
                                         ));
-                                        closing_tags.push("</th>".to_string());
-                                    }
-                                    Tag::Td => {
-                                        html.push_str(&format!("<td>{}", parsed_content));
-                                        closing_tags.push("</td>".to_string());
                                     }
                                     _ => {
                                         html.push_str(&format!("<p>{}", parsed_content));
@@ -359,7 +344,7 @@ fn parse_scene(
                     }
 
                     Token::Heading(size, content) => {
-                        html.push_str(collect_closing_tags(&mut closing_tags).as_str());
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
                         html.push_str(&format!(
                             "<h{}>{}",
                             size,
@@ -374,9 +359,14 @@ fn parse_scene(
                     }
 
                     Token::BulletPoint(_indentation, content) => {
-                        html.push_str(collect_closing_tags(&mut closing_tags).as_str());
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
                         html.push_str(&format!("<li>{}", add_markdown_tags(&mut content.clone())));
-                        closing_tags.push("</li>".to_string());
+
+                        if count_newlines_at_end_of_string(&content) > 0 {
+                            html.push_str(&format!("</li>"));
+                        } else {
+                            closing_tags.push("</li>".to_string());
+                        }
                     }
 
                     Token::Superscript(content) => {
@@ -384,30 +374,46 @@ fn parse_scene(
                     }
 
                     Token::Pre(content) => {
-                        html.push_str(collect_closing_tags(&mut closing_tags).as_str());
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
                         html.push_str(&format!("<pre>{}", content));
                         closing_tags.push("</pre>".to_string());
                     }
-                    _ => {}
+
+                    Token::Newline => {
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
+                        if columns == 0 {
+                            html.push_str("<br>");
+                        }
+                    }
+
+                    Token::CodeBlock(content) => {
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
+                        html.push_str(&format!("<pre><code>{}</code></pre>", content));
+                    }
+                    _ => {
+                        red_ln!("Unknown token found in AST Element node: {:?}", token);
+                    }
                 };
             }
 
             AstNode::Scene(new_scene_nodes, new_scene_tags, new_scene_styles) => {
-                add_table_open_tags(&mut html, columns, &mut ele_count, parent_tag);
                 let new_scene = parse_scene(
                     new_scene_nodes,
                     new_scene_tags,
                     new_scene_styles,
-                    parent_tag,
+                    &mut scene_wrap.tag,
                     js,
                     css,
                     module_references,
                     class_id,
                 );
 
-                // Need to check if need to close some tags before the end of this scene
-                html.push_str(&new_scene.0);
-                add_table_closing_tags(&mut html, columns, &mut ele_count, parent_tag);
+                // If this is in a table, add correct table tags
+                if columns > 0 {
+                    insert_into_table(&new_scene.0, &mut ele_count, columns, &mut html);
+                } else {
+                    html.push_str(&new_scene.0);
+                }
             }
 
             AstNode::Space => {
@@ -451,7 +457,16 @@ fn parse_scene(
             }
 
             AstNode::SceneTemplate => {
-                scenehead_templates.push(html.len());
+                if columns > 0 {
+                    scenehead_templates.push(insert_into_table(
+                        &String::new(),
+                        &mut ele_count,
+                        columns,
+                        &mut html,
+                    ));
+                } else {
+                    scenehead_templates.push(html.len());
+                }
             }
 
             // ERROR HANDLING
@@ -587,6 +602,15 @@ fn parse_scene(
             }
         }
         Tag::Table(_) => {
+            // If not enough elements to fill the table, add empty cells
+            let ele_mod = ele_count % columns;
+            if ele_mod != 0 {
+                for _ in 0..columns - ele_mod {
+                    html.push_str("<td></td>");
+                }
+            }
+
+            collect_closing_tags(&mut closing_tags);
             html.push_str("</tbody></table>");
         }
         Tag::Video(src) => {
@@ -618,69 +642,20 @@ fn parse_scene(
                 ),
             );
         }
+        Tag::Code(_) => {
+            html.insert_str(
+                0,
+                &format!(
+                    "<code style=\"{}\" {} >",
+                    scene_wrap.style, scene_wrap.properties,
+                ),
+            );
+            html.push_str("</code>");
+        }
         _ => {}
     };
 
     (html, parent_tag.to_owned())
-}
-
-fn add_table_open_tags(html: &mut String, columns: u32, ele_count: &mut u32, parent_tag: &mut Tag) {
-    // If this is a table scene, add appropriate table element tags
-    if columns > 0 {
-        *ele_count += 1;
-
-        match *ele_count % columns {
-            // If this is the last element for this column
-            0 => {
-                // Open the table element, should be a td unless there is just one column
-                if columns > 1 && *ele_count > columns {
-                    *parent_tag = Tag::Td;
-                } else {
-                    *parent_tag = Tag::Th;
-                }
-            }
-            // if this is the first element for this column
-            1 => {
-                // If this is the first element for this column, open the table column and first element
-                html.push_str("<tr>");
-                *parent_tag = Tag::Th;
-            }
-            _ => {
-                // If first row, make sure all the table elements are headings
-                if *ele_count < columns {
-                    *parent_tag = Tag::Th;
-                } else {
-                    *parent_tag = Tag::Td;
-                }
-            }
-        }
-    }
-}
-
-fn add_table_closing_tags(
-    html: &mut String,
-    columns: u32,
-    ele_count: &mut u32,
-    parent_tag: &mut Tag,
-) {
-    // If this is a table scene, close the table row (and possibly column)
-    if columns > 0 && *ele_count > 0 {
-        // If this is the last element for this column
-        if *ele_count % columns == 0 {
-            // Close the table element and column, should be a td unless there is just one column
-            if columns > 1 && *ele_count > columns {
-                html.push_str("</tr>");
-            } else {
-                html.push_str("</tr>");
-            }
-
-            // If this is the first row of elements, close the heading tag and open the body tag too
-            if *ele_count == columns {
-                html.push_str("</thead><tbody>");
-                *parent_tag = Tag::None;
-            }
-        }
-    }
 }
 
 fn collect_closing_tags(closing_tags: &mut Vec<String>) -> String {
@@ -717,4 +692,49 @@ fn get_src(value: &AstNode) -> String {
     } else {
         return format!("{}/{}", get_html_config().image_folder_url, src);
     }
+}
+
+// Returns the index it inserted the html at
+fn insert_into_table(
+    inserted_html: &String,
+    ele_count: &mut u32,
+    columns: u32,
+    html: &mut String,
+) -> usize {
+    *ele_count += 1;
+
+    let heading = *ele_count < columns || columns < 2;
+    let ele_mod = *ele_count % columns;
+
+    if ele_mod == 1 {
+        // if this is the first element for this row
+        html.push_str("<tr>");
+    }
+
+    if heading {
+        html.push_str("<th scope='col'>");
+    } else {
+        html.push_str("<td>");
+    }
+
+    // Need to check if need to close some tags before the end of this scene
+    html.push_str(inserted_html);
+    let idx = html.len();
+
+    if heading {
+        html.push_str("</th>");
+    } else {
+        html.push_str("</td>");
+    }
+
+    // If this is the last element for this row
+    if ele_mod == 0 {
+        html.push_str("</tr>");
+
+        if *ele_count == columns {
+            html.push_str("</thead><tbody>");
+        }
+    }
+
+    idx
 }

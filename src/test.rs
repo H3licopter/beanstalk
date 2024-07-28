@@ -1,9 +1,9 @@
-use crate::html_output::web_parser;
+// use crate::html_output::web_parser;
 use crate::parsers;
-use crate::settings::get_html_config;
+// use crate::settings::get_html_config;
 use crate::tokenizer;
 use crate::Token;
-use regex::Regex;
+// use regex::Regex;
 use std::error::Error;
 use std::fs;
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8">
 <meta name="viewport"content="width=device-width, initial-scale=1">
-<title></title>
+<title> | Website Title</title>
 <meta name="description"content="Website Description"/>
 <meta property="og:title"content=""/>
 <meta property="og:description"content=""/>
@@ -32,11 +32,11 @@ You use this to access properties on the Window object in the browser.
 </h2><p>Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a Beanstalk scene. Beanstalk markdown supports the familiar heading, bold and italic syntax from most markdown parsers.
 
 </p><span># A Heading
-
+<br>
     Some text that has a [link "www.example.com", alt "alt text"] link inside it.
-
+<br>
     [ constant ]
-
+<br>
     The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets and curly brackets [rgb(170,0,0): <em>cannot</em>] be used without an escape character or by using backticks to create a raw string.
 </span><h2>Scene exmaple
 </h2><p>[ head_of_element: content of element that renders as text (markdown / more templates) {string : "this is a code block inside of the scene body, that is scoped to the scene"} ]
@@ -65,11 +65,11 @@ You use this to access properties on the Window object in the browser.
     [ imported_bs_markdown ]
     [ slot "main content" ]
 </p><h3>Style
-</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>style</th><td>theme</td></tr><tr><th scope='col'>size</th><td>img</td></tr><tr><th scope='col'>pad</th><td>space</td></tr><tr><th scope='col'>rgb</th><td>hex</td></tr><tr><th scope='col'>raw</th></tbody></table><h3>Interactive 
-</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>input</th><td>audio</td></tr><tr><th scope='col'>video</th><td>click</td></tr><tr><th scope='col'>form</th><td>option</td></tr><tr><th scope='col'>dropdown</th></tbody></table><h3>HTTP 
-</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>post</th><td>get</td></tr><tr><th scope='col'>delete</th><td>swap</td></tr></tbody></table><h3>Dynamic
-</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>slot</th><td>canvas</td></tr></tbody></table><h3>Comments
-</h3><table><thead><tr><th scope='col'>Property&nbsp;</th></th></tr></thead><tbody><tr><th scope='col'>comment</th></tbody></table></main>
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>style</span></td><td><span>theme</span></td></tr><tr><td><span>size</span></td><td><span>img</span></td></tr><tr><td><span>pad</span></td><td><span>space</span></td></tr><tr><td><span>rgb</span></td><td><span>hex</span></td></tr><tr><td><span>raw</span></td><td></td></tbody></table><h3>Interactive 
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>input</span></td><td><span>audio</span></td></tr><tr><td><span>video</span></td><td><span>click</span></td></tr><tr><td><span>form</span></td><td><span>option</span></td></tr><tr><td><span>dropdown</span></td><td></td></tbody></table><h3>HTTP 
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>post</span></td><td><span>get</span></td></tr><tr><td><span>delete</span></td><td><span>swap</span></td></tr></tbody></table><h3>Dynamic
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>slot</span></td><td><span>canvas</span></td></tr></tbody></table><h3>Comments
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>comment</span></td><td></td></tbody></table></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

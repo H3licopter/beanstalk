@@ -1,0 +1,110 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport"content="width=device-width, initial-scale=1">
+<title> | Website Title</title>
+<meta name="description"content="Website Description"/>
+<meta property="og:title"content=""/>
+<meta property="og:description"content=""/>
+<meta property="og:image"content="localhost:6969/"/>
+<meta property="og:image:alt"content=""/>
+<meta property="og:locale"content="en_US"/>
+<meta property="og:type"content="website"/>
+<meta property="og:url"content="localhost:6969/"/>
+<meta name="twitter:card"content=""/>
+<meta name="color-scheme" content="light dark" />
+<link rel="canonical"href="">
+<link rel="icon"href="../images/favicons/favicon.ico">
+<!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
+<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../css/pico.min.css" />
+<style></style></head><body><main class="container"><h1>Functions
+</h1><p>If the function can only return an error, you can use a '!' as the specified return type.  
+
+</p><h2>The arrow operator
+</h2><p>The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
+
+</p><p>A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
+
+</p><span>doNothing : () -&gt; {}
+
+    -- Returns a tuple of values
+    multipleReturns : () -&gt; (int, int, int) {
+        return (1, 2, 3)
+    }
+
+    differentReturns : (spicy : bool = false) -&gt; (int, int, int) {
+        if spicy:
+            return (69, 420, 1337)
+        
+        return (1, 2, 3)
+    }
+
+    nestedReturns : () -&gt; bool {
+        if state is (
+            STATE.normal =&gt; return true
+            =&gt; return false
+        )
+    }
+
+    defaultReturn: () -&gt; (int) {
+        if time now is time last (
+            time now += 1
+        )
+
+        return time now
+    }
+
+</span><h1>Generics
+</h1><p>The type keyword is used to create generic types that can be used in functions and methods.
+
+</p><p>These types will converge into a single possible type when initialised within a type definition, but within the same scope they remain 'generic'.
+
+</p><span>-- Creating a generic type
+    number : type : int or float
+
+    add : (a : number, b : number) -&gt; number {
+        return a + b
+    }
+
+    -- This function will now work with floats and ints
+    add(3, 4) -- 7
+    add(3.23, 53.9) -- 57.13
+
+    -- Converges to int type
+    example1 : number = 3
+
+    -- Converges to float type
+    example2 : number = 3.23
+
+    -- Type Error, only one type can be converged
+    example3 : number = example1 + example2
+
+</span></main>
+<script type="module">
+  import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
+  init().then(() => {
+    function uInnerHTML(id,update){
+                const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
+                for (let i = 0;i<es.length;i++) {
+                  es[i].innerHTML=update
+                }
+            }
+  });
+  
+  function checkIfFileChanged() {
+    const currentUrl = window.location.pathname;
+    const requestUrl = `/check?page=${currentUrl}`;
+
+    fetch(requestUrl, { method: 'HEAD' })
+      .then(response => {
+        if (response.status == 205) {
+          location.reload();
+        }
+      }).catch(console.error);
+  };
+  setInterval(() => checkIfFileChanged(), 600);
+</script>
+</body>
+</html>

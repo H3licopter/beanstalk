@@ -1,7 +1,8 @@
 pub struct Config {
     pub project: String,
     pub src: String,
-    pub output_folder: String,
+    pub dev_folder: String,
+    pub release_folder: String,
     pub name: String,
     pub version: String,
     pub author: String,
@@ -12,7 +13,8 @@ pub fn get_default_config() -> Config {
     Config {
         project: String::from("html"),
         src: String::from("src"),
-        output_folder: String::from("dist"),
+        dev_folder: String::from("dev"),
+        release_folder: String::from("dist"),
         name: String::from("html_project"),
         version: String::from("0.1.0"),
         author: String::new(),

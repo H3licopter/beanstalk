@@ -7,7 +7,7 @@ The style guide is:
 - PascalCase for objects
 - SCREAMING_SNAKE_CASE for Choices
 
-4 spaces are recommended for indentation.
+4 spaces are recommended for indentation. 
 
 # Comments
 Comments use a double minus sign '--'. 
@@ -15,7 +15,7 @@ Comments use a double minus sign '--'.
 If you put a newline immediately after a comment mark, the comment will become multi line and must be closed with - again. 
 Comments are read by the compiler and can be nested.
 
-`
+[code: 
     -- normal comment
 
     --
@@ -23,7 +23,7 @@ Comments are read by the compiler and can be nested.
 
     Woo
     --
-`
+]
 
 # Variables
 Beanstalk uses pointer semantics by default. This means that a variable is a reference to a value unless it is explicitly copied or assigned to a new value.
@@ -35,13 +35,15 @@ The @ symbol is used to export variables and methods/functions outside of a modu
 ## Exporting / Importing at the top of a module
 This will export existing variables and functions from the module. The variables and functions being exported must be declared somewhere inside the module.
 
-@export (
-    mutable_var, 
-    comptime_immutable_var
-)
-@import (
-    utiliFunction
-)
+[code:
+    @export (
+        mutable_var, 
+        comptime_immutable_var
+    )
+    @import (
+        utiliFunction
+    )
+]
 
 ## Assignment
 Assigning a new variable to an existing variable will create a reference to the existing variable, unless you specify the type as a 'copy'.
@@ -49,13 +51,13 @@ Assigning a new variable to an existing variable will create a reference to the 
 Types will be inferred if not specified, and implicit conversions will be used to convert the value to the inferred type.
 
 ### Compile time immutable variable
-comptime_immutable_var : int : 69
+[code: comptime_immutable_var : int : 69]
 
 ### Runtime Variable
-mutable_var : int = 0
+[code: mutable_var : int = 0]
 
-# Static Assignment
-`
+## Static Assignment
+[code:
     -- UTF-8 string
     my_brain := "Dumb"
 
@@ -71,7 +73,7 @@ mutable_var : int = 0
     -- Implicit string conversion (string type must be specified in the type definition for this to work)
     -- Any expression you assign to this string variable will be converted to a string
     cool_string := 14 + 42 + " is a cool number " + '😂' -- "56 is a cool number 😂"
-`
+]
 
 Variables must be given a value or a type when they are declared. There is no such thing as 'null' in Beanstalk, the closest equivalent is an Error type or an empty tuple.
 
@@ -79,24 +81,24 @@ If an error occurs during assignment of a variable, it's type becomes an Error t
 
 All copies of collections are explicit and must use the 'copy' keyword in place of a type.
 
-`
+[code:
     -- Deep copy of a collection
     thing : copy = a_collection 
 
     -- Reference to a_collection
     thing := a_collection
-`
+]
 
 If you are creating a non-collection variable and need it to be formatted over multiple lines, 
 you must wrap the value in parenthesis.
 
 Parenthesis are used to group expressions together.
 
-`
+[code:
     some_int := (
         4 + 5 + 6 + 7 + 8 + 9 + 10
     )
-`
+]
 
 # Data Types
 All data type keywords contain methods from the standard library for common manipulation of types. 
@@ -104,6 +106,7 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 
 ## Primative Types
 [table 3: 
+    TABLE CAPTION
     [: Type] [: Description] [: Zero Value]
 
     [: int ] [: 32 bit signed integer ] [: 0]
@@ -111,7 +114,7 @@ The zero value is the value a variable will be assigned if it is not assigned a 
     [: index ] [: Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible. ] [: 0]
 
     [: float ] [: 32 bit floating point number ] [: 0.0]
-
+    
     [: decimal ] [: A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision] [: 0.00]
 
     [: string ] [: UTF-8] [: ""]
@@ -120,16 +123,16 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 
     [: bool ] [: Boolean, including true and false as types] [: false]
 
-    [: error] [: Contains a special type of debug string detailing the error] [: ]
+    [: error] [: Contains a special type of debug string detailing the error] [: "ERROR"]
 ]
 
 ## Collection Types
 [table 3:
     [: Type] [: Description] [: Zero Value]
 
-    [: ()] [: Collection. Any number of items seperated by commas. See [link "../collections.bs"] for more information] [: ()]
+    [: ()] [: Collection. Any number of items seperated by commas. See [link "../collections": Collections] for more information.] [: ()]
 
-    [: scene] [: The templating syntax of Beanstalk] [: [] an empty scene]
+    [: scene] [: The templating syntax of Beanstalk] [: "`[]`" -  an empty scene]
     
     [: choice] [: Rust style enums] [: error]
 
@@ -139,20 +142,18 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 # Strings
 String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
 
-"Double quotes for a utf8 string literal"
+[code: "Double quotes for a utf8 string literal"]
 
 Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 
-"string literal with \{curly braces} in it that is escaped" 
+[code: "string literal with \{curly braces} in it that is escaped"]
 
-`
-    `9 "is" {5 + 4}` -- 9 "is" {5 + 4}
-`
+[code: `9 "is" {5 + 4}` -- 9 "is" {5 + 4}]
 
 # Unicode Strings
 Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 
 
-cool_emoji : '😂'
+[code: cool_emoji : '😂']
 
 # Numeric Units
 Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
@@ -162,7 +163,7 @@ You don't need to have a space between a literal value and the unit type, but va
 
 If you are mixing unit types in an operation, the first unit type will be used for the result.
 
-`
+[code:
     -- Specifies the base type as a float
     m : unit : float
     cm : unit : m * 0.01
@@ -173,4 +174,4 @@ If you are mixing unit types in an operation, the first unit type will be used f
 
     height := (3m * 2m)cm
     -- result is 500
-`
+]

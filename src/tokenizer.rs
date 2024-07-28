@@ -98,11 +98,24 @@ fn get_next_token(
         }
     }
 
+    if tokenize_mode == &TokenizeMode::Codeblock {
+        if scene_nesting_level == &0 {
+            *tokenize_mode = TokenizeMode::Normal;
+        } else {
+            *tokenize_mode = TokenizeMode::Markdown;
+        }
+
+        return tokenize_codeblock(chars);
+    }
+
     if current_char == '[' {
         *scene_nesting_level += 1;
         match tokenize_mode {
             TokenizeMode::SceneHead => {
                 return Token::Error("Cannot have nested scenes inside of a scene head, must be inside the scene body".to_string());
+            }
+            TokenizeMode::Codeblock => {
+                return Token::Error("Cannot have nested scenes inside of a codeblock".to_string());
             }
             _ => {
                 // [] is an empty scene
@@ -179,6 +192,7 @@ fn get_next_token(
         if tokenize_mode == &TokenizeMode::SceneHead {
             *tokenize_mode = TokenizeMode::Markdown;
         }
+
         return Token::AssignComptime;
     }
 
@@ -478,58 +492,30 @@ fn keyword_or_variable(
             // If their is whitespace or some termination
             // First check if there is a match to a keyword
             // Otherwise break out and check it is a valid variable name
-
-            // Control Flow
-            if token_value == "return" {
-                return Token::Return;
-            }
-            if token_value == "if" {
-                return Token::If;
-            }
-            if token_value == "else" {
-                return Token::Else;
-            }
-            if token_value == "for" {
-                return Token::For;
-            }
-            if token_value == "import" {
-                return Token::Import;
-            }
-            if token_value == "match" {
-                return Token::Match;
-            }
-            if token_value == "break" {
-                return Token::Break;
-            }
-            if token_value == "when" {
-                return Token::When;
-            }
-            if token_value == "defer" {
-                return Token::Defer;
-            }
-            if token_value == "in" {
-                return Token::In;
-            }
-            if token_value == "as" {
-                return Token::As;
-            }
-
-            // Logical
-            if token_value == "is" {
-                return Token::Equal;
-            }
-            if token_value == "not" {
-                return Token::Not;
-            }
-            if token_value == "and" {
-                return Token::And;
-            }
-            if token_value == "or" {
-                return Token::Or;
-            }
-
-            // Data Types
             match token_value.as_str() {
+                // Control Flow
+                "return" => return Token::Return,
+                "if" => return Token::If,
+                "else" => return Token::Else,
+                "for" => return Token::For,
+                "import" => return Token::Import,
+                "match" => return Token::Match,
+                "break" => return Token::Break,
+                "when" => return Token::When,
+                "defer" => return Token::Defer,
+                "in" => return Token::In,
+                "as" => return Token::As,
+
+                // Logical
+                "is" => return Token::Equal,
+                "not" => return Token::Not,
+                "and" => return Token::And,
+                "or" => return Token::Or,
+
+                // Keywords
+                "io" => return Token::Print,
+
+                // Data Types
                 "int" => return Token::TypeKeyword(DataType::Int),
                 "idx" => return Token::TypeKeyword(DataType::Int),
                 "flt" => return Token::TypeKeyword(DataType::Float),
@@ -540,61 +526,26 @@ fn keyword_or_variable(
                 _ => {}
             }
 
-            // IO (printing and other various functions from standard library)
-            // Should eventually not be hardcoded
-            if token_value == "io" {
-                return Token::Print;
-            }
-            if token_value == "bs" {
-                return Token::Settings;
-            }
-
             // only bother tokenizing / reserving these keywords if inside of a scene head
             match tokenize_mode {
-                TokenizeMode::SceneHead => {
-                    if token_value == "link" {
-                        return Token::A;
-                    }
-                    if token_value == "m" {
-                        return Token::Margin;
-                    }
-                    if token_value == "p" {
-                        return Token::Padding;
-                    }
-                    if token_value == "img" {
-                        return Token::Img;
-                    }
-                    if token_value == "alt" {
-                        return Token::Alt;
-                    }
-                    if token_value == "rgb" {
-                        return Token::Rgb;
-                    }
-                    if token_value == "center" {
-                        return Token::Center;
-                    }
-                    if token_value == "bg" {
-                        return Token::BG;
-                    }
-                    if token_value == "size" {
-                        return Token::Size;
-                    }
-                    if token_value == "table" {
-                        return Token::Table;
-                    }
-                    if token_value == "video" {
-                        return Token::Video;
-                    }
-                    if token_value == "audio" {
-                        return Token::Audio;
-                    }
-                    if token_value == "slot" {
-                        return Token::Slot;
-                    }
-                    if token_value == "ignore" {
-                        return Token::Ignore;
-                    }
-                }
+                TokenizeMode::SceneHead => match token_value.as_str() {
+                    "link" => return Token::A,
+                    "m" => return Token::Margin,
+                    "p" => return Token::Padding,
+                    "img" => return Token::Img,
+                    "alt" => return Token::Alt,
+                    "rgb" => return Token::Rgb,
+                    "center" => return Token::Center,
+                    "bg" => return Token::BG,
+                    "size" => return Token::Size,
+                    "table" => return Token::Table,
+                    "video" => return Token::Video,
+                    "audio" => return Token::Audio,
+                    "slot" => return Token::Slot,
+                    "ignore" => return Token::Ignore,
+                    "code" => return Token::CodeKeyword,
+                    _ => {}
+                },
 
                 TokenizeMode::Window => {
                     *tokenize_mode = TokenizeMode::Normal;
@@ -636,6 +587,7 @@ fn tokenize_scenehead(
     scene_nesting_level: &mut i64,
 ) -> Token {
     let mut scene_head: Vec<Token> = Vec::new();
+    let mut code_block: bool = false;
 
     if scene_nesting_level == &1 {
         scene_head.push(Token::ParentScene);
@@ -651,10 +603,17 @@ fn tokenize_scenehead(
                 scene_head.push(next_token);
                 break;
             }
+            Token::CodeKeyword => {
+                code_block = true;
+            }
             _ => {
                 scene_head.push(next_token);
             }
         }
+    }
+
+    if code_block {
+        *tokenize_mode = TokenizeMode::Codeblock
     }
 
     Token::SceneHead(scene_head)
@@ -672,7 +631,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
     while current_char.is_whitespace() {
         if current_char == &'\n' {
             if content.ends_with("\n\n") {
-                return Token::Empty;
+                return Token::Newline;
             }
             previous_newlines += 1;
             content.push('\n');
@@ -680,7 +639,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
 
         match chars.peek() {
             Some(ch) => match ch {
-                '[' | ']' => {
+                '[' | ']' | '-' | '#' => {
                     break;
                 }
                 _ => {
@@ -699,16 +658,14 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
 
         loop {
             match chars.peek() {
-                Some(ch) => {
-                    match ch {
-                        '[' => {
-                            empty_before_nested_scene = true;
-                            break;
-                        }
-                        _ => {
-                            *current_char = *ch;
-                            chars.next()
-                        }
+                Some(ch) => match ch {
+                    '[' => {
+                        empty_before_nested_scene = true;
+                        break;
+                    }
+                    _ => {
+                        *current_char = *ch;
+                        chars.next()
                     }
                 },
                 None => return Token::EOF,
@@ -736,16 +693,14 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
         let mut bullet_strength: u8 = 0;
         loop {
             match chars.peek() {
-                Some(ch) => {
-                    match ch {
-                        '[' => {
-                            empty_before_nested_scene = true;
-                            break;
-                        }
-                        _ => {
-                            *current_char = *ch;
-                            chars.next();
-                        }
+                Some(ch) => match ch {
+                    '[' => {
+                        empty_before_nested_scene = true;
+                        break;
+                    }
+                    _ => {
+                        *current_char = *ch;
+                        chars.next();
                     }
                 },
                 None => return Token::EOF,
@@ -753,10 +708,6 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
 
             if current_char == &'-' {
                 bullet_strength += 1;
-                continue;
-            }
-
-            if current_char.is_whitespace() {
                 continue;
             }
 
@@ -811,14 +762,11 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                         break;
                     }
                 }
-                Token::Heading(_, _) => {
+                Token::Heading(_, _) | Token::BulletPoint(_, _) => {
                     if previous_newlines > 0 {
                         content.push('\n');
                         break;
                     }
-                }
-                Token::BulletPoint(_, _) => {
-                    break;
                 }
                 _ => {}
             }
@@ -837,15 +785,17 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                 '[' => {
                     break;
                 }
-                '-' => {
-                    if !content.trim().is_empty() && previous_newlines > 0 {
-                        token = Token::BulletPoint(0, String::new());
+                '-' | '#' => {
+                    if previous_newlines > 0 {
                         break;
+                    } else {
+                        *current_char = ch;
+                        chars.next();
                     }
-                    *current_char = chars.next().unwrap();
                 }
                 _ => {
-                    *current_char = chars.next().unwrap();
+                    *current_char = ch;
+                    chars.next();
                 }
             },
             None => {
@@ -894,6 +844,41 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
 
         _ => Token::Error("Invalid Markdown Element".to_string()),
     }
+}
+
+// Ignores everything except for the closing brackets
+// If there is a greater number of closing brackets than opening brackets,
+// Close the codeblock and return the token
+fn tokenize_codeblock(chars: &mut Peekable<Chars>) -> Token {
+    let mut codeblock = String::new();
+    let mut brackets = 1;
+    let mut raw_mode = false;
+
+    while let Some(ch) = chars.peek() {
+        match ch {
+            &'[' => {
+                if !raw_mode {
+                    brackets += 1;
+                }
+            }
+            &']' => {
+                if !raw_mode {
+                    brackets -= 1;
+                }
+            }
+            &'`' => {
+                raw_mode = !raw_mode;
+            }
+            _ => {}
+        }
+        if brackets == 0 {
+            break;
+        }
+        codeblock.push(*ch);
+        chars.next();
+    }
+
+    Token::CodeBlock(codeblock)
 }
 
 pub fn new_var_or_ref(

@@ -212,6 +212,9 @@ pub fn new_scene(
 
             Token::Ignore => {
                 // Just create a comment
+                // Should also clear any styles or tags in the scene
+                scene_styles.clear();
+                scene_tags.clear();
                 while *i < tokens.len() {
                     match &tokens[*i] {
                         Token::SceneClose(_) | Token::EOF => {
@@ -222,6 +225,10 @@ pub fn new_scene(
                     *i += 1;
                 }
                 return AstNode::Comment("Ignored Scene".to_string());
+            }
+            Token::CodeKeyword => {
+                scene_styles.clear();
+                scene_tags.clear();
             }
 
             _ => {
@@ -262,22 +269,11 @@ pub fn new_scene(
             }
 
             Token::Heading(size, content) => {
-                scene.push(if !check_if_inline(tokens, *i) {
-                    AstNode::Element(Token::Heading(*size, content.clone()))
-                } else {
-                    AstNode::Element(Token::Span(content.clone()))
-                });
+                scene.push(AstNode::Element(Token::Heading(*size, content.clone())));
             }
 
-            Token::BulletPoint(indentation, content) => {
-                scene.push(if !check_if_inline(tokens, *i) {
-                    AstNode::Element(Token::BulletPoint(
-                        *indentation,
-                        content.clone(),
-                    ))
-                } else {
-                    AstNode::Element(Token::Span(content.clone()))
-                });
+            Token::BulletPoint(size, content) => {
+                scene.push(AstNode::Element(Token::BulletPoint(*size, content.clone())));
             }
 
             Token::Superscript(content) => {
@@ -292,6 +288,10 @@ pub fn new_scene(
                 scene.push(AstNode::Element(Token::Pre(content.to_string())));
             }
 
+            Token::CodeBlock(content) => {
+                scene.push(AstNode::Element(Token::CodeBlock(content.to_string())));
+            }
+
             // For templating values in scene heads in the body of scenes
             Token::EmptyScene(spaces) => {
                 scene.push(AstNode::SceneTemplate);
@@ -300,12 +300,17 @@ pub fn new_scene(
                 }
             }
 
-            Token::Empty | Token::Newline | Token::AssignComptime | Token::DeadVarible => {}
+            Token::Empty | Token::Newline => {
+                scene.push(AstNode::Element(Token::Newline));
+            }
+
+            Token::AssignComptime | Token::DeadVarible => {}
 
             _ => {
-                scene.push(AstNode::Error(
-                    format!("Invalid Syntax Used Inside scene body when creating scene node: {:?}", tokens[*i]),
-                ));
+                scene.push(AstNode::Error(format!(
+                    "Invalid Syntax Used Inside scene body when creating scene node: {:?}",
+                    tokens[*i]
+                )));
             }
         }
 
@@ -317,17 +322,17 @@ pub fn new_scene(
 
 fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     // If the element itself starts with Newlines, it should not be inlined
-    match &tokens[i] {
+    let current_element = &tokens[i];
+    match current_element {
         Token::P(content) => {
             if count_newlines_at_start_of_string(content) > 0 {
                 return false;
             }
         }
-        Token::Heading(_, content) => {
-            if count_newlines_at_start_of_string(content) > 0 {
-                return false;
-            }
+        Token::Heading(_, _) | Token::BulletPoint(_, _) => {
+            return false;
         }
+
         _ => {}
     }
 
@@ -373,7 +378,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     // It doesn't have 2 newlines ending it and it can be inlined
     // Then return true
     match previous_element {
-        Token::Empty => false,
+        Token::Empty | Token::Newline => false,
 
         Token::P(content) | Token::Span(content) => {
             if count_newlines_at_end_of_string(content) > 1 {
@@ -383,15 +388,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
             }
         }
 
-        Token::Heading(_, content) => {
-            if count_newlines_at_end_of_string(content) > 0 {
-                false
-            } else {
-                true
-            }
-        }
-
-        Token::BulletPoint(_, content) => {
+        Token::Heading(_, content) | Token::BulletPoint(_, content) => {
             if count_newlines_at_end_of_string(content) > 0 {
                 false
             } else {

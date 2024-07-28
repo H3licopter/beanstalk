@@ -1,0 +1,69 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport"content="width=device-width, initial-scale=1">
+<title> | Website Title</title>
+<meta name="description"content="Website Description"/>
+<meta property="og:title"content=""/>
+<meta property="og:description"content=""/>
+<meta property="og:image"content="localhost:6969/"/>
+<meta property="og:image:alt"content=""/>
+<meta property="og:locale"content="en_US"/>
+<meta property="og:type"content="website"/>
+<meta property="og:url"content="localhost:6969/"/>
+<meta name="twitter:card"content=""/>
+<meta name="color-scheme" content="light dark" />
+<link rel="canonical"href="">
+<link rel="icon"href="images/favicons/favicon.ico">
+<!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
+<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="images/favicons/site.webmanifest">
+<link rel="stylesheet" href="css/pico.min.css" />
+<style></style></head><body><main class="container"><br><span style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:1rem;" ><h1>THE   BEANSTALK   BOOK!
+</h1><h1>&#127793;
+</h1></span><h3>What is Beanstalk?
+</h3><p>This website was created using Beanstalk! It's a statically typed language that compiles to HTML, CSS, Javascript and (hopefully soon) Web Assembly.
+
+</p><p>For the most part you use it a lot like markdown, but instead of writing HTML or seperate Javascript code for a webpage, Beanstalk has it's own unique syntax that blends modern utility class styles into a minimilistic and modern framework-replacing language.
+
+</p><p>The compiler is written in Rust, and fast compile times and a built in watcher/dev server make it super fast to start developing without feeling like you're missing out on stuff from the Javascript world.
+
+</p><p>This means you can just make webpages without all the noise and bloat of Node, a Javascript framework and old, verbose, boilerplate filled languages designed for an older age.
+
+</p><h3>Current Status
+</h3><p>This is a work in progress site for Beanstalk documentation as it's being developed. 
+
+</p><p>As the language and compiler are in the early stages of development, the documentation has only just started being written and is subject to frequent changes.
+
+</p><p>The source code for this site on <a href="https://github.com/H3licopter/beanstalk/tree/main/docs/src" style="" ><span>Github</span></a><span>. You can view the output of the Beanstalk compiler </span><a href="https://github.com/H3licopter/beanstalk/tree/main/docs/dist" style="" ><span>here</span>&nbsp;</a><span>!
+
+</span></p><h3>Documentation
+</h3><br><a href="./docs/basics" style="" ><span>The basics of Beanstalk</span></a><p>More info will be added soon!
+
+</p><br></main>
+<script type="module">
+  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  init().then(() => {
+    function uInnerHTML(id,update){
+                const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
+                for (let i = 0;i<es.length;i++) {
+                  es[i].innerHTML=update
+                }
+            }
+  });
+  
+  function checkIfFileChanged() {
+    const currentUrl = window.location.pathname;
+    const requestUrl = `/check?page=${currentUrl}`;
+
+    fetch(requestUrl, { method: 'HEAD' })
+      .then(response => {
+        if (response.status == 205) {
+          location.reload();
+        }
+      }).catch(console.error);
+  };
+  setInterval(() => checkIfFileChanged(), 600);
+</script>
+</body>
+</html>

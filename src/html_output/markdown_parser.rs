@@ -3,8 +3,24 @@
 pub fn add_markdown_tags(content: &mut String) -> String {
     let mut i = 0;
     *content = content.replace('<', "&lt;").replace('>', "&gt;");
+    // let mut previous_newline = false;
 
     while i < content.len() - 1 {
+        // let char = content.chars().nth(i).unwrap_or('0');
+
+        // // Add line break if double newline is found
+        // if char == '\n' {
+        //     if previous_newline {
+        //         content.insert_str(i, "<br>");
+        //         i += 4;
+        //         previous_newline = false;
+        //     } else {
+        //         previous_newline = true;
+        //     }
+        // } else {
+        //     previous_newline = false;
+        // }
+
         if !add_em_tags(content, &mut i) {
             break;
         }

@@ -3,7 +3,7 @@ use colour::{dark_cyan_ln, dark_yellow_ln, print_bold, print_ln_bold, red_ln};
 use crate::html_output::web_parser;
 use crate::parsers;
 use crate::parsers::ast::AstNode;
-use crate::settings::{get_default_config, get_html_config};
+use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::Token;
 use std::error::Error;
@@ -17,6 +17,10 @@ struct OutputFile {
 
 #[allow(unused_variables)]
 pub fn build(mut entry_path: String, release_build: bool) -> Result<(), Box<dyn Error>> {
+    // Change default output directory to dev if release_build is true
+    let project_config = get_default_config();
+    let output_dir_name = if release_build { &project_config.release_folder } else { &project_config.dev_folder };
+    
     // If entry_path is "test", use the compiler test directory
     if entry_path == "test" {
         entry_path = match std::env::current_dir() {
@@ -88,8 +92,9 @@ pub fn build(mut entry_path: String, release_build: bool) -> Result<(), Box<dyn 
             // Compile the induvidual file
             let entry_file_dir = entry_path.split("/").collect::<Vec<&str>>();
             let default_output_dir = format!(
-                "{}/dist",
-                entry_file_dir[0..entry_file_dir.len() - 3].join("/")
+                "{}/{}",
+                entry_file_dir[0..entry_file_dir.len() - 3].join("/"),
+                output_dir_name
             );
 
             source_code_to_parse.push(OutputFile {
@@ -108,22 +113,21 @@ pub fn build(mut entry_path: String, release_build: bool) -> Result<(), Box<dyn 
             // Get config settings from config file
             // let project_config = get_config_data(&source_code)?;
             // Just get the default config for now until can parse the config settings
-            let project_config = get_default_config();
             let src_dir: fs::ReadDir =
-                match fs::read_dir(&format!("{}/{}", entry_path, project_config.src)) {
+                match fs::read_dir(&format!("{}/{}", entry_path, &project_config.src)) {
                     Ok(dir) => dir,
                     Err(e) => {
                         red_ln!("Error reading directory: {:?}", e);
                         return Err(e.into());
                     }
                 };
-            add_bs_files_to_parse(&mut source_code_to_parse, src_dir)?;
+            add_bs_files_to_parse(&mut source_code_to_parse, src_dir, &output_dir_name)?;
         }
     }
 
     // Compile all output files
     for file in source_code_to_parse {
-        compile(file, release_build)?;
+        compile(file, release_build, &project_config)?;
     }
 
     Ok(())
@@ -133,6 +137,7 @@ pub fn build(mut entry_path: String, release_build: bool) -> Result<(), Box<dyn 
 fn add_bs_files_to_parse(
     source_code_to_parse: &mut Vec<OutputFile>,
     dir: fs::ReadDir,
+    output_dir_name: &String,
 ) -> Result<(), Box<dyn Error>> {
     for file in dir {
         match file {
@@ -161,7 +166,7 @@ fn add_bs_files_to_parse(
                         let subfolders = &subfolders[4..]; // 4 is the length of "/src"
 
                         // Create the output directory string
-                        output_dir = format!("{}/dist{}", root_dir, subfolders);
+                        output_dir = format!("{}/{}{}", root_dir, output_dir_name, subfolders); 
                     } else {
                         eprintln!("'src' not found in the path");
                     }
@@ -169,7 +174,7 @@ fn add_bs_files_to_parse(
                     // turn whitespace in file name to dashes
                     let no_whitespace = file_name.replace(|c: char| c.is_whitespace(), "-");
                     let mut name_iter = no_whitespace.chars().peekable();
-                    
+
                     // Remove duplicate dashes
                     let mut file_name_formatted = String::new();
                     loop {
@@ -181,13 +186,11 @@ fn add_bs_files_to_parse(
                                 }
 
                                 file_name_formatted.push(c);
-                            },
+                            }
                             None => break,
                         }
                     }
-                    
 
-                    
                     let output_file = format!("{file_name_formatted}.html");
                     let file_dir = file.to_str().unwrap();
 
@@ -221,7 +224,7 @@ fn add_bs_files_to_parse(
                         }
                     };
 
-                    add_bs_files_to_parse(source_code_to_parse, new_dir)?
+                    add_bs_files_to_parse(source_code_to_parse, new_dir, output_dir_name)?
                 }
             }
 
@@ -234,7 +237,7 @@ fn add_bs_files_to_parse(
     Ok(())
 }
 
-fn compile(output: OutputFile, release_build: bool) -> Result<Vec<AstNode>, Box<dyn Error>> {
+fn compile(output: OutputFile, release_build: bool, config: &Config) -> Result<Vec<AstNode>, Box<dyn Error>> {
     print_bold!("Compiling: ");
     dark_yellow_ln!("{}", output.file_name);
 
@@ -250,12 +253,12 @@ fn compile(output: OutputFile, release_build: bool) -> Result<Vec<AstNode>, Box<
 
     // TO BE REPLACED WITH LOADING CONFIG.BS FILE (When all config tokens are in tokenizer)
     let mut html_config = get_html_config();
-    let config = get_default_config();
 
-    // For each subdirectory from the dist folder of the output_dir, add a ../ to the image_folder_url
+    // For each subdirectory from the dist or dev folder of the output_dir, add a ../ to the image_folder_url
+    let output_dir_name = if release_build { &config.release_folder } else { &config.dev_folder };
     let dist_subfolders = output
         .output_dir
-        .split(&format!("{}/", config.output_folder))
+        .split(&format!("{}/", output_dir_name))
         .collect::<Vec<&str>>()[1]
         .split("/")
         .count()

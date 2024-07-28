@@ -4,6 +4,7 @@ use crate::bs_types::DataType;
 pub enum TokenizeMode {
     Normal,
     Markdown,
+    Codeblock,
     SceneHead,
     Window,
 }
@@ -190,4 +191,6 @@ pub enum Token {
     BG,
     Table,
     Center,
+    CodeKeyword,
+    CodeBlock(String),
 }

@@ -26,14 +26,17 @@
   });
   
   function checkIfFileChanged() {
-    fetch('/check', { method: 'HEAD' })
+    const currentUrl = window.location.pathname;
+    const requestUrl = `/check?page=${currentUrl}`;
+
+    fetch(requestUrl, { method: 'HEAD' })
       .then(response => {
         if (response.status == 205) {
           location.reload();
         }
       }).catch(console.error);
-  }
-  setInterval(() => checkIfFileChanged(), 512);
+  };
+  setInterval(() => checkIfFileChanged(), 600);
 </script>
 </body>
 </html>

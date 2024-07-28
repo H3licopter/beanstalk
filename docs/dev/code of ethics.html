@@ -1,0 +1,53 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport"content="width=device-width, initial-scale=1">
+<title></title>
+<meta name="description"content="Website Description"/>
+<meta property="og:title"content=""/>
+<meta property="og:description"content=""/>
+<meta property="og:image"content="localhost:6969/"/>
+<meta property="og:image:alt"content=""/>
+<meta property="og:locale"content="en_US"/>
+<meta property="og:type"content="website"/>
+<meta property="og:url"content="localhost:6969/"/>
+<meta name="twitter:card"content=""/>
+<meta name="color-scheme" content="light dark" />
+<link rel="canonical"href="">
+<link rel="icon"href="images/favicons/favicon.ico">
+<!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
+<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="images/favicons/site.webmanifest">
+<link rel="stylesheet" href="css/pico.min.css" />
+<style></style></head><body><main class="container"><p>0. Don't take ethical codes too seriously
+1. Don't take yourself too seriously
+2. Don't take life too seriously
+3. Don't take life too seriously
+4. Your lists should not be repetitive
+5. Don't fuckin' swear
+6. Ligma
+7. Empathy, or at least the pursuit of understanding the internal world of others, is the first and most important step in figuring out how to better the world around you.</p></main>
+<script type="module">
+  import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
+  init().then(() => {
+    function uInnerHTML(id,update){
+                const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
+                for (let i = 0;i<es.length;i++) {
+                  es[i].innerHTML=update
+                }
+            }
+  });
+  
+  function checkIfFileChanged() {
+    fetch('/check', { method: 'HEAD' })
+      .then(response => {
+        if (response.status == 205) {
+          location.reload();
+        }
+      }).catch(console.error);
+  }
+
+  setInterval(() => checkIfFileChanged(), 500);
+</script>
+</body>
+</html>
