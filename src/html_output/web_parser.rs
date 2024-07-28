@@ -356,6 +356,7 @@ fn parse_scene(
                         } else {
                             closing_tags.push(format!("</h{}>", size));
                         }
+                        *parent_tag = Tag::None;
                     }
 
                     Token::BulletPoint(_indentation, content) => {
@@ -367,6 +368,7 @@ fn parse_scene(
                         } else {
                             closing_tags.push("</li>".to_string());
                         }
+                        *parent_tag = Tag::None;
                     }
 
                     Token::Superscript(content) => {

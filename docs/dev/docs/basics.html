@@ -18,21 +18,21 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><main class="container"><h1>Style Guide
+<style></style></head><body><main class="container"><br><h1>Style Guide
 </h1><p>The style guide is:
-<span>snake_case as the default choice for variables and other things
-</span></p><li>camelCase for functions
+</p><li>snake_case as the default choice for variables and other things
+</li><li>camelCase for functions
 </li><li>PascalCase for objects
 </li><li>SCREAMING_SNAKE_CASE for Choices
-</li><span>4 spaces are recommended for indentation. 
+</li><p>4 spaces are recommended for indentation. 
 
-</span><h1>Comments
-</h1><span>Comments use a double minus sign '--'. 
+</p><h1>Comments
+</h1><p>Comments use a double minus sign '--'. 
 
-</span><span>If you put a newline immediately after a comment mark, the comment will become multi line and must be closed with - again. 
+</p><p>If you put a newline immediately after a comment mark, the comment will become multi line and must be closed with - again. 
 Comments are read by the compiler and can be nested.
 
-</span><pre><code>
+</p><pre><code>
     -- normal comment
 
     --
@@ -40,31 +40,31 @@ Comments are read by the compiler and can be nested.
 
     Woo
     --
-</code></pre><h1>Variables
-</h1><span>Beanstalk uses pointer semantics by default. This means that a variable is a reference to a value unless it is explicitly copied or assigned to a new value.
+</code></pre><br><h1>Variables
+</h1><p>Beanstalk uses pointer semantics by default. This means that a variable is a reference to a value unless it is explicitly copied or assigned to a new value.
 
-</span><span>Colon means initialise, equals means assign. The type of a variable goes after the colon, but can be omitted if the type is inferred.
+</p><p>Colon means initialise, equals means assign. The type of a variable goes after the colon, but can be omitted if the type is inferred.
 
-</span><span>The @ symbol is used to export variables and methods/functions outside of a module or object.
+</p><p>The @ symbol is used to export variables and methods/functions outside of a module or object.
 
-</span><h2>Exporting / Importing at the top of a module
-</h2><span>This will export existing variables and functions from the module. The variables and functions being exported must be declared somewhere inside the module.
+</p><h2>Exporting / Importing at the top of a module
+</h2><p>This will export existing variables and functions from the module. The variables and functions being exported must be declared somewhere inside the module.
 
-</span><pre><code>    @export (
+</p><pre><code>    @export (
         mutable_var, 
         comptime_immutable_var
     )
     @import (
         utiliFunction
     )
-</code></pre><h2>Assignment
-</h2><span>Assigning a new variable to an existing variable will create a reference to the existing variable, unless you specify the type as a 'copy'.
+</code></pre><br><h2>Assignment
+</h2><p>Assigning a new variable to an existing variable will create a reference to the existing variable, unless you specify the type as a 'copy'.
 
-</span><span>Types will be inferred if not specified, and implicit conversions will be used to convert the value to the inferred type.
+</p><p>Types will be inferred if not specified, and implicit conversions will be used to convert the value to the inferred type.
 
-</span><h3>Compile time immutable variable
-</h3><pre><code>comptime_immutable_var : int : 69</code></pre><h3>Runtime Variable
-</h3><pre><code>mutable_var : int = 0</code></pre><h2>Static Assignment
+</p><h3>Compile time immutable variable
+</h3><pre><code>comptime_immutable_var : int : 69</code></pre><br><h3>Runtime Variable
+</h3><pre><code>mutable_var : int = 0</code></pre><br><h2>Static Assignment
 </h2><pre><code>    -- UTF-8 string
     my_brain := "Dumb"
 
@@ -80,49 +80,49 @@ Comments are read by the compiler and can be nested.
     -- Implicit string conversion (string type must be specified in the type definition for this to work)
     -- Any expression you assign to this string variable will be converted to a string
     cool_string := 14 + 42 + " is a cool number " + '😂' -- "56 is a cool number 😂"
-</code></pre></p><p>Variables must be given a value or a type when they are declared. There is no such thing as 'null' in Beanstalk, the closest equivalent is an Error type or an empty tuple.
+</code></pre><p>Variables must be given a value or a type when they are declared. There is no such thing as 'null' in Beanstalk, the closest equivalent is an Error type or an empty tuple.
 
-<span>If an error occurs during assignment of a variable, it's type becomes an Error type and must be handled. Unhandled assignment errors at runtime will default the variable to it's zero value.
+</p><p>If an error occurs during assignment of a variable, it's type becomes an Error type and must be handled. Unhandled assignment errors at runtime will default the variable to it's zero value.
 
-</span><span>All copies of collections are explicit and must use the 'copy' keyword in place of a type.
+</p><p>All copies of collections are explicit and must use the 'copy' keyword in place of a type.
 
-</span><pre><code>    -- Deep copy of a collection
+</p><pre><code>    -- Deep copy of a collection
     thing : copy = a_collection 
 
     -- Reference to a_collection
     thing := a_collection
-</code></pre></p><p>If you are creating a non-collection variable and need it to be formatted over multiple lines, 
+</code></pre><p>If you are creating a non-collection variable and need it to be formatted over multiple lines, 
 you must wrap the value in parenthesis.
 
-<span>Parenthesis are used to group expressions together.
+</p><p>Parenthesis are used to group expressions together.
 
-</span><pre><code>    some_int := (
+</p><pre><code>    some_int := (
         4 + 5 + 6 + 7 + 8 + 9 + 10
     )
-</code></pre><h1>Data Types
-</h1><span>All data type keywords contain methods from the standard library for common manipulation of types. 
+</code></pre><br><h1>Data Types
+</h1><p>All data type keywords contain methods from the standard library for common manipulation of types. 
 The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
 
-</span><h2>Primative Types
+</p><h2>Primative Types
 </h2><table><thead><p>TABLE CAPTION
-    <tr><th scope='col'><span>Type</span>&nbsp;</th><th scope='col'><span>Description</span>&nbsp;</th><td><span>Zero Value</span></td></tr></thead><tbody></p><tr><td><span>int</span>&nbsp;</td><td><span>32 bit signed integer</span>&nbsp;</td><td><span>0</span></td></tr><tr><td><span>index</span>&nbsp;</td><td><span>Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible.</span>&nbsp;</td><td><span>0</span></td></tr><tr><td><span>float</span>&nbsp;</td><td><span>32 bit floating point number</span>&nbsp;</td><td><span>0.0</span></td></tr><tr><td><span>decimal</span>&nbsp;</td><td><span>A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision</span>&nbsp;</td><td><span>0.00</span></td></tr><tr><td><span>string</span>&nbsp;</td><td><span>UTF-8</span>&nbsp;</td><td><span>""</span></td></tr><tr><td><span>unicode</span>&nbsp;</td><td><span>Unicode strings are UTF-32 strings. They are created using single quotes.</span>&nbsp;</td><td><span>''</span></td></tr><tr><td><span>bool</span>&nbsp;</td><td><span>Boolean, including true and false as types</span>&nbsp;</td><td><span>false</span></td></tr><tr><td><span>error</span>&nbsp;</td><td><span>Contains a special type of debug string detailing the error</span>&nbsp;</td><td><span>"ERROR"</span></td></tr></tbody></table><h2>Collection Types
-</h2><table><thead><tr><th scope='col'><span>Type</span>&nbsp;</th><th scope='col'><span>Description</span>&nbsp;</th><td><span>Zero Value</span></td></tr></thead><tbody><tr><td><span>()</span>&nbsp;</td><td><span>Collection. Any number of items seperated by commas. See </span><a href="../collections" style="" ><span>Collections</span>&nbsp;</a><span>for more information.</span>&nbsp;</td><td><span>()</span></td></tr><tr><td><span>scene</span>&nbsp;</td><td><span>The templating syntax of Beanstalk</span>&nbsp;</td><td><span>"[]</span><span>" -  an empty scene</span></td></tr><tr><td><span>choice</span>&nbsp;</td><td><span>Rust style enums</span>&nbsp;</td><td><span>error</span></td></tr><tr><td><span>type</span>&nbsp;</td><td><span>For generics and datatype related operations</span>&nbsp;</td><td><span>error</span></td></tr></tbody></table><h1>Strings
-</h1><span>String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
+    <tr><th scope='col'><span>Type</span>&nbsp;</th><th scope='col'><span>Description</span>&nbsp;</th><td><span>Zero Value</span></td></tr></thead><tbody></p><tr><td><span>int</span>&nbsp;</td><td><span>32 bit signed integer</span>&nbsp;</td><td><span>0</span></td></tr><tr><td><span>index</span>&nbsp;</td><td><span>Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible.</span>&nbsp;</td><td><span>0</span></td></tr><tr><td><span>float</span>&nbsp;</td><td><span>32 bit floating point number</span>&nbsp;</td><td><span>0.0</span></td></tr><tr><td><span>decimal</span>&nbsp;</td><td><span>A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision</span>&nbsp;</td><td><span>0.00</span></td></tr><tr><td><span>string</span>&nbsp;</td><td><span>UTF-8</span>&nbsp;</td><td><span>""</span></td></tr><tr><td><span>unicode</span>&nbsp;</td><td><span>Unicode strings are UTF-32 strings. They are created using single quotes.</span>&nbsp;</td><td><span>''</span></td></tr><tr><td><span>bool</span>&nbsp;</td><td><span>Boolean, including true and false as types</span>&nbsp;</td><td><span>false</span></td></tr><tr><td><span>error</span>&nbsp;</td><td><span>Contains a special type of debug string detailing the error</span>&nbsp;</td><td><span>"ERROR"</span></td></tr></tbody></table><br><h2>Collection Types
+</h2><table><thead><tr><th scope='col'><span>Type</span>&nbsp;</th><th scope='col'><span>Description</span>&nbsp;</th><td><span>Zero Value</span></td></tr></thead><tbody><tr><td><span>()</span>&nbsp;</td><td><span>Collection. Any number of items seperated by commas. See </span><a href="../collections" style="" ><span>Collections</span>&nbsp;</a><span>for more information.</span>&nbsp;</td><td><span>()</span></td></tr><tr><td><span>scene</span>&nbsp;</td><td><span>The templating syntax of Beanstalk</span>&nbsp;</td><td><span>"[]</span><span>" -  an empty scene</span></td></tr><tr><td><span>choice</span>&nbsp;</td><td><span>Rust style enums</span>&nbsp;</td><td><span>error</span></td></tr><tr><td><span>type</span>&nbsp;</td><td><span>For generics and datatype related operations</span>&nbsp;</td><td><span>error</span></td></tr></tbody></table><br><h1>Strings
+</h1><p>String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
 
-</span><pre><code>"Double quotes for a utf8 string literal"</code></pre></p><p>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
+</p><pre><code>"Double quotes for a utf8 string literal"</code></pre><p>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 
-<pre><code>"string literal with \{curly braces} in it that is escaped"</code></pre><br><pre><code>`9 "is" {5 + 4}` -- 9 "is" {5 + 4}</code></pre><h1>Unicode Strings
-</h1><span>Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 
+</p><pre><code>"string literal with \{curly braces} in it that is escaped"</code></pre><br><pre><code>`9 "is" {5 + 4}` -- 9 "is" {5 + 4}</code></pre><br><h1>Unicode Strings
+</h1><p>Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 
 
-</span><pre><code>cool_emoji : '😂'</code></pre><h1>Numeric Units
-</h1><span>Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
+</p><pre><code>cool_emoji : '😂'</code></pre><br><h1>Numeric Units
+</h1><p>Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
 
-</span><span>The first unit in the operation will be used if no unit type is specified in the type parameter. 
+</p><p>The first unit in the operation will be used if no unit type is specified in the type parameter. 
 You don't need to have a space between a literal value and the unit type, but variables must have a space between the value and the unit type.
 
-</span><span>If you are mixing unit types in an operation, the first unit type will be used for the result.
+</p><p>If you are mixing unit types in an operation, the first unit type will be used for the result.
 
-</span><pre><code>    -- Specifies the base type as a float
+</p><pre><code>    -- Specifies the base type as a float
     m : unit : float
     cm : unit : m * 0.01
     mm : unit : cm * 0.1

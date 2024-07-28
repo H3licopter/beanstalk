@@ -11,10 +11,10 @@ use std::{
 };
 
 pub fn start_dev_server(mut path: String) -> Result<(), Box<dyn Error>> {
-    let url = "localhost:6969";
+    let url = "127.0.0.1:6969";
     let listener = TcpListener::bind(url).unwrap();
     print_bold!("Dev Server created on: ");
-    green_ln_bold!("http://{}", url);
+    green_ln_bold!("http://{}", url.replace("127.0.0.1", "localhost"));
 
     let current_dir = std::env::current_dir()?;
     path = format!("{}/{}", current_dir.to_string_lossy().into_owned(), path);

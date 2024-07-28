@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><main class="container"><h1>Collections
+<style></style></head><body><main class="container"><br><h1>Collections
 </h1><p>All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
 
 </p><p>Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
@@ -27,7 +27,7 @@
 </h2><p>By simply wrapping a list of values in parethesis and not specifying a type, you create a tuple literal.
 
 </p><span>(1, 2, 3)
-</span><h2>Fixed Collections
+</span><br><h2>Fixed Collections
 </h2><p>Tuples are a fixed size and can contain any type. Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
 
 </p><p>If a tuple only contains one value in parenthesis, it becomes equaivalent to a single value rather than a collection of values.
@@ -49,7 +49,7 @@
     tuple_of_one : float = (number 420)
     int_value := 420
     tuple_of_one number is int_value -- returns false
-</span><h2>Dynamic Collections (Arrays)
+</span><br><h2>Dynamic Collections (Arrays)
 </h2><p>When creating a variable collection rather than a constant collection, it becomes a dynamic collection.
 
 </p><p>Dynamic collections can only contain one data type.

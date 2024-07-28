@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><main class="container"><h1>Scenes
+<style></style></head><body><main class="container"><br><h1>Scenes
 </h1><p>Beanstalk has its own templating language. These are called scenes.
 
 </p><p>Scenes use square brackets and have predefined properties that will affect the behavior of the Scene. The properties in scenes are imported via the standard library depending on the project configuration.
@@ -38,7 +38,7 @@ You use this to access properties on the Window object in the browser.
     [ constant ]
 
     The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets and curly brackets [rgb(170,0,0): <em>cannot</em>] be used without an escape character or by using backticks to create a raw string.
-</span><h2>Scene exmaple
+</span><br><h2>Scene exmaple
 </h2><p>[ head_of_element: content of element that renders as text (markdown / more templates) {string : "this is a code block inside of the scene body, that is scoped to the scene"} ]
 
     [img "images/meme.jpg"]
@@ -64,11 +64,11 @@ You use this to access properties on the Window object in the browser.
 
     [ imported_bs_markdown ]
     [ slot "main content" ]
-</p><h3>Style
-</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>style</span></td><td><span>theme</span></td></tr><tr><td><span>size</span></td><td><span>img</span></td></tr><tr><td><span>pad</span></td><td><span>space</span></td></tr><tr><td><span>rgb</span></td><td><span>hex</span></td></tr><tr><td><span>raw</span></td><td></td></tbody></table><h3>Interactive 
-</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>input</span></td><td><span>audio</span></td></tr><tr><td><span>video</span></td><td><span>click</span></td></tr><tr><td><span>form</span></td><td><span>option</span></td></tr><tr><td><span>dropdown</span></td><td></td></tbody></table><h3>HTTP 
-</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>post</span></td><td><span>get</span></td></tr><tr><td><span>delete</span></td><td><span>swap</span></td></tr></tbody></table><h3>Dynamic
-</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>slot</span></td><td><span>canvas</span></td></tr></tbody></table><h3>Comments
+</p><br><h3>Style
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>style</span></td><td><span>theme</span></td></tr><tr><td><span>size</span></td><td><span>img</span></td></tr><tr><td><span>pad</span></td><td><span>space</span></td></tr><tr><td><span>rgb</span></td><td><span>hex</span></td></tr><tr><td><span>raw</span></td><td></td></tbody></table><br><h3>Interactive 
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>input</span></td><td><span>audio</span></td></tr><tr><td><span>video</span></td><td><span>click</span></td></tr><tr><td><span>form</span></td><td><span>option</span></td></tr><tr><td><span>dropdown</span></td><td></td></tbody></table><br><h3>HTTP 
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>post</span></td><td><span>get</span></td></tr><tr><td><span>delete</span></td><td><span>swap</span></td></tr></tbody></table><br><h3>Dynamic
+</h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>slot</span></td><td><span>canvas</span></td></tr></tbody></table><br><h3>Comments
 </h3><table><thead><tr><th scope='col'><span>Property</span>&nbsp;</th><td><span>Description</span></td></tr></thead><tbody><tr><td><span>comment</span></td><td></td></tbody></table></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
