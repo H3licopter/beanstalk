@@ -23,6 +23,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
     let mut html = String::new();
     let mut css = String::new();
     let mut page_title = String::new();
+    let mut exp_id: usize = 0;
 
     let mut module_references: Vec<usize> = Vec::new();
     let mut class_id: usize = 0;
@@ -42,6 +43,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
                         &mut css,
                         &mut module_references,
                         &mut class_id,
+                        &mut exp_id,
                     )
                     .0,
                 );
@@ -110,6 +112,7 @@ fn parse_scene(
     css: &mut String,
     module_references: &mut Vec<usize>,
     class_id: &mut usize,
+    exp_id: &mut usize,
 ) -> (String, Tag) {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
@@ -408,6 +411,7 @@ fn parse_scene(
                     css,
                     module_references,
                     class_id,
+                    exp_id,
                 );
 
                 // If this is in a table, add correct table tags
@@ -487,7 +491,6 @@ fn parse_scene(
 
     // Take all scenehead variables and add them into any templates inside of the scene body
     // When there are no templates left, create a new span element to hold the literal
-    let mut id: u32 = 0;
     for literal in scenehead_literals.into_iter().rev() {
         let mut js_string = String::new();
 
@@ -524,13 +527,13 @@ fn parse_scene(
         // If there are templates inside the scene, use that index.
         // Otherwise just use the index of where the literal would be inserted.
         let index = scenehead_templates.pop().unwrap_or(literal.1);
-        html.insert_str(index, &format!("<span id=\"exp{id}\"></span>"));
+        html.insert_str(index, &format!("<span id=\"exp{exp_id}\"></span>"));
 
         js.push_str(&format!(
-            "document.getElementById('exp{id}').innerHTML={js_string};"
+            "document.getElementById('exp{exp_id}').innerHTML={js_string};"
         ));
 
-        id += 1;
+        *exp_id += 1;
     }
 
     // Create class for all child elements

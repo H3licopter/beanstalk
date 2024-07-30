@@ -1,3 +1,5 @@
+use colour::red_ln;
+
 use super::{
     ast::AstNode,
     parse_expression::{create_expression, eval_expression},
@@ -24,6 +26,7 @@ pub fn new_scene(
     let mut j = 0;
     while j < scene_head.len() {
         match &scene_head[j] {
+
             Token::SceneClose(spaces) => {
                 for _ in 0..*spaces {
                     scene.push(AstNode::Space);
@@ -123,11 +126,11 @@ pub fn new_scene(
                             scene_tags.push(Tag::Table(value as u32));
                         }
                         _ => {
-                            println!("Incorrect arguments passed into table declaration");
+                            red_ln!("Incorrect arguments passed into table declaration");
                         }
                     },
                     _ => {
-                        println!("Incorrect arguments passed into table declaration");
+                        red_ln!("Incorrect arguments passed into table declaration");
                     }
                 }
             }
@@ -140,20 +143,33 @@ pub fn new_scene(
                     scene_tags.push(Tag::Img(eval_arg));
                 } else {
                     // Need to add JS DOM hooks to change img src at runtime.
+                    red_ln!("Can't add img src attribute to scene head at runtime (yet)");
                     scene_tags.push(Tag::Img(eval_arg));
                 }
             }
 
             Token::Alt => {
                 j += 1;
-                match &scene_head[j] {
-                    Token::StringLiteral(value) => {
-                        scene_styles.push(Style::Alt(value.clone()));
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::String, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    match eval_arg {
+                        AstNode::Literal(token) => match token {
+                            Token::StringLiteral(value) => {
+                                scene_styles.push(Style::Alt(value.clone()));
+                            }
+                            _ => {
+                                scene.push(AstNode::Error("Wrong datatype provided for alt".to_string()));
+                            }
+                        },
+                        _ => {
+                            scene.push(AstNode::Error("No string provided for alt".to_string()));
+                        }
                     }
-                    _ => {
-                        scene.push(AstNode::Error("No string provided for alt".to_string()));
-                    }
-                };
+                } else {
+                    // Need to add JS DOM hooks to change href at runtime.
+                    red_ln!("Can't add alt attribute to scene head at runtime (yet)");
+                }
             }
 
             Token::Video => {

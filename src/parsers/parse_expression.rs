@@ -54,14 +54,26 @@ pub fn create_expression(
 
                 break;
             }
-            Token::EOF | Token::Newline | Token::SceneClose(_) => {
-                if bracket_nesting == 0 {
-                    break;
+
+            Token::EOF | Token::SceneClose(_) => {
+                if bracket_nesting != 0 {
+                    return AstNode::Error(
+                        "Not enough closing parenthesis for expression. Need more ')' at the end of the expression!".to_string(),
+                    );
                 }
 
-                return AstNode::Error(
-                    "Not enough closing parenthesis for expression. Need more ')' at the end of the expression!".to_string(),
-                );
+                *i -= 1;
+                break;
+            }
+
+            Token::Newline => {
+                // Fine if inside of brackets (not closed yet)
+                // Otherwise break out of the expression
+                if bracket_nesting > 0 {
+                    continue;
+                } else {
+                    break;
+                }
             }
 
             Token::Comma => {
