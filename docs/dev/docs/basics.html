@@ -24,7 +24,8 @@
 </li><li>camelCase for functions
 </li><li>PascalCase for objects
 </li><li>SCREAMING_SNAKE_CASE for Choices
-</li><p>4 spaces are recommended for indentation. 
+</li><p><br>
+4 spaces are recommended for indentation. 
 
 </p><h1>Comments
 </h1><p>Comments use a double minus sign '--'. 
@@ -80,7 +81,9 @@ Comments are read by the compiler and can be nested.
     -- Implicit string conversion (string type must be specified in the type definition for this to work)
     -- Any expression you assign to this string variable will be converted to a string
     cool_string := 14 + 42 + " is a cool number " + '😂' -- "56 is a cool number 😂"
-</code></pre><p>Variables must be given a value or a type when they are declared. There is no such thing as 'null' in Beanstalk, the closest equivalent is an Error type or an empty tuple.
+</code></pre><p><br>
+
+Variables must be given a value or a type when they are declared. There is no such thing as 'null' in Beanstalk, the closest equivalent is an Error type or an empty tuple.
 
 </p><p>If an error occurs during assignment of a variable, it's type becomes an Error type and must be handled. Unhandled assignment errors at runtime will default the variable to it's zero value.
 
@@ -91,7 +94,9 @@ Comments are read by the compiler and can be nested.
 
     -- Reference to a_collection
     thing := a_collection
-</code></pre><p>If you are creating a non-collection variable and need it to be formatted over multiple lines, 
+</code></pre><p><br>
+
+If you are creating a non-collection variable and need it to be formatted over multiple lines, 
 you must wrap the value in parenthesis.
 
 </p><p>Parenthesis are used to group expressions together.
@@ -104,12 +109,15 @@ you must wrap the value in parenthesis.
 The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
 
 </p><h2>Primative Types
-</h2><table><thead><p>TABLE CAPTION
+</h2><table><thead><p><br>
+TABLE CAPTION
     <tr><th scope='col'><span>Type</span>&nbsp;</th><th scope='col'><span>Description</span>&nbsp;</th><td><span>Zero Value</span></td></tr></thead><tbody></p><tr><td><span>int</span>&nbsp;</td><td><span>32 bit signed integer</span>&nbsp;</td><td><span>0</span></td></tr><tr><td><span>index</span>&nbsp;</td><td><span>Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible.</span>&nbsp;</td><td><span>0</span></td></tr><tr><td><span>float</span>&nbsp;</td><td><span>32 bit floating point number</span>&nbsp;</td><td><span>0.0</span></td></tr><tr><td><span>decimal</span>&nbsp;</td><td><span>A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision</span>&nbsp;</td><td><span>0.00</span></td></tr><tr><td><span>string</span>&nbsp;</td><td><span>UTF-8</span>&nbsp;</td><td><span>""</span></td></tr><tr><td><span>unicode</span>&nbsp;</td><td><span>Unicode strings are UTF-32 strings. They are created using single quotes.</span>&nbsp;</td><td><span>''</span></td></tr><tr><td><span>bool</span>&nbsp;</td><td><span>Boolean, including true and false as types</span>&nbsp;</td><td><span>false</span></td></tr><tr><td><span>error</span>&nbsp;</td><td><span>Contains a special type of debug string detailing the error</span>&nbsp;</td><td><span>"ERROR"</span></td></tr></tbody></table><br><h2>Collection Types
 </h2><table><thead><tr><th scope='col'><span>Type</span>&nbsp;</th><th scope='col'><span>Description</span>&nbsp;</th><td><span>Zero Value</span></td></tr></thead><tbody><tr><td><span>()</span>&nbsp;</td><td><span>Collection. Any number of items seperated by commas. See </span><a href="../collections" style="" ><span>Collections</span>&nbsp;</a><span>for more information.</span>&nbsp;</td><td><span>()</span></td></tr><tr><td><span>scene</span>&nbsp;</td><td><span>The templating syntax of Beanstalk</span>&nbsp;</td><td><span>"[]</span><span>" -  an empty scene</span></td></tr><tr><td><span>choice</span>&nbsp;</td><td><span>Rust style enums</span>&nbsp;</td><td><span>error</span></td></tr><tr><td><span>type</span>&nbsp;</td><td><span>For generics and datatype related operations</span>&nbsp;</td><td><span>error</span></td></tr></tbody></table><br><h1>Strings
 </h1><p>String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
 
-</p><pre><code>"Double quotes for a utf8 string literal"</code></pre><p>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
+</p><pre><code>"Double quotes for a utf8 string literal"</code></pre><p><br>
+
+Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 
 </p><pre><code>"string literal with \{curly braces} in it that is escaped"</code></pre><br><pre><code>`9 "is" {5 + 4}` -- 9 "is" {5 + 4}</code></pre><br><h1>Unicode Strings
 </h1><p>Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 

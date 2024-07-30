@@ -3,16 +3,19 @@
 # &#127793;
 ]
 
-### What is Beanstalk?
+## What is Beanstalk?
 This website was created using Beanstalk! It's a statically typed language that compiles to HTML, CSS, Javascript and (hopefully soon) Web Assembly.
 
 For the most part you use it a lot like markdown, but instead of writing HTML or seperate Javascript code for a webpage, Beanstalk has it's own unique syntax that blends modern utility class styles into a minimilistic and modern framework-replacing language.
 
-The compiler is written in Rust, and fast compile times and a built in watcher/dev server make it super fast to start developing without feeling like you're missing out on stuff from the Javascript world.
+The compiler is written in Rust, and fast compile times and a built in watcher/dev server make it super fast to start developing without feeling like you're missing out on stuff from the Javascript/Node world.
 
-This means you can just make webpages without all the noise and bloat of Node, a Javascript framework and old, verbose, boilerplate filled languages designed for an older age.
+## Documentation
+- [link "./docs/scenes": Introduction to scenes]
 
-### Current Status
+More info to be added soon!
+
+## Current Status
 This is a work in progress site for Beanstalk documentation as it's being developed. 
 
 As the language and compiler are in the early stages of development, the documentation has only just started being written and is subject to frequent changes.
@@ -20,11 +23,5 @@ As the language and compiler are in the early stages of development, the documen
 The source code for this site on [link "https://github.com/H3licopter/beanstalk/tree/main/docs/src": Github]. You can view the output of the Beanstalk compiler [link "https://github.com/H3licopter/beanstalk/tree/main/docs/dist": here] !
 
 
-### Documentation
-- [link "./docs/basics": The basics of Beanstalk]
 
-More info will be added soon!
-
-
-]
 

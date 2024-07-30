@@ -1,9 +1,9 @@
-use colour::{blue_bold, blue_ln_bold, dark_grey_ln, dark_yellow, dark_yellow_ln, yellow_ln_bold};
+use colour::{blue_ln_bold, dark_grey_ln, dark_yellow_ln, yellow_ln_bold};
 use colour::{blue_ln, cyan_ln, green_ln, grey_ln, red_ln};
 use regex::Regex;
 
 use crate::html_output::web_parser;
-use crate::parsers;
+use crate::{dev_server, parsers};
 use crate::parsers::ast::AstNode;
 use crate::settings::get_html_config;
 use crate::tokenizer;
@@ -86,6 +86,8 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Print the formatted content
     println!("\n{}", formatted_content);
+
+    dev_server::start_dev_server("test_output".to_string())?;
 
     Ok(())
 }

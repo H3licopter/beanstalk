@@ -406,7 +406,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
         }
 
         Token::Heading(_, content) | Token::BulletPoint(_, content) => {
-            if count_newlines_at_end_of_string(content) > 0 {
+            if count_newlines_at_end_of_string(content) > 0 && !content.trim().is_empty() {
                 false
             } else {
                 true

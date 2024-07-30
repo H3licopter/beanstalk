@@ -4,15 +4,7 @@ pub fn add_markdown_tags(content: &mut String) -> String {
     let mut i = 0;
     *content = content.replace('<', "&lt;").replace('>', "&gt;");
 
-    while i < content.len() - 1 {
-        let char = content.chars().nth(i).unwrap_or('0');
-
-        // Add line break if double newline is found
-        if char == '\n' {
-            content.insert_str(i, "<br>");
-            i += 4;
-        }
-
+    while i < content.len() {
         if !add_em_tags(content, &mut i) {
             break;
         }

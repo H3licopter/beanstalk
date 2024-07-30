@@ -2,7 +2,6 @@ use super::{
     dom_hooks::{generate_dom_update_js, DOMUpdate},
     generate_html::create_html_boilerplate,
     js_parser::{collection_to_js, collection_to_vec_of_js, expression_to_js},
-    markdown_parser::add_markdown_tags,
 };
 use crate::{
     bs_types::DataType,
@@ -272,7 +271,7 @@ fn parse_scene(
                             Tag::P => {
                                 html.push_str(&format!(
                                     "<span>{}</span>",
-                                    add_markdown_tags(&mut content.clone())
+                                    content
                                 ));
                                 if count_newlines_at_end_of_string(&content) > 1 {
                                     *parent_tag = Tag::None;
@@ -292,7 +291,7 @@ fn parse_scene(
                             _ => {
                                 html.push_str(&format!(
                                     "<span>{}</span>",
-                                    add_markdown_tags(&mut content.clone())
+                                    content
                                 ));
                             }
                         }
@@ -307,15 +306,15 @@ fn parse_scene(
                             }
                             Tag::A(_) => {
                                 html.push_str(&collect_closing_tags(&mut closing_tags));
-                                html.push_str(&add_markdown_tags(&mut content.clone()));
+                                html.push_str(&content.to_owned());
                             }
                             _ => {
                                 html.push_str(&collect_closing_tags(&mut closing_tags));
 
-                                let parsed_content = add_markdown_tags(&mut content.clone());
+                                let parsed_content = content.clone();
                                 match *parent_tag {
                                     Tag::P => {
-                                        if count_newlines_at_start_of_string(&content) > 1 {
+                                        if count_newlines_at_start_of_string(content.as_str()) > 1 {
                                             html.push_str("</p>");
                                             html.push_str(&format!("<p>{}", parsed_content));
                                         } else {
@@ -328,7 +327,7 @@ fn parse_scene(
                                     Tag::Table(_) => {
                                         html.push_str(&format!(
                                             "<span>{}</span>",
-                                            add_markdown_tags(&mut content.clone())
+                                            content
                                         ));
                                     }
                                     _ => {
@@ -351,7 +350,7 @@ fn parse_scene(
                         html.push_str(&format!(
                             "<h{}>{}",
                             size,
-                            add_markdown_tags(&mut content.clone())
+                            content
                         ));
 
                         if count_newlines_at_end_of_string(&content) > 0 {
@@ -364,7 +363,7 @@ fn parse_scene(
 
                     Token::BulletPoint(_indentation, content) => {
                         html.push_str(&collect_closing_tags(&mut closing_tags));
-                        html.push_str(&format!("<li>{}", add_markdown_tags(&mut content.clone())));
+                        html.push_str(&format!("<li>{}", content));
 
                         if count_newlines_at_end_of_string(&content) > 0 {
                             html.push_str(&format!("</li>"));
