@@ -7,9 +7,7 @@ use super::{
 use crate::{
     bs_types::DataType,
     parsers::{
-        ast::AstNode,
-        styles::{Style, Tag},
-        util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
+        ast::AstNode, styles::{Style, Tag}, util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string}
     },
     settings::{get_html_config, HTMLMeta},
     Token,
@@ -25,7 +23,8 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
     let mut page_title = String::new();
     let mut exp_id: usize = 0;
 
-    let mut module_references: Vec<usize> = Vec::new();
+    let mut module_references: Vec<AstNode> = Vec::new();
+    
     let mut class_id: usize = 0;
 
     // Parse HTML
@@ -56,11 +55,12 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
             }
 
             // JAVASCRIPT / WASM
-            AstNode::VarDeclaration(id, expr, _) => {
+            AstNode::VarDeclaration(id, ref expr, _) => {
                 js.push_str(&format!("let v{} = {};", id, expression_to_js(&expr)));
+                module_references.push(node);
             }
-            AstNode::Const(id, expr, _) => {
-                js.push_str(&format!("const cv{} = {};", id, expression_to_js(&expr)));
+            AstNode::Const(_, _, _) => {
+                module_references.push(node);
             }
             AstNode::Function(name, args, body, is_exported) => {
                 js.push_str(&format!(
@@ -79,7 +79,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
             }
 
             _ => {
-                println!("unknown AST node found: {:?}", node);
+                red_ln!("unknown AST node found: {:?}", node);
             }
         }
     }
@@ -110,7 +110,7 @@ fn parse_scene(
     parent_tag: &mut Tag,
     js: &mut String,
     css: &mut String,
-    module_references: &mut Vec<usize>,
+    module_references: &mut Vec<AstNode>,
     class_id: &mut usize,
     exp_id: &mut usize,
 ) -> (String, Tag) {
@@ -432,18 +432,45 @@ fn parse_scene(
                 // TO DO: Should be reactive in future
                 html.push_str(&format!("<span class=\"c{value}\"></span>"));
 
-                if !module_references.contains(&value) {
+                if !module_references.contains(&node) {
                     js.push_str(&format!("uInnerHTML(\"c{value}\", v{value});"));
-                    module_references.push(value);
+                    module_references.push(node);
                 }
             }
-            AstNode::ConstReference(value) => {
-                // Create a span in the HTML with a class that can be referenced by JS
-                html.push_str(&format!("<span class=\"c{value}\"></span>"));
 
-                if !module_references.contains(&value) {
-                    js.push_str(&format!("uInnerHTML(\"c{value}\", cv{value});"));
-                    module_references.push(value);
+            AstNode::ConstReference(value) => {
+                // Make sure the const is in the module references
+                let var = module_references.into_iter().rev().find(|n| match n { AstNode::Const(id, _, _) => *id == value, _ => false }); 
+                
+                // Constant folding not yet implemented, so just check if there is a literal rather than expression
+                match var {
+                    Some(AstNode::Const(_, ref expr, _)) => {
+                        let node = *expr.clone();
+                        match node {
+                            AstNode::Literal(token) => { 
+                                let value;
+                                match token {
+                                    Token::StringLiteral(v) | Token::RawStringLiteral(v) => {
+                                        value = v;
+                                    }
+                                    Token::FloatLiteral(v) => {
+                                        value = v.to_string();
+                                    }
+                                    Token::IntLiteral(v) => {
+                                        value = v.to_string();
+                                    }
+                                    _ => {
+                                        red_ln!("Unsupported constant type (should be implimented in future: {:?}", token);
+                                        value = String::new();
+                                    }
+                                }
+
+                                html.push_str(&format!("<span>{}</span>", value));
+                            }
+                            _ => { red_ln!("Const was not folded (was an expression)") }
+                        }
+                    }, 
+                    _ => red_ln!("Const reference not found in module")
                 }
             }
 
@@ -477,10 +504,10 @@ fn parse_scene(
 
             // ERROR HANDLING
             AstNode::Error(value) => {
-                println!("Error: {}", value);
+                red_ln!("Error: {}", value);
             }
             _ => {
-                println!("unknown AST node found in scene: {:?}", node);
+                red_ln!("unknown AST node found in scene: {:?}", node);
             }
         }
     }
@@ -520,7 +547,7 @@ fn parse_scene(
                 _ => {}
             },
             _ => {
-                println!("Scene Head literal not yet supported in scene body");
+                red_ln!("Scene Head literal not yet supported in scene body");
             }
         }
 
@@ -684,11 +711,11 @@ fn get_src(value: &AstNode) -> String {
             if *data_type == DataType::String {
                 src = expression_to_js(&AstNode::RuntimeExpression(expr.clone(), DataType::String))
             } else {
-                println!("Error: src attribute must be a string literal (Webparser - get src)");
+                red_ln!("Error: src attribute must be a string literal (Webparser - get src)");
             }
         }
         _ => {
-            println!("Error: src attribute must be a string literal (Webparser - get src)");
+            red_ln!("Error: src attribute must be a string literal (Webparser - get src)");
         }
     }
 

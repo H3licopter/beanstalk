@@ -1,5 +1,5 @@
-use colour::{blue_ln_bold, dark_blue_ln, dark_grey_ln, dark_yellow_ln, yellow_ln_bold};
-use colour::{blue_ln, cyan_ln, green_ln, grey_ln, red_ln, yellow_ln};
+use colour::{blue_bold, blue_ln_bold, dark_grey_ln, dark_yellow, dark_yellow_ln, yellow_ln_bold};
+use colour::{blue_ln, cyan_ln, green_ln, grey_ln, red_ln};
 use regex::Regex;
 
 use crate::html_output::web_parser;
@@ -99,7 +99,7 @@ fn print_scene(scene: &AstNode, scene_nesting_level: u32) {
     
     match scene {
         AstNode::Scene(nodes, tags, styles) => {
-            blue_ln_bold!("\n{}Scene Head:", indentation);
+            blue_ln_bold!("\n{}Scene Head: ", indentation);
             for tag in tags {
                 dark_yellow_ln!("{}  {:?}", indentation, tag);
             }
@@ -144,4 +144,5 @@ fn print_scene(scene: &AstNode, scene_nesting_level: u32) {
         }
         _ => {}
     }
+    println!("\n");
 }

@@ -1,7 +1,7 @@
 use super::styles::{Style, Tag};
 use crate::{bs_types::DataType, Token};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 #[allow(dead_code)]
 pub enum AstNode {
     // Config settings
@@ -24,8 +24,6 @@ pub enum AstNode {
     // References to existing variables
     VarReference(usize),
     ConstReference(usize),
-    CompileTimeConstReference(usize),
-    CompileTimeVarReference(usize),
     FunctionCall(usize, Box<AstNode>),
 
     // Literals

@@ -7,7 +7,6 @@ The style guide is:
 - PascalCase for objects
 - SCREAMING_SNAKE_CASE for Choices
 
-
 4 spaces are recommended for indentation. 
 
 # Comments

@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub struct Config {
     pub project: String,
     pub src: String,
@@ -21,7 +22,7 @@ pub fn get_default_config() -> Config {
         license: String::from("MIT"),
     }
 }
-
+#[allow(dead_code)]
 pub struct HTMLMeta {
     pub site_title: String,
     pub page_description: String,

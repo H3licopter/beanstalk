@@ -90,16 +90,6 @@ pub fn create_expression(
             Token::ConstReference(id) => {
                 expression.push(AstNode::ConstReference(find_var_declaration_index(ast, id)));
             }
-            Token::CompileTimeConstReference(id) => {
-                expression.push(AstNode::CompileTimeConstReference(
-                    find_var_declaration_index(ast, id),
-                ));
-            }
-            Token::CompileTimeVarReference(id) => {
-                expression.push(AstNode::CompileTimeVarReference(
-                    find_var_declaration_index(ast, id),
-                ));
-            }
 
             // Check if is a literal
             Token::IntLiteral(int) => {
@@ -217,9 +207,7 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
 
                     // EVENTUALLY NEED TO HANDLE COMPILE TIME VALUES DIFFERENTLY
                     AstNode::ConstReference(value)
-                    | AstNode::VarReference(value)
-                    | AstNode::CompileTimeConstReference(value)
-                    | AstNode::CompileTimeVarReference(value) => {
+                    | AstNode::VarReference(value) => {
                         compile_time_eval = false;
                         match &ast[value] {
                             AstNode::VarDeclaration(_, assignment, _)

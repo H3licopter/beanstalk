@@ -1,6 +1,6 @@
 use super::ast::AstNode;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Tag {
     None,
     Span,
@@ -11,11 +11,11 @@ pub enum Tag {
     Video(AstNode),    // src
     Audio(AstNode),    // src
     Table(u32),
-    Code(String), // Language
+    Code(String),       // Language
 }
 
 // Will contain an expression or collection of expressions to be parsed in the target language
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Style {
     Padding(AstNode),
     Margin(AstNode),

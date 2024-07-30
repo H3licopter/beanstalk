@@ -242,6 +242,7 @@ pub fn new_scene(
                 }
                 return AstNode::Comment("Ignored Scene".to_string());
             }
+            
             Token::CodeKeyword => {
                 scene_styles.clear();
                 scene_tags.clear();
