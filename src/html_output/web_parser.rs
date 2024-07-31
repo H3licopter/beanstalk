@@ -266,7 +266,9 @@ fn parse_scene(
         match node {
             AstNode::Element(token) => {
                 match token {
-                    Token::Span(content) => {
+                    Token::Span(mut content) => {
+                        content = sanitise_content(&mut content);
+
                         match *parent_tag {
                             Tag::P => {
                                 html.push_str(&format!(
@@ -311,7 +313,9 @@ fn parse_scene(
                         }
                     }
 
-                    Token::P(content) => {
+                    Token::P(mut content) => {
+                        content = sanitise_content(&mut content);
+
                         match scene_wrap.tag {
                             Tag::Img(_) | Tag::Video(_) => {
                                 scene_wrap
@@ -813,4 +817,10 @@ fn insert_into_table(
     }
 
     idx
+}
+
+// Also make sure to escape reserved HTML characters and remove any empty lines
+fn sanitise_content(content: &mut String) -> String {
+    *content = content.replace('<', "&lt;").replace('>', "&gt;");
+    content.trim_start().to_string()
 }

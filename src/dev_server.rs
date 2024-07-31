@@ -163,7 +163,7 @@ fn has_been_modified(path: &String, modified: &mut std::time::SystemTime) -> boo
     let path_metadata = match fs::metadata(path) {
         Ok(m) => m,
         Err(_) => {
-            red_ln!("Error reading directory: {}", path);
+            red_ln!("Error reading directory (probably doesn't exist): {}", path);
             return false;
         }
     };

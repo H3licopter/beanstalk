@@ -20,24 +20,16 @@
 <link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><br><h1>Collections
 </h1><p>All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
-</p><p>
-Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
-</p><br><h2>Literals
+</p><p>Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
+</p><h2>Literals
 </h2><p>By simply wrapping a list of values in parethesis and not specifying a type, you create a tuple literal.
-</p><p>
-
-(1, 2, 3)
+</p><p>(1, 2, 3)
 </p><br><h2>Fixed Collections
 </h2><p>Tuples are a fixed size and can contain any type. Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
-</p><p>
-If a tuple only contains one value in parenthesis, it becomes equaivalent to a single value rather than a collection of values.
-</p><p>
-Tuples can also contain named values that can be accessed by name rather than index. This is done by providing a variable name just before the value.
-</p><p>
-When creating a tuple using a colon, the values inside become immutable.
-</p><p>
-
-    -- Fixed size tuple of immutable integers
+</p><p>If a tuple only contains one value in parenthesis, it becomes equaivalent to a single value rather than a collection of values.
+</p><p>Tuples can also contain named values that can be accessed by name rather than index. This is done by providing a variable name just before the value.
+</p><p>When creating a tuple using a colon, the values inside become immutable.
+</p><p>-- Fixed size tuple of immutable integers
     tuple :: (1, 2, 3)
     tuple 0 -- returns 1
 
@@ -50,32 +42,22 @@ When creating a tuple using a colon, the values inside become immutable.
     tuple_of_one : float = (number 420)
     int_value := 420
     tuple_of_one number is int_value -- returns false
-</p><br><h2>Dynamic Collections (Arrays)
+</p><h2>Dynamic Collections (Arrays)
 </h2><p>When creating a variable collection rather than a constant collection, it becomes a dynamic collection.
-</p><p>
-Dynamic collections can only contain one data type.
-</p><span>
-    array := (3, 4, 5)
+</p><p>Dynamic collections can only contain one data type.
+</p><span>array := (3, 4, 5)
     array push(9)
     array 3 -- returns 9
-</span><p>
-
-Specifying the type of your collection.
-</p><p>
-
-    -- Empty array of integers
+</span><br><p>Specifying the type of your collection.
+</p><p>-- Empty array of integers
     empty_array : (int)
 
     empty_array push(3)
     empty_array 0 -- returns 3
 
     strings : (string) = ("hello", "world")
-</p><p>
-
-Collections can also have named values or keys. These values can now be defined as mutable or immutable.
-</p><p>
-
-    values :: (
+</p><br><p>Collections can also have named values or keys. These values can now be defined as mutable or immutable.
+</p><p>values :: (
         default_number :: 0,
         "cool number" :: 6,
         7,

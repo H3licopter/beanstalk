@@ -13,6 +13,7 @@ mod settings;
 mod test;
 mod tokenizer;
 mod tokens;
+mod tokenize_scene;
 mod parsers {
     pub mod ast;
     pub mod build_ast;
@@ -26,7 +27,6 @@ mod html_output {
     mod dom_hooks;
     mod generate_html;
     pub mod js_parser;
-    mod markdown_parser;
     pub mod web_parser;
 }
 use colour::{dark_cyan, green_ln_bold, red_ln};

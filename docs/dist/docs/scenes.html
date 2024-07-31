@@ -20,19 +20,15 @@
 <link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><br><h1>Scenes
 </h1><p>Beanstalk has its own templating language. These are called scenes.
-</p><p>
-Scenes have two sections, the head and the body. 
-</p><br><p><strong><em>The head&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the styling and positioning of the scene.
-</span></p><br><p><strong><em>The body&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the content of the scene.
-</span></p><p>
-These two sections are separated by a colon.
-</p><p>
-Scenes are scoped using square brackets and have predefined keywords you use in the scene head that can change their behavior, content and styling. 
-</p><p>
-Inside the body of a scene, you can nest more scenes using square brackets. This allows you to create complex UIs and webpages, while writing mostly in a dialect of markdown.
-</p><br><h2>Beanstalk Markdown
+</p><p>Scenes have two sections, the head and the body. 
+</p><p><strong><em>The head&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the styling and positioning of the scene.
+</span></p><p><strong><em>The body&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the content of the scene.
+</span></p><p>These two sections are separated by a colon.
+</p><p>Scenes are scoped using square brackets and have predefined keywords you use in the scene head that can change their behavior, content and styling. 
+</p><p>Inside the body of a scene, you can nest more scenes using square brackets. This allows you to create complex UIs and webpages, while writing mostly in a dialect of markdown.
+</p><h2>Beanstalk Markdown
 </h2><p>Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a scene body. Beanstalk markdown supports the familiar heading, bold and italic syntax from most markdown parsers.
-</p><br><pre><code>    [:
+</p><pre><code>    [:
     The open square bracket is used to start a new scene. The colon begins the scene body.
 
     # A Heading

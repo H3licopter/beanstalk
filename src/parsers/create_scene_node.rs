@@ -322,11 +322,11 @@ pub fn new_scene(
                 }
             }
 
-            Token::Empty | Token::Newline => {
+            Token::Newline => {
                 scene.push(AstNode::Element(Token::Newline));
             }
 
-            Token::AssignComptime | Token::DeadVarible => {}
+            Token::Empty | Token::AssignComptime | Token::DeadVarible => {}
 
             _ => {
                 scene.push(AstNode::Error(format!(

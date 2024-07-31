@@ -20,34 +20,31 @@
 <link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><br><h1>Functions
 </h1><p>If the function can only return an error, you can use a '!' as the specified return type.&nbsp; 
-</p><br><h2>The arrow operator
+</p><h2>The arrow operator
 </h2><p>The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
-</p><p>
-A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
-</p><p>
-
-    doNothing : () -> {}
+</p><p>A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
+</p><p>doNothing : () -&gt; {}
 
     -- Returns a tuple of values
-    multipleReturns : () -> (int, int, int) {
+    multipleReturns : () -&gt; (int, int, int) {
         return (1, 2, 3)
     }
 
-    differentReturns : (spicy : bool = false) -> (int, int, int) {
+    differentReturns : (spicy : bool = false) -&gt; (int, int, int) {
         if spicy:
             return (69, 420, 1337)
         
         return (1, 2, 3)
     }
 
-    nestedReturns : () -> bool {
+    nestedReturns : () -&gt; bool {
         if state is (
-            STATE.normal => return true
-            => return false
+            STATE.normal =&gt; return true
+            =&gt; return false
         )
     }
 
-    defaultReturn: () -> (int) {
+    defaultReturn: () -&gt; (int) {
         if time now is time last (
             time now += 1
         )
@@ -57,14 +54,11 @@ A function must always return a value or an error in all of it's branches. If a 
 
 </p><br><h1>Generics
 </h1><p>The type keyword is used to create generic types that can be used in functions and methods.
-</p><p>
-These types will converge into a single possible type when initialised within a type definition, but within the same scope they remain 'generic'.
-</p><p>
-
-    -- Creating a generic type
+</p><p>These types will converge into a single possible type when initialised within a type definition, but within the same scope they remain 'generic'.
+</p><p>-- Creating a generic type
     number : type : int or float
 
-    add : (a : number, b : number) -> number {
+    add : (a : number, b : number) -&gt; number {
         return a + b
     }
 
