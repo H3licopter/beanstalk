@@ -165,9 +165,10 @@ pub enum Token {
     //markdown inferred elements
     Span(String),
     P(String),
-    Heading(u8, String), // Max heading size should be 10 or something
-    BulletPoint(u8, String),
+    Em(u8, String), // Forms the start and the end of an Em tag
     Superscript(String),
+    HeadingStart(u8), // Max heading size should be 10 or something
+    BulletPointStart(u8),
     Empty,
     Pre(String), // Content inside raw elements. Might change to not be a format tag in the future
 

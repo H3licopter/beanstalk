@@ -21,6 +21,7 @@ pub fn new_scene(
     let mut scene_tags: Vec<Tag> = Vec::new();
     let mut scene_styles: Vec<Style> = Vec::new();
     let mut scene_open: bool = true;
+    let mut merge_next_p_line: bool = true;
 
     // Look at all the possible properties that can be added to the scene head
     let mut j = 0;
@@ -278,23 +279,27 @@ pub fn new_scene(
             }
 
             Token::P(content) => {
-                scene.push(if !check_if_inline(tokens, *i) {
+                scene.push(if !check_if_inline(tokens, *i, &mut merge_next_p_line) {
                     AstNode::Element(Token::P(content.clone()))
                 } else {
                     AstNode::Element(Token::Span(content.clone()))
                 });
             }
 
-            Token::Heading(size, content) => {
-                scene.push(AstNode::Element(Token::Heading(*size, content.clone())));
+            // Special Markdown Syntax Elements
+            Token::HeadingStart(size) => {
+                merge_next_p_line = false;
+                scene.push(AstNode::Heading(*size));
             }
-
-            Token::BulletPoint(size, content) => {
-                scene.push(AstNode::Element(Token::BulletPoint(*size, content.clone())));
+            Token::BulletPointStart(size) => {
+                merge_next_p_line = false;
+                scene.push(AstNode::BulletPoint(*size));
             }
-
+            Token::Em(size, content) => {
+                scene.push(AstNode::Em(*size, content.clone()));
+            }
             Token::Superscript(content) => {
-                scene.push(AstNode::Element(Token::Superscript(content.clone())));
+                scene.push(AstNode::Superscript(content.clone()));
             }
 
             Token::RawStringLiteral(content) => {
@@ -337,19 +342,16 @@ pub fn new_scene(
     AstNode::Scene(scene, scene_tags, scene_styles)
 }
 
-fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
+fn check_if_inline(tokens: &Vec<Token>, i: usize, merge_next_p_line: &mut bool) -> bool {
     // If the element itself starts with Newlines, it should not be inlined
     let current_element = &tokens[i];
+    let p_newlines_to_seperate: usize = if *merge_next_p_line { 2 } else { 1 };
     match current_element {
         Token::P(content) => {
             if count_newlines_at_start_of_string(content) > 0 {
                 return false;
             }
         }
-        Token::Heading(_, _) | Token::BulletPoint(_, _) => {
-            return false;
-        }
-
         _ => {}
     }
 
@@ -397,16 +399,9 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
     match previous_element {
         Token::Empty | Token::Newline => false,
 
-        Token::P(content) | Token::Span(content) => {
-            if count_newlines_at_end_of_string(content) > 1 {
-                false
-            } else {
-                true
-            }
-        }
-
-        Token::Heading(_, content) | Token::BulletPoint(_, content) => {
-            if count_newlines_at_end_of_string(content) > 0 && !content.trim().is_empty() {
+        Token::P(content) | Token::Span(content) | Token::Em(_, content) | Token::Superscript(content) => {
+            if count_newlines_at_end_of_string(content) >= p_newlines_to_seperate {
+                *merge_next_p_line = true;
                 false
             } else {
                 true
@@ -415,7 +410,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize) -> bool {
 
         Token::Pre(_) => false,
 
-        Token::A | Token::StringLiteral(_) | Token::EmptyScene(_) => true,
+        Token::A | Token::StringLiteral(_) | Token::EmptyScene(_) | Token::HeadingStart(_) | Token::BulletPointStart(_) => true,
 
         _ => false,
     }

@@ -19,36 +19,35 @@
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><br><h1>Functions
-</h1><p>If the function can only return an error, you can use a '!' as the specified return type.  
-
-</p><h2>The arrow operator
+</h1><p>If the function can only return an error, you can use a '!' as the specified return type.&nbsp; 
+</p><br><h2>The arrow operator
 </h2><p>The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
+</p><p>
+A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
+</p><p>
 
-</p><p>A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
-
-</p><span><br>
-    doNothing : () -&gt; {}
+    doNothing : () -> {}
 
     -- Returns a tuple of values
-    multipleReturns : () -&gt; (int, int, int) {
+    multipleReturns : () -> (int, int, int) {
         return (1, 2, 3)
     }
 
-    differentReturns : (spicy : bool = false) -&gt; (int, int, int) {
+    differentReturns : (spicy : bool = false) -> (int, int, int) {
         if spicy:
             return (69, 420, 1337)
         
         return (1, 2, 3)
     }
 
-    nestedReturns : () -&gt; bool {
+    nestedReturns : () -> bool {
         if state is (
-            STATE.normal =&gt; return true
-            =&gt; return false
+            STATE.normal => return true
+            => return false
         )
     }
 
-    defaultReturn: () -&gt; (int) {
+    defaultReturn: () -> (int) {
         if time now is time last (
             time now += 1
         )
@@ -56,16 +55,16 @@
         return time now
     }
 
-</span><br><h1>Generics
+</p><br><h1>Generics
 </h1><p>The type keyword is used to create generic types that can be used in functions and methods.
+</p><p>
+These types will converge into a single possible type when initialised within a type definition, but within the same scope they remain 'generic'.
+</p><p>
 
-</p><p>These types will converge into a single possible type when initialised within a type definition, but within the same scope they remain 'generic'.
-
-</p><span><br>
     -- Creating a generic type
     number : type : int or float
 
-    add : (a : number, b : number) -&gt; number {
+    add : (a : number, b : number) -> number {
         return a + b
     }
 
@@ -82,7 +81,7 @@
     -- Type Error, only one type can be converged
     example3 : number = example1 + example2
 
-</span></main>
+</p></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

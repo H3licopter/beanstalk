@@ -623,9 +623,8 @@ fn tokenize_scenehead(
 // Any Beanstalk specific extensions to Markdown will need to be implimented here
 fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> Token {
     let mut content = String::new(); // To keep track of current chars being parsed
-    let mut token: Token = Token::P(String::new());
     let mut previous_newlines = 0;
-    let mut empty_before_nested_scene = false;
+    let mut current_token = Token::Empty;
 
     //Ignore starting whitespace (except newlines)
     while current_char.is_whitespace() {
@@ -639,7 +638,7 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
 
         match chars.peek() {
             Some(ch) => match ch {
-                '[' | ']' | '-' | '#' => {
+                '[' | ']' | '-' | '#' | '*' => {
                     break;
                 }
                 _ => {
@@ -653,70 +652,108 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
 
     // HEADINGS
     if current_char == &'#' {
-        let mut heading_count = 1;
+        let mut strength = 1;
         previous_newlines = 0;
 
         loop {
             match chars.peek() {
                 Some(ch) => match ch {
-                    '[' => {
-                        empty_before_nested_scene = true;
-                        break;
+                    '#' => {
+                        strength += 1;
+                        *current_char = *ch;
+                        chars.next();
+                        continue;
                     }
+                    // Break in the hashes
+                    ' ' => {
+                        *current_char = *ch;
+                        chars.next();
+                        return Token::HeadingStart(strength);
+                    }
+                    // Cancel the heading, just normal hashes
                     _ => {
                         *current_char = *ch;
-                        chars.next()
+                        chars.next();
+                        for _ in 0..strength {
+                            content.push('#');
+                            content.push(current_char.clone());
+                        }
+                        break;
                     }
                 },
                 None => return Token::EOF,
             };
-
-            if current_char == &'#' {
-                heading_count += 1;
-                continue;
-            }
-
-            if current_char == &' ' {
-                token = Token::Heading(heading_count, String::new());
-                break;
-            }
-
-            for _ in 0..heading_count {
-                content.push('#');
-                content.push(current_char.clone());
-            }
-
-            break;
         }
     // BULLET POINTS
     } else if current_char == &'-' {
-        let mut bullet_strength: u8 = 0;
+        let mut strength: u8 = 1;
+        previous_newlines = 0;
+
         loop {
             match chars.peek() {
                 Some(ch) => match ch {
-                    '[' => {
-                        empty_before_nested_scene = true;
+                    '-' => {
+                        strength += 1;
+                        *current_char = *ch;
+                        chars.next();
+                        continue;
+                    }
+                    // Break in the hashes
+                    ' ' => {
+                        *current_char = *ch;
+                        chars.next();
+                        return Token::BulletPointStart(strength);
+                    }
+                    // Cancel the heading, just normal hashes
+                    _ => {
+                        *current_char = *ch;
+                        chars.next();
+                        for _ in 0..strength {
+                            content.push('-');
+                            content.push(current_char.clone());
+                        }
+                        break;
+                    }
+                },
+                None => return Token::EOF,
+            };
+        }
+    // EM TAGS
+    } else if current_char == &'*' {
+        let mut strength: u8 = 1;
+        previous_newlines = 0;
+
+        loop {
+            match chars.peek() {
+                Some(ch) => match ch {
+                    '*' => {
+                        strength += 1;
+                        *current_char = *ch;
+                        chars.next();
+                        continue;
+                    }
+                    // If there is a space or newline after the asterisk, cancel the em tag
+                    ' ' | '\n' => {
+                        *current_char = *ch;
+                        chars.next();
+                        for _ in 0..strength {
+                            content.push('*');
+                            content.push(current_char.clone());
+                        }
                         break;
                     }
                     _ => {
                         *current_char = *ch;
                         chars.next();
+                        current_token = Token::Em(strength, String::new());
+                        break;
                     }
                 },
                 None => return Token::EOF,
             };
-
-            if current_char == &'-' {
-                bullet_strength += 1;
-                continue;
-            }
-
-            break;
         }
-
-        token = Token::BulletPoint(bullet_strength, String::new());
     }
-
+    
     // Loop through the elements content until hitting a condition that
     // breaks out of the element
     let mut parse_raw = false;
@@ -754,24 +791,18 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
         }
 
         if current_char == &'\n' {
-            previous_newlines += 1;
-            match token {
-                Token::P(_) => {
-                    if previous_newlines > 1 {
-                        content.push('\n');
-                        break;
-                    }
-                }
-                Token::Heading(_, _) | Token::BulletPoint(_, _) => {
-                    if previous_newlines > 0 {
-                        content.push('\n');
-                        break;
-                    }
-                }
-                _ => {}
-            }
+            content.push('\n');
+            break;
         } else if !current_char.is_whitespace() {
             previous_newlines = 0;
+        }
+
+        if current_char == &' ' {
+            if chars.peek() == Some(&' ') {
+                content.push_str("&nbsp;");
+                chars.next();
+                continue;
+            }
         }
 
         content.push(current_char.clone());
@@ -793,6 +824,51 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
                         chars.next();
                     }
                 }
+                '*' => {
+                    match current_token { 
+                        // Breaking out of current em tag
+                        Token::Em(strength, _) => {
+                            // Count strength of em tag and make sure it's the same
+                            // Once it hits the same number of asterisks, return the em tag
+                            let mut asterisks = 1;
+                            loop {
+                                if strength == asterisks {
+                                    chars.next();
+                                    // Check for any spaces after the asterisks and add them to the end of the content
+                                    while let Some(&next_char) = chars.peek() {
+                                        if next_char == ' ' {
+                                            content.push_str("&nbsp;");
+                                            chars.next();
+                                        } else {
+                                            break;
+                                        }
+                                    }
+                                    return Token::Em(strength, content);
+                                }
+
+                                chars.next();
+                                if let Some(&next_char) = chars.peek() {
+                                    if next_char == '*' {
+                                        asterisks += 1;
+                                        continue;
+                                    }
+                                    break;
+                                } else {
+                                    break;
+                                }
+                            }
+                        }, 
+                        // New em tag?
+                        _ => {
+                            if content.ends_with(' ') || previous_newlines > 0 {
+                                // This could be an Em tag
+                                break;
+                            }
+                            *current_char = ch;
+                            chars.next();
+                        }
+                    }
+                }
                 _ => {
                     *current_char = ch;
                     chars.next();
@@ -805,44 +881,15 @@ fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> To
     }
 
     // Return relevant token
-    match token {
-        Token::P(_) => {
-            if !content.trim().is_empty() {
-                return Token::P(content);
-            }
-
-            Token::Empty
+    if !content.trim().is_empty() {
+        match current_token {
+            Token::Empty => return Token::P(content),
+            Token::Em(size, _) => return Token::Em(size, content),
+            Token::Superscript(_) => return Token::Superscript(content),
+            _ => return current_token,
         }
-
-        Token::Heading(count, _) => {
-            if content.trim().is_empty() && !empty_before_nested_scene {
-                let mut p_content = String::new();
-                for _ in 0..count {
-                    p_content.push('#');
-                }
-                return Token::P(p_content);
-            }
-
-            Token::Heading(count, content)
-        }
-
-        Token::BulletPoint(strength, _) => {
-            if content.trim().is_empty() && !empty_before_nested_scene {
-                return Token::Empty;
-            }
-
-            Token::BulletPoint(strength, content)
-        }
-
-        Token::Superscript(_) => {
-            if content.trim().is_empty() {
-                return Token::Empty;
-            }
-
-            Token::Superscript(content)
-        }
-
-        _ => Token::Error("Invalid Markdown Element".to_string()),
+    } else {
+        return Token::Empty;
     }
 }
 

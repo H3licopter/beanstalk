@@ -6,6 +6,10 @@ pub enum Tag {
     Span,
     Div,
     P,                 // To check whether scene is already inside a P tag
+    Heading,
+    BulletPoint,
+    Em,
+    Superscript,
     A(AstNode),        // src
     Img(AstNode),      // src
     Video(AstNode),    // src

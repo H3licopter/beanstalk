@@ -1,4 +1,4 @@
-use colour::{blue_ln_bold, dark_grey_ln, dark_yellow_ln, yellow_ln_bold};
+use colour::{blue_ln_bold, dark_grey_ln, dark_yellow_ln, green_ln_bold, yellow_ln_bold};
 use colour::{blue_ln, cyan_ln, green_ln, grey_ln, red_ln};
 use regex::Regex;
 
@@ -25,7 +25,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
             Token::SceneHead(_) | Token::SceneClose(_) => {
                 blue_ln!("{:?}", token);
             }
-            Token::P(_) | Token::Heading(_, _) | Token::BulletPoint(_, _) => {
+            Token::P(_) | Token::HeadingStart(_) | Token::BulletPointStart(_) | Token::Em(_, _) | Token::Superscript(_) => {
                 green_ln!("{:?}", token);
             }
             Token::Empty | Token::Newline => {
@@ -118,13 +118,16 @@ fn print_scene(scene: &AstNode, scene_nesting_level: u32) {
                     }
                     AstNode::Element(token) => {
                         match token {
-                            Token::P(_) | Token::Heading(_, _) | Token::BulletPoint(_, _) => {
+                            Token::P(_) => {
                                 green_ln!("{}  {:?}", indentation, scene_node);
                             }
                             _ => {
                                 grey_ln!("{}  {:?}", indentation, scene_node);
                             }
                         }
+                    }
+                    AstNode::Heading(_) | AstNode::BulletPoint(_) | AstNode::Em(_, _) | AstNode::Superscript(_) => {
+                        green_ln_bold!("{}  {:?}", indentation, scene_node);
                     }
                     AstNode::RuntimeExpression(_, _) => {
                         dark_yellow_ln!("{}  {:?}", indentation, scene_node);

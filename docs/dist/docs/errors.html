@@ -20,22 +20,22 @@
 <link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><br><h1>Error Handling
 </h1><p>Any function that can return an error can return the error as one of it's values.
-
-</p><p>The ? operator is used to check if one of the values in a tuple is an error. If it is, the error can then be handled in a new scope.
-
-</p><h2>Using the ? operator
+</p><p>
+The ? operator is used to check if one of the values in a tuple is an error. If it is, the error can then be handled in a new scope.
+</p><br><h2>Using the ? operator
 </h2><p>These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code, as well as providing a way to avoid opening a new scope for every error check.
+</p><p>
 
-</p><span>-- Always returns a string even if an error is thrown by getNetworkRequest()
+    -- Always returns a string even if an error is thrown by getNetworkRequest()
     -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
     
-    getURL : () -&gt; string :
+    getURL : () -> string :
         return getNetworkRequest() ? (
             io "Network Request Error: " + error
             return "example.com"
         )
 
-</span></main>
+</p></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

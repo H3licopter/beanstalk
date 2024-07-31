@@ -19,10 +19,10 @@
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><br><h1>If Statements
-</h1><p><br>
+</h1><p>
 If statements can be used as expressions or statements. They can also be used for pattern matching, all with a similar syntax.
+</p><p>
 
-</p><span><br>
     v := 1
 
     if v is not 1 (
@@ -33,16 +33,16 @@ If statements can be used as expressions or statements. They can also be used fo
 
     -- If as a statement
     if v is (
-        0 =&gt; print "nope"
-        1 =&gt; print "yep"
-        =&gt; print "defintely nope"
+        0 => print "nope"
+        1 => print "yep"
+        => print "defintely nope"
     )
 
     -- If as an expression
     msg := if v is (
-        0 =&gt; return "nope"
-        1 =&gt; return "yep"
-        =&gt; return "defintely nope"
+        0 => return "nope"
+        1 => return "yep"
+        => return "defintely nope"
     )
 
     print(msg)
@@ -50,14 +50,14 @@ If statements can be used as expressions or statements. They can also be used fo
     v = 69
 
     if v is (
-        0 =&gt; (
+        0 => (
             v += 1
             print "yep"
         )
-        1 =&gt; print "yep"
-        =&gt; print "defintely nope"
+        1 => print "yep"
+        => print "defintely nope"
     )
-</span></main>
+</p></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

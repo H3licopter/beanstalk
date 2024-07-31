@@ -273,7 +273,7 @@ fn parse_scene(
                                     "<span>{}</span>",
                                     content
                                 ));
-                                if count_newlines_at_end_of_string(&content) > 1 {
+                                if count_newlines_at_end_of_string(&content) > 0 {
                                     *parent_tag = Tag::None;
                                     html.push_str("</p>");
 
@@ -285,6 +285,20 @@ fn parse_scene(
                                             closing_tags.remove(i);
                                             break;
                                         }
+                                    }
+                                }
+                            }
+                            Tag::Heading | Tag::BulletPoint => {
+                                let newlines_at_start = count_newlines_at_start_of_string(&content);
+                                if newlines_at_start > 0 {
+                                    // If newlines at start, break out of heading and add normal P tag instead
+                                    html.push_str(&format!("<p>{}", content));
+                                    closing_tags.push("</p>".to_string());
+                                    *parent_tag = Tag::None;
+                                } else {
+                                    html.push_str( &content);
+                                    if count_newlines_at_end_of_string(&content) > 0 {
+                                        *parent_tag = Tag::None;
                                     }
                                 }
                             }
@@ -330,9 +344,28 @@ fn parse_scene(
                                             content
                                         ));
                                     }
+                                    Tag::Heading | Tag::BulletPoint => {
+                                        let newlines_at_start = count_newlines_at_start_of_string(content.as_str());
+                                        if newlines_at_start > 0 {
+                                            for _ in 1..newlines_at_start {
+                                                html.push_str("<br>");
+                                            }
+                                            html.push_str(&format!("<p>{}", parsed_content));
+                                            closing_tags.push("</p>".to_string());
+                                            *parent_tag = Tag::P;
+                                        } else {
+                                            html.push_str(&format!(
+                                                "{}",
+                                                content
+                                            ));
+                                            if count_newlines_at_end_of_string(content.as_str()) > 0 {
+                                                *parent_tag = Tag::None;
+                                            }
+                                        }
+                                    }
                                     _ => {
                                         html.push_str(&format!("<p>{}", parsed_content));
-                                        if count_newlines_at_end_of_string(&content) > 1 {
+                                        if count_newlines_at_end_of_string(&content) > 0 {
                                             html.push_str("</p>");
                                             *parent_tag = Tag::None;
                                         } else {
@@ -343,38 +376,6 @@ fn parse_scene(
                                 }
                             }
                         }
-                    }
-
-                    Token::Heading(size, content) => {
-                        html.push_str(&collect_closing_tags(&mut closing_tags));
-                        html.push_str(&format!(
-                            "<h{}>{}",
-                            size,
-                            content
-                        ));
-
-                        if count_newlines_at_end_of_string(&content) > 0 {
-                            html.push_str(&format!("</h{}>", size));
-                        } else {
-                            closing_tags.push(format!("</h{}>", size));
-                        }
-                        *parent_tag = Tag::None;
-                    }
-
-                    Token::BulletPoint(_indentation, content) => {
-                        html.push_str(&collect_closing_tags(&mut closing_tags));
-                        html.push_str(&format!("<li>{}", content));
-
-                        if count_newlines_at_end_of_string(&content) > 0 {
-                            html.push_str(&format!("</li>"));
-                        } else {
-                            closing_tags.push("</li>".to_string());
-                        }
-                        *parent_tag = Tag::None;
-                    }
-
-                    Token::Superscript(content) => {
-                        html.push_str(&format!("<sup>{}</sup>", content));
                     }
 
                     Token::Pre(content) => {
@@ -419,6 +420,50 @@ fn parse_scene(
                 } else {
                     html.push_str(&new_scene.0);
                 }
+            }
+
+            // Special Markdown Syntax Elements
+            AstNode::Heading(size) => {
+                html.push_str(&collect_closing_tags(&mut closing_tags));
+                html.push_str(&format!("<h{}>", size));
+                closing_tags.push(format!("</h{}>", size));
+                *parent_tag = Tag::Heading;
+            }
+            AstNode::BulletPoint(_strength) => {
+                html.push_str(&collect_closing_tags(&mut closing_tags));
+                html.push_str(&format!("<li>"));
+                closing_tags.push("</li>".to_string());
+                *parent_tag = Tag::None;
+            }
+            AstNode::Em(strength, content) => {
+                if *parent_tag != Tag::P {
+                    html.push_str(&collect_closing_tags(&mut closing_tags));
+                    html.push_str("<p>");
+                    closing_tags.push("</p>".to_string());
+                    *parent_tag = Tag::P;
+                }
+                match strength {
+                    1 => {
+                        html.push_str(&format!("<em>{}</em>", content));
+                    }
+                    2 => {
+                        html.push_str(&format!("<strong>{}</strong>", content));
+                    }
+                    3 => {
+                        html.push_str(&format!("<strong><em>{}</em></strong>", content));
+                    }
+                    _ => {
+                        html.push_str(&format!("<b><strong><em>{}</em></strong></b>", content));
+                    }
+                }
+                
+            }
+
+            AstNode::Superscript(content) => {
+                html.push_str(&format!("<sup>{}</sup>", content));
+                *parent_tag = Tag::None;
+                // TODO
+                red_ln!("Superscript not yet supported in HTML output");
             }
 
             AstNode::Space => {

@@ -19,38 +19,35 @@
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><br><h1>Classes
-</h1><p><br>
+</h1><p>
 Classes are a way to group together variables and functions that are related to each other. In Beanstalk, their simplest form is very similar to a struct in other languages. 
-
-</p><p>But you can optionally add some constructor syntax to make it more like a class.
-
-</p><p>When creating a class, it is similar to just creating a new scope in a module, with normal variable declarations and functions. But now you can instantiate a new object of that class and use it like a struct.
-
-</p><h2>Class like a struct
-</h2><p><br>
+</p><p>
+But you can optionally add some constructor syntax to make it more like a class.
+</p><p>
+When creating a class, it is similar to just creating a new scope in a module, with normal variable declarations and functions. But now you can instantiate a new object of that class and use it like a struct.
+</p><br><h2>Class like a struct
+</h2><p>
 Player : class {
-    name :: string
-    score := int
-    health := int
-}
-
-</p><p>player : Player("Player 1", 100, 100)
-
-</p><h2>Class with a constructor
-</h2><p><br>
+</p><p>name :: string
+</p><span>score := int
+</span><span>health := int
+</span><span>}
+</span><p>
+player : Player("Player 1", 100, 100)
+</p><br><h2>Class with a constructor
+</h2><p>
 Player : class(name: string, hp_modifier: int = 0) {
-    _base_hp :: 100
-
-</p><p>name :: name
-    score : int
-    health := _base_hp + hp_modifier
-
-</p><p>increase_hp : (amount: int) -&gt; {
-        health += amount
-    }
-}
-
-</p></main>
+</p><p>_base_hp :: 100
+</p><p>
+name :: name
+</p><span>score : int
+</span><span>health := _base_hp + hp_modifier
+</span><p>
+increase_hp : (amount: int) -> {
+</p><span>health += amount
+</span><span>}
+</span><span>}
+</span></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

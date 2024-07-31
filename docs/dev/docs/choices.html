@@ -20,14 +20,14 @@
 <link rel="stylesheet" href="../css/pico.min.css" />
 <style></style></head><body><main class="container"><br><h1>Choices (enums)
 </h1><p>Choices are a way to define a set of possible values for a variable.
+</p><p>
+Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
+</p><p>
+Choices are written in SCREAMING_SNAKE_CASE. 
+</p><p>
+Each choice can optionally contain data that can be accessed inside that Choice.
+</p><p>
 
-</p><p>Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
-
-</p><p>Choices are written in SCREAMING_SNAKE_CASE. 
-
-</p><p>Each choice can optionally contain data that can be accessed inside that Choice.
-
-</p><span><br>
     RESPONSE : choice : (data: string, error: !)
 
     STATE : choice : (
@@ -40,10 +40,10 @@
 
     if now is STATE.error_message (
         if now is (
-            STATE.error_message =&gt; print( now value )
+            STATE.error_message => print( now value )
         )
     )
-</span></main>
+</p></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

@@ -21,19 +21,17 @@
 <style></style></head><body><main class="container"><br><h1>Keywords
 </h1><br><h2>Logical Operators
 </h2><p>The 'is' keyword is used to check equality. Not ==. The "and / or" keywords are used for logical and / or and 'not' is used to invert a truthy value to falsy or vice versa.
-
-</p><p>Only false, ! and ? are falsy values. Any other check with an if statement will return true. 
-
-</p><h2>Bitwise operations
-</h2><p>~and  --Bitwise and
-~or   --Bitwise or
-~not  --Bitwise not
-~xor  --Bitwise xor
-~~&gt;   --Bitwise signed right shift
-~&gt;    --Bitwise zero fill right shift
-&lt;~    --Bitwise zero fill left shift
-
-</p><table><thead><tr><th scope='col'><span>Operator</span>&nbsp;</th><th scope='col'><span>Description</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><td><span>Precedence</span></td></tr></thead><tbody><tr><td><span>**</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>Exponents</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>8</span></td></tr><tr><td><span>//</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>Roots</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>8</span></td></tr><tr><td><span>*</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>Multiplication</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>7</span></td></tr><tr><td><span>/</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>Division</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>7</span></td></tr><tr><td><span>%</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>Modulo (truncated)</span>&nbsp;&nbsp;&nbsp;</td><td><span>7</span></td></tr><tr><td><span>%%</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>Remainder (floored)</span>&nbsp;&nbsp;</td><td><span>7</span></td></tr><tr><td><span>+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>Sum</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>6</span></td></tr><tr><td><span>-</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>Subtraction</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span>6</span></td></tr></tbody></table></main>
+</p><p>
+Only false, ! and ? are falsy values. Any other check with an if statement will return true. 
+</p><br><h2>Bitwise operations
+</h2><p>~and&nbsp; --Bitwise and
+</p><span>~or&nbsp;&nbsp; --Bitwise or
+</span><span>~not&nbsp; --Bitwise not
+</span><span>~xor&nbsp; --Bitwise xor
+</span><span>~~>&nbsp;&nbsp; --Bitwise signed right shift
+</span><span>~>&nbsp;&nbsp;&nbsp; --Bitwise zero fill right shift
+</span><span><~&nbsp;&nbsp;&nbsp; --Bitwise zero fill left shift
+</span><br><table><thead><tr><th scope='col'><span>Operator</span>&nbsp;</th><th scope='col'><span>Description</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><td><span>Precedence</span></td></tr></thead><tbody><tr><td><br><p><strong>]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </strong><span>Exponents</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>8</span></p><br><p>//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p><span>Roots</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>8</span><br><br><em>]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </em><span>Multiplication</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>7</span><br><p>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p><span>Division</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>7</span><br><span>%</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>Modulo (truncated)</span>&nbsp;&nbsp;&nbsp;<span>7</span><br><span>%%</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>Remainder (floored)</span>&nbsp;&nbsp;<span>7</span><br><span>+</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>Sum</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>6</span><br><span> -</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>Subtraction</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span>6</span><br></td></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {
