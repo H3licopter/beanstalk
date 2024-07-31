@@ -11,9 +11,9 @@ mod create_new_project;
 pub mod dev_server;
 mod settings;
 mod test;
+mod tokenize_scene;
 mod tokenizer;
 mod tokens;
-mod tokenize_scene;
 mod parsers {
     pub mod ast;
     pub mod build_ast;

@@ -181,7 +181,6 @@ pub enum Token {
     Audio,
     Raw,
 
-    Slot, // Injection point for additional template nesting
     Alt,
 
     // Styles
@@ -194,4 +193,9 @@ pub enum Token {
     Center,
     CodeKeyword,
     CodeBlock(String),
+
+    // To be implemented
+    Slot, // Injection point for additional template nesting
+    Nav,
+    Button,
 }

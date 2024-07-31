@@ -46,7 +46,7 @@ pub enum AstNode {
     BulletPoint(u8),
     Em(u8, String),
     Superscript(String),
-    Space,          // Add a space at front of element
+    Space, // Add a space at front of element
 
     // SCENE META DATA
     Title(String),

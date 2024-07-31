@@ -106,7 +106,6 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 
 ## Primative Types
 [table 3: 
-    TABLE CAPTION
     [: Type] [: Description] [: Zero Value]
 
     [: int ] [: 32 bit signed integer ] [: 0]
@@ -154,6 +153,23 @@ Backticks are used for RAW strings. To escape a backtick it must be preceded wit
 Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 
 
 [code: cool_emoji : '😂']
+
+# Logical Operators
+The 'is' keyword is used to check equality. Not ==. The "and / or" keywords are used for logical and / or and 'not' is used to invert a truthy value to falsy or vice versa.
+
+Only false, ! and ? are falsy values. Any other check with an if statement will return true. 
+
+[table 3:
+    [: Operator] [: Description]          [: Precedence]
+    [: **]       [: Exponents]            [: 8]
+    [: //]       [: Roots]                [: 8]
+    [: *]        [: Multiplication]       [: 7]
+    [: /]        [: Division]             [: 7]
+    [: %]        [: Modulo (truncated)]   [: 7]
+    [: %%]       [: Remainder (floored)]  [: 7]
+    [: +]        [: Sum]                  [: 6]
+    [: -]        [: Subtraction]          [: 6]
+]
 
 # Numeric Units
 Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 

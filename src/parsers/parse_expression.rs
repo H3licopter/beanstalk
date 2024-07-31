@@ -206,8 +206,7 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                     }
 
                     // EVENTUALLY NEED TO HANDLE COMPILE TIME VALUES DIFFERENTLY
-                    AstNode::ConstReference(value)
-                    | AstNode::VarReference(value) => {
+                    AstNode::ConstReference(value) | AstNode::VarReference(value) => {
                         compile_time_eval = false;
                         match &ast[value] {
                             AstNode::VarDeclaration(_, assignment, _)

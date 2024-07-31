@@ -542,9 +542,13 @@ fn keyword_or_variable(
                     "table" => return Token::Table,
                     "video" => return Token::Video,
                     "audio" => return Token::Audio,
-                    "slot" => return Token::Slot,
                     "ignore" => return Token::Ignore,
                     "code" => return Token::CodeKeyword,
+
+                    // To be implemented
+                    "slot" => return Token::Slot,
+                    "nav" => return Token::Nav,
+                    "button" => return Token::Button,
                     _ => {}
                 },
 

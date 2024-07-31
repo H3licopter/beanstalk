@@ -18,26 +18,31 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><main class="container"><br><h1>Setting up a Project
-</h1><p>Running the command 'new html' followed by your directory path will create a new Beanstalk project in that directory. The path is relative to the current directory.
-</p><p>The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
-</p><p>This file is called "config.bs" and is placed in the root folder of your project by default. A configuration file is also created in the root directory.
-</p><span>All Beanstalk files use the .bs file extension.
-</span><p>The compiler will read through any configuration settings first.
-</p><p>The src folder will contain your bs files and inform the structure of your pages. 
-</p><p>The dist folder contains the compiled files.
-</p><h1>Project Configuration
-</h1><p>When creating a new Beanstalk html project, a configuration file will be created in the root directory. 
-</p><span>This is called "config.bs" by default and it will specify the entry point and structure of the program. 
-</span><h2>Compiling your BS files
-</h2><h3>Build
-</h3><p>While in the root directory of your project, where the config.bs file is, run the command 'build' to compile your whole project. 
-</p><p>If you specify a specific bs file, build will only compile that file.
-</p><h3>Dev
-</h3><p>To create a development server with a watcher, run the command 'dev' in the root directory of your project.
-</p><p>Any changes to your bs files will be automatically compiled and the server will reload the page.
+<style></style></head><body><main class="container"><h1>Setting up a Project
+</h1><p>Running the command 'new html' followed by your directory path will create a new static HTML Beanstalk project in that directory. The path is relative to the current directory.
+</p><p><em>More project types will be added in the future.</em></p><br><span>The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
+</span><span>This file is called </span><strong>config.bs&nbsp;</strong><span>and is placed in the root folder of your project by default. A configuration file is also created in the root directory.
+</span></p><p><em>All Beanstalk files use the .bs file extension.</em></p><br><span>The compiler will read through any configuration settings first.
+</span><li><span>src folder contains your bs files and determines the file structure of your pages. 
+</span></li><li><span>dist folder contains the compiled files.
+</span></li><p>* * *  ⚠️ The compiler is not yet a proper command line tool, it currently has to be compiled and ran directly before giving it a command. ⚠️ <span>*
+*
+*
+
+</span></p><p>Has development starts to be more stable, the compiler will be set up to install on your system and be run from the command line with the 'bean' command.
+</p><h1>Compiling your BS files
+</h1><h3>Build
+</h3><p>The simpliest way to get the compiler to output some HTML is to use the <em>build&nbsp;</em><span>command.
+</span></p><p>While in the root directory of your project, where the config.bs file is, run the command <strong>build&nbsp;</strong><span>to compile your whole project.
+</span></p><pre><code>    $ build ./path_to_project
+</code></pre><br><p>If you specify a specific bs file, build will only compile that specific file.
+</p><pre><code>    $ build ./path_to_project/src/index.bs
+</code></pre><br><h3>Dev
+</h3><p>To create a development server with a watcher, run the command 'dev' in the root directory of your project. This is the main way to develop your HTML project.
+</p><p>This will create a localhost server that will automatically reload the page when you make changes to your bs files. The command line will give you a link to open in your browser.
 </p><h1>File Paths
-</h1><p>Any index.bs files will become the main page of the folder they are in, so your main page will be index.bs in the root directory.</p></main>
+</h1><p>Any index.bs files will become the main page of the folder they are in, so your main page will be index.bs in the root directory.
+</p><p>* * *  ⚠️ The intention is to have a file-system based router built in <a href="https://kit.svelte.dev/docs/routing" style="" ><span>(similar to Svelte)</span>&nbsp;</a><span>so there may be changed in file naming conventions and how the compiler handles those files in the future. ⚠️ </span></p></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

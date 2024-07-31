@@ -6,7 +6,9 @@ use super::{
 use crate::{
     bs_types::DataType,
     parsers::{
-        ast::AstNode, styles::{Style, Tag}, util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string}
+        ast::AstNode,
+        styles::{Style, Tag},
+        util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
     },
     settings::{get_html_config, HTMLMeta},
     Token,
@@ -23,7 +25,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
     let mut exp_id: usize = 0;
 
     let mut module_references: Vec<AstNode> = Vec::new();
-    
+
     let mut class_id: usize = 0;
 
     // Parse HTML
@@ -271,10 +273,7 @@ fn parse_scene(
 
                         match *parent_tag {
                             Tag::P => {
-                                html.push_str(&format!(
-                                    "<span>{}</span>",
-                                    content
-                                ));
+                                html.push_str(&format!("<span>{}</span>", content));
                                 if count_newlines_at_end_of_string(&content) > 0 {
                                     *parent_tag = Tag::None;
                                     html.push_str("</p>");
@@ -298,17 +297,15 @@ fn parse_scene(
                                     closing_tags.push("</p>".to_string());
                                     *parent_tag = Tag::None;
                                 } else {
-                                    html.push_str( &content);
+                                    html.push_str(&content);
                                     if count_newlines_at_end_of_string(&content) > 0 {
+                                        html.push_str(&collect_closing_tags(&mut closing_tags));
                                         *parent_tag = Tag::None;
                                     }
                                 }
                             }
                             _ => {
-                                html.push_str(&format!(
-                                    "<span>{}</span>",
-                                    content
-                                ));
+                                html.push_str(&format!("<span>{}</span>", content));
                             }
                         }
                     }
@@ -343,13 +340,11 @@ fn parse_scene(
                                         }
                                     }
                                     Tag::Table(_) => {
-                                        html.push_str(&format!(
-                                            "<span>{}</span>",
-                                            content
-                                        ));
+                                        html.push_str(&format!("<span>{}</span>", content));
                                     }
                                     Tag::Heading | Tag::BulletPoint => {
-                                        let newlines_at_start = count_newlines_at_start_of_string(content.as_str());
+                                        let newlines_at_start =
+                                            count_newlines_at_start_of_string(content.as_str());
                                         if newlines_at_start > 0 {
                                             for _ in 1..newlines_at_start {
                                                 html.push_str("<br>");
@@ -358,11 +353,12 @@ fn parse_scene(
                                             closing_tags.push("</p>".to_string());
                                             *parent_tag = Tag::P;
                                         } else {
-                                            html.push_str(&format!(
-                                                "{}",
-                                                content
-                                            ));
-                                            if count_newlines_at_end_of_string(content.as_str()) > 0 {
+                                            html.push_str(&format!("{}", content));
+                                            if count_newlines_at_end_of_string(content.as_str()) > 0
+                                            {
+                                                html.push_str(&collect_closing_tags(
+                                                    &mut closing_tags,
+                                                ));
                                                 *parent_tag = Tag::None;
                                             }
                                         }
@@ -460,7 +456,6 @@ fn parse_scene(
                         html.push_str(&format!("<b><strong><em>{}</em></strong></b>", content));
                     }
                 }
-                
             }
 
             AstNode::Superscript(content) => {
@@ -488,14 +483,17 @@ fn parse_scene(
 
             AstNode::ConstReference(value) => {
                 // Make sure the const is in the module references
-                let var = module_references.into_iter().rev().find(|n| match n { AstNode::Const(id, _, _) => *id == value, _ => false }); 
-                
+                let var = module_references.into_iter().rev().find(|n| match n {
+                    AstNode::Const(id, _, _) => *id == value,
+                    _ => false,
+                });
+
                 // Constant folding not yet implemented, so just check if there is a literal rather than expression
                 match var {
                     Some(AstNode::Const(_, ref expr, _)) => {
                         let node = *expr.clone();
                         match node {
-                            AstNode::Literal(token) => { 
+                            AstNode::Literal(token) => {
                                 let value;
                                 match token {
                                     Token::StringLiteral(v) | Token::RawStringLiteral(v) => {
@@ -515,10 +513,12 @@ fn parse_scene(
 
                                 html.push_str(&format!("<span>{}</span>", value));
                             }
-                            _ => { red_ln!("Const was not folded (was an expression)") }
+                            _ => {
+                                red_ln!("Const was not folded (was an expression)")
+                            }
                         }
-                    }, 
-                    _ => red_ln!("Const reference not found in module")
+                    }
+                    _ => red_ln!("Const reference not found in module"),
                 }
             }
 

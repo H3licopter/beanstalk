@@ -19,8 +19,12 @@ struct OutputFile {
 pub fn build(mut entry_path: String, release_build: bool) -> Result<(), Box<dyn Error>> {
     // Change default output directory to dev if release_build is true
     let project_config = get_default_config();
-    let output_dir_name = if release_build { &project_config.release_folder } else { &project_config.dev_folder };
-    
+    let output_dir_name = if release_build {
+        &project_config.release_folder
+    } else {
+        &project_config.dev_folder
+    };
+
     // If entry_path is "test", use the compiler test directory
     if entry_path == "test" {
         entry_path = match std::env::current_dir() {
@@ -166,7 +170,7 @@ fn add_bs_files_to_parse(
                         let subfolders = &subfolders[4..]; // 4 is the length of "/src"
 
                         // Create the output directory string
-                        output_dir = format!("{}/{}{}", root_dir, output_dir_name, subfolders); 
+                        output_dir = format!("{}/{}{}", root_dir, output_dir_name, subfolders);
                     } else {
                         eprintln!("'src' not found in the path");
                     }
@@ -237,7 +241,11 @@ fn add_bs_files_to_parse(
     Ok(())
 }
 
-fn compile(output: OutputFile, release_build: bool, config: &Config) -> Result<Vec<AstNode>, Box<dyn Error>> {
+fn compile(
+    output: OutputFile,
+    release_build: bool,
+    config: &Config,
+) -> Result<Vec<AstNode>, Box<dyn Error>> {
     print_bold!("Compiling: ");
     dark_yellow_ln!("{}", output.file_name);
 
@@ -255,7 +263,11 @@ fn compile(output: OutputFile, release_build: bool, config: &Config) -> Result<V
     let mut html_config = get_html_config();
 
     // For each subdirectory from the dist or dev folder of the output_dir, add a ../ to the image_folder_url
-    let output_dir_name = if release_build { &config.release_folder } else { &config.dev_folder };
+    let output_dir_name = if release_build {
+        &config.release_folder
+    } else {
+        &config.dev_folder
+    };
     let dist_subfolders = output
         .output_dir
         .split(&format!("{}/", output_dir_name))

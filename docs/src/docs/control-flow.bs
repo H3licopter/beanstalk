@@ -1,10 +1,11 @@
 [:
+# Control Flow
 
-# If Statements
+## If Statements
 
 If statements can be used as expressions or statements. They can also be used for pattern matching, all with a similar syntax.
 
-`
+[code:
     v := 1
 
     if v is not 1 (
@@ -39,4 +40,33 @@ If statements can be used as expressions or statements. They can also be used fo
         1 => print "yep"
         => print "defintely nope"
     )
-`
+]
+
+# Loops
+Only 1 keyword for loops "for". 
+
+Using the "in" keyword, you can specify an integer, float or collection to iterate through or define a new integer, float or collection. 
+
+[code:
+    for thing in things (
+        print("ye")
+    )
+
+    for thing in 5 (
+        print(thing)
+    )
+
+    for checkIfTrue() (
+        io("ye")
+    )
+
+    -- reversed iterator, using the 'to' keyword to specify a range
+    for t in text_array length to 0 (
+        print(text_array t)
+    )
+
+    for (
+        print("ye")
+        break
+    )
+]

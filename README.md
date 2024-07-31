@@ -99,14 +99,14 @@ They can be nested and used as components in other scenes.
 ### CSS
 Scenes have utility classes built in. Use keywords at the start of scenes to not only defined your elememts, but style and position them as well.
 
-You can also import CSS into your BS files to use in your scenes for more complex styling.
+You can also import CSS into your Beanstalk scenes for more complex styling.
 
 ### JS/WASM
 Beanstalk will be a full programming language that compiles into Web Assembly, allowing you to add dynamic and interactive behaviours in your scenes naturally and concisely in it's own language.
 
 Reactivity, (scene) components, compile time evaluation and more will be built into the language with many more features already planned out in the language syntax for the future.
 
-Technologies currently used in the compiler:
+### Technologies currently used in the compiler
 - [Pico CSS](https://picocss.com/) for the default CSS styling
 
 <br>

@@ -27,7 +27,6 @@ pub fn new_scene(
     let mut j = 0;
     while j < scene_head.len() {
         match &scene_head[j] {
-
             Token::SceneClose(spaces) => {
                 for _ in 0..*spaces {
                     scene.push(AstNode::Space);
@@ -160,7 +159,9 @@ pub fn new_scene(
                                 scene_styles.push(Style::Alt(value.clone()));
                             }
                             _ => {
-                                scene.push(AstNode::Error("Wrong datatype provided for alt".to_string()));
+                                scene.push(AstNode::Error(
+                                    "Wrong datatype provided for alt".to_string(),
+                                ));
                             }
                         },
                         _ => {
@@ -243,7 +244,7 @@ pub fn new_scene(
                 }
                 return AstNode::Comment("Ignored Scene".to_string());
             }
-            
+
             Token::CodeKeyword => {
                 scene_styles.clear();
                 scene_tags.clear();
@@ -399,7 +400,10 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize, merge_next_p_line: &mut bool) 
     match previous_element {
         Token::Empty | Token::Newline => false,
 
-        Token::P(content) | Token::Span(content) | Token::Em(_, content) | Token::Superscript(content) => {
+        Token::P(content)
+        | Token::Span(content)
+        | Token::Em(_, content)
+        | Token::Superscript(content) => {
             if count_newlines_at_end_of_string(content) >= p_newlines_to_seperate {
                 *merge_next_p_line = true;
                 false
@@ -410,7 +414,11 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize, merge_next_p_line: &mut bool) 
 
         Token::Pre(_) => false,
 
-        Token::A | Token::StringLiteral(_) | Token::EmptyScene(_) | Token::HeadingStart(_) | Token::BulletPointStart(_) => true,
+        Token::A
+        | Token::StringLiteral(_)
+        | Token::EmptyScene(_)
+        | Token::HeadingStart(_)
+        | Token::BulletPointStart(_) => true,
 
         _ => false,
     }
