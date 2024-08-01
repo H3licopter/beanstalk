@@ -350,3 +350,22 @@ fn check_literal(
         _ => AstNode::Error("Invalid Literal (check_literal)".to_string()),
     }
 }
+
+pub fn check_if_arg(scene_head: &Vec<Token>, i: &mut usize) -> bool {
+    if *i >= scene_head.len() {
+        return false;
+    }
+    match &scene_head[*i] {
+        // Check if open bracket, literal or variable
+        Token::OpenParenthesis |
+        Token::VarReference(_) | 
+        Token::ConstReference(_) | 
+        Token::IntLiteral(_) |
+        Token::StringLiteral(_) |
+        Token::BoolLiteral(_) |
+        Token::DecLiteral(_) |
+        Token::RawStringLiteral(_) |
+        Token::FloatLiteral(_) => true,
+        _ => false,
+    }
+}

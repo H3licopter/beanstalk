@@ -194,7 +194,7 @@ pub fn get_next_token(
             *tokenize_mode = TokenizeMode::Markdown;
         }
 
-        return Token::AssignComptime;
+        return Token::Colon;
     }
 
     //Window
@@ -531,11 +531,12 @@ fn keyword_or_variable(
             match tokenize_mode {
                 TokenizeMode::SceneHead => match token_value.as_str() {
                     "link" => return Token::A,
-                    "m" => return Token::Margin,
-                    "p" => return Token::Padding,
+                    "space" => return Token::Margin,
+                    "pad" => return Token::Padding,
                     "img" => return Token::Img,
                     "alt" => return Token::Alt,
                     "rgb" => return Token::Rgb,
+                    "hsl" => return Token::Hsl,
                     "center" => return Token::Center,
                     "bg" => return Token::BG,
                     "size" => return Token::Size,
@@ -544,10 +545,17 @@ fn keyword_or_variable(
                     "audio" => return Token::Audio,
                     "ignore" => return Token::Ignore,
                     "code" => return Token::CodeKeyword,
+                    "nav" => return Token::Nav,
+                    "order" => return Token::Order,
+
+                    // Structure of the page
+                    "main" => return Token::Main,
+                    "header" => return Token::Header,
+                    "footer" => return Token::Footer,   
+                    "section" => return Token::Section,
 
                     // To be implemented
                     "slot" => return Token::Slot,
-                    "nav" => return Token::Nav,
                     "button" => return Token::Button,
                     _ => {}
                 },
@@ -606,11 +614,7 @@ pub fn new_var_or_ref(
                 return Token::ConstReference(var_names[index].index);
             }
 
-            if token_after == &Token::AssignComptimeVariable {
-                return Token::CompileTimeVarReference(var_names[index].index);
-            }
-
-            if token_after == &Token::AssignComptime {
+            if token_after == &Token::Colon {
                 return Token::CompileTimeConstReference(var_names[index].index);
             }
 

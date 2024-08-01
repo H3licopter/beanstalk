@@ -7,6 +7,7 @@ use std::{
 
 pub mod bs_types;
 mod build;
+mod bs_css;
 mod create_new_project;
 pub mod dev_server;
 mod settings;

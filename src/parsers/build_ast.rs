@@ -12,7 +12,6 @@ enum Attribute {
     Constant,
     Mutable,
     Comptime,
-    ComptimeVariable,
 }
 
 pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
@@ -139,11 +138,8 @@ fn new_variable(
         &Token::AssignVariable => {
             attribute = Attribute::Mutable;
         }
-        &Token::AssignComptime => {
+        &Token::Colon => {
             attribute = Attribute::Comptime;
-        }
-        &Token::AssignComptimeVariable => {
-            attribute = Attribute::ComptimeVariable;
         }
         &Token::Comma => {
             // TO DO: Multiple assignments
@@ -294,9 +290,6 @@ fn create_var_node(
         Attribute::Mutable => {
             return AstNode::VarDeclaration(var_name, Box::new(var_value), is_exported);
         }
-        Attribute::ComptimeVariable => {
-            return AstNode::Error("Comptime variable not yet supported".to_string());
-        }
         Attribute::Exported => {
             return AstNode::Error("Exported variable not yet supported".to_string());
         }
@@ -326,8 +319,7 @@ fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {
     match tokens.get(*i).unwrap_or(&Token::EOF) {
         Token::Assign
         | Token::AssignConstant
-        | Token::AssignComptime
-        | Token::AssignComptimeVariable => {
+        | Token::Colon => {
             *i += 1;
         }
         Token::Newline => {

@@ -1,9 +1,19 @@
+use crate::Token;
+
 use super::ast::AstNode;
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(dead_code)]
 pub enum Tag {
     None,
+
+    // Structure of the page
+    Main,
+    Header,
+    Footer,
+    Section,
+
+    // HTML tags
     Span,
     Div,
     P, // To check whether scene is already inside a P tag
@@ -19,7 +29,8 @@ pub enum Tag {
     Code(String), // Language
 
     // TO BE IMPLIMENTED
-    Nav,
+    Nav(AstNode),  // Will be an enum with different types of navs
+    List,
     Button,
 }
 
@@ -29,8 +40,9 @@ pub enum Style {
     Padding(AstNode),
     Margin(AstNode),
     Size(AstNode),
-    TextColor(AstNode),
+    TextColor(AstNode, Token), // Value, type (rgb, hsl)
     BackgroundColor(AstNode),
     Alt(String),
     Center(bool), // true = also center vertically
+    Order(AstNode),    // For positioning elements inside a grid/flex container/nav etc
 }

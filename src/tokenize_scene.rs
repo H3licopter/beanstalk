@@ -1,5 +1,5 @@
-use super::tokens::{Token, TokenizeMode};
 use crate::tokenizer::get_next_token;
+use super::tokens::{Token, TokenizeMode};
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -18,7 +18,7 @@ pub fn tokenize_scenehead(
     while tokenize_mode == &TokenizeMode::SceneHead {
         let next_token = get_next_token(chars, tokenize_mode, scene_nesting_level);
         match next_token {
-            Token::EOF | Token::AssignComptime => {
+            Token::EOF | Token::Colon => {
                 break;
             }
             Token::SceneClose(_) => {
@@ -175,7 +175,7 @@ pub fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -
             };
         }
     }
-
+    
     // Loop through the elements content until hitting a condition that
     // breaks out of the element
     let mut parse_raw = false;
@@ -239,7 +239,7 @@ pub fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -
                     break;
                 }
                 '-' | '#' => {
-                    if previous_newlines > 0 {
+                    if content.trim_start().is_empty() {
                         break;
                     } else {
                         *current_char = ch;
@@ -247,7 +247,7 @@ pub fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -
                     }
                 }
                 '*' => {
-                    match current_token {
+                    match current_token { 
                         // Breaking out of current em tag
                         Token::Em(strength, _) => {
                             // Count strength of em tag and make sure it's the same
@@ -279,7 +279,7 @@ pub fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -
                                     break;
                                 }
                             }
-                        }
+                        }, 
                         // New em tag?
                         _ => {
                             if content.ends_with(' ') || previous_newlines > 0 {

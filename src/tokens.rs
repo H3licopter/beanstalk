@@ -30,7 +30,6 @@ pub enum Token {
     Export,
 
     // HTML project compiler directives
-    Main,
     Page,
     Component,
     Title,
@@ -72,13 +71,12 @@ pub enum Token {
     // Basic Grammar
     Comma,
     Dot,
+    Colon,         // :
 
     // Declarations
     Assign,                 // =
     AssignVariable,         // :=
-    AssignComptime,         // :
     AssignConstant,         // ::
-    AssignComptimeVariable, // ::= maybe?
 
     // Scope
     OpenParenthesis,  // (
@@ -188,11 +186,19 @@ pub enum Token {
     Margin,
     Size,
     Rgb,
+    Hsl,
     BG,
     Table,
     Center,
     CodeKeyword,
     CodeBlock(String),
+    Order,
+
+    // Structure of the page
+    Main,
+    Header,
+    Footer,
+    Section,
 
     // To be implemented
     Slot, // Injection point for additional template nesting

@@ -2,7 +2,7 @@ use colour::red_ln;
 
 use super::{
     ast::AstNode,
-    parse_expression::{create_expression, eval_expression},
+    parse_expression::{check_if_arg, create_expression, eval_expression},
     styles::{Style, Tag},
     util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
 };
@@ -38,6 +38,10 @@ pub fn new_scene(
 
             Token::A => {
                 j += 1;
+                if !check_if_arg(scene_head, &mut j) {
+                    continue;
+                }
+                
                 let arg = create_expression(scene_head, &mut j, false, ast);
                 let eval_arg = eval_expression(arg, &DataType::String, ast);
                 if check_if_comptime_value(&eval_arg) {
@@ -50,8 +54,14 @@ pub fn new_scene(
 
             Token::Padding => {
                 j += 1;
-                let arg = create_expression(scene_head, &mut j, false, ast);
-                let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                let eval_arg;
+                // TODO: get a default padding value
+                if !check_if_arg(scene_head, &mut j) {
+                    eval_arg = AstNode::Literal(Token::FloatLiteral(1.5));
+                } else {
+                    let arg = create_expression(scene_head, &mut j, false, ast);
+                    eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                }
 
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::Padding(eval_arg));
@@ -63,8 +73,15 @@ pub fn new_scene(
 
             Token::Margin => {
                 j += 1;
-                let arg = create_expression(scene_head, &mut j, false, ast);
-                let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                let eval_arg;
+                // TODO: get a default margin value
+                if !check_if_arg(scene_head, &mut j) {
+                    eval_arg = AstNode::Literal(Token::FloatLiteral(1.5));
+                } else {
+                    let arg = create_expression(scene_head, &mut j, false, ast);
+                    eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                }
+
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::Margin(eval_arg));
                 } else {
@@ -73,8 +90,26 @@ pub fn new_scene(
                 }
             }
 
+            // For positioning inside a flex container / grid
+            Token::Order => {
+                j += 1;
+                if !check_if_arg(scene_head, &mut j) {
+                    continue;
+                }
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    scene_styles.push(Style::Order(eval_arg));
+                } else {
+                    // Need to add JS DOM hooks to change order at runtime.
+                }
+            }
+
             Token::BG => {
                 j += 1;
+                if !check_if_arg(scene_head, &mut j) {
+                    continue;
+                }
                 // TO DO: Accept color names and hex values
                 let arg = create_expression(scene_head, &mut j, false, ast);
                 let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
@@ -85,13 +120,16 @@ pub fn new_scene(
                 }
             }
 
-            Token::Rgb => {
+            Token::Rgb | Token::Hsl => {
                 j += 1;
+                if !check_if_arg(scene_head, &mut j) {
+                    continue;
+                }
                 // TO DO: Accept color names and hex values
                 let arg = create_expression(scene_head, &mut j, false, ast);
                 let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
                 if check_if_comptime_value(&eval_arg) {
-                    scene_styles.push(Style::TextColor(eval_arg));
+                    scene_styles.push(Style::TextColor(eval_arg, scene_head[j].to_owned()));
                 } else {
                     // Need to add JS DOM hooks to change text color at runtime.
                 }
@@ -103,6 +141,9 @@ pub fn new_scene(
 
             Token::Size => {
                 j += 1;
+                if !check_if_arg(scene_head, &mut j) {
+                    continue;
+                }
                 let arg = create_expression(scene_head, &mut j, false, ast);
                 let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
                 if check_if_comptime_value(&eval_arg) {
@@ -114,8 +155,15 @@ pub fn new_scene(
 
             Token::Table => {
                 j += 1;
-                let arg = create_expression(scene_head, &mut j, false, ast);
-                let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                let eval_arg;
+                // Default to 1 if no argument is provided
+                if !check_if_arg(scene_head, &mut j) {
+                    eval_arg = AstNode::Literal(Token::IntLiteral(1));
+                } else {
+                    let arg = create_expression(scene_head, &mut j, false, ast);
+                    eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                }
+
 
                 match eval_arg {
                     AstNode::Literal(literal_token) => match literal_token {
@@ -250,6 +298,37 @@ pub fn new_scene(
                 scene_tags.clear();
             }
 
+            Token::Nav => {
+                j += 1;
+                let eval_arg;
+                // TODO: get a default margin value
+                if !check_if_arg(scene_head, &mut j) {
+                    eval_arg = AstNode::Literal(Token::IntLiteral(0));
+                } else {
+                    let arg = create_expression(scene_head, &mut j, false, ast);
+                    eval_arg = eval_expression(arg, &DataType::Inferred, ast);
+                }
+                if check_if_comptime_value(&eval_arg) {
+                    scene_tags.push(Tag::Nav(eval_arg));
+                } else {
+                    // Need to add JS DOM hooks to change img src at runtime.
+                    scene_tags.push(Tag::Nav(eval_arg));
+                }
+            }
+
+            Token::Main => {
+                scene_tags.push(Tag::Main);
+            }
+            Token::Header => {
+                scene_tags.push(Tag::Header);
+            }
+            Token::Footer => {
+                scene_tags.push(Tag::Footer);
+            }
+            Token::Section => {
+                scene_tags.push(Tag::Section);
+            }
+
             _ => {
                 scene.push(AstNode::Error(format!(
                     "Invalid Token Used inside Scene Head: '{:?}'",
@@ -327,7 +406,7 @@ pub fn new_scene(
                 scene.push(AstNode::Element(Token::Newline));
             }
 
-            Token::Empty | Token::AssignComptime | Token::DeadVarible => {}
+            Token::Empty | Token::Colon | Token::DeadVarible => {}
 
             _ => {
                 scene.push(AstNode::Error(format!(
@@ -362,7 +441,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize, merge_next_p_line: &mut bool) 
     while j > 0 {
         match &tokens[j] {
             // Ignore these tokens
-            Token::AssignComptime | Token::SceneClose(_) => {
+            Token::Colon | Token::SceneClose(_) => {
                 j -= 1;
             }
 
