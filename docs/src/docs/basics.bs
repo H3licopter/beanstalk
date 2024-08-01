@@ -1,4 +1,4 @@
-[nav(1) bg(100, 220, 0, 0.06): [link("../../"): &#127793;]]
+[nav(1) bg(100, 220, 0, 0.06): [link("../"): &#127793;]]
 
 [header center: [title 1: BASIC BEANSTALK SYNTAX]]
 [main:

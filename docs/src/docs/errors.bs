@@ -1,9 +1,8 @@
-[nav(1) bg(100, 220, 0, 0.06): [link("../../"): &#127793;]]
+[nav(1) bg(100, 220, 0, 0.06): [link("../"): &#127793;]]
 
 [header center: [title 1: ERROR HANDLING]]
 [main:
 
-# Error Handling
 Any function that can return an error as one of it's values.
 
 The ? operator is used to check if one of the values in a tuple is an error. If it is, the error can then be handled in a new scope.
