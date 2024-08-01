@@ -71,12 +71,12 @@ pub enum Token {
     // Basic Grammar
     Comma,
     Dot,
-    Colon,         // :
+    Colon, // :
 
     // Declarations
-    Assign,                 // =
-    AssignVariable,         // :=
-    AssignConstant,         // ::
+    Assign,         // =
+    AssignVariable, // :=
+    AssignConstant, // ::
 
     // Scope
     OpenParenthesis,  // (

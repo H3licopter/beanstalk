@@ -1,4 +1,4 @@
-[:
+[main:
 # Setting up a Project
 Running the command 'new html' followed by your directory path will create a new static HTML Beanstalk project in that directory. The path is relative to the current directory.
 
@@ -43,3 +43,9 @@ This will create a localhost server that will automatically reload the page when
 Any index.bs files will become the main page of the folder they are in, so your main page will be index.bs in the root directory.
 
 *** ⚠️ The intention is to have a file-system based router built in [link "https://kit.svelte.dev/docs/routing": (similar to Svelte)] so there may be changed in file naming conventions and how the compiler handles those files in the future. ⚠️ ***
+
+]
+
+[footer: [pad(2, 0, 0, 0) center: 
+    ### &#127793;
+]

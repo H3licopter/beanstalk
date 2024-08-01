@@ -1,6 +1,6 @@
 use colour::red_ln;
 
-// All the custom CSS styles that get 
+// All the custom CSS styles that get
 pub fn get_bs_css(name: &str) -> &str {
     match name {
         "nav-0" => {

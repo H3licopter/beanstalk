@@ -1,4 +1,4 @@
-[:
+[main:
 
 # Scenes
 Beanstalk has its own templating language. These are called scenes.
@@ -116,3 +116,8 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
     [: comment]
 ]
 
+]
+
+[footer: [pad(2, 0, 0, 0) center: 
+    ### &#127793;
+]

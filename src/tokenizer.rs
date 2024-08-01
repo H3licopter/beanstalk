@@ -551,7 +551,7 @@ fn keyword_or_variable(
                     // Structure of the page
                     "main" => return Token::Main,
                     "header" => return Token::Header,
-                    "footer" => return Token::Footer,   
+                    "footer" => return Token::Footer,
                     "section" => return Token::Section,
 
                     // To be implemented

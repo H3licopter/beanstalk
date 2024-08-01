@@ -4,11 +4,15 @@ use super::{
     js_parser::{collection_to_js, collection_to_vec_of_js, expression_to_js},
 };
 use crate::{
-    bs_css::get_bs_css, bs_types::DataType, parsers::{
+    bs_css::get_bs_css,
+    bs_types::DataType,
+    parsers::{
         ast::AstNode,
         styles::{Style, Tag},
         util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
-    }, settings::{get_html_config, HTMLMeta}, Token
+    },
+    settings::{get_html_config, HTMLMeta},
+    Token,
 };
 use colour::red_ln;
 
@@ -30,20 +34,18 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
         match node {
             // SCENES (HTML)
             AstNode::Scene(scene, scene_tags, scene_styles) => {
-                html.push_str(
-                    &parse_scene(
-                        scene,
-                        scene_tags,
-                        scene_styles,
-                        &mut Tag::None,
-                        &mut js,
-                        &mut css,
-                        &mut module_references,
-                        &mut class_id,
-                        &mut exp_id,
-                        &mut Vec::new(),
-                    ),
-                );
+                html.push_str(&parse_scene(
+                    scene,
+                    scene_tags,
+                    scene_styles,
+                    &mut Tag::None,
+                    &mut js,
+                    &mut css,
+                    &mut module_references,
+                    &mut class_id,
+                    &mut exp_id,
+                    &mut Vec::new(),
+                ));
             }
             AstNode::Title(value) => {
                 page_title = value;
@@ -141,9 +143,7 @@ fn parse_scene(
                 // If tuple, spread the values into the padding property
                 match arg {
                     AstNode::Literal(Token::IntLiteral(value)) => {
-                        scene_wrap
-                            .style
-                            .push_str(&format!("padding:{}rem;", value));
+                        scene_wrap.style.push_str(&format!("padding:{}rem;", value));
                     }
                     AstNode::Tuple(values) => {
                         let mut padding = String::new();
@@ -153,7 +153,9 @@ fn parse_scene(
                                     padding.push_str(&format!("{}rem ", value));
                                 }
                                 _ => {
-                                    red_ln!("Error: Padding must be a literal or a tuple of literals");
+                                    red_ln!(
+                                        "Error: Padding must be a literal or a tuple of literals"
+                                    );
                                 }
                             }
                         }
@@ -202,9 +204,11 @@ fn parse_scene(
                     }
                 };
 
-                scene_wrap
-                    .child_styles
-                    .push_str(&format!("color:{}({});", color_keyword, collection_to_js(&args)));
+                scene_wrap.child_styles.push_str(&format!(
+                    "color:{}({});",
+                    color_keyword,
+                    collection_to_js(&args)
+                ));
                 // Only switch to span if there is no tag
                 match scene_wrap.tag {
                     Tag::None => {
@@ -270,7 +274,7 @@ fn parse_scene(
 
     let mut img_count = 0;
     let img_default_dir = get_html_config().image_folder_url.to_owned();
-    
+
     for tag in &scene_tags {
         match tag {
             Tag::Img(value) => {
@@ -450,10 +454,7 @@ fn parse_scene(
                                             html.push_str("</p>");
                                             html.push_str(&format!("<p>{}", content));
                                         } else {
-                                            html.push_str(&format!(
-                                                "<span>{}</span>",
-                                                content
-                                            ));
+                                            html.push_str(&format!("<span>{}</span>", content));
                                         }
                                     }
                                     Tag::Table(_) | Tag::Nav(_) => {
@@ -521,14 +522,10 @@ fn parse_scene(
             AstNode::Scene(new_scene_nodes, new_scene_tags, new_scene_styles) => {
                 // Switch scene tag for certain child scenes
                 let mut new_scene_tag = match scene_wrap.tag {
-                    Tag::Nav(_) => {
-                        Tag::List
-                    }
-                    _ => {
-                        scene_wrap.tag.to_owned()
-                    }
+                    Tag::Nav(_) => Tag::List,
+                    _ => scene_wrap.tag.to_owned(),
                 };
-                
+
                 let new_scene = parse_scene(
                     new_scene_nodes,
                     new_scene_tags,
@@ -837,11 +834,12 @@ fn parse_scene(
             }
 
             collect_closing_tags(&mut closing_tags);
-            html.insert_str(0, 
+            html.insert_str(
+                0,
                 &format!(
                     "<table style=\"{}\" {} ><head>",
                     scene_wrap.style, scene_wrap.properties,
-                )
+                ),
             );
             html.push_str("</tbody></table>");
         }
@@ -886,9 +884,7 @@ fn parse_scene(
         }
         Tag::Nav(nav_style) => {
             let class_id = match nav_style {
-                AstNode::Literal(Token::IntLiteral(value)) => {
-                    value
-                }
+                AstNode::Literal(Token::IntLiteral(value)) => value,
                 _ => {
                     red_ln!("Error: nav style must be an integer literal, none provided");
                     0

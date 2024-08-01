@@ -29,7 +29,7 @@ pub enum Tag {
     Code(String), // Language
 
     // TO BE IMPLIMENTED
-    Nav(AstNode),  // Will be an enum with different types of navs
+    Nav(AstNode), // Will be an enum with different types of navs
     List,
     Button,
 }
@@ -43,6 +43,6 @@ pub enum Style {
     TextColor(AstNode, Token), // Value, type (rgb, hsl)
     BackgroundColor(AstNode),
     Alt(String),
-    Center(bool), // true = also center vertically
-    Order(AstNode),    // For positioning elements inside a grid/flex container/nav etc
+    Center(bool),   // true = also center vertically
+    Order(AstNode), // For positioning elements inside a grid/flex container/nav etc
 }

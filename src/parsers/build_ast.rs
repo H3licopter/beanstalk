@@ -317,9 +317,7 @@ fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {
 
     *i += 1;
     match tokens.get(*i).unwrap_or(&Token::EOF) {
-        Token::Assign
-        | Token::AssignConstant
-        | Token::Colon => {
+        Token::Assign | Token::AssignConstant | Token::Colon => {
             *i += 1;
         }
         Token::Newline => {

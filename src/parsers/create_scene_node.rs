@@ -41,7 +41,7 @@ pub fn new_scene(
                 if !check_if_arg(scene_head, &mut j) {
                     continue;
                 }
-                
+
                 let arg = create_expression(scene_head, &mut j, false, ast);
                 let eval_arg = eval_expression(arg, &DataType::String, ast);
                 if check_if_comptime_value(&eval_arg) {
@@ -163,7 +163,6 @@ pub fn new_scene(
                     let arg = create_expression(scene_head, &mut j, false, ast);
                     eval_arg = eval_expression(arg, &DataType::Inferred, ast);
                 }
-
 
                 match eval_arg {
                     AstNode::Literal(literal_token) => match literal_token {

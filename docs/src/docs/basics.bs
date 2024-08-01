@@ -1,4 +1,4 @@
-[:
+[main:
 
 # Style Guide
 The style guide is:
@@ -190,4 +190,10 @@ If you are mixing unit types in an operation, the first unit type will be used f
 
     height := (3m * 2m)cm
     -- result is 500
+]
+
+]
+
+[footer: [pad(2, 0, 0, 0) center: 
+    ### &#127793;
 ]
