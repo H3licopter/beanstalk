@@ -121,6 +121,8 @@ pub fn new_scene(
             }
 
             Token::Rgb | Token::Hsl => {
+                let color_type = scene_head[j].to_owned();
+
                 j += 1;
                 if !check_if_arg(scene_head, &mut j) {
                     continue;
@@ -129,7 +131,7 @@ pub fn new_scene(
                 let arg = create_expression(scene_head, &mut j, false, ast);
                 let eval_arg = eval_expression(arg, &DataType::Inferred, ast);
                 if check_if_comptime_value(&eval_arg) {
-                    scene_styles.push(Style::TextColor(eval_arg, scene_head[j].to_owned()));
+                    scene_styles.push(Style::TextColor(eval_arg, color_type));
                 } else {
                     // Need to add JS DOM hooks to change text color at runtime.
                 }
@@ -151,6 +153,14 @@ pub fn new_scene(
                 } else {
                     // Need to add JS DOM hooks to change text size at runtime.
                 }
+            }
+
+            Token::Blank => {
+                scene_styles.push(Style::Blank);
+            }
+
+            Token::Hide => {
+                scene_styles.push(Style::Hide);
             }
 
             Token::Table => {
@@ -352,7 +362,10 @@ pub fn new_scene(
                     "Invalid Token Used inside Scene Head: '{:?}'",
                     &scene_head[j]
                 )));
-                red_ln!("Invalid Token Used inside Scene Head: '{:?}'", &scene_head[j]);
+                red_ln!(
+                    "Invalid Token Used inside Scene Head: '{:?}'",
+                    &scene_head[j]
+                );
             }
         }
 

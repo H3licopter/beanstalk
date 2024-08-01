@@ -43,12 +43,12 @@ pub enum Tag {
 pub enum Style {
     Padding(AstNode),
     Margin(AstNode),
-    Size(AstNode),
+    Size(AstNode),             // Size of text
     TextColor(AstNode, Token), // Value, type (rgb, hsl)
     BackgroundColor(AstNode),
     Alt(String),
     Center(bool),   // true = also center vertically
     Order(AstNode), // For positioning elements inside a grid/flex container/nav etc
-
-
+    Hide,
+    Blank,
 }

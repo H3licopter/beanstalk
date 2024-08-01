@@ -18,7 +18,19 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><main class="container"><br><h1>Style Guide
+<style>.bs-nav-1 {
+                border-bottom-color: grey;
+                border-bottom-style: solid;
+                border-bottom-width: 1px;
+                padding: 0rem 2rem 0rem 2rem;
+            }.bs-title-1 {
+                font-size: 3rem;
+                font-weight: bold;
+                letter-spacing: 0.3rem;
+                word-spacing: 0.4rem;
+                margin: 1.3rem 0 1.2rem 0;
+                line-height: 3.5rem;
+            }</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BASIC BEANSTALK SYNTAX</b></div></header><main class="container"><br><h1>Style Guide
 </h1><p>The style guide is:
 </p><li><span>snake_case as the default choice for variables and other things
 </span></li><li><span>camelCase for functions
@@ -66,10 +78,13 @@
     float := 69.420
 
     -- pointed sized unsigned integer
-    my_brain : index : 420 
+    my_brain : Index : 420 
 
-    -- Implicit string conversion (string type must be specified in the type definition for this to work)
-    -- Any expression you assign to this string variable will be converted to a string
+    -- 
+        Implicit string conversion (string type must be specified in the type definition for this to work)
+        
+        Any expression you assign to this string variable will be converted to a string
+    --
     cool_string := 14 + 42 + " is a cool number " + '😂' -- "56 is a cool number 😂"
 </code></pre><br><p>Variables must be given a value or a type when they are declared. There is no such thing as 'null' in Beanstalk, the closest equivalent is an Error type or an empty tuple.
 </p><p>If an error occurs during assignment of a variable, it's type becomes an Error type and must be handled. Unhandled assignment errors at runtime will default the variable to it's zero value.
@@ -88,9 +103,11 @@
 </code></pre><br><h1>Data Types
 </h1><p>All data type keywords contain methods from the standard library for common manipulation of types. 
 </p><span>The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
-</span><h2>Primative Types
-</h2><table style=""  ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>int</td><td>32 bit signed integer</td><td>0</td></tr><tr><td>index</td><td>Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible.</td><td>0</td></tr><tr><td>float</td><td>32 bit floating point number</td><td>0.0</td></tr><tr><td>decimal</td><td>A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision</td><td>0.00</td></tr><tr><td>string</td><td>UTF-8</td><td>""</td></tr><tr><td>unicode</td><td>Unicode strings are UTF-32 strings. They are created using single quotes.</td><td>''</td></tr><tr><td>bool</td><td>Boolean, including true and false as types</td><td>false</td></tr><tr><td>error</td><td>Contains a special type of debug string detailing the error</td><td>"ERROR"</td></tr></tbody></table><br><h2>Collection Types
-</h2><table style=""  ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>()</td><td>Collection. Any number of items seperated by commas. See <a href="../collections" style="" ><span>Collections</span>&nbsp;</a>for more information.</td><td>()</td></tr><tr><td>scene</td><td>The templating syntax of Beanstalk</td><td>"[]" -&nbsp; an empty scene</td></tr><tr><td>choice</td><td>Rust style enums</td><td>error</td></tr><tr><td>type</td><td>For generics and datatype related operations</td><td>error</td></tr></tbody></table><br><h1>Strings
+</span><p><strong>Primatives&nbsp;</strong></p><span>There are 
+</span><h2>Numerical Types
+</h2><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>Int</td><td>32 bit signed integer</td><td>0</td></tr><tr><td>Idx</td><td>Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible.</td><td>0</td></tr><tr><td>Float</td><td>32 bit floating point number</td><td>0.0</td></tr><tr><td>Decimal</td><td>A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision</td><td>0.00</td></tr><tr><td>Unit</td><td>Special numeric unit syntax for appending numerical types</td><td>error</td></tr></tbody></table><h2>String based Types
+</h2><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>String</td><td>UTF-8</td><td>""</td></tr><tr><td>Unicode</td><td>Unicode strings are UTF-32 strings. They must be created with a type annotation.</td><td>""</td></tr><tr><td>Error</td><td>Contains a special type of debug string detailing the error</td><td>"ERROR"</td></tr><tr><td>Style</td><td>Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML)</td><td>""</td></tr></tbody></table><br><h2>Collection Types
+</h2><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>()</td><td>Collection. Any number of items seperated by commas. See <a href="../collections" style="" class="" >Collections&nbsp;</a>for more information.</td><td>()</td></tr><tr><td>Scene</td><td>The templating syntax of Beanstalk</td><td>"[]" -&nbsp; an empty scene</td></tr><tr><td>Choice</td><td>Rust style enums</td><td>error</td></tr><tr><td>Type</td><td>For generics and datatype related operations</td><td>error</td></tr></tbody></table><br><h1>Strings
 </h1><p>String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
 </p><pre><code>"Double quotes for a utf8 string literal"</code></pre><br><p>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 </p><pre><code>"string literal with \{curly braces} in it that is escaped"</code></pre><br><pre><code>`9 "is" {5 + 4}` -- 9 "is" {5 + 4}</code></pre><br><h1>Unicode Strings
@@ -98,22 +115,22 @@
 </p><pre><code>cool_emoji : '😂'</code></pre><br><h1>Logical Operators
 </h1><p>The 'is' keyword is used to check equality. Not ==. The "and / or" keywords are used for logical and / or and 'not' is used to invert a truthy value to falsy or vice versa.
 </p><p>Only false, ! and ? are falsy values. Any other check with an if statement will return true. 
-</p><table style=""  ><thead><tr><th scope='col'>Operator</th><th scope='col'>Description</th><th scope='col'>Precedence</th></tr></thead><tbody><tr><td>**</td><td>Exponents</td><td>8</td></tr><tr><td>//</td><td>Roots</td><td>8</td></tr><tr><td>*</td><td>Multiplication</td><td>7</td></tr><tr><td>/</td><td>Division</td><td>7</td></tr><tr><td>%</td><td>Modulo (truncated)</td><td>7</td></tr><tr><td>%%</td><td>Remainder (floored)</td><td>7</td></tr><tr><td>+</td><td>Sum</td><td>6</td></tr><tr><td>-</td><td>Subtraction</td><td>6</td></tr></tbody></table><br><h1>Numeric Units
+</p><table style=""  class="" ><thead><tr><th scope='col'>Operator</th><th scope='col'>Description</th><th scope='col'>Precedence</th></tr></thead><tbody><tr><td>**</td><td>Exponents</td><td>8</td></tr><tr><td>//</td><td>Roots</td><td>8</td></tr><tr><td>*</td><td>Multiplication</td><td>7</td></tr><tr><td>/</td><td>Division</td><td>7</td></tr><tr><td>%</td><td>Modulo (truncated)</td><td>7</td></tr><tr><td>%%</td><td>Remainder (floored)</td><td>7</td></tr><tr><td>+</td><td>Sum</td><td>6</td></tr><tr><td>-</td><td>Subtraction</td><td>6</td></tr></tbody></table><br><h1>Numeric Units
 </h1><p>Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
 </p><p>The first unit in the operation will be used if no unit type is specified in the type parameter. 
 </p><span>You don't need to have a space between a literal value and the unit type, but variables must have a space between the value and the unit type.
 </span><p>If you are mixing unit types in an operation, the first unit type will be used for the result.
 </p><pre><code>    -- Specifies the base type as a float
-    m : unit : float
-    cm : unit : m * 0.01
-    mm : unit : cm * 0.1
+    m : Unit : float
+    cm : Unit : m * 0.01
+    mm : Unit : cm * 0.1
 
     width := 5m * 230cm
     -- result is 5.23
 
     height := (3m * 2m)cm
     -- result is 500
-</code></pre><br></main><footer><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  ><h3>&#127793;
+</code></pre><br></main><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
 </h3></div></footer>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";

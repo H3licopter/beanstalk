@@ -1,4 +1,5 @@
-[nav(0) bg(0, 0, 75, 0.1): [link "../../": Home]]
+[nav(1) bg(100, 220, 0, 0.06): [link("../../"): &#127793;]]
+
 [header center: [title 1: BASIC BEANSTALK SYNTAX]]
 [main:
 
@@ -109,7 +110,10 @@ Parenthesis are used to group expressions together.
 All data type keywords contain methods from the standard library for common manipulation of types. 
 The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
 
-## Primative Types
+**Primatives** 
+There are 
+
+## Numerical Types
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
@@ -121,15 +125,19 @@ The zero value is the value a variable will be assigned if it is not assigned a 
     
     [: Decimal ] [: A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision] [: 0.00]
 
+    [: Unit] [: Special numeric unit syntax for appending numerical types ] [: error]
+]
+## String based Types
+[table 3: 
+    [: Type] [: Description] [: Zero Value]
+
     [: String ] [: UTF-8] [: ""]
 
-    [: Unicode ] [: Unicode strings are UTF-32 strings. They are created using single quotes. ] [: '']
-
-    [: Bool ] [: Boolean, including true and false as types] [: false]
+    [: Unicode ] [: Unicode strings are UTF-32 strings. They must be created with a type annotation. ] [: ""]
 
     [: Error] [: Contains a special type of debug string detailing the error] [: "ERROR"]
 
-    [: Unit] [: Special numeric unit syntax for appending numerical types ] [: error]
+    [: Style] [: Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML)] [: ""]
 ]
 
 ## Collection Types

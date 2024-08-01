@@ -18,7 +18,19 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><main class="container"><h1>Setting up a Project
+<style>.bs-nav-1 {
+                border-bottom-color: grey;
+                border-bottom-style: solid;
+                border-bottom-width: 1px;
+                padding: 0rem 2rem 0rem 2rem;
+            }.bs-title-1 {
+                font-size: 3rem;
+                font-weight: bold;
+                letter-spacing: 0.3rem;
+                word-spacing: 0.4rem;
+                margin: 1.3rem 0 1.2rem 0;
+                line-height: 3.5rem;
+            }</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><h1>Setting up a Project
 </h1><p>Running the command 'new html' followed by your directory path will create a new static HTML Beanstalk project in that directory. The path is relative to the current directory.
 </p><p><em>More project types will be added in the future.</em></p><br><span>The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
 </span><span>This file is called </span><strong>config.bs&nbsp;</strong><span>and is placed in the root folder of your project by default. A configuration file is also created in the root directory.
@@ -42,11 +54,11 @@
 </p><p>This will create a localhost server that will automatically reload the page when you make changes to your bs files. The command line will give you a link to open in your browser.
 </p><h1>File Paths
 </h1><p>Any index.bs files will become the main page of the folder they are in, so your main page will be index.bs in the root directory.
-</p><p>* * *  ⚠️ The intention is to have a file-system based router built in <a href="https://kit.svelte.dev/docs/routing" style="" ><span>(similar to Svelte)</span>&nbsp;</a><span>so there may be changed in file naming conventions and how the compiler handles those files in the future. ⚠️ </span><span>*
+</p><p>* * *  ⚠️ The intention is to have a file-system based router built in <a href="https://kit.svelte.dev/docs/routing" style="" class="" >(similar to Svelte)&nbsp;</a><span>so there may be changed in file naming conventions and how the compiler handles those files in the future. ⚠️ </span><span>*
 *
 *
 
-</span></p></main><footer><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  ><h3>&#127793;
+</span></p></main><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
 </h3></div></footer>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";

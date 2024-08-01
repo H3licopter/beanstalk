@@ -193,15 +193,23 @@ pub enum Token {
     CodeKeyword,
     CodeBlock(String),
     Order,
+    Blank,
+    Hide,
 
     // Structure of the page
     Main,
     Header,
     Footer,
     Section,
+    Gap,
 
     // To be implemented
-    Slot, // Injection point for additional template nesting
     Nav,
     Button,
+    Canvas,
+    Click,
+    Form,
+    Option,
+    Dropdown,
+    Input,
 }

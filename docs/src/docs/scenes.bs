@@ -1,3 +1,5 @@
+[nav(1) bg(100, 220, 0, 0.06): [link("../../"): &#127793;]]
+
 [header center: [title 1: BEANSTALK SCENES]]
 [main:
 Beanstalk has its own templating language. These are called scenes.
@@ -23,11 +25,13 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
     The open square bracket is used to start a new scene. The colon begins the scene body. This is defining the main scene, which by default will add a main tag to the HTML and wrap the content in a centered container.
 
     # A Heading
-    Some text that has a [link "www.example.com": link] inside it.
+    Some text that has a [link "example.com": link] inside it.
 
     A constant variable from the code inserted into the scene: [ constant ].
 
     The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets [rgb(170,0,0): *cannot*] be used without an escape character or by using backticks to create a raw string.
+
+    ]
 ]
 
 ## Scene exmaple
@@ -59,35 +63,60 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
     [rgb(230,20,150): this is a bunch of text with rgb color]
 
     [ imported_scene ]
-    [ slot "main content" ]
 ]
 
 ### Style
 [table 2:
     [: Property] [: Description]
-    
-    [: pad] [: the padding around the element]
-    [: space] [: the margin around the element]
-    [: size] [: the size of the element]
-    [: img] [: turning the scene into an image element ]
-    [: video] [: turning the scene into a video element ]
-    [: audio] [: turning the scene into an audio element ]
-    [: rgb, hsl] [: the color of the element. Color keywords will also be supported in the future]
-    [: hex]
-    [: raw]
+
+    [: bg] [: Changes the background color of the element (will eventually just be passed a style argument such as a color and will automatically make those style changes to the background)]
+    [: rgb, hsl, hex] [: The color of the element. Color keywords will also be supported in the future]
+    [: code] [: A code block]
+    [: blank] [: removes all styling from the element]
+    [: title] [: An even bigger, more styalized heading]
+]
+
+### Layout
+[table 2:
+    [: Property] [: Description]
+
+    [: pad] [: The padding around the element]
+    [: space] [: The margin around the element]
+    [: center] [: Centers the element vertically]
+    [: table] [: A table element]
+    [: size] [: The size of the element]
+    [: hide] [: Hides the element]
+    [: nav] [: A navigation element. Basically a nav bar, will automatically add ul tags for child scenes]
+    [: order] [: The order of the element inside a container]
+    [: gap] [: Creates a gap between elements]
+
+    [: main] [: The main element of the page. Creates a main tag with a centered container]
+    [: header] [: The header element of the page. Creates a header tag with a centered container]
+    [: footer] [: The footer element of the page. Creates a footer tag with a centered container]
+    [: section] [: A section element of the page. Creates a section tag with a centered container]
 ]
 
 ### Interactive 
 [table 2:
     [: Property] [: Description]
 
-    [: input]
-    [: audio]
-    [: video]
-    [: click]
-    [: form]
-    [: option]
-    [: dropdown]
+    [: link] [: link (anchor tag)]
+    [: button] [: A button]
+    [: input] [: An input element]
+    [: click] [: You can provide a function as an argument to the click event]
+    [: form] [: A form element]
+    [: option] [: An option element]
+    [: dropdown] [: A dropdown element]
+]
+
+### Media
+[table 2:
+    [: Property] [: Description]
+
+    [: img] [: An image element ]
+    [: video] [: A video element ]
+    [: audio] [: An audio element ]
+    [: alt] [: An alternative text for media ]
 ]
 
 ### HTTP 
@@ -100,21 +129,48 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
     [: swap]
 ]
 
-### Dynamic
+### Other
 [table 2: 
     [: Property] [: Description]
 
-    [: slot]
-    [: canvas]
+    [: ignore] [: Creates a comment, but does not add it to the final output]
+    [: canvas] [: An HTML canvas element ]
 ]
 
-### Comments
-[table 2: 
-    [: Property] [: Description]
+## Unique Scene Logic
+Variables and expressions are typecast into strings when put into a scene. This is the behaviour of all the numerical types and most of the string types. There are some exceptions to how other types are handled by scenes.
 
-    [: comment]
+#### Booleans
+Booleans in a scenehead will conditonally hide or show itself based on the value of the boolean. If the boolean is true, the scene and it's children will be shown, if false, it will be hidden.
+
+[code:
+    logged_in := false
+
+    -- Scene is hidden
+    [if not logged_in:
+        [button: Log In]
+    ]
 ]
 
+#### Errors
+If an error is added to a scene, it will be displayed in the console, rather than injected into the scene. This usually means that the variable with the error has reverted to its default value, which will be shown.
+
+[rgb(175, 10, 10) size(0.85): *This behaviour is an uncertain part of the design, tuples that contain errors might be better completely hidden from the scene rather than a zero value being shown.*]
+
+#### Reactive Variables
+Variables can be made reactive in a scene by being appended with a tilde. The variable will update whenever the value of the variable changes. Variables without the tilde will only update if the scene is re-rendered.
+
+[code:
+    variable_that_changes := "hello"
+
+    -- Variable becomes reactive in this scene
+    [ ~variable_that_changes ]
+
+    -- Non-reactive variable
+    [ variable_that_changes ]
+
+    -- This will update the string in the first scene, but not the second
+    variable_that_changes := "world"
 ]
 
 [footer: [pad(2, 0, 0, 0) center: 

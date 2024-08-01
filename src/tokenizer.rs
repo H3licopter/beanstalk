@@ -530,22 +530,38 @@ fn keyword_or_variable(
             // only bother tokenizing / reserving these keywords if inside of a scene head
             match tokenize_mode {
                 TokenizeMode::SceneHead => match token_value.as_str() {
-                    "link" => return Token::A,
-                    "space" => return Token::Margin,
-                    "pad" => return Token::Padding,
-                    "img" => return Token::Img,
-                    "alt" => return Token::Alt,
+                    // Style
                     "rgb" => return Token::Rgb,
                     "hsl" => return Token::Hsl,
-                    "center" => return Token::Center,
+                    "code" => return Token::CodeKeyword,
+                    "blank" => return Token::Blank,
                     "bg" => return Token::BG,
+
+                    // Layout
+                    "pad" => return Token::Padding,
+                    "space" => return Token::Margin,
+                    "center" => return Token::Center,
                     "size" => return Token::Size,
+                    "hide" => return Token::Hide,
+                    "nav" => return Token::Nav,
                     "table" => return Token::Table,
+                    "gap" => return Token::Gap,
+
+                    // Interactive
+                    "link" => return Token::A,
+                    "button" => return Token::Button,
+                    "input" => return Token::Input,
+                    "click" => return Token::Click,
+                    "form" => return Token::Form,
+                    "option" => return Token::Option,
+                    "dropdown" => return Token::Dropdown,
+
+                    // Media
+                    "img" => return Token::Img,
+                    "alt" => return Token::Alt,
                     "video" => return Token::Video,
                     "audio" => return Token::Audio,
-                    "ignore" => return Token::Ignore,
-                    "code" => return Token::CodeKeyword,
-                    "nav" => return Token::Nav,
+
                     "order" => return Token::Order,
                     "title" => return Token::Title,
 
@@ -555,9 +571,9 @@ fn keyword_or_variable(
                     "footer" => return Token::Footer,
                     "section" => return Token::Section,
 
-                    // To be implemented
-                    "slot" => return Token::Slot,
-                    "button" => return Token::Button,
+                    // Other
+                    "ignore" => return Token::Ignore,
+                    "canvas" => return Token::Canvas,
                     _ => {}
                 },
 

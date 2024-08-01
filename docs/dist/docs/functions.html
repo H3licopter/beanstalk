@@ -18,64 +18,75 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><br><h1>Functions
-</h1><p>If the function can only return an error, you can use a '!' as the specified return type.&nbsp; 
+<style>.bs-nav-1 {
+                border-bottom-color: grey;
+                border-bottom-style: solid;
+                border-bottom-width: 1px;
+                padding: 0rem 2rem 0rem 2rem;
+            }.bs-title-1 {
+                font-size: 3rem;
+                font-weight: bold;
+                letter-spacing: 0.3rem;
+                word-spacing: 0.4rem;
+                margin: 1.3rem 0 1.2rem 0;
+                line-height: 3.5rem;
+            }</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >FUNCTIONS</b></div></header><main class="container"><br><h1>Functions
+</h1><p>If the function can only return an error, you can use a '?' as the specified return type.&nbsp; 
 </p><h2>The arrow operator
 </h2><p>The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
 </p><p>A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
-</p><p>doNothing : () -&gt; {}
+</p><pre><code>        doNothing :: () -> {}
 
-    -- Returns a tuple of values
-    multipleReturns : () -&gt; (int, int, int) {
-        return (1, 2, 3)
-    }
+        -- Returns a tuple of values
+        multipleReturns :: () -> (int, int, int) {
+            return (1, 2, 3)
+        }
 
-    differentReturns : (spicy : bool = false) -&gt; (int, int, int) {
-        if spicy:
-            return (69, 420, 1337)
-        
-        return (1, 2, 3)
-    }
+        differentReturns :: (spicy : bool = false) -> (int, int, int) {
+            if spicy: return (69, 420, 1337)
+            
+            return (1, 2, 3)
+        }
 
-    nestedReturns : () -&gt; bool {
-        if state is (
-            STATE.normal =&gt; return true
-            =&gt; return false
-        )
-    }
+        nestedReturns :: () -> bool {
+            if state is (
+                STATE.normal => return true
+                => return false
+            )
+        }
 
-    defaultReturn: () -&gt; (int) {
-        if time now is time last (
-            time now += 1
-        )
+        defaultReturn :: () -> (int) {
+            if time.now is time.last (
+                time.now += 1
+            )
 
-        return time now
-    }
+            return time now
+        }
 
-</p><br><h1>Generics
+    </code></pre><br><h1>Generics
 </h1><p>The type keyword is used to create generic types that can be used in functions and methods.
 </p><p>These types will converge into a single possible type when initialised within a type definition, but within the same scope they remain 'generic'.
-</p><p>-- Creating a generic type
-    number : type : int or float
+</p><pre><code>        -- Creating a generic type
+        number : type : int or float or dec
 
-    add : (a : number, b : number) -&gt; number {
-        return a + b
-    }
+        add : (a : number, b : number) -> number {
+            return a + b
+        }
 
-    -- This function will now work with floats and ints
-    add(3, 4) -- 7
-    add(3.23, 53.9) -- 57.13
+        -- This function will now work with floats and ints
+        add(3, 4) -- 7
+        add(3.23, 53.9) -- 57.13
 
-    -- Converges to int type
-    example1 : number = 3
+        -- Converges to int type
+        example1 : number = 3
 
-    -- Converges to float type
-    example2 : number = 3.23
+        -- Converges to float type
+        example2 : number = 3.23
 
-    -- Type Error, only one type can be converged
-    example3 : number = example1 + example2
-
-</p>
+        -- Type Error, only one type can be converged
+        example3 : number = example1 + example2
+    </code></pre><br><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
+</h3></div></footer></main>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
   init().then(() => {

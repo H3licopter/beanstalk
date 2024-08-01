@@ -1,7 +1,7 @@
 use super::{
     dom_hooks::{generate_dom_update_js, DOMUpdate},
     generate_html::create_html_boilerplate,
-    js_parser::{collection_to_js, collection_to_vec_of_js, expression_to_js},
+    js_parser::{collection_to_js, expression_to_js},
 };
 use crate::{
     bs_css::get_bs_css,
@@ -126,7 +126,10 @@ fn parse_scene(
 
     let mut images: Vec<&AstNode> = Vec::new();
     let mut scene_wrap = SceneTag {
-        tag: Tag::None,
+        tag: match parent_tag {
+            Tag::List => Tag::List,
+            _ => Tag::None,
+        },
         outer_tag: match parent_tag {
             Tag::List => Tag::List,
             _ => Tag::None,
@@ -183,7 +186,7 @@ fn parse_scene(
                 style_assigned = true;
             }
             Style::BackgroundColor(args) => {
-                scene_wrap.child_styles.push_str(&format!(
+                scene_wrap.style.push_str(&format!(
                     "background-color:rgba({});",
                     collection_to_js(&args)
                 ));
@@ -201,8 +204,11 @@ fn parse_scene(
                     Token::Rgb => "rgb",
                     Token::Hsl => "hsl",
                     _ => {
-                        red_ln!("Error: Invalid color type provided for text color");
-                        ""
+                        red_ln!(
+                            "Error: Invalid color type provided for text color: {:?}",
+                            type_of_color
+                        );
+                        continue;
                     }
                 };
 
@@ -220,15 +226,35 @@ fn parse_scene(
                 }
                 style_assigned = true;
             }
-            Style::Size(arg) => {
-                let size = collection_to_vec_of_js(&arg);
+            // OLD VERSION OF SIZE, WILL JUST BE TEXT SIZE NOW
+            // Style::Size(arg) => {
+            //     let size = collection_to_vec_of_js(&arg);
 
-                // TO DO: Add or remove parameters based on number of arguments
-                // And make sure there are no more than 4 arguments
+            //     // TO DO: Add or remove parameters based on number of arguments
+            //     // And make sure there are no more than 4 arguments
+            //     scene_wrap
+            //         .style
+            //         .push_str(&format!("width:{}rem;height:{}rem", size[0], size[1]));
+            //     style_assigned = true;
+            // }
+            Style::Size(node) => {
+                let value = match node {
+                    AstNode::Literal(token) => match token {
+                        Token::IntLiteral(value) => value as f64,
+                        Token::FloatLiteral(value) => value,
+                        _ => {
+                            red_ln!("Error: Size argument was not numeric");
+                            continue;
+                        }
+                    },
+                    _ => {
+                        red_ln!("Error: Size must be a literal");
+                        continue;
+                    }
+                };
                 scene_wrap
                     .style
-                    .push_str(&format!("width:{}rem;height:{}rem", size[0], size[1]));
-                style_assigned = true;
+                    .push_str(&format!("font-size:{}rem;", value));
             }
             Style::Alt(value) => {
                 scene_wrap
@@ -269,6 +295,14 @@ fn parse_scene(
                         red_ln!("Order not implemented for this tag yet");
                     }
                 }
+                style_assigned = true;
+            }
+            Style::Blank => {
+                scene_wrap.style.push_str("all:unset;");
+                style_assigned = true;
+            }
+            Style::Hide => {
+                scene_wrap.style.push_str("display:none;");
                 style_assigned = true;
             }
         }
@@ -402,8 +436,8 @@ fn parse_scene(
 
                         // Specical tags
                         match scene_wrap.tag {
-                            Tag::Title(_) => {
-                                html.push_str(&format!("{}", content));
+                            Tag::Title(_) | Tag::List | Tag::A(_) => {
+                                html.push_str(&content.to_owned());
                                 continue;
                             }
                             _ => {}
@@ -442,8 +476,8 @@ fn parse_scene(
                                     }
                                 }
                             }
-                            Tag::Table(_) => {
-                                html.push_str(&format!("{}", content));
+                            Tag::Table(_) | Tag::List | Tag::A(_) => {
+                                html.push_str(&content.to_owned());
                             }
                             _ => {
                                 html.push_str(&format!("<span>{}</span>", content));
@@ -454,20 +488,15 @@ fn parse_scene(
                     Token::P(mut content) => {
                         content = sanitise_content(&mut content);
 
-                        // Specical tags
-                        match scene_wrap.tag {
-                            Tag::Title(_) => {
-                                html.push_str(&format!("{}", content));
-                                continue;
-                            }
-                            _ => {}
-                        }
-
                         match scene_wrap.tag {
                             Tag::Img(_) | Tag::Video(_) => {
                                 scene_wrap
                                     .properties
                                     .push_str(&format!(" alt=\"{}\"", content));
+                            }
+                            Tag::Title(_) | Tag::List => {
+                                html.push_str(&content.to_owned());
+                                continue;
                             }
                             Tag::A(_) => {
                                 html.push_str(&collect_closing_tags(&mut closing_tags));
@@ -484,8 +513,8 @@ fn parse_scene(
                                             html.push_str(&format!("<span>{}</span>", content));
                                         }
                                     }
-                                    Tag::Table(_) | Tag::Nav(_) => {
-                                        html.push_str(&format!("{}", content));
+                                    Tag::Table(_) | Tag::Nav(_) | Tag::List => {
+                                        html.push_str(&content.to_owned());
                                     }
                                     Tag::Heading | Tag::BulletPoint => {
                                         let newlines_at_start =
@@ -498,7 +527,7 @@ fn parse_scene(
                                             closing_tags.push("</p>".to_string());
                                             *parent_tag = Tag::P;
                                         } else {
-                                            html.push_str(&format!("{}", content));
+                                            html.push_str(&content.to_owned());
                                             if count_newlines_at_end_of_string(content.as_str()) > 0
                                             {
                                                 html.push_str(&collect_closing_tags(
@@ -555,6 +584,7 @@ fn parse_scene(
                 // Switch scene tag for certain child scenes
                 let mut new_scene_tag = match scene_wrap.tag {
                     Tag::Nav(_) => Tag::List,
+                    Tag::List => Tag::None,
                     _ => scene_wrap.tag.to_owned(),
                 };
 
@@ -571,14 +601,6 @@ fn parse_scene(
                     &mut Vec::new(),
                 );
 
-                // If this is in a list, surroung the scene with list tags
-                let list_item_closing_tag = match scene_wrap.outer_tag {
-                    Tag::List => {
-                        html.push_str("<li>");
-                        "</li>"
-                    }
-                    _ => "",
-                };
                 // If this is in a table, add correct table tags
                 // What happens if columns are 0?
                 match scene_wrap.tag {
@@ -593,8 +615,6 @@ fn parse_scene(
                         html.push_str(&new_scene);
                     }
                 }
-
-                html.push_str(list_item_closing_tag);
             }
 
             // Special Markdown Syntax Elements
@@ -807,9 +827,7 @@ fn parse_scene(
 
     // Create class for all child elements
     if !scene_wrap.child_styles.is_empty() {
-        scene_wrap
-            .classes
-            .push_str(&format!(" bs-{class_id}"));
+        scene_wrap.classes.push_str(&format!(" bs-{class_id}"));
         css.push_str(&format!(
             ".bs-{class_id} > * {{{}}}",
             scene_wrap.child_styles
@@ -846,14 +864,6 @@ fn parse_scene(
             html.push_str("</div>");
         }
         Tag::A(href) => {
-            // If this is in a list, surroung the scene with list tags
-            let list_item_closing_tag = match scene_wrap.outer_tag {
-                Tag::List => {
-                    html.insert_str(0, "<li>");
-                    "</li>"
-                }
-                _ => "",
-            };
             html.insert_str(
                 0,
                 &format!(
@@ -865,7 +875,6 @@ fn parse_scene(
                 ),
             );
             html.push_str("</a>");
-            html.push_str(list_item_closing_tag);
         }
         Tag::Img(src) => {
             html.insert_str(
@@ -1003,6 +1012,10 @@ fn parse_scene(
         Tag::Section => {
             html.insert_str(0, "<section>");
             html.push_str("</section>");
+        }
+        Tag::List => {
+            html.insert_str(0, "<li>");
+            html.push_str("</li>");
         }
         _ => {}
     };
