@@ -427,6 +427,9 @@ fn parse_scene(
                                     }
                                 }
                             }
+                            Tag::Table(_) => {
+                                html.push_str(&format!("{}", content));
+                            }
                             _ => {
                                 html.push_str(&format!("<span>{}</span>", content));
                             }
@@ -458,7 +461,7 @@ fn parse_scene(
                                         }
                                     }
                                     Tag::Table(_) | Tag::Nav(_) => {
-                                        html.push_str(&format!("<span>{}</span>", content));
+                                        html.push_str(&format!("{}", content));
                                     }
                                     Tag::Heading | Tag::BulletPoint => {
                                         let newlines_at_start =
@@ -503,10 +506,15 @@ fn parse_scene(
                     }
 
                     Token::Newline => {
-                        html.push_str(&collect_closing_tags(&mut closing_tags));
-                        if columns == 0 {
-                            html.push_str("<br>");
-                        }
+                        match *parent_tag {
+                            Tag::Table(_) | Tag::Nav(_) => {}
+                            _ => {
+                                html.push_str(&collect_closing_tags(&mut closing_tags));
+                                if columns == 0 {
+                                    html.push_str("<br>");
+                                }
+                            }
+                        };
                     }
 
                     Token::CodeBlock(content) => {
@@ -567,24 +575,38 @@ fn parse_scene(
 
             // Special Markdown Syntax Elements
             AstNode::Heading(size) => {
-                html.push_str(&collect_closing_tags(&mut closing_tags));
-                html.push_str(&format!("<h{}>", size));
-                closing_tags.push(format!("</h{}>", size));
-                *parent_tag = Tag::Heading;
+                match *parent_tag {
+                    Tag::Table(_) | Tag::Nav(_) => {}
+                    _ => {
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
+                        html.push_str(&format!("<h{}>", size));
+                        closing_tags.push(format!("</h{}>", size));
+                        *parent_tag = Tag::Heading;
+                    }
+                };
             }
             AstNode::BulletPoint(_strength) => {
-                html.push_str(&collect_closing_tags(&mut closing_tags));
-                html.push_str(&format!("<li>"));
-                closing_tags.push("</li>".to_string());
-                *parent_tag = Tag::None;
+                match *parent_tag {
+                    Tag::Table(_) | Tag::Nav(_) => {}
+                    _ => {
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
+                        html.push_str(&format!("<li>"));
+                        closing_tags.push("</li>".to_string());
+                        *parent_tag = Tag::None;
+                    }
+                };
             }
             AstNode::Em(strength, content) => {
-                if *parent_tag != Tag::P {
-                    html.push_str(&collect_closing_tags(&mut closing_tags));
-                    html.push_str("<p>");
-                    closing_tags.push("</p>".to_string());
-                    *parent_tag = Tag::P;
-                }
+                match *parent_tag {
+                    Tag::Table(_) | Tag::Nav(_) | Tag::P => {}
+                    _ => {
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
+                        html.push_str("<p>");
+                        closing_tags.push("</p>".to_string());
+                        *parent_tag = Tag::P;
+                    }
+                };
+
                 match strength {
                     1 => {
                         html.push_str(&format!("<em>{}</em>", content));
@@ -609,7 +631,12 @@ fn parse_scene(
             }
 
             AstNode::Space => {
-                html.push_str("&nbsp;");
+                match *parent_tag {
+                    Tag::Table(_) | Tag::Nav(_) => {}
+                    _ => {
+                        html.push_str("&nbsp;");
+                    }
+                };
             }
 
             // STUFF THAT IS INSIDE SCENE HEAD THAT NEEDS TO BE PASSED INTO SCENE BODY
@@ -837,7 +864,7 @@ fn parse_scene(
             html.insert_str(
                 0,
                 &format!(
-                    "<table style=\"{}\" {} ><head>",
+                    "<table style=\"{}\" {} ><thead>",
                     scene_wrap.style, scene_wrap.properties,
                 ),
             );
@@ -973,7 +1000,7 @@ fn insert_into_table(
 ) -> usize {
     *ele_count += 1;
 
-    let heading = *ele_count < columns || columns < 2;
+    let heading = *ele_count <= columns || columns < 2;
     let ele_mod = *ele_count % columns;
 
     if ele_mod == 1 {
