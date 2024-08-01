@@ -1,5 +1,5 @@
 [header center pad(2, 0, 0, 0):
-    # T H E   B E A N S T A L K   B O O K
+    [title 1: THE BEANSTALK BOOK]
     # &#127793;
 ][main:
 
@@ -14,6 +14,8 @@ The compiler is written in Rust, and fast compile times and a built in watcher/d
 - [link "./docs/scenes": Introduction to scenes]
 - [link "./docs/setting-up-a-project": Setting up a project]
 - [link "./docs/basics": Basic Language Syntax (in progress)]
+- [link "./docs/functions": Functions]
+- [link "./docs/errors": Error Handling]
 
 More info to be added soon!
 

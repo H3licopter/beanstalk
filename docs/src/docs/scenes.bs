@@ -1,6 +1,5 @@
+[header center: [title 1: BEANSTALK SCENES]]
 [main:
-
-# Scenes
 Beanstalk has its own templating language. These are called scenes.
 
 Scenes have two sections, the head and the body. 

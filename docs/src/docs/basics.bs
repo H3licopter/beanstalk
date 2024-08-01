@@ -1,3 +1,5 @@
+[nav(0) bg(0, 0, 75, 0.1): [link "../../": Home]]
+[header center: [title 1: BASIC BEANSTALK SYNTAX]]
 [main:
 
 # Style Guide
@@ -68,10 +70,13 @@ Types will be inferred if not specified, and implicit conversions will be used t
     float := 69.420
 
     -- pointed sized unsigned integer
-    my_brain : index : 420 
+    my_brain : Index : 420 
 
-    -- Implicit string conversion (string type must be specified in the type definition for this to work)
-    -- Any expression you assign to this string variable will be converted to a string
+    -- 
+        Implicit string conversion (string type must be specified in the type definition for this to work)
+        
+        Any expression you assign to this string variable will be converted to a string
+    --
     cool_string := 14 + 42 + " is a cool number " + '😂' -- "56 is a cool number 😂"
 ]
 
@@ -108,21 +113,23 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
-    [: int ] [: 32 bit signed integer ] [: 0]
+    [: Int ] [: 32 bit signed integer ] [: 0]
     
-    [: index ] [: Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible. ] [: 0]
+    [: Idx ] [: Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible. ] [: 0]
 
-    [: float ] [: 32 bit floating point number ] [: 0.0]
+    [: Float ] [: 32 bit floating point number ] [: 0.0]
     
-    [: decimal ] [: A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision] [: 0.00]
+    [: Decimal ] [: A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision] [: 0.00]
 
-    [: string ] [: UTF-8] [: ""]
+    [: String ] [: UTF-8] [: ""]
 
-    [: unicode ] [: Unicode strings are UTF-32 strings. They are created using single quotes. ] [: '']
+    [: Unicode ] [: Unicode strings are UTF-32 strings. They are created using single quotes. ] [: '']
 
-    [: bool ] [: Boolean, including true and false as types] [: false]
+    [: Bool ] [: Boolean, including true and false as types] [: false]
 
-    [: error] [: Contains a special type of debug string detailing the error] [: "ERROR"]
+    [: Error] [: Contains a special type of debug string detailing the error] [: "ERROR"]
+
+    [: Unit] [: Special numeric unit syntax for appending numerical types ] [: error]
 ]
 
 ## Collection Types
@@ -131,11 +138,11 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 
     [: ()] [: Collection. Any number of items seperated by commas. See [link "../collections": Collections] for more information.] [: ()]
 
-    [: scene] [: The templating syntax of Beanstalk] [: "`[]`" -  an empty scene]
+    [: Scene] [: The templating syntax of Beanstalk] [: "`[]`" -  an empty scene]
     
-    [: choice] [: Rust style enums] [: error]
+    [: Choice] [: Rust style enums] [: error]
 
-    [: type] [: For generics and datatype related operations] [: error]
+    [: Type] [: For generics and datatype related operations] [: error]
 ]
 
 # Strings
@@ -168,7 +175,7 @@ Only false, ! and ? are falsy values. Any other check with an if statement will 
     [: %]          [: Modulo (truncated)]   [: 7]
     [: %%]         [: Remainder (floored)]  [: 7]
     [: +]          [: Sum]                  [: 6]
-    [: -]          [: Subtraction]          [: 6]
+    [: `-`]          [: Subtraction]          [: 6]
 ]
 
 # Numeric Units
@@ -181,9 +188,9 @@ If you are mixing unit types in an operation, the first unit type will be used f
 
 [code:
     -- Specifies the base type as a float
-    m : unit : float
-    cm : unit : m * 0.01
-    mm : unit : cm * 0.1
+    m : Unit : float
+    cm : Unit : m * 0.01
+    mm : Unit : cm * 0.1
 
     width := 5m * 230cm
     -- result is 5.23

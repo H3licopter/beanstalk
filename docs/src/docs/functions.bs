@@ -1,69 +1,72 @@
-[:
+[header center: [title 1: FUNCTIONS]]
+[main:
 
 # Functions
-If the function can only return an error, you can use a '!' as the specified return type.  
+If the function can only return an error, you can use a '?' as the specified return type.  
 
 ## The arrow operator
 The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
 
 A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
 
-`
-    doNothing : () -> {}
+    [code:
+        doNothing :: () -> {}
 
-    -- Returns a tuple of values
-    multipleReturns : () -> (int, int, int) {
-        return (1, 2, 3)
-    }
+        -- Returns a tuple of values
+        multipleReturns :: () -> (int, int, int) {
+            return (1, 2, 3)
+        }
 
-    differentReturns : (spicy : bool = false) -> (int, int, int) {
-        if spicy:
-            return (69, 420, 1337)
-        
-        return (1, 2, 3)
-    }
+        differentReturns :: (spicy : bool = false) -> (int, int, int) {
+            if spicy: return (69, 420, 1337)
+            
+            return (1, 2, 3)
+        }
 
-    nestedReturns : () -> bool {
-        if state is (
-            STATE.normal => return true
-            => return false
-        )
-    }
+        nestedReturns :: () -> bool {
+            if state is (
+                STATE.normal => return true
+                => return false
+            )
+        }
 
-    defaultReturn: () -> (int) {
-        if time now is time last (
-            time now += 1
-        )
+        defaultReturn :: () -> (int) {
+            if time.now is time.last (
+                time.now += 1
+            )
 
-        return time now
-    }
+            return time now
+        }
 
-`
+    ]
 
 # Generics
 The type keyword is used to create generic types that can be used in functions and methods.
 
 These types will converge into a single possible type when initialised within a type definition, but within the same scope they remain 'generic'.
 
-`
-    -- Creating a generic type
-    number : type : int or float
+    [code:
+        -- Creating a generic type
+        number : type : int or float or dec
 
-    add : (a : number, b : number) -> number {
-        return a + b
-    }
+        add : (a : number, b : number) -> number {
+            return a + b
+        }
 
-    -- This function will now work with floats and ints
-    add(3, 4) -- 7
-    add(3.23, 53.9) -- 57.13
+        -- This function will now work with floats and ints
+        add(3, 4) -- 7
+        add(3.23, 53.9) -- 57.13
 
-    -- Converges to int type
-    example1 : number = 3
+        -- Converges to int type
+        example1 : number = 3
 
-    -- Converges to float type
-    example2 : number = 3.23
+        -- Converges to float type
+        example2 : number = 3.23
 
-    -- Type Error, only one type can be converged
-    example3 : number = example1 + example2
+        -- Type Error, only one type can be converged
+        example3 : number = example1 + example2
+    ]
 
-`
+[footer: [pad(2, 0, 0, 0) center: 
+    ### &#127793;
+]

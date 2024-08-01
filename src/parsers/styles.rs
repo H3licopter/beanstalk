@@ -28,9 +28,13 @@ pub enum Tag {
     Table(u32),
     Code(String), // Language
 
-    // TO BE IMPLIMENTED
     Nav(AstNode), // Will be an enum with different types of navs
     List,
+
+    // Custom Beanstalk Tags
+    Title(AstNode),
+
+    // TO BE IMPLIMENTED
     Button,
 }
 
@@ -45,4 +49,6 @@ pub enum Style {
     Alt(String),
     Center(bool),   // true = also center vertically
     Order(AstNode), // For positioning elements inside a grid/flex container/nav etc
+
+
 }

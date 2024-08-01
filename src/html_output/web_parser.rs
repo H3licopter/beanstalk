@@ -100,6 +100,7 @@ struct SceneTag {
     outer_tag: Tag,
     properties: String,
     style: String,
+    classes: String,
     child_styles: String,
 }
 
@@ -131,6 +132,7 @@ fn parse_scene(
             _ => Tag::None,
         },
         properties: String::new(),
+        classes: String::new(),
         style: String::new(),
         child_styles: String::new(),
     };
@@ -182,7 +184,7 @@ fn parse_scene(
             }
             Style::BackgroundColor(args) => {
                 scene_wrap.child_styles.push_str(&format!(
-                    "background-color:rgb({});",
+                    "background-color:rgba({});",
                     collection_to_js(&args)
                 ));
                 // Only switch to span if there is no tag
@@ -205,7 +207,7 @@ fn parse_scene(
                 };
 
                 scene_wrap.child_styles.push_str(&format!(
-                    "color:{}({});",
+                    "color:{}a({});",
                     color_keyword,
                     collection_to_js(&args)
                 ));
@@ -311,6 +313,9 @@ fn parse_scene(
             Tag::A(node) => {
                 scene_wrap.tag = Tag::A(node.to_owned());
             }
+            Tag::Title(node) => {
+                scene_wrap.tag = Tag::Title(node.to_owned());
+            }
             Tag::Nav(style) => {
                 match scene_wrap.tag {
                     Tag::Img(_) | Tag::Video(_) | Tag::Audio(_) => {
@@ -394,6 +399,16 @@ fn parse_scene(
                 match token {
                     Token::Span(mut content) => {
                         content = sanitise_content(&mut content);
+
+                        // Specical tags
+                        match scene_wrap.tag {
+                            Tag::Title(_) => {
+                                html.push_str(&format!("{}", content));
+                                continue;
+                            }
+                            _ => {}
+                        }
+
                         match *parent_tag {
                             Tag::P => {
                                 html.push_str(&format!("<span>{}</span>", content));
@@ -438,6 +453,15 @@ fn parse_scene(
 
                     Token::P(mut content) => {
                         content = sanitise_content(&mut content);
+
+                        // Specical tags
+                        match scene_wrap.tag {
+                            Tag::Title(_) => {
+                                html.push_str(&format!("{}", content));
+                                continue;
+                            }
+                            _ => {}
+                        }
 
                         match scene_wrap.tag {
                             Tag::Img(_) | Tag::Video(_) => {
@@ -784,8 +808,8 @@ fn parse_scene(
     // Create class for all child elements
     if !scene_wrap.child_styles.is_empty() {
         scene_wrap
-            .properties
-            .push_str(&format!(" class='bs-{class_id}'"));
+            .classes
+            .push_str(&format!(" bs-{class_id}"));
         css.push_str(&format!(
             ".bs-{class_id} > * {{{}}}",
             scene_wrap.child_styles
@@ -798,8 +822,8 @@ fn parse_scene(
             html.insert_str(
                 0,
                 &format!(
-                    "<span style=\"{}\" {}>",
-                    scene_wrap.style, scene_wrap.properties
+                    "<span style=\"{}\" {} class=\"{}\" >",
+                    scene_wrap.style, scene_wrap.properties, scene_wrap.classes
                 ),
             );
             html.push_str("</span>");
@@ -808,8 +832,8 @@ fn parse_scene(
             html.insert_str(
                 0,
                 &format!(
-                    "<div style=\"{}\" {} >",
-                    scene_wrap.style, scene_wrap.properties
+                    "<div style=\"{}\" {} class=\"{}\" >",
+                    scene_wrap.style, scene_wrap.properties, scene_wrap.classes
                 ),
             );
             if match *parent_tag {
@@ -822,24 +846,35 @@ fn parse_scene(
             html.push_str("</div>");
         }
         Tag::A(href) => {
+            // If this is in a list, surroung the scene with list tags
+            let list_item_closing_tag = match scene_wrap.outer_tag {
+                Tag::List => {
+                    html.insert_str(0, "<li>");
+                    "</li>"
+                }
+                _ => "",
+            };
             html.insert_str(
                 0,
                 &format!(
-                    "<a href={} style=\"{}\" {}>",
+                    "<a href={} style=\"{}\" class=\"{}\" {}>",
                     expression_to_js(&href),
                     scene_wrap.style,
+                    scene_wrap.classes,
                     scene_wrap.properties
                 ),
             );
             html.push_str("</a>");
+            html.push_str(list_item_closing_tag);
         }
         Tag::Img(src) => {
             html.insert_str(
                 0,
                 &format!(
-                    "<img src={} style=\"{}\" {} />",
+                    "<img src={} style=\"{}\" class=\"{}\" {} />",
                     expression_to_js(&src),
                     scene_wrap.style,
+                    scene_wrap.classes,
                     scene_wrap.properties
                 ),
             );
@@ -864,8 +899,8 @@ fn parse_scene(
             html.insert_str(
                 0,
                 &format!(
-                    "<table style=\"{}\" {} ><thead>",
-                    scene_wrap.style, scene_wrap.properties,
+                    "<table style=\"{}\" {} class=\"{}\" ><thead>",
+                    scene_wrap.style, scene_wrap.properties, scene_wrap.classes,
                 ),
             );
             html.push_str("</tbody></table>");
@@ -874,10 +909,11 @@ fn parse_scene(
             html.insert_str(
                 0,
                 &format!(
-                    "<video src=\"{}\" style=\"{}\" {} controls />",
+                    "<video src=\"{}\" style=\"{}\" {} class=\"{}\" controls />",
                     expression_to_js(&src),
                     scene_wrap.style,
-                    scene_wrap.properties
+                    scene_wrap.properties,
+                    scene_wrap.classes
                 ),
             );
             if match *parent_tag {
@@ -892,10 +928,11 @@ fn parse_scene(
             html.insert_str(
                 0,
                 &format!(
-                    "<audio src=\"{}\" style=\"{}\" {} controls />",
+                    "<audio src=\"{}\" style=\"{}\" {} class=\"{}\" controls />",
                     expression_to_js(&src),
                     scene_wrap.style,
-                    scene_wrap.properties
+                    scene_wrap.properties,
+                    scene_wrap.classes
                 ),
             );
         }
@@ -903,8 +940,8 @@ fn parse_scene(
             html.insert_str(
                 0,
                 &format!(
-                    "<code style=\"{}\" {} >",
-                    scene_wrap.style, scene_wrap.properties,
+                    "<code style=\"{}\" {} class=\"{}\" >",
+                    scene_wrap.style, scene_wrap.properties, scene_wrap.classes,
                 ),
             );
             html.push_str("</code>");
@@ -921,13 +958,31 @@ fn parse_scene(
             html.insert_str(
                 0,
                 &format!(
-                    "<nav style=\"{}\" class=\"bs-nav-{}\" {} >",
-                    scene_wrap.style, class_id, scene_wrap.properties,
+                    "<nav style=\"{}\" class=\"bs-nav-{} {}\" {} >",
+                    scene_wrap.style, class_id, scene_wrap.classes, scene_wrap.properties,
                 ),
             );
 
             css.push_str(get_bs_css(&format!("nav-{}", class_id)));
             html.push_str("</nav>");
+        }
+        Tag::Title(size) => {
+            let class_id = match size {
+                AstNode::Literal(Token::IntLiteral(value)) => value,
+                _ => {
+                    red_ln!("Error: title size must be an integer literal, none provided");
+                    0
+                }
+            };
+            html.insert_str(
+                0,
+                &format!(
+                    "<b class=\"bs-title-{} {}\" style=\"{}\" {} >",
+                    class_id, scene_wrap.classes, scene_wrap.style, scene_wrap.properties,
+                ),
+            );
+            css.push_str(get_bs_css(&format!("title-{}", class_id)));
+            html.push_str("</b>");
         }
         _ => {}
     };
@@ -938,11 +993,11 @@ fn parse_scene(
             html.push_str("</main>");
         }
         Tag::Header => {
-            html.insert_str(0, "<header>");
+            html.insert_str(0, "<header class=\"container\">");
             html.push_str("</header>");
         }
         Tag::Footer => {
-            html.insert_str(0, "<footer>");
+            html.insert_str(0, "<footer class=\"container\">");
             html.push_str("</footer>");
         }
         Tag::Section => {

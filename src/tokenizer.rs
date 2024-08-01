@@ -547,6 +547,7 @@ fn keyword_or_variable(
                     "code" => return Token::CodeKeyword,
                     "nav" => return Token::Nav,
                     "order" => return Token::Order,
+                    "title" => return Token::Title,
 
                     // Structure of the page
                     "main" => return Token::Main,
@@ -565,9 +566,6 @@ fn keyword_or_variable(
 
                     if token_value == "date" {
                         return Token::Date;
-                    }
-                    if token_value == "title" {
-                        return Token::Title;
                     }
                 }
 
