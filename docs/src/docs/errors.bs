@@ -1,11 +1,25 @@
-[nav(1) bg(100, 220, 0, 0.06): [link("../"): &#127793;]]
+[nav(1) bg(100, 220, 0, 0.06): [link(../"): &#127793;]]
 
 [header center: [title 1: ERROR HANDLING]]
 [main:
 
-Any function that can return an error as one of it's values.
+Errors are treated as values in Beanstalk, any function can return an error as one of it's values must have it's error handled.
 
-The ? operator is used to check if one of the values in a tuple is an error. If it is, the error can then be handled in a new scope.
+The ? operator is used to check if one of the values in a tuple is an error. If it is, the error can then be handled in a new scope, or passed up the call stack if no scope is provided.
+
+[code:
+    func_call_that_can_return_an_error() ? {
+        -- Error handling code
+    }
+
+    -- Passing the error up to the calling function
+    parent_func :: () -> string? {
+        return func_call_that_can_return_an_error() ?
+    }
+
+]
+
+You can think of this as similar to err != nil in golang, but with a more concise syntax.
 
 ## Using the ? operator
 These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code, as well as providing a way to avoid opening a new scope for every error check.

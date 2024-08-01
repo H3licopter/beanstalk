@@ -1,4 +1,4 @@
-[nav(1) bg(100, 220, 0, 0.06): [link("../../"): &#127793;]]
+[nav(1) bg(100, 220, 0, 0.06): [link("../"): &#127793;]]
 
 [header center: [title 1: BEANSTALK SCENES]]
 [main:
@@ -65,6 +65,12 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
     [ imported_scene ]
 ]
 
+### Units and sizes
+By default, beanstalk uses rem for all units by default. This will continue to be the case until later in the project when more specific units will be supported. This will come with the language supporing more complex styling and layout.
+
+## Scene Style Keywords
+More keywords will be added and more documentation about the aruments you can pass into the styles will be added as the compiler is developed and design desisions are slowly solidified.
+
 ### Style
 [table 2:
     [: Property] [: Description]
@@ -82,10 +88,9 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
 
     [: pad] [: The padding around the element]
     [: space] [: The margin around the element]
-    [: center] [: Centers the element vertically]
+    [: center] [: Centers the element horizontally. Pass in a bool of true to center vertically]
     [: table] [: A table element]
-    [: size] [: The size of the element]
-    [: hide] [: Hides the element]
+    [: size] [: The size of the text in the element]
     [: nav] [: A navigation element. Basically a nav bar, will automatically add ul tags for child scenes]
     [: order] [: The order of the element inside a container]
     [: gap] [: Creates a gap between elements]

@@ -15,11 +15,11 @@
   <p>⚠️ This is currently a work in progress compiler. It's not reccomended you try and actually use it yet!</p>
   <p>⚠️ Core parts of the design are still subject to large changes and iteration as the compiler is developed</p>
 
-  <h3>
+  <h1>
     <a href="https://h3licopter.github.io/beanstalk">
       Documentation
     </a>
-  </h3>
+  </h1>
   <p>The docs are written entirely in Beanstalk!</p>
 
 </div>
