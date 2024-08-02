@@ -140,7 +140,7 @@ pub fn collection_to_js(collection: &AstNode) -> String {
     }
 }
 
-pub fn collection_to_vec_of_js(collection: &AstNode) -> Vec<String> {
+pub fn _collection_to_vec_of_js(collection: &AstNode) -> Vec<String> {
     let mut js = Vec::new();
 
     match collection {

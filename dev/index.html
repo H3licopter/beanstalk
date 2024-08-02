@@ -18,9 +18,7 @@
 <link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="images/favicons/site.webmanifest">
 <link rel="stylesheet" href="css/pico.min.css" />
-<style>.bs-0 > * {color:rgba(175, 10, 10);}</style></head><body><h2>Documentation
-</h2><p>⚠️ <span style=""  class=" bs-0" ><p><strong>Only some of this documentation is implimented. 
-</strong><span>It is partly being used as a design plan and for keeping track of ideas, as much as it documents what actually works so far.**</span>&nbsp;</p></span><span>⚠️</span></p>
+<style></style></head><body>
 <script type="module">
   import init, { parse_int_expr, parse_float_expr } from "./pkg/bs_wasm_generator.js";
   init().then(() => {
@@ -30,7 +28,7 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }
+            }let v2 = parse_int_expr(`3 + 3`);console.log();
   });
   
   function checkIfFileChanged() {

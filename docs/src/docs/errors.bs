@@ -1,4 +1,4 @@
-[nav(1) bg(100, 220, 0, 0.06): [link(../"): &#127793;]]
+[nav(1) bg(100, 220, 0, 0.06): [link("../"): &#127793;]]
 
 [header center: [title 1: ERROR HANDLING]]
 [main:
@@ -24,22 +24,22 @@ You can think of this as similar to err != nil in golang, but with a more concis
 ## Using the ? operator
 These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code, as well as providing a way to avoid opening a new scope for every error check.
 
-    [code:
-        -- Always returns a string even if an error is thrown by getNetworkRequest()
-        -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
-        
-        getURL :: () -> string {
-            return getNetworkRequest() ? {
-                io "Network Request Error: " + error
-                return "example.com"
-            }
+[code:
+    -- Always returns a string even if an error is thrown by getNetworkRequest()
+    -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
+    
+    getURL :: () -> string {
+        return getNetworkRequest() ? {
+            io "Network Request Error: " + error
+            return "example.com"
         }
+    }
 
-        -- Returns a string or an error
-        getURL :: () -> string? {
-            return getNetworkRequest()
-        }
-    ]
+    -- Returns a string or an error
+    getURL :: () -> string? {
+        return getNetworkRequest()
+    }
+]
 
 ]
 
