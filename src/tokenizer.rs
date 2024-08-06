@@ -4,7 +4,7 @@ use crate::tokenize_scene::{tokenize_codeblock, tokenize_markdown, tokenize_scen
 use std::iter::Peekable;
 use std::str::Chars;
 
-pub fn tokenize(source_code: &str, module_name: &String) -> Vec<Token> {
+pub fn tokenize(source_code: &str, module_name: &str) -> Vec<Token> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut chars: Peekable<Chars<'_>> = source_code.chars().peekable();
     let mut tokenize_mode: TokenizeMode = TokenizeMode::Normal;

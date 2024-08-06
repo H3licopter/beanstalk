@@ -7,51 +7,53 @@ use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::Token;
 use std::error::Error;
+use std::path::PathBuf;
 use std::fs;
 
-struct OutputFile {
+pub struct OutputFile {
     source_code: String,
-    output_dir: String,
-    file_name: String,
+    file: PathBuf,
 }
 
 #[allow(unused_variables)]
-pub fn build(mut entry_path: String, release_build: bool) -> Result<(), Box<dyn Error>> {
+pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Error>> {
     // Change default output directory to dev if release_build is true
     let project_config = get_default_config();
-    let output_dir_name = if release_build {
-        &project_config.release_folder
+    let output_dir_folder = if release_build {
+        PathBuf::from(&project_config.release_folder)
     } else {
-        &project_config.dev_folder
+        PathBuf::from(&project_config.dev_folder)
     };
 
+    // Create a new PathBuf from the entry_path
+    let entry_dir ;
     // If entry_path is "test", use the compiler test directory
     if entry_path == "test" {
-        entry_path = match std::env::current_dir() {
-            Ok(dir) => format!(
-                "{}/test_output/src/index.bs",
-                dir.to_str().unwrap().to_owned()
-            ),
+        entry_dir = match std::env::current_dir() {
+            Ok(dir) => {
+                dir.join("test_output/src/index.bs")
+            },
             Err(e) => {
                 println!("Error getting current directory: {:?}", e);
                 return Err(e.into());
             }
         };
-    }
-
-    if entry_path == "" {
-        entry_path = match std::env::current_dir() {
-            Ok(dir) => dir.to_str().unwrap().to_owned(),
+    } else if entry_path == "" {
+        entry_dir = match std::env::current_dir() {
+            Ok(dir) => dir,
             Err(e) => {
                 println!("Error getting current directory: {:?}", e);
                 return Err(e.into());
             }
         };
+    } else {
+        // turn whitespace in file name to dashes
+        entry_dir = PathBuf::from(entry_path.replace(|c: char| c.is_whitespace(), "-"));
     }
 
     // Read content from a test file
     print_ln_bold!("Project Directory: ");
-    dark_yellow_ln!("{}", &entry_path);
+    dark_yellow_ln!("{:?}", &entry_dir);
 
     let mut source_code_to_parse: Vec<OutputFile> = Vec::new();
 
@@ -59,52 +61,32 @@ pub fn build(mut entry_path: String, release_build: bool) -> Result<(), Box<dyn 
     // if there is, read it and set the config settings
     // and check where the project entry points are
     enum CompileType {
-        SingleFile(String, String), // File Name, Source Code
-        MultiFile(String),          // Config file content
+        SingleFile(PathBuf, String), // File Name, Source Code
+        MultiFile(PathBuf, String),          // Config file content
         Error(String),
     }
 
-    let config = if entry_path.ends_with(".bs") {
-        let source_code = fs::read_to_string(&entry_path);
-        let og_file_name = entry_path.split("/").last().unwrap();
-        let new_file_name = og_file_name.split(".").next().unwrap();
-
+    let config = if entry_dir.extension() == Some("bs".as_ref()) {
+        let source_code = fs::read_to_string(&entry_dir);
         match source_code {
             Ok(content) => {
-                let file_name = format!(
-                    "{}.html",
-                    if new_file_name == "home" {
-                        "index"
-                    } else {
-                        new_file_name
-                    }
-                );
-                CompileType::SingleFile(file_name, content)
+                CompileType::SingleFile(entry_dir.with_extension("html"), content)
             }
             Err(_) => CompileType::Error("No file found".to_string()),
         }
     } else {
-        let source_code = fs::read_to_string(format!("{}/config.bs", &entry_path));
+        let source_code = fs::read_to_string(entry_dir.join("config.bs"));
         match source_code {
-            Ok(content) => CompileType::MultiFile(content),
+            Ok(content) => CompileType::MultiFile(entry_dir, content),
             Err(_) => CompileType::Error("No config.bs file found in directory".to_string()),
         }
     };
 
     match config {
-        CompileType::SingleFile(name, code) => {
-            // Compile the induvidual file
-            let entry_file_dir = entry_path.split("/").collect::<Vec<&str>>();
-            let default_output_dir = format!(
-                "{}/{}",
-                entry_file_dir[0..entry_file_dir.len() - 3].join("/"),
-                output_dir_name
-            );
-
+        CompileType::SingleFile(file_path, code) => {
             source_code_to_parse.push(OutputFile {
                 source_code: code,
-                output_dir: format!("{}/", &default_output_dir),
-                file_name: name,
+                file: file_path,
             });
         }
 
@@ -112,93 +94,57 @@ pub fn build(mut entry_path: String, release_build: bool) -> Result<(), Box<dyn 
             return Err(e.into());
         }
 
-        CompileType::MultiFile(source_code) => {
+        CompileType::MultiFile(entry_dir, source_code) => {
             dark_cyan_ln!("Reading Config File ...");
             // Get config settings from config file
             // let project_config = get_config_data(&source_code)?;
             // Just get the default config for now until can parse the config settings
             let src_dir: fs::ReadDir =
-                match fs::read_dir(&format!("{}/{}", entry_path, &project_config.src)) {
+                match fs::read_dir(entry_dir.join(&project_config.src)) {
                     Ok(dir) => dir,
                     Err(e) => {
                         red_ln!("Error reading directory: {:?}", e);
                         return Err(e.into());
                     }
                 };
-            add_bs_files_to_parse(&mut source_code_to_parse, src_dir, &output_dir_name)?;
+            add_bs_files_to_parse(&mut source_code_to_parse, src_dir, entry_dir.join(output_dir_folder))?;
         }
     }
 
     // Compile all output files
-    for file in source_code_to_parse {
+    for file in &source_code_to_parse {
         compile(file, release_build, &project_config)?;
+    }
+
+    // Any HTML files in the output dir not on the list of files to compile should be deleted if this is a release build
+    if release_build {
+        let output_dir = PathBuf::from(&project_config.release_folder);
+        for file in fs::read_dir(output_dir)? {
+            let file = file?;
+            let file_path = file.path();
+            if file_path.extension() == Some("html".as_ref()) {
+                if !source_code_to_parse.iter().any(|f| f.file == file_path) {
+                    fs::remove_file(file_path)?;
+                }
+            }
+        }
     }
 
     Ok(())
 }
 
 // Look for every subdirectory inside of dir and add all .bs files to the source_code_to_parse
-fn add_bs_files_to_parse(
+pub fn add_bs_files_to_parse(
     source_code_to_parse: &mut Vec<OutputFile>,
     dir: fs::ReadDir,
-    output_dir_name: &String,
+    output_file_dir: PathBuf,
 ) -> Result<(), Box<dyn Error>> {
     for file in dir {
         match file {
-            Ok(file) => {
-                let file = file.path();
-                if file.extension() == Some("bs".as_ref()) {
-                    let file_name = match file.file_stem() {
-                        Some(name) => name.to_string_lossy(),
-                        None => continue,
-                    };
-
-                    let file_str = file.parent().unwrap().to_str().unwrap();
-
-                    let mut output_dir = String::new();
-
-                    if let Some(src_pos) = file_str.find("/src") {
-                        // Split the string slice at the position of "/src/"
-                        let (root_dir, subfolders) = file_str.split_at(src_pos);
-
-                        // Skip the "/src" part in subfolders
-                        if subfolders.len() < 4 {
-                            eprintln!("'src' not found in the path");
-                            continue;
-                        }
-
-                        let subfolders = &subfolders[4..]; // 4 is the length of "/src"
-
-                        // Create the output directory string
-                        output_dir = format!("{}/{}{}", root_dir, output_dir_name, subfolders);
-                    } else {
-                        eprintln!("'src' not found in the path");
-                    }
-
-                    // turn whitespace in file name to dashes
-                    let no_whitespace = file_name.replace(|c: char| c.is_whitespace(), "-");
-                    let mut name_iter = no_whitespace.chars().peekable();
-
-                    // Remove duplicate dashes
-                    let mut file_name_formatted = String::new();
-                    loop {
-                        let c = name_iter.next();
-                        match c {
-                            Some(c) => {
-                                if c == '-' && name_iter.peek() == Some(&'-') {
-                                    continue;
-                                }
-
-                                file_name_formatted.push(c);
-                            }
-                            None => break,
-                        }
-                    }
-
-                    let output_file = format!("{file_name_formatted}.html");
-                    let file_dir = file.to_str().unwrap();
-
-                    let code = match fs::read_to_string(&file_dir) {
+            Ok(f) => {
+                let file_path = &f.path();
+                if file_path.extension() == Some("bs".as_ref()) {
+                    let code = match fs::read_to_string(file_path) {
                         Ok(content) => content,
                         Err(e) => {
                             red_ln!("Error reading file while adding bs files to parse: {:?}", e);
@@ -206,18 +152,16 @@ fn add_bs_files_to_parse(
                         }
                     };
 
+                    let file_name = file_path.file_stem().unwrap().to_str().unwrap();
+                    
                     source_code_to_parse.push(OutputFile {
                         source_code: code,
-                        output_dir: format!("{}/", output_dir),
-                        file_name: output_file,
+                        file: output_file_dir.join(file_name).with_extension("html"),
                     });
-                }
-
-                // HANDLE USING JS / HTML / CSS / MARKDOWN FILES MIXED INTO THE PROJECT IN THE FUTURE
 
                 // If directory, recursively call add_bs_files_to_parse
-                if file.is_dir() {
-                    let new_dir = match fs::read_dir(&file) {
+                } else if file_path.is_dir() {
+                    let new_dir = match fs::read_dir(file_path) {
                         Ok(new_path) => new_path,
                         Err(e) => {
                             red_ln!(
@@ -228,8 +172,28 @@ fn add_bs_files_to_parse(
                         }
                     };
 
-                    add_bs_files_to_parse(source_code_to_parse, new_dir, output_dir_name)?
+                    let new_output_dir = output_file_dir.join(file_path.file_stem().unwrap());
+                    add_bs_files_to_parse(source_code_to_parse, new_dir, new_output_dir)?
+                
+                // HANDLE USING JS / HTML / CSS MIXED INTO THE PROJECT
+                } else {
+                    match file_path.extension() {
+                        Some(ext) => {
+
+                            // TEMPORARY: JUST PUT THEM DIRECTLY INTO THE OUTPUT DIRECTORY
+                            if ext == "js" || ext == "html" || ext == "css" {
+                                let file_name = file_path.file_name().unwrap().to_str().unwrap();
+                                source_code_to_parse.push(OutputFile {
+                                    source_code: String::new(),
+                                    file: output_file_dir.join(file_name),
+                                });
+                            }
+                        }
+                        None => {}
+                    }
                 }
+
+
             }
 
             Err(e) => {
@@ -242,22 +206,24 @@ fn add_bs_files_to_parse(
 }
 
 fn compile(
-    output: OutputFile,
+    output: &OutputFile,
     release_build: bool,
     config: &Config,
 ) -> Result<Vec<AstNode>, Box<dyn Error>> {
     print_bold!("Compiling: ");
-    dark_yellow_ln!("{}", output.file_name);
+    let file_name = output.file.file_name().unwrap().to_str().unwrap();
+    dark_yellow_ln!("{:?}", file_name);
 
-    let tokens: Vec<Token> = tokenizer::tokenize(&output.source_code, &output.file_name);
+    let tokens: Vec<Token> = tokenizer::tokenize(&output.source_code, file_name);
     let ast = parsers::build_ast::new_ast(tokens, 0).0;
 
     // If the output directory does not exist, create it
-    if !fs::metadata(&output.output_dir).is_ok() {
-        fs::create_dir_all(&output.output_dir)?;
+    let parent_dir = output.file.parent().unwrap();
+    if !fs::metadata(parent_dir).is_ok() {
+        fs::create_dir_all(parent_dir)?;
     }
 
-    let output_path = format!("{}{}", output.output_dir, output.file_name);
+    let output_path = &output.file;
 
     // TO BE REPLACED WITH LOADING CONFIG.BS FILE (When all config tokens are in tokenizer)
     let mut html_config = get_html_config();
@@ -268,16 +234,12 @@ fn compile(
     } else {
         &config.dev_folder
     };
-    let dist_subfolders = output
-        .output_dir
-        .split(&format!("{}/", output_dir_name))
-        .collect::<Vec<&str>>()[1]
-        .split("/")
-        .count()
-        - 1;
 
-    if dist_subfolders > 0 {
-        html_config.page_dist_url = (0..dist_subfolders).map(|_| "../").collect::<String>();
+    for ancestor in output.file.ancestors() {
+        if ancestor.file_name() == Some(output_dir_name.as_ref()) {
+            break;
+        }
+        html_config.page_dist_url.push_str("../");
     }
 
     fs::write(

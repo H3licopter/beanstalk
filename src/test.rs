@@ -10,11 +10,13 @@ use crate::Token;
 use crate::{dev_server, parsers};
 use std::error::Error;
 use std::fs;
+use std::path::PathBuf;
 
 pub fn test_build() -> Result<(), Box<dyn Error>> {
     // Read content from a test file
     yellow_ln_bold!("\nREADING TEST FILE\n");
-    let content = fs::read_to_string("test_output/src/index.bs")?;
+    let path = PathBuf::from("test_output/src/index.bs");
+    let content = fs::read_to_string(path)?;
 
     // Tokenize File
     yellow_ln_bold!("TOKENIZING FILE\n");

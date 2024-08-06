@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::time::Instant;
 use std::{
     fs,
@@ -30,14 +31,18 @@ mod html_output {
     pub mod js_parser;
     pub mod web_parser;
 }
+mod wasm_output {
+    pub mod wasm_generator;
+}
 use colour::{dark_cyan, green_ln_bold, red_ln};
 pub use tokens::Token;
 enum Command {
-    NewHTMLProject(String),
+    NewHTMLProject(PathBuf),
     Build(String),
     Release(String),
     Test,
     Dev(String), // Runs local dev server
+    Wat(String), // Compiles a WAT file to WebAssembly
 }
 
 fn main() {
@@ -71,7 +76,7 @@ fn main() {
         Command::Build(path) => {
             dark_cyan!("Building project...");
             let start = Instant::now();
-            match build::build(path, false) {
+            match build::build(path, true) {
                 Ok(_) => {
                     let duration = start.elapsed();
                     print!("Project built in: ");
@@ -102,8 +107,15 @@ fn main() {
         }
         Command::Test => {
             println!("Testing...");
-            let _ = test::test_build();
-            main();
+            let result = test::test_build();
+            match result {
+                Ok(_) => {
+                    main();
+                }
+                Err(e) => {
+                    red_ln!("Error testing: {:?}", e);
+                }
+            }
         }
         Command::Dev(path) => {
             println!("Starting dev server...");
@@ -116,6 +128,14 @@ fn main() {
                 }
             }
         }
+        Command::Wat(path) => {
+            println!("Compiling WAT to WebAssembly...");
+            if path.is_empty() {
+                let p = Path::new("./test_output/test.wat");
+                let _ = wasm_output::wasm_generator::compile_wat_file(p);
+            }
+            main();
+        }
     }
 }
 
@@ -127,9 +147,16 @@ fn collect_user_input() -> Command {
             // Check type of project
             match args.get(1).map(String::as_str) {
                 Some("html") => {
-                    let dir = &prompt_user_for_input("Enter project path: ".to_string())[0];
-                    if check_if_valid_directory_path(&dir) {
-                        return Command::NewHTMLProject(dir.to_string());
+                    let dir = &prompt_user_for_input("Enter project path: ".to_string());
+
+                    if dir.len() == 1 {
+                        let dir = dir[0].to_string();
+                        if check_if_valid_directory_path(&dir) {
+                            return Command::NewHTMLProject(PathBuf::from(dir));
+                        }
+                    } else {
+                       // use current directory
+                        return Command::NewHTMLProject(PathBuf::from(""));
                     }
                 }
                 _ => {
@@ -190,21 +217,23 @@ fn collect_user_input() -> Command {
                 None => return Command::Dev("test_output".to_string()),
             };
         }
+        Some("wat") => {
+            match args.get(1).map(String::as_str) {
+                Some(path) => {
+                    if path.is_empty() {
+                        return Command::Wat("test_output/test.wat".to_string());
+                    } else {
+                        return Command::Wat(path.to_string());
+                    }
+                }
+                None => return Command::Wat("test_output/test.wat".to_string()),
+            };
+        }
 
         _ => {
-            let _ = build::build("test".to_string(), false);
-            let _ = test::test_build();
-            main();
+            return Command::Test;
         }
     }
-
-    // Help is default case if no command is entered
-    // Display possible commands
-    // println!("Possible commands:");
-    // println!("new html");
-    // println!("build");
-    // println!("test");
-    // println!("build test");
 
     collect_user_input()
 }
