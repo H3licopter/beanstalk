@@ -20,10 +20,11 @@
 <link rel="stylesheet" href="page-dist-url/css/pico.min.css" />
 <style>@page-css</style></head><body>page-template
 <script type="module">
-  /* await WebAssembly.instantiateStreaming(fetch("./page-dist-url/pkg/bs_wasm.wasm"), { console }).then(obj => {
-    const bs = obj.instance.exports;
-    bs.x_i32();
-  }); */
+  WebAssembly.instantiateStreaming(fetch("./page-dist-url/pkg/test.wasm"),{console}).then(
+    (obj) => {
+      console.log(obj.instance.exports.add(2, 3));
+    },
+  );
   //js
   
   function checkIfFileChanged() {

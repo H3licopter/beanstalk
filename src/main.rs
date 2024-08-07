@@ -42,7 +42,7 @@ enum Command {
     Release(String),
     Test,
     Dev(String), // Runs local dev server
-    Wat(String), // Compiles a WAT file to WebAssembly
+    Wat(PathBuf), // Compiles a WAT file to WebAssembly
 }
 
 fn main() {
@@ -130,10 +130,7 @@ fn main() {
         }
         Command::Wat(path) => {
             println!("Compiling WAT to WebAssembly...");
-            if path.is_empty() {
-                let p = Path::new("./test_output/test.wat");
-                let _ = wasm_output::wasm_generator::compile_wat_file(p);
-            }
+            let _ = wasm_output::wasm_generator::compile_wat_file(&path);
             main();
         }
     }
@@ -221,12 +218,12 @@ fn collect_user_input() -> Command {
             match args.get(1).map(String::as_str) {
                 Some(path) => {
                     if path.is_empty() {
-                        return Command::Wat("test_output/test.wat".to_string());
+                        return Command::Wat(PathBuf::from("test_output/test.wat"));
                     } else {
-                        return Command::Wat(path.to_string());
+                        return Command::Wat(PathBuf::from(path));
                     }
                 }
-                None => return Command::Wat("test_output/test.wat".to_string()),
+                None => return Command::Wat(PathBuf::from("test_output/test.wat")),
             };
         }
 
