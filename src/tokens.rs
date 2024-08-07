@@ -212,4 +212,5 @@ pub enum Token {
     Option,
     Dropdown,
     Input,
+    Redirect,
 }

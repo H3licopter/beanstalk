@@ -177,12 +177,6 @@ fn parse_scene(
                     .style
                     .push_str(&format!("margin:{}rem;", expression_to_js(&arg)));
                 // Only switch to span if there is no tag
-                match scene_wrap.tag {
-                    Tag::None => {
-                        scene_wrap.tag = Tag::Span;
-                    }
-                    _ => {}
-                }
                 style_assigned = true;
             }
             Style::BackgroundColor(args) => {
@@ -190,13 +184,6 @@ fn parse_scene(
                     "background-color:rgba({});",
                     collection_to_js(&args)
                 ));
-                // Only switch to span if there is no tag
-                match scene_wrap.tag {
-                    Tag::None => {
-                        scene_wrap.tag = Tag::Span;
-                    }
-                    _ => {}
-                }
                 style_assigned = true;
             }
             Style::TextColor(args, type_of_color) => {
@@ -217,13 +204,6 @@ fn parse_scene(
                     color_keyword,
                     collection_to_js(&args)
                 ));
-                // Only switch to span if there is no tag
-                match scene_wrap.tag {
-                    Tag::None => {
-                        scene_wrap.tag = Tag::Span;
-                    }
-                    _ => {}
-                }
                 style_assigned = true;
             }
             // OLD VERSION OF SIZE, WILL JUST BE TEXT SIZE NOW
@@ -381,6 +361,28 @@ fn parse_scene(
                 if scene_wrap.outer_tag == Tag::None {
                     scene_wrap.outer_tag = Tag::Section;
                 }
+            }
+
+            // Scripts
+            Tag::Redirect(node) => {
+                let src = match node {
+                    AstNode::Literal(Token::StringLiteral(value)) => {
+                        value
+                    }
+                    AstNode::RuntimeExpression(expr, data_type) => {
+                        if *data_type == DataType::String {
+                            &expression_to_js(&AstNode::RuntimeExpression(expr.clone(), DataType::String))
+                        } else {
+                            red_ln!("Error: src attribute must be a string literal (Webparser - get src)");
+                            continue;
+                        }
+                    }
+                    _ => {
+                        red_ln!("Error: src attribute must be a string literal (Webparser - get src)");
+                        continue;
+                    }
+                };
+                js.push_str(&format!("window.location.href='{}';", src));
             }
             _ => {}
         }

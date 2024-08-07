@@ -1,4 +1,4 @@
-use colour::{dark_cyan_ln, dark_yellow_ln, print_bold, print_ln_bold, red_ln};
+use colour::{blue_ln, dark_cyan_ln, dark_yellow_ln, print_bold, print_ln_bold, red_ln};
 
 use crate::html_output::web_parser;
 use crate::parsers;
@@ -77,7 +77,7 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
     } else {
         let source_code = fs::read_to_string(entry_dir.join("config.bs"));
         match source_code {
-            Ok(content) => CompileType::MultiFile(entry_dir, content),
+            Ok(content) => CompileType::MultiFile(entry_dir.clone(), content),
             Err(_) => CompileType::Error("No config.bs file found in directory".to_string()),
         }
     };
@@ -107,24 +107,55 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
                         return Err(e.into());
                     }
                 };
-            add_bs_files_to_parse(&mut source_code_to_parse, src_dir, entry_dir.join(output_dir_folder))?;
+            match add_bs_files_to_parse(&mut source_code_to_parse, src_dir, entry_dir.join(output_dir_folder)) {
+                Ok(_) => {}
+                Err(e) => {
+                    red_ln!("Error adding bs files to parse: {:?}", e);
+                }
+            }
         }
     }
 
     // Compile all output files
     for file in &source_code_to_parse {
-        compile(file, release_build, &project_config)?;
+        match compile(file, release_build, &project_config) {
+            Ok(_) => {}
+            Err(e) => {
+                red_ln!("Error compiling file: {:?}", e);
+            }
+        }
     }
 
     // Any HTML files in the output dir not on the list of files to compile should be deleted if this is a release build
-    if release_build {
-        let output_dir = PathBuf::from(&project_config.release_folder);
-        for file in fs::read_dir(output_dir)? {
-            let file = file?;
+    if release_build && entry_dir.is_dir() {
+        let output_dir = PathBuf::from(&entry_dir).join(&project_config.release_folder);
+        let dir_files = match fs::read_dir(&output_dir) {
+            Ok(dir) => dir,
+            Err(e) => {
+                red_ln!("Error reading output_dir directory: {:?}", &output_dir);
+                return Err(e.into());
+            }
+        };
+
+        for file in dir_files {
+            let file = match file {
+                Ok(f) => f,
+                Err(e) => {
+                    red_ln!("Error reading file: {:?}", e);
+                    continue;
+                }
+            };
             let file_path = file.path();
             if file_path.extension() == Some("html".as_ref()) {
-                if !source_code_to_parse.iter().any(|f| f.file == file_path) {
-                    fs::remove_file(file_path)?;
+                if !source_code_to_parse.iter().any(|f| f.file.file_stem() == file_path.file_stem()) {
+                    match fs::remove_file(&file_path) {
+                        Ok(_) => {
+                            blue_ln!("Deleted unused file: {:?}", file_path);
+                        }
+                        Err(e) => {
+                            red_ln!("Error deleting file: {:?}", e);
+                        }
+                    }
                 }
             }
         }
@@ -173,13 +204,17 @@ pub fn add_bs_files_to_parse(
                     };
 
                     let new_output_dir = output_file_dir.join(file_path.file_stem().unwrap());
-                    add_bs_files_to_parse(source_code_to_parse, new_dir, new_output_dir)?
+                    match add_bs_files_to_parse(source_code_to_parse, new_dir, new_output_dir) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            red_ln!("Error adding bs files to parse: {:?}", e);
+                        }
+                    }
                 
                 // HANDLE USING JS / HTML / CSS MIXED INTO THE PROJECT
                 } else {
                     match file_path.extension() {
                         Some(ext) => {
-
                             // TEMPORARY: JUST PUT THEM DIRECTLY INTO THE OUTPUT DIRECTORY
                             if ext == "js" || ext == "html" || ext == "css" {
                                 let file_name = file_path.file_name().unwrap().to_str().unwrap();
@@ -220,7 +255,12 @@ fn compile(
     // If the output directory does not exist, create it
     let parent_dir = output.file.parent().unwrap();
     if !fs::metadata(parent_dir).is_ok() {
-        fs::create_dir_all(parent_dir)?;
+        match fs::create_dir_all(parent_dir) {
+            Ok(_) => {}
+            Err(e) => {
+                red_ln!("Error creating directory: {:?}", e);
+            }
+        }
     }
 
     let output_path = &output.file;
@@ -242,10 +282,15 @@ fn compile(
         html_config.page_dist_url.push_str("../");
     }
 
-    fs::write(
+    match fs::write(
         output_path,
         web_parser::parse(ast, html_config, release_build),
-    )?;
+    ) {
+        Ok(_) => {}
+        Err(e) => {
+            red_ln!("Error writing file: {:?}", e);
+        }
+    }
 
     Ok(Vec::new())
 }

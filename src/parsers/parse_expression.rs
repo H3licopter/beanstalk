@@ -353,6 +353,7 @@ fn check_literal(
 
 pub fn check_if_arg(scene_head: &Vec<Token>, i: &mut usize) -> bool {
     if *i >= scene_head.len() {
+        *i -= 1;
         return false;
     }
     match &scene_head[*i] {
@@ -366,6 +367,9 @@ pub fn check_if_arg(scene_head: &Vec<Token>, i: &mut usize) -> bool {
         | Token::DecLiteral(_)
         | Token::RawStringLiteral(_)
         | Token::FloatLiteral(_) => true,
-        _ => false,
+        _ => {
+            *i -= 1;
+            false
+        }
     }
 }

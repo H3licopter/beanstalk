@@ -62,7 +62,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
             AstNode::Literal(_) => {
                 cyan_ln!("{:?}", node);
             }
-            AstNode::Space | AstNode::Comment(_) => {
+            AstNode::Comment(_) => {
                 grey_ln!("{:?}", node);
             }
             _ => {

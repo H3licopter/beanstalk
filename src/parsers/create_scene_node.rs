@@ -74,9 +74,9 @@ pub fn new_scene(
             Token::Margin => {
                 j += 1;
                 let eval_arg;
-                // TODO: get a default margin value
+
                 if !check_if_arg(scene_head, &mut j) {
-                    eval_arg = AstNode::Literal(Token::FloatLiteral(1.5));
+                    eval_arg = AstNode::Literal(Token::FloatLiteral(2.0));
                 } else {
                     let arg = create_expression(scene_head, &mut j, false, ast);
                     eval_arg = eval_expression(arg, &DataType::Inferred, ast);
@@ -355,6 +355,18 @@ pub fn new_scene(
             }
             Token::Section => {
                 scene_tags.push(Tag::Section);
+            }
+
+            Token::Redirect => {
+                j += 1;
+                let arg = create_expression(scene_head, &mut j, false, ast);
+                let eval_arg = eval_expression(arg, &DataType::String, ast);
+                if check_if_comptime_value(&eval_arg) {
+                    scene_tags.push(Tag::Redirect(eval_arg));
+                } else {
+                    // Need to add JS DOM hooks to change src at runtime.
+                    scene_tags.push(Tag::Redirect(eval_arg));
+                }
             }
 
             _ => {

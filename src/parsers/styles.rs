@@ -13,6 +13,9 @@ pub enum Tag {
     Footer,
     Section,
 
+    // Scripts
+    Redirect(AstNode),  // src
+
     // HTML tags
     Span,
     Div,

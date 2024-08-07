@@ -545,7 +545,6 @@ fn keyword_or_variable(
                     "hide" => return Token::Hide,
                     "nav" => return Token::Nav,
                     "table" => return Token::Table,
-                    "gap" => return Token::Gap,
 
                     // Interactive
                     "link" => return Token::A,
@@ -574,6 +573,7 @@ fn keyword_or_variable(
                     // Other
                     "ignore" => return Token::Ignore,
                     "canvas" => return Token::Canvas,
+                    "redirect" => return Token::Redirect,
                     _ => {}
                 },
 
