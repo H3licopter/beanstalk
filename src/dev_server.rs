@@ -47,14 +47,15 @@ fn handle_connection(
         Ok(request) => {
             // HANDLE REQUESTS
             if request == "GET / HTTP/1.1" {
-                contents = match get_home_page_path(&path) {
-                    Ok(p) => fs::read(p).unwrap(),
+                match get_home_page_path(&path, false) {
+                    Ok(p) => {
+                        contents = fs::read(p).unwrap();
+                        status_line = "HTTP/1.1 200 OK";
+                    }
                     Err(e) => {
                         red_ln!("Error reading home page: {:?}", e);
-                        fs::read(format!("{}/dev/404.html", path)).unwrap()
                     }
                 };
-                status_line = "HTTP/1.1 200 OK";
             } else if request.starts_with("HEAD /check") {
                 // the check request has the page url as a query parameter after the /check
                 let request_path = request.split("?page=").nth(1);
@@ -63,13 +64,14 @@ fn handle_connection(
                     Some(p) => {
                         let page_path = p.split_whitespace().collect::<Vec<&str>>()[0];
                         if page_path == "/" {
-                            get_home_page_path(&path)
+                            get_home_page_path(&path, true)
                         } else {
-                            Ok(PathBuf::from(&path).join(get_default_config().dev_folder).join(page_path).with_extension("html"))
+                            let src_path = PathBuf::from(format!("{}/{}{}", path, get_default_config().src, page_path)).with_extension("bs");
+                            Ok(src_path)
                         }
                     }
                     None => {
-                        get_home_page_path(&path)
+                        get_home_page_path(&path, true)
                     }
                 };
 
@@ -241,8 +243,13 @@ fn has_been_modified(path: &PathBuf, modified: &mut std::time::SystemTime) -> bo
     false
 }
 
-fn get_home_page_path(path: &String) -> Result<PathBuf, Box<dyn Error>> {
-    let root_src_path = PathBuf::from(&path).join(get_default_config().dev_folder);
+fn get_home_page_path(path: &String, src: bool) -> Result<PathBuf, Box<dyn Error>> {
+    let root_src_path = if src {
+        PathBuf::from(&path).join(get_default_config().src)
+    } else {
+        PathBuf::from(&path).join(get_default_config().dev_folder)
+    };
+
     let src_files = match fs::read_dir(root_src_path) {
         Ok(m) => m,
         Err(e) => {
@@ -254,18 +261,28 @@ fn get_home_page_path(path: &String) -> Result<PathBuf, Box<dyn Error>> {
     // Look for first file that starts with '#page' in the src directory
     let mut first_page = None;
     for entry in src_files {
-        let entry = match entry {
-            Ok(e) => e.path(),
+        first_page = match entry {
+            Ok(e) => {
+                let page = e.path();
+                if src {
+                    if page.file_stem().unwrap().to_str().unwrap().starts_with(settings::COMP_PAGE_KEYWORD) {
+                        Some(page)
+                    } else {
+                        continue;
+                    }
+                } else {
+                    if page.file_stem().unwrap().to_str().unwrap().starts_with(settings::INDEX_PAGE_KEYWORD) {
+                        Some(page)
+                    } else {
+                        continue;
+                    }
+                }
+            }
             Err(e) => {
                 red_ln!("Error reading src directory");
                 return Err(e.into());
             }
         };
-
-        if entry.file_stem().unwrap().to_str().unwrap().starts_with(settings::COMP_PAGE_KEYWORD) {
-            first_page = Some(entry);
-            break;
-        }
     }
 
     match first_page {
@@ -273,7 +290,7 @@ fn get_home_page_path(path: &String) -> Result<PathBuf, Box<dyn Error>> {
             Ok(index_page_path)
         }
         None => {
-            red_ln!("No page found in src directory");
+            red_ln!("No page found in {} directory: {:?}", if src { "src" } else { "dev" }, first_page);
             return Err(Box::new(std::io::Error::new(std::io::ErrorKind::NotFound, "No page found in src directory")));
         }
     }
