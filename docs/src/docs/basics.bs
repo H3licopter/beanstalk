@@ -35,19 +35,6 @@ Colon means initialise, equals means assign. The type of a variable goes after t
 
 The @ symbol is used to export variables and methods/functions outside of a module or object.
 
-## Exporting / Importing at the top of a module
-This will export existing variables and functions from the module. The variables and functions being exported must be declared somewhere inside the module.
-
-[code:
-    @export (
-        mutable_var, 
-        comptime_immutable_var
-    )
-    @import (
-        utiliFunction
-    )
-]
-
 ## Assignment
 Assigning a new variable to an existing variable will create a reference to the existing variable, unless you specify the type as a 'copy'.
 

@@ -53,16 +53,7 @@
 </h1><p>Beanstalk uses pointer semantics by default. This means that a variable is a reference to a value unless it is explicitly copied or assigned to a new value.
 </p><p>Colon means initialise, equals means assign. The type of a variable goes after the colon, but can be omitted if the type is inferred.
 </p><p>The @ symbol is used to export variables and methods/functions outside of a module or object.
-</p><h2>Exporting / Importing at the top of a module
-</h2><p>This will export existing variables and functions from the module. The variables and functions being exported must be declared somewhere inside the module.
-</p><pre><code>    @export (
-        mutable_var, 
-        comptime_immutable_var
-    )
-    @import (
-        utiliFunction
-    )
-</code></pre><br><h2>Assignment
+</p><h2>Assignment
 </h2><p>Assigning a new variable to an existing variable will create a reference to the existing variable, unless you specify the type as a 'copy'.
 </p><p>Types will be inferred if not specified, and implicit conversions will be used to convert the value to the inferred type.
 </p><h3>Compile time immutable variable

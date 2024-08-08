@@ -18,7 +18,6 @@ The compiler is written in Rust, and fast compile times and a built in watcher/d
 - [link "./docs/setting-up-a-project": Setting up a project]
 - [link "./docs/basics": Basic Language Syntax ]
 - [link "./docs/functions": Functions]
-- [link "./docs/classes": Classes]
 - [link "./docs/errors": Error Handling]
 
 More info to be added soon!
