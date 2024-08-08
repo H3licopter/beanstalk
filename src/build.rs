@@ -291,10 +291,15 @@ fn compile(
         &config.dev_folder
     };
 
-    for ancestor in output.file.ancestors() {
-        if ancestor.file_name() == Some(output_dir_name.as_ref()) {
-            break;
-        }
+    for ancestor in output.file.ancestors().skip(1) {
+        match ancestor.file_stem() {
+            Some(stem) => {
+                if *stem == **output_dir_name {
+                    break;
+                }
+            }
+            None => {}
+        };
         html_config.page_dist_url.push_str("../");
     }
 
