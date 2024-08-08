@@ -9,11 +9,11 @@ pub enum AstNode {
 
     // Blocks
     Function(usize, Box<AstNode>, Vec<AstNode>, bool), // Function name, Args, Body, Public
-    Expression(Vec<AstNode>),                          // Expression that can contain mixed types
+    Expression(Vec<AstNode>, u32),                      // Expression that can contain mixed types, line number
     RuntimeExpression(Vec<AstNode>, DataType),         //Expression, Result type
 
     // Basics
-    Error(String),
+    Error(String, u32), // Message, line number
     Comment(String),
     VarDeclaration(usize, Box<AstNode>, bool), // Variable name, Value, Public
     Const(usize, Box<AstNode>, bool),          // Constant name, Value, Public
@@ -30,7 +30,7 @@ pub enum AstNode {
     Literal(Token),
     Collection(Vec<AstNode>, DataType),
     Struct(usize, Box<AstNode>, bool), // Name, Fields, Public
-    Tuple(Vec<AstNode>),
+    Tuple(Vec<AstNode>, u32), // Tuple, line number
     Scene(Vec<AstNode>, Vec<Tag>, Vec<Style>),
     SceneTemplate,
     Empty, // Empty collection

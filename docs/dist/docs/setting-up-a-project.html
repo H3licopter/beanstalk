@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="../images/favicons/favicon.ico">
+<link rel="icon"href="../../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="../images/favicons/site.webmanifest">
-<link rel="stylesheet" href="../css/pico.min.css" />
+<link rel="apple-touch-icon"href="../../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../../css/pico.min.css" />
 <style>.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
@@ -30,19 +30,27 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><h1>Setting up a Project
+            }.bs-0 > * {color:inherit;}.bs-1 > * {color:inherit;}</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><h1>Setting up a Project
 </h1><p>Running the command 'new html' followed by your directory path will create a new static HTML Beanstalk project in that directory. The path is relative to the current directory.
 </p><p><em>More project types will be added in the future.</em></p><br><span>The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
 </span><span>This file is called </span><strong>config.bs&nbsp;</strong><span>and is placed in the root folder of your project by default. A configuration file is also created in the root directory.
 </span></p><p><em>All Beanstalk files use the .bs file extension.</em></p><br><span>The compiler will read through any configuration settings first.
 </span><li><span>src folder contains your bs files and determines the file structure of your pages. 
 </span></li><li><span>dist folder contains the compiled files.
-</span></li><p>* * *  ⚠️ The compiler is not yet a proper command line tool, it currently has to be compiled and ran directly before giving it a command. ⚠️ <span>*
-*
-*
-
+</span></li><p>⚠️ <span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-0" ><span>The compiler is not yet a proper command line tool, it currently has to be compiled and ran directly before giving it a command.</span>&nbsp;</span><span>⚠️
 </span></p><p>Has development starts to be more stable, the compiler will be set up to install on your system and be run from the command line with the 'bean' command.
-</p><h1>Compiling your BS files
+</p><h1>Routes
+</h1><p>Beanstalk projects use a directory based router, with a few special naming rules. 
+</p><h2>Comptime files
+</h2><p>Prefixing your BS files with a '#' symbol and keyword means it is a special comptime file. The compiler recognises different kinds of comptime files and will handle them differently. 
+</p><p>After the special file name, you can leave a space and name the file whatever you want.
+</p><li><span>'#page' is the main page of the folder it is in.
+</span></li><li><span>'#layout' automatically wraps all pages in the same directory in a parent layout. Use the 'slot' keyword in a scenehead to specify where the content should be placed. 
+</span></li><li><span>'#error' handles what the server does by default when an error occurs on the server, such as a 404.
+</span></li><h2>Server files (coming soon)
+</h2><p>Prefixing your BS files with a '+' symbol and keyword means it is a server file. Naming the file the same as a regular page, beans the server file will be called first when the page is requested.
+</p><p>Otherwise the server file can contain regular server side BS code.
+</p><span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-1" ><p>BS cannot yet be used for server side code</p></span><br><h1>Compiling your BS files
 </h1><h3>Build
 </h3><p>The simpliest way to get the compiler to output some HTML is to use the <em>build&nbsp;</em><span>command.
 </span></p><p>While in the root directory of your project, where the config.bs file is, run the command <strong>build&nbsp;</strong><span>to compile your whole project.
@@ -60,17 +68,12 @@
 
 </span></p></main><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
 </h3></div></footer>
-<script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
-  init().then(() => {
-    function uInnerHTML(id,update){
+<script type="module">function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }
-  });
-</script>
+            }</script>
 </body>
 </html>

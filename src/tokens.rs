@@ -25,6 +25,9 @@ pub enum Token {
     DeadVarible, // Variable that is never used, to be removed in the AST
     EOF,         // End of file
 
+    // To later calculate where a token was in the source code
+    Whitespace,
+
     // Module Import/Export
     Import,
     Export,
@@ -152,6 +155,8 @@ pub enum Token {
     // Scenes
     ParentScene,
     EmptyScene(u32), // Used for templating values in scene heads in the body of scenes, value is numnber of spaces after the scene template
+    
+    // THIS SHOULD BE CHANGED TO SCENEHEAD OPEN, SCENEBODY OPEN, nest tokens in ast only
     SceneHead(Vec<Token>), // Scene head properties, inline?
     SceneBody(Vec<Token>),
     Signal(String),
@@ -196,6 +201,21 @@ pub enum Token {
     Blank,
     Hide,
 
+    // Colours
+    ThemeColor,
+    Red,
+    Green,
+    Blue,
+    Yellow,
+    Cyan,
+    Magenta,
+    White,
+    Black,
+    Orange,
+    Pink,
+    Purple,
+    Grey,
+
     // Structure of the page
     Main,
     Header,
@@ -203,7 +223,6 @@ pub enum Token {
     Section,
     Gap,
 
-    // To be implemented
     Nav,
     Button,
     Canvas,

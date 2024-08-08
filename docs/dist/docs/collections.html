@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="../images/favicons/favicon.ico">
+<link rel="icon"href="../../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="../images/favicons/site.webmanifest">
-<link rel="stylesheet" href="../css/pico.min.css" />
+<link rel="apple-touch-icon"href="../../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../../css/pico.min.css" />
 <style></style></head><body><br><h1>Collections
 </h1><p>All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
 </p><p>Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
@@ -64,17 +64,12 @@
         8
     )
 </p>
-<script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
-  init().then(() => {
-    function uInnerHTML(id,update){
+<script type="module">function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }
-  });
-</script>
+            }</script>
 </body>
 </html>

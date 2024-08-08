@@ -17,7 +17,7 @@ mod tokenize_scene;
 mod tokenizer;
 mod tokens;
 mod parsers {
-    pub mod ast;
+    pub mod ast_nodes;
     pub mod build_ast;
     pub mod collections;
     mod create_scene_node;
@@ -30,6 +30,7 @@ mod html_output {
     mod generate_html;
     pub mod js_parser;
     pub mod web_parser;
+    pub mod colors;
 }
 mod wasm_output {
     pub mod wasm_generator;

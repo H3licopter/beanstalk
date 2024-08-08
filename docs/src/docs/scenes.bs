@@ -29,7 +29,7 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
 
     A constant variable from the code inserted into the scene: [ constant ].
 
-    The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets [rgb(170,0,0): *cannot*] be used without an escape character or by using backticks to create a raw string.
+    The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets [red: *cannot*] be used without an escape character or by using backticks to create a raw string.
 
     ]
 ]
@@ -145,7 +145,7 @@ More keywords will be added and more documentation about the aruments you can pa
 ## Unique Scene Logic
 Variables and expressions are typecast into strings when put into a scene. This is the behaviour of all the numerical types and most of the string types. There are some exceptions to how other types are handled by scenes.
 
-#### Booleans
+### Booleans
 Booleans in a scenehead will conditonally hide or show itself based on the value of the boolean. If the boolean is true, the scene and it's children will be shown, if false, it will be hidden.
 
 [code:
@@ -157,12 +157,12 @@ Booleans in a scenehead will conditonally hide or show itself based on the value
     ]
 ]
 
-#### Errors
+### Errors
 If an error is added to a scene, it will be displayed in the console, rather than injected into the scene. This usually means that the variable with the error has reverted to its default value, which will be shown.
 
-[rgb(175, 10, 10) size(0.85): *This behaviour is an uncertain part of the design, tuples that contain errors might be better completely hidden from the scene rather than a zero value being shown.*]
+[red size(0.85): *This behaviour is an uncertain part of the design, tuples that contain errors might be better completely hidden from the scene rather than a zero value being shown.*]
 
-#### Reactive Variables
+### Reactive Variables
 Variables can be made reactive in a scene by being appended with a tilde. The variable will update whenever the value of the variable changes. Variables without the tilde will only update if the scene is re-rendered.
 
 [code:

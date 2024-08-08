@@ -1,8 +1,8 @@
 use colour::{blue_ln, dark_cyan_ln, dark_yellow_ln, print_bold, print_ln_bold, red_ln};
 
 use crate::html_output::web_parser;
-use crate::parsers;
-use crate::parsers::ast::AstNode;
+use crate::{parsers, settings};
+use crate::parsers::ast_nodes::AstNode;
 use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::Token;
@@ -31,7 +31,7 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
     if entry_path == "test" {
         entry_dir = match std::env::current_dir() {
             Ok(dir) => {
-                dir.join("test_output/src/index.bs")
+                dir.join("test_output/src").join(settings::COMP_PAGE_KEYWORD).with_extension("bs")
             },
             Err(e) => {
                 println!("Error getting current directory: {:?}", e);
@@ -75,10 +75,10 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
             Err(_) => CompileType::Error("No file found".to_string()),
         }
     } else {
-        let source_code = fs::read_to_string(entry_dir.join("config.bs"));
+        let source_code = fs::read_to_string(entry_dir.join(settings::CONFIG_FILE_NAME));
         match source_code {
             Ok(content) => CompileType::MultiFile(entry_dir.clone(), content),
-            Err(_) => CompileType::Error("No config.bs file found in directory".to_string()),
+            Err(_) => CompileType::Error("No config file found in directory".to_string()),
         }
     };
 
@@ -183,7 +183,23 @@ pub fn add_bs_files_to_parse(
                         }
                     };
 
-                    let file_name = file_path.file_stem().unwrap().to_str().unwrap();
+                    let file_name = match file_path.file_stem() {
+                        Some(stem) => match stem.to_str() {
+                            Some(stem_str) => if stem_str == settings::COMP_PAGE_KEYWORD {
+                                settings::INDEX_PAGE_KEYWORD.to_string()
+                            } else {
+                                stem_str.to_string()
+                            },
+                            None => {
+                                red_ln!("Error converting file stem to string");
+                                continue;
+                            }
+                        },
+                        None => {
+                            red_ln!("Error getting file stem");
+                            continue;
+                        }
+                    };
                     
                     source_code_to_parse.push(OutputFile {
                         source_code: code,
@@ -249,8 +265,8 @@ fn compile(
     let file_name = output.file.file_name().unwrap().to_str().unwrap();
     dark_yellow_ln!("{:?}", file_name);
 
-    let tokens: Vec<Token> = tokenizer::tokenize(&output.source_code, file_name);
-    let ast = parsers::build_ast::new_ast(tokens, 0).0;
+    let (tokens, token_line_numbers): (Vec<Token>, Vec<u32>) = tokenizer::tokenize(&output.source_code, file_name);
+    let ast = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers).0;
 
     // If the output directory does not exist, create it
     let parent_dir = output.file.parent().unwrap();

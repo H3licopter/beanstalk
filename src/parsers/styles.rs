@@ -1,6 +1,6 @@
 use crate::Token;
 
-use super::ast::AstNode;
+use super::ast_nodes::AstNode;
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(dead_code)]
@@ -47,6 +47,8 @@ pub enum Style {
     Padding(AstNode),
     Margin(AstNode),
     Size(AstNode),             // Size of text
+    
+    // Colours keywords = -100 to 100 as different shades. -100 darkest, 100 lightest
     TextColor(AstNode, Token), // Value, type (rgb, hsl)
     BackgroundColor(AstNode),
     Alt(String),
@@ -54,4 +56,5 @@ pub enum Style {
     Order(AstNode), // For positioning elements inside a grid/flex container/nav etc
     Hide,
     Blank,
+
 }

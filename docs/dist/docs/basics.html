@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="../images/favicons/favicon.ico">
+<link rel="icon"href="../../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="../images/favicons/site.webmanifest">
-<link rel="stylesheet" href="../css/pico.min.css" />
+<link rel="apple-touch-icon"href="../../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../../css/pico.min.css" />
 <style>.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
@@ -132,17 +132,12 @@
     -- result is 500
 </code></pre><br></main><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
 </h3></div></footer>
-<script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
-  init().then(() => {
-    function uInnerHTML(id,update){
+<script type="module">function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }
-  });
-</script>
+            }</script>
 </body>
 </html>

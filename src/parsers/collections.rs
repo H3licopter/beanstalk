@@ -1,4 +1,4 @@
-use super::ast::AstNode;
+use super::ast_nodes::AstNode;
 use super::parse_expression::eval_expression;
 use crate::parsers::parse_expression::create_expression;
 use crate::{bs_types::DataType, Token};
@@ -8,6 +8,7 @@ pub fn new_tuple(
     i: &mut usize,
     first_item: AstNode,
     ast: &Vec<AstNode>,
+    token_line_numbers: &Vec<u32>,
 ) -> AstNode {
     let first_item_eval = eval_expression(first_item, &DataType::Inferred, ast);
     let mut items: Vec<AstNode> = vec![first_item_eval];
@@ -20,11 +21,11 @@ pub fn new_tuple(
 
             Token::OpenParenthesis | Token::Comma => {
                 *i += 1;
-                items.push(create_expression(tokens, i, true, &ast));
+                items.push(create_expression(tokens, i, true, &ast, token_line_numbers));
             }
 
             _ => {
-                items.push(create_expression(tokens, i, true, &ast));
+                items.push(create_expression(tokens, i, true, &ast, token_line_numbers));
             }
         }
 
@@ -42,10 +43,10 @@ pub fn new_tuple(
 
     // TO DO: Get all expressions in the tuple
 
-    return AstNode::Tuple(items);
+    return AstNode::Tuple(items, token_line_numbers[*i]);
 }
 
-pub fn new_array(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>) -> AstNode {
+pub fn new_array(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, token_line_numbers: &Vec<u32>) -> AstNode {
     let mut items: Vec<AstNode> = Vec::new();
     let collection_type = DataType::InferredCollection;
 
@@ -61,7 +62,7 @@ pub fn new_array(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>) -> AstN
 
             // TO DO: Type checking and adding values to array
             _ => {
-                items.push(create_expression(tokens, i, true, ast));
+                items.push(create_expression(tokens, i, true, ast, token_line_numbers));
             }
         }
 

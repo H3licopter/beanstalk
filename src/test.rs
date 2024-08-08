@@ -3,7 +3,7 @@ use colour::{blue_ln_bold, dark_grey_ln, dark_yellow_ln, green_ln_bold, yellow_l
 use regex::Regex;
 
 use crate::html_output::web_parser;
-use crate::parsers::ast::AstNode;
+use crate::parsers::ast_nodes::AstNode;
 use crate::settings::get_html_config;
 use crate::tokenizer;
 use crate::Token;
@@ -15,12 +15,12 @@ use std::path::PathBuf;
 pub fn test_build() -> Result<(), Box<dyn Error>> {
     // Read content from a test file
     yellow_ln_bold!("\nREADING TEST FILE\n");
-    let path = PathBuf::from("test_output/src/index.bs");
+    let path = PathBuf::from("test_output/src/#page.bs");
     let content = fs::read_to_string(path)?;
 
     // Tokenize File
     yellow_ln_bold!("TOKENIZING FILE\n");
-    let tokens: Vec<Token> = tokenizer::tokenize(&content, &"Test File".to_string());
+    let (tokens, token_line_numbers) = tokenizer::tokenize(&content, &"Test File".to_string());
 
     for token in &tokens {
         match token {
@@ -37,6 +37,9 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
             Token::Empty | Token::Newline => {
                 grey_ln!("{:?}", token);
             }
+
+            // Ignore whitespace in test output
+            // Token::Whitespace => {}
             _ => {
                 println!("{:?}", token);
             }
@@ -46,7 +49,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Create AST
     yellow_ln_bold!("CREATING AST\n");
-    let ast: Vec<AstNode> = parsers::build_ast::new_ast(tokens, 0).0;
+    let ast: Vec<AstNode> = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers).0;
 
     for node in &ast {
         match node {
@@ -56,8 +59,8 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
             AstNode::Element(_) => {
                 green_ln!("{:?}", node);
             }
-            AstNode::Error(_) => {
-                red_ln!("{:?}", node);
+            AstNode::Error(err, line) => {
+                red_ln!("Error at line {}: {}", line, err);
             }
             AstNode::Literal(_) => {
                 cyan_ln!("{:?}", node);
@@ -139,8 +142,8 @@ fn print_scene(scene: &AstNode, scene_nesting_level: u32) {
                     AstNode::RuntimeExpression(_, _) => {
                         dark_yellow_ln!("{}  {:?}", indentation, scene_node);
                     }
-                    AstNode::Error(_) => {
-                        red_ln!("{}  {:?}", indentation, scene_node);
+                    AstNode::Error(err, line) => {
+                        red_ln!("{}  Error at line {}: {}", indentation, line, err);
                     }
                     AstNode::Literal(_) => {
                         cyan_ln!("{}  {:?}", indentation, scene_node);

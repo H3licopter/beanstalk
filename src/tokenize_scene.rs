@@ -7,6 +7,7 @@ pub fn tokenize_scenehead(
     chars: &mut Peekable<Chars>,
     tokenize_mode: &mut TokenizeMode,
     scene_nesting_level: &mut i64,
+    line_number: &mut u32,
 ) -> Token {
     let mut scene_head: Vec<Token> = Vec::new();
     let mut code_block: bool = false;
@@ -16,7 +17,7 @@ pub fn tokenize_scenehead(
     }
 
     while tokenize_mode == &TokenizeMode::SceneHead {
-        let next_token = get_next_token(chars, tokenize_mode, scene_nesting_level);
+        let next_token = get_next_token(chars, tokenize_mode, scene_nesting_level, line_number);
         match next_token {
             Token::EOF | Token::Colon => {
                 break;
@@ -43,7 +44,7 @@ pub fn tokenize_scenehead(
 
 // Create string of markdown content, only escaping when a closed curly brace is found
 // Any Beanstalk specific extensions to Markdown will need to be implimented here
-pub fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -> Token {
+pub fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char, line_number: &mut u32) -> Token {
     let mut content = String::new(); // To keep track of current chars being parsed
     let mut previous_newlines = 0;
     let mut current_token = Token::Empty;
@@ -51,6 +52,7 @@ pub fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -
     //Ignore starting whitespace (except newlines)
     while current_char.is_whitespace() {
         if current_char == &'\n' {
+            *line_number += 1;
             if content.ends_with("\n") {
                 return Token::Newline;
             }
@@ -195,6 +197,10 @@ pub fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -
                         }
                     };
                 }
+                '\n' => {
+                    *line_number += 1;
+                    content.push('\n');
+                }
                 '`' => {
                     break;
                 }
@@ -213,6 +219,7 @@ pub fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char) -
         }
 
         if current_char == &'\n' {
+            *line_number += 1;
             content.push('\n');
             break;
         } else if !current_char.is_whitespace() {

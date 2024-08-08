@@ -1,8 +1,9 @@
-use crate::build;
+use crate::{build, settings};
 use colour::{blue_ln, dark_cyan_ln, green_ln_bold, print_bold, red_ln};
 use std::error::Error;
+use std::path::PathBuf;
 use std::time::SystemTime;
-
+use settings::get_default_config;
 use std::{
     fs::{self, metadata},
     io::{prelude::*, BufReader},
@@ -38,7 +39,6 @@ fn handle_connection(
 
     // println!("{}", format!("{}/{}/dev/any file should be here", entry_path, path));
     let mut contents = fs::read(format!("{}/dev/404.html", path)).unwrap();
-    let mut length = contents.len();
     let mut status_line = "HTTP/1.1 404 NOT FOUND";
     let mut content_type = "text/html";
 
@@ -47,8 +47,13 @@ fn handle_connection(
         Ok(request) => {
             // HANDLE REQUESTS
             if request == "GET / HTTP/1.1" {
-                contents = fs::read(format!("{}/dev/index.html", path)).unwrap();
-                length = contents.len();
+                contents = match get_home_page_path(&path) {
+                    Ok(p) => fs::read(p).unwrap(),
+                    Err(e) => {
+                        red_ln!("Error reading home page: {:?}", e);
+                        fs::read(format!("{}/dev/404.html", path)).unwrap()
+                    }
+                };
                 status_line = "HTTP/1.1 200 OK";
             } else if request.starts_with("HEAD /check") {
                 // the check request has the page url as a query parameter after the /check
@@ -58,23 +63,32 @@ fn handle_connection(
                     Some(p) => {
                         let page_path = p.split_whitespace().collect::<Vec<&str>>()[0];
                         if page_path == "/" {
-                            format!("{}/src/index.bs", path)
+                            get_home_page_path(&path)
                         } else {
-                            format!("{}/src{}.bs", path, page_path)
+                            Ok(PathBuf::from(&path).join(get_default_config().dev_folder).join(page_path).with_extension("html"))
                         }
                     }
                     None => {
-                        format!("{}/src/index.bs", path)
+                        get_home_page_path(&path)
                     }
                 };
 
-                // Get the metadata of the file
-                if has_been_modified(&parsed_url, last_modified) {
-                    blue_ln!("Changes detected for {:?}", parsed_url);
-                    build_project(&path, false);
-                    status_line = "HTTP/1.1 205 Reset Content";
-                } else {
-                    status_line = "HTTP/1.1 200 OK";
+                match &parsed_url {
+                    // Get the metadata of the file
+                    Ok(parsed_url) => {
+                        if has_been_modified(parsed_url, last_modified) {
+                            blue_ln!("Changes detected for {:?}", parsed_url);
+                            build_project(&path, false);
+                            status_line = "HTTP/1.1 205 Reset Content";
+                        } else {
+                            status_line = "HTTP/1.1 200 OK";
+                        }
+                    }
+                    // Throw an error if the url is invalid
+                    Err(e) => {
+                        red_ln!("Error parsing url: {:?}", e);
+                        status_line = "HTTP/1.1 404 NOT FOUND";
+                    }
                 }
             } else if request.starts_with("GET /") {
                 // Get requested path
@@ -113,7 +127,6 @@ fn handle_connection(
                         // Make sure the path does not try to access any directories outside of /dev
                         if !file_path.contains("..") {
                             contents = c;
-                            length = contents.len();
                             status_line = "HTTP/1.1 200 OK";
                         }
                     }
@@ -130,7 +143,7 @@ fn handle_connection(
 
     let string_response = format!(
         "{}\r\nContent-Length: {}\r\nContent-Type: {}\r\n\r\n",
-        status_line, length, content_type,
+        status_line, contents.len(), content_type,
     );
 
     let response = &[string_response.as_bytes(), &contents].concat();
@@ -159,12 +172,12 @@ fn build_project(build_path: &String, release: bool) {
     }
 }
 
-fn has_been_modified(path: &String, modified: &mut std::time::SystemTime) -> bool {
+fn has_been_modified(path: &PathBuf, modified: &mut std::time::SystemTime) -> bool {
     // Check if it's a file or directory
     let path_metadata = match fs::metadata(path) {
         Ok(m) => m,
         Err(_) => {
-            red_ln!("Error reading directory (probably doesn't exist): {}", path);
+            red_ln!("Error reading directory (probably doesn't exist): {:?}", path);
             return false;
         }
     };
@@ -173,7 +186,7 @@ fn has_been_modified(path: &String, modified: &mut std::time::SystemTime) -> boo
         let entries = match fs::read_dir(path) {
             Ok(all) => all,
             Err(_) => {
-                red_ln!("Error reading directory: {}", path);
+                red_ln!("Error reading directory: {:?}", path);
                 return false;
             }
         };
@@ -226,4 +239,42 @@ fn has_been_modified(path: &String, modified: &mut std::time::SystemTime) -> boo
     }
 
     false
+}
+
+fn get_home_page_path(path: &String) -> Result<PathBuf, Box<dyn Error>> {
+    let root_src_path = PathBuf::from(&path).join(get_default_config().dev_folder);
+    let src_files = match fs::read_dir(root_src_path) {
+        Ok(m) => m,
+        Err(e) => {
+            red_ln!("Error reading root src directory metadata");
+            return Err(e.into());
+        }
+    };
+
+    // Look for first file that starts with '#page' in the src directory
+    let mut first_page = None;
+    for entry in src_files {
+        let entry = match entry {
+            Ok(e) => e.path(),
+            Err(e) => {
+                red_ln!("Error reading src directory");
+                return Err(e.into());
+            }
+        };
+
+        if entry.file_stem().unwrap().to_str().unwrap().starts_with(settings::COMP_PAGE_KEYWORD) {
+            first_page = Some(entry);
+            break;
+        }
+    }
+
+    match first_page {
+        Some(index_page_path) => {
+            Ok(index_page_path)
+        }
+        None => {
+            red_ln!("No page found in src directory");
+            return Err(Box::new(std::io::Error::new(std::io::ErrorKind::NotFound, "No page found in src directory")));
+        }
+    }
 }

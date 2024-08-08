@@ -18,8 +18,28 @@ The compiler will read through any configuration settings first.
 - src folder contains your bs files and determines the file structure of your pages. 
 - dist folder contains the compiled files.
 
-*** ⚠️ The compiler is not yet a proper command line tool, it currently has to be compiled and ran directly before giving it a command. ⚠️ ***
+⚠️ [red size(0.85):  The compiler is not yet a proper command line tool, it currently has to be compiled and ran directly before giving it a command.] ⚠️
+
 Has development starts to be more stable, the compiler will be set up to install on your system and be run from the command line with the 'bean' command.
+
+# Routes
+Beanstalk projects use a directory based router, with a few special naming rules. 
+
+## Comptime files
+Prefixing your BS files with a '#' symbol and keyword means it is a special comptime file. The compiler recognises different kinds of comptime files and will handle them differently. 
+
+After the special file name, you can leave a space and name the file whatever you want.
+
+- '#page' is the main page of the folder it is in.
+- '#layout' automatically wraps all pages in the same directory in a parent layout. Use the 'slot' keyword in a scenehead to specify where the content should be placed. 
+- '#error' handles what the server does by default when an error occurs on the server, such as a 404.
+
+## Server files (coming soon)
+Prefixing your BS files with a '+' symbol and keyword means it is a server file. Naming the file the same as a regular page, beans the server file will be called first when the page is requested.
+
+Otherwise the server file can contain regular server side BS code.
+
+[red size(0.85): BS cannot yet be used for server side code]
 
 # Compiling your BS files
 ### Build

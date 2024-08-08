@@ -1,13 +1,12 @@
 use super::{
-    dom_hooks::{generate_dom_update_js, DOMUpdate},
-    generate_html::create_html_boilerplate,
-    js_parser::{collection_to_js, expression_to_js},
+    colors::get_color, 
+    dom_hooks::{generate_dom_update_js, DOMUpdate}, generate_html::create_html_boilerplate, js_parser::{collection_to_js, expression_to_js}
 };
 use crate::{
     bs_css::get_bs_css,
     bs_types::DataType,
     parsers::{
-        ast::AstNode,
+        ast_nodes::AstNode,
         styles::{Style, Tag},
         util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
     },
@@ -55,13 +54,11 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
             }
 
             // JAVASCRIPT / WASM
-            AstNode::VarDeclaration(id, ref expr, _) => {
+            AstNode::VarDeclaration(id, ref expr, _) | AstNode::Const(id, ref expr, _) => {
                 js.push_str(&format!("let v{} = {};", id, expression_to_js(&expr)));
                 module_references.push(node);
             }
-            AstNode::Const(_, _, _) => {
-                module_references.push(node);
-            }
+            
             AstNode::Function(name, args, body, is_exported) => {
                 js.push_str(&format!(
                     "{}function f{}({:?}){{\n{:?}\n}}",
@@ -79,7 +76,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
             }
 
             _ => {
-                red_ln!("unknown AST node found: {:?}", node);
+                red_ln!("unknown AST node found when parsing AST in web parser: {:?}", node);
             }
         }
     }
@@ -150,7 +147,7 @@ fn parse_scene(
                     AstNode::Literal(Token::IntLiteral(value)) => {
                         scene_wrap.style.push_str(&format!("padding:{}rem;", value));
                     }
-                    AstNode::Tuple(values) => {
+                    AstNode::Tuple(values, line_number) => {
                         let mut padding = String::new();
                         for value in values {
                             match value {
@@ -159,7 +156,8 @@ fn parse_scene(
                                 }
                                 _ => {
                                     red_ln!(
-                                        "Error: Padding must be a literal or a tuple of literals"
+                                        "Error at line {}: Padding must be a literal or a tuple of literals",
+                                        line_number
                                     );
                                 }
                             }
@@ -187,9 +185,13 @@ fn parse_scene(
                 style_assigned = true;
             }
             Style::TextColor(args, type_of_color) => {
-                let color_keyword = match type_of_color {
-                    Token::Rgb => "rgb",
-                    Token::Hsl => "hsl",
+                let color = match type_of_color {
+                    Token::Rgb => format!("rgba({})", collection_to_js(&args)),
+                    Token::Hsl => format!("hsla({})", collection_to_js(&args)),
+
+                    Token::Red | Token::Green | Token::Blue | Token::Yellow | Token::Cyan | Token::Magenta | Token::White | Token::Black | Token::Orange | Token::Pink | Token::Purple | Token::Grey => {
+                        format!("hsla({})", get_color(&type_of_color, &args))
+                    }
                     _ => {
                         red_ln!(
                             "Error: Invalid color type provided for text color: {:?}",
@@ -199,11 +201,13 @@ fn parse_scene(
                     }
                 };
 
-                scene_wrap.child_styles.push_str(&format!(
-                    "color:{}a({});",
-                    color_keyword,
-                    collection_to_js(&args)
+                scene_wrap.style.push_str(&format!(
+                    "color:{};",
+                    color,
                 ));
+                scene_wrap.child_styles.push_str(
+                    "color:inherit;"
+                );
                 style_assigned = true;
             }
             // OLD VERSION OF SIZE, WILL JUST BE TEXT SIZE NOW
@@ -686,9 +690,9 @@ fn parse_scene(
             }
 
             // STUFF THAT IS INSIDE SCENE HEAD THAT NEEDS TO BE PASSED INTO SCENE BODY
-            AstNode::VarReference(value) => {
+            AstNode::VarReference(value) | AstNode::ConstReference(value) => {
                 // Create a span in the HTML with a class that can be referenced by JS
-                // TO DO: Should be reactive in future
+                // TO DO: Should be reactive in future -> this can change at runtime
                 html.push_str(&format!("<span class=\"c{value}\"></span>"));
 
                 if !module_references.contains(&node) {
@@ -697,53 +701,12 @@ fn parse_scene(
                 }
             }
 
-            AstNode::ConstReference(value) => {
-                // Make sure the const is in the module references
-                let var = module_references.into_iter().rev().find(|n| match n {
-                    AstNode::Const(id, _, _) => *id == value,
-                    _ => false,
-                });
-
-                // Constant folding not yet implemented, so just check if there is a literal rather than expression
-                match var {
-                    Some(AstNode::Const(_, ref expr, _)) => {
-                        let node = *expr.clone();
-                        match node {
-                            AstNode::Literal(token) => {
-                                let value;
-                                match token {
-                                    Token::StringLiteral(v) | Token::RawStringLiteral(v) => {
-                                        value = v;
-                                    }
-                                    Token::FloatLiteral(v) => {
-                                        value = v.to_string();
-                                    }
-                                    Token::IntLiteral(v) => {
-                                        value = v.to_string();
-                                    }
-                                    _ => {
-                                        red_ln!("Unsupported constant type (should be implimented in future: {:?}", token);
-                                        value = String::new();
-                                    }
-                                }
-
-                                html.push_str(&format!("<span>{}</span>", value));
-                            }
-                            _ => {
-                                red_ln!("Const was not folded (was an expression)")
-                            }
-                        }
-                    }
-                    _ => red_ln!("Const reference not found in module"),
-                }
-            }
-
             // WILL CALL WASM FUNCTIONS
             AstNode::RuntimeExpression(expr, expr_type) => {
                 scenehead_literals.push((AstNode::RuntimeExpression(expr, expr_type), html.len()));
             }
 
-            AstNode::Tuple(items) => {
+            AstNode::Tuple(items, _) => {
                 for item in items {
                     scenehead_literals.push((item, html.len()));
                 }
@@ -767,9 +730,10 @@ fn parse_scene(
             }
 
             // ERROR HANDLING
-            AstNode::Error(value) => {
-                red_ln!("Error: {}", value);
+            AstNode::Error(value, line_number) => {
+                red_ln!("Error at line {} in scene: {} ", line_number, value);
             }
+            
             _ => {
                 red_ln!("unknown AST node found in scene: {:?}", node);
             }

@@ -1,5 +1,7 @@
+use colour::red_ln;
+
 use super::{
-    ast::AstNode,
+    ast_nodes::AstNode,
     collections::new_array,
     create_scene_node::new_scene,
     parse_expression::{create_expression, eval_expression},
@@ -14,7 +16,7 @@ enum Attribute {
     Comptime,
 }
 
-pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) {
+pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<u32>) -> (Vec<AstNode>, usize) {
     let mut ast = Vec::new();
     let mut i = start_index;
     let mut attributes: Vec<Attribute> = Vec::new();
@@ -26,7 +28,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
             }
 
             Token::SceneHead(scene_head) => {
-                ast.push(new_scene(scene_head, &tokens, &mut i, &ast));
+                ast.push(new_scene(scene_head, &tokens, &mut i, &ast, token_line_numbers));
             }
             Token::ModuleStart(_) => {
                 // In future, need to structure into code blocks
@@ -34,12 +36,14 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
 
             // New Function or Variable declaration
             Token::VarDeclaration(id) => {
+                // Need to determine if it is a const that compiles to a literal, should just push a literal in that case
                 ast.push(new_variable(
                     *id,
                     &tokens,
                     &mut i,
                     attributes.contains(&Attribute::Exported),
                     &ast,
+                    token_line_numbers,
                 ));
             }
 
@@ -65,6 +69,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                     _ => {
                         ast.push(AstNode::Error(
                             "Title must have a valid string as a argument".to_string(),
+                            token_line_numbers[i],
                         ));
                     }
                 }
@@ -79,19 +84,20 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
                     _ => {
                         ast.push(AstNode::Error(
                             "Date must have a valid string as a argument".to_string(),
+                            token_line_numbers[i],
                         ));
                     }
                 }
             }
 
-            Token::Newline | Token::Empty | Token::SceneClose(_) => {
+            Token::Newline | Token::Empty | Token::SceneClose(_) | Token::Whitespace => {
                 // Do nothing for now
             }
 
             Token::Print => {
                 i += 1;
                 ast.push(AstNode::Print(Box::new(eval_expression(
-                    create_expression(&tokens, &mut i, false, &ast),
+                    create_expression(&tokens, &mut i, false, &ast, token_line_numbers),
                     &DataType::Inferred,
                     &ast,
                 ))));
@@ -109,7 +115,10 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize) -> (Vec<AstNode>, usize) 
 
             // Or stuff that hasn't been implemented yet
             _ => {
-                ast.push(AstNode::Error(format!("Compiler Error: Token not recognised by AST parser when creating AST: {:?}", &tokens[i]).to_string()));
+                ast.push(AstNode::Error(
+                    format!("Compiler Error: Token not recognised by AST parser when creating AST: {:?}", &tokens[i]).to_string(),
+                    token_line_numbers[i],
+                ));
             }
         }
 
@@ -127,6 +136,7 @@ fn new_variable(
     i: &mut usize,
     is_exported: bool,
     ast: &Vec<AstNode>,
+    token_line_numbers: &Vec<u32>,
 ) -> AstNode {
     let attribute;
 
@@ -151,7 +161,10 @@ fn new_variable(
             return AstNode::VarDeclaration(name, Box::new(AstNode::Empty), is_exported);
         }
         _ => {
-            return AstNode::Error("Expected ':' or '=' after variable name for initialising. Variable does not yet exsist".to_string());
+            return AstNode::Error(
+                "Expected ':' or '=' after variable name for initialising. Variable does not yet exsist".to_string(),
+                token_line_numbers[*i],
+            );
         }
     }
 
@@ -163,12 +176,12 @@ fn new_variable(
     match &tokens[*i] {
         Token::OpenScope => match attribute {
             Attribute::Comptime => {
-                return AstNode::Struct(name, Box::new(new_array(tokens, i, ast)), is_exported)
+                return AstNode::Struct(name, Box::new(new_array(tokens, i, ast, token_line_numbers)), is_exported)
             }
             Attribute::Mutable | Attribute::Constant => {
                 return AstNode::VarDeclaration(
                     name,
-                    Box::new(new_array(tokens, i, ast)),
+                    Box::new(new_array(tokens, i, ast, token_line_numbers)),
                     is_exported,
                 )
             }
@@ -176,6 +189,7 @@ fn new_variable(
                 return AstNode::Error(
                     "Invalid assignment declaration for collection - possibly not supported yet?"
                         .to_string(),
+                    token_line_numbers[*i],
                 );
             }
         },
@@ -183,14 +197,14 @@ fn new_variable(
             Attribute::Comptime => {
                 return AstNode::Const(
                     name,
-                    Box::new(new_scene(scene_head, tokens, i, &ast)),
+                    Box::new(new_scene(scene_head, tokens, i, &ast, token_line_numbers)),
                     is_exported,
                 )
             }
             Attribute::Mutable | Attribute::Constant => {
                 return AstNode::VarDeclaration(
                     name,
-                    Box::new(new_scene(scene_head, tokens, i, &ast)),
+                    Box::new(new_scene(scene_head, tokens, i, &ast, token_line_numbers)),
                     is_exported,
                 )
             }
@@ -198,6 +212,7 @@ fn new_variable(
                 return AstNode::Error(
                     "Invalid assignment declaration for scene - possibly not supported yet?"
                         .to_string(),
+                    token_line_numbers[*i],
                 );
             }
         },
@@ -206,7 +221,7 @@ fn new_variable(
 
     let mut data_type = &DataType::Inferred;
     // Can be a collection, expression, literal or empty tuple
-    let parsed_expr = create_expression(tokens, i, false, &ast);
+    let parsed_expr = create_expression(tokens, i, false, &ast, token_line_numbers);
 
     // create_expression does not move the token index past the closing token so it is incremented past it here
     *i += 1;
@@ -214,7 +229,7 @@ fn new_variable(
     // Check if the variable is a function, prototype, choice, has a type declaration or an exsisting choice/prototype type
     match &tokens[*i] {
         Token::Arrow => {
-            return new_function(name, parsed_expr, tokens, i, is_exported);
+            return new_function(name, parsed_expr, tokens, i, is_exported, token_line_numbers);
         }
         Token::TypeKeyword(type_declaration) => {
             data_type = type_declaration;
@@ -228,27 +243,28 @@ fn new_variable(
     // Or whether it is a literal or expression
     // If the expression is an empty expression when the variable is NOT a function, return an error
     match parsed_expr {
-        AstNode::Expression(_) => {
+        AstNode::Expression(_, _) | AstNode::Tuple(_, _) => {
             let evaluated_expression = eval_expression(parsed_expr, data_type, ast);
-            return create_var_node(attribute, name, evaluated_expression, is_exported);
-        }
-        AstNode::Tuple(_) => {
-            let evaluated_expression = eval_expression(parsed_expr, data_type, ast);
-            return create_var_node(attribute, name, evaluated_expression, is_exported);
+            return create_var_node(attribute, name, evaluated_expression, is_exported, &token_line_numbers[*i]);
         }
         // AstNode::Collection(items, collection_type) => {
 
         // }
-        AstNode::Error(_) => {
+        AstNode::Error(err, line) => {
             return AstNode::Error(
                 format!(
-                    "Invalid expression for variable assignment (creating new variable: {name})"
+                    "Error: Invalid expression for variable assignment (creating new variable: {name}) at line {}: {}",
+                    line, err
                 )
                 .to_string(),
+                token_line_numbers[*i],
             );
         }
         _ => {
-            return AstNode::Error("Invalid expression for variable assignment".to_string());
+            return AstNode::Error(
+                "Invalid expression for variable assignment".to_string(),
+                token_line_numbers[*i],
+            );
         }
     }
 }
@@ -260,6 +276,7 @@ fn new_function(
     tokens: &Vec<Token>,
     i: &mut usize,
     is_exported: bool,
+    token_line_numbers: &Vec<u32>,
 ) -> AstNode {
     let function_body = Vec::new();
 
@@ -267,7 +284,7 @@ fn new_function(
     *i += 1;
 
     if &tokens[*i] != &Token::CloseScope {
-        return AstNode::Error("Expected '(' for function args".to_string());
+        return AstNode::Error("Expected '(' for function args".to_string(),token_line_numbers[*i]);
     }
 
     *i += 1;
@@ -282,6 +299,7 @@ fn create_var_node(
     var_name: usize,
     var_value: AstNode,
     is_exported: bool,
+    line_number: &u32,
 ) -> AstNode {
     match attribute {
         Attribute::Constant | Attribute::Comptime => {
@@ -291,7 +309,7 @@ fn create_var_node(
             return AstNode::VarDeclaration(var_name, Box::new(var_value), is_exported);
         }
         Attribute::Exported => {
-            return AstNode::Error("Exported variable not yet supported".to_string());
+            return AstNode::Error("Exported variable not yet supported".to_string(), *line_number);
         }
     }
 }
@@ -329,21 +347,40 @@ fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {
         }
     }
 
-    // TO DO: Skip to end of variable declaration
+    // Skip to end of variable declaration
+    let mut open_parenthesis = 0;
+    while let Some(token) = tokens.get(*i) {
+        match token {
+            Token::OpenParenthesis => {
+                *i += 1;
+                open_parenthesis += 1;
+            }
+            Token::CloseParenthesis => {
+                *i += 1;
 
-    // while let Some(token) = tokens.get(*i) {
-    //     Token::OpenParenthesis => {
-    //         *i += 1;
-    //     }
-    //     Token::Newline => {
-    //         *i += 1;
-    //         return;
-    //     }
-    //     _ => {
-    //         return;
-    //     }
-    //     *i += 1;
-    // }
+                if open_parenthesis < 1 {
+                    red_ln!("Error: Closing parenthesis without opening parenthesis in dead variable code");
+                    return;
+                }
+                open_parenthesis -= 1;
+                if open_parenthesis == 0 {
+                    break;
+                }
+            }
+            Token::Newline => {
+                *i += 1;
+                if open_parenthesis < 1 {
+                    return;
+                }
+            }
+            Token::EOF => {
+                break;
+            }
+            _ => {
+                *i += 1;
+            }
+        }
+    }
 }
 /*
 match &tokens[*i] {

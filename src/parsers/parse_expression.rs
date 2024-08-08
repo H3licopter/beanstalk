@@ -1,15 +1,15 @@
 // use math_parse::MathParse;
 
-use super::{ast::AstNode, build_ast::find_var_declaration_index, collections::new_tuple};
+use colour::red_ln;
+
+use super::{ast_nodes::AstNode, build_ast::find_var_declaration_index, collections::new_tuple};
 use crate::{bs_types::DataType, Token};
 
 /*  CAN RETURN:
-     - a literal
      - an expression
-     - an empty expression for functions
-     - a collection of expressions or literals
-
-
+     - a tuple of expresions
+     - an error
+     
      DOES NOT CARE ABOUT TYPES (yet)
      can return a mix of types in the same expression
      Enforcing the type is done when the expression is evaluated
@@ -20,6 +20,7 @@ pub fn create_expression(
     i: &mut usize,
     inside_tuple: bool,
     ast: &Vec<AstNode>,
+    token_line_numbers: &Vec<u32>,
 ) -> AstNode {
     let mut expression = Vec::new();
 
@@ -33,6 +34,7 @@ pub fn create_expression(
     // Loop through the expression and create the AST nodes (increment i each time)
     // Figure out the type it should be from the data
     // DOES NOT MOVE TOKENS PAST THE CLOSING TOKEN
+    let mut next_number_negative = false;
     while let Some(token) = tokens.get(*i) {
         match token {
             // Conditions that close the expression
@@ -59,6 +61,7 @@ pub fn create_expression(
                 if bracket_nesting != 0 {
                     return AstNode::Error(
                         "Not enough closing parenthesis for expression. Need more ')' at the end of the expression!".to_string(),
+                        token_line_numbers[*i],
                     );
                 }
 
@@ -80,7 +83,7 @@ pub fn create_expression(
                 if inside_tuple {
                     break;
                 }
-                return new_tuple(tokens, i, AstNode::Expression(expression), ast);
+                return new_tuple(tokens, i, AstNode::Expression(expression, token_line_numbers[*i]), ast, token_line_numbers);
             }
 
             // Check if name is a reference to another variable or function call
@@ -92,22 +95,29 @@ pub fn create_expression(
             }
 
             // Check if is a literal
-            Token::IntLiteral(int) => {
-                expression.push(AstNode::Literal(Token::IntLiteral(*int)));
+
+            // Numbers
+            Token::IntLiteral(mut int) => {
+                if next_number_negative {int = -int; next_number_negative = false;}
+                expression.push(AstNode::Literal(Token::IntLiteral(int)));
             }
+            Token::FloatLiteral(mut float) => {
+                if next_number_negative {float = -float; next_number_negative = false;}
+                expression.push(AstNode::Literal(Token::FloatLiteral(float)));
+            }
+
+            // Strings
             Token::StringLiteral(string) => {
                 expression.push(AstNode::Literal(Token::StringLiteral(string.clone())));
             }
-            Token::FloatLiteral(float) => {
-                expression.push(AstNode::Literal(Token::FloatLiteral(*float)));
-            }
+
 
             // OPERATORS
             // Will push as a string so shunting yard can handle it later just as a string
 
             // UNARY OPERATORS
             Token::Negative => {
-                expression.push(AstNode::Operator(" -".to_string()));
+                next_number_negative = true;
             }
             Token::Exponent => {
                 expression.push(AstNode::Operator(" ** ".to_string()));
@@ -162,6 +172,7 @@ pub fn create_expression(
             _ => {
                 expression.push(AstNode::Error(
                     "Invalid Expression, must be assigned wih a valid datatype".to_string(),
+                    token_line_numbers[*i],
                 ));
             }
         }
@@ -169,7 +180,7 @@ pub fn create_expression(
         *i += 1;
     }
 
-    AstNode::Expression(expression)
+    AstNode::Expression(expression, token_line_numbers[*i])
 }
 
 // This function takes in an Expression node or Collection of expressions that has a Vec of Nodes to evaluate
@@ -182,7 +193,7 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
     let mut compile_time_eval = true;
 
     match expr {
-        AstNode::Expression(e) => {
+        AstNode::Expression(e, line_number) => {
             for node in e {
                 match node {
                     AstNode::Literal(t) => {
@@ -190,16 +201,21 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                             t,
                             type_declaration,
                             &mut current_type,
+                            line_number
                         ));
                     }
                     AstNode::Operator(op) => {
                         // If the current type is a string, then must be a + operator or create an error
                         if current_type == DataType::String && op != " + " {
-                            return AstNode::Error("Can only use the + operator to manipulate strings inside string expressions".to_string());
+                            return AstNode::Error(
+                                "Can only use the + operator to manipulate strings inside string expressions".to_string(),
+                                line_number
+                            );
                         }
                         if simplified_expression.len() < 1 {
                             return AstNode::Error(
                                 "Must have a value to the left of an operator".to_string(),
+                                line_number
                             );
                         }
                         simplified_expression.push(AstNode::Operator(op));
@@ -220,24 +236,34 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                                             t,
                                             type_declaration,
                                             &mut current_type,
+                                            line_number
                                         ));
                                     }
                                     AstNode::RuntimeExpression(e, expr_type) => {
                                         if current_type == DataType::Inferred
                                             || current_type != expr_type
                                         {
-                                            return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+                                            return AstNode::Error(
+                                                "Error Mixing types. You must explicitly convert types to use them in the same expression".to_string()
+                                                , line_number
+                                            );
                                         }
                                         simplified_expression
                                             .push(AstNode::RuntimeExpression(e, expr_type));
                                     }
                                     _ => {
-                                        return AstNode::Error("Invalid Expression".to_string());
+                                        return AstNode::Error(
+                                            "Invalid Expression".to_string(),
+                                            line_number
+                                        );
                                     }
                                 }
                             }
                             _ => {
-                                return AstNode::Error("Reference not found in AST".to_string());
+                                return AstNode::Error(
+                                    "Reference not found in AST".to_string(),
+                                    line_number
+                                );
                             }
                         }
                     }
@@ -247,12 +273,12 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
             }
         }
 
-        AstNode::Tuple(e) => {
+        AstNode::Tuple(e, line_number) => {
             for node in e {
                 match node {
-                    AstNode::Expression(e) | AstNode::Tuple(e) => {
+                    AstNode::Expression(e, line_number) | AstNode::Tuple(e, line_number) => {
                         simplified_expression.push(eval_expression(
-                            AstNode::Expression(e),
+                            AstNode::Expression(e, line_number),
                             type_declaration,
                             ast,
                         ));
@@ -263,10 +289,10 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                 }
             }
 
-            return AstNode::Tuple(simplified_expression);
+            return AstNode::Tuple(simplified_expression, line_number);
         }
         _ => {
-            return AstNode::Error("No Expression to Evaluate".to_string());
+            red_ln!("Compiler Bug: No Expression to Evaluate - eval expression passed wrong AST node: {:?}", expr);
         }
     }
 
@@ -305,7 +331,7 @@ fn concat_strings(simplified_expression: &mut Vec<AstNode>) -> AstNode {
                 previous_node_is_plus = true;
             }
             _ => {
-                return AstNode::Error("Cannot evaluate string expression at compile time. Compiler should be creating a runtime string expression".to_string());
+                red_ln!("Compiler Bug: Cannot evaluate string expression at compile time. Compiler should be creating a runtime string expression");
             }
         }
     }
@@ -317,6 +343,7 @@ fn check_literal(
     value: Token,
     type_declaration: &DataType,
     current_type: &mut DataType,
+    line_number: u32,
 ) -> AstNode {
     if type_declaration == &DataType::CoerseToString {
         return AstNode::Literal(value);
@@ -326,7 +353,10 @@ fn check_literal(
             if type_declaration == &DataType::Inferred {
                 *current_type = DataType::Int;
             } else if type_declaration != &DataType::Int {
-                return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+                return AstNode::Error(
+                    "Error Mixing types. You must explicitly convert types to use them in the same expression".to_string(),
+                    line_number
+                );
             }
             AstNode::Literal(value)
         }
@@ -334,7 +364,10 @@ fn check_literal(
             if type_declaration == &DataType::Inferred {
                 *current_type = DataType::Float;
             } else if type_declaration != &DataType::Float {
-                return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+                return AstNode::Error(
+                    "Error Mixing types. You must explicitly convert types to use them in the same expression".to_string(),
+                    line_number
+                );
             }
             AstNode::Literal(value)
         }
@@ -342,25 +375,28 @@ fn check_literal(
             if type_declaration == &DataType::Inferred {
                 *current_type = DataType::String;
             } else if type_declaration != &DataType::String {
-                return AstNode::Error("Error Mixing types. You must explicitly convert types to use them in the same expression".to_string());
+                return AstNode::Error(
+                    "Error Mixing types. You must explicitly convert types to use them in the same expression".to_string(),
+                    line_number
+                );
             }
 
             AstNode::Literal(value)
         }
-        _ => AstNode::Error("Invalid Literal (check_literal)".to_string()),
+        _ => AstNode::Error("Invalid Literal (check_literal)".to_string(),
+            line_number
+        ),
     }
 }
 
 pub fn check_if_arg(scene_head: &Vec<Token>, i: &mut usize) -> bool {
     if *i >= scene_head.len() {
-        *i -= 1;
         return false;
     }
     match &scene_head[*i] {
-        // Check if open bracket, literal or variable
+        // Check if open bracket, literal or prefixed unary operator
         Token::OpenParenthesis
-        | Token::VarReference(_)
-        | Token::ConstReference(_)
+        | Token::Negative
         | Token::IntLiteral(_)
         | Token::StringLiteral(_)
         | Token::BoolLiteral(_)

@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="../images/favicons/favicon.ico">
+<link rel="icon"href="../../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="../images/favicons/site.webmanifest">
-<link rel="stylesheet" href="../css/pico.min.css" />
+<link rel="apple-touch-icon"href="../../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../../css/pico.min.css" />
 <style>.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:rgba(175, 10, 10);}</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><p>Beanstalk has its own templating language. These are called scenes.
+            }.bs-0 > * {color:inherit;}</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><p>Beanstalk has its own templating language. These are called scenes.
 </p><p>Scenes have two sections, the head and the body. 
 </p><p><strong><em>The head&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the styling and positioning of the scene.
 </span></p><p><strong><em>The body&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the content of the scene.
@@ -48,7 +48,7 @@
 
     A constant variable from the code inserted into the scene: [ constant ].
 
-    The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets [rgb(170,0,0): *cannot*] be used without an escape character or by using backticks to create a raw string.
+    The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets [red: *cannot*] be used without an escape character or by using backticks to create a raw string.
 
     ]
 </code></pre><br><h2>Scene exmaple
@@ -90,18 +90,18 @@
 </h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>post</td><td>get</td></tr><tr><td>delete</td><td>swap</td></tr></tbody></table><br><h3>Other
 </h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>ignore</td><td>Creates a comment, but does not add it to the final output</td></tr><tr><td>canvas</td><td>An HTML canvas element</td></tr></tbody></table><br><h2>Unique Scene Logic
 </h2><p>Variables and expressions are typecast into strings when put into a scene. This is the behaviour of all the numerical types and most of the string types. There are some exceptions to how other types are handled by scenes.
-</p><h4>Booleans
-</h4><p>Booleans in a scenehead will conditonally hide or show itself based on the value of the boolean. If the boolean is true, the scene and it's children will be shown, if false, it will be hidden.
+</p><h3>Booleans
+</h3><p>Booleans in a scenehead will conditonally hide or show itself based on the value of the boolean. If the boolean is true, the scene and it's children will be shown, if false, it will be hidden.
 </p><pre><code>    logged_in := false
 
     -- Scene is hidden
     [if not logged_in:
         [button: Log In]
     ]
-</code></pre><br><h4>Errors
-</h4><p>If an error is added to a scene, it will be displayed in the console, rather than injected into the scene. This usually means that the variable with the error has reverted to its default value, which will be shown.
-</p><span style="font-size:0.85rem;"  class=" bs-0" ><p><em>This behaviour is an uncertain part of the design, tuples that contain errors might be better completely hidden from the scene rather than a zero value being shown.</em></p></span><br><h4>Reactive Variables
-</h4><p>Variables can be made reactive in a scene by being appended with a tilde. The variable will update whenever the value of the variable changes. Variables without the tilde will only update if the scene is re-rendered.
+</code></pre><br><h3>Errors
+</h3><p>If an error is added to a scene, it will be displayed in the console, rather than injected into the scene. This usually means that the variable with the error has reverted to its default value, which will be shown.
+</p><span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-0" ><p><em>This behaviour is an uncertain part of the design, tuples that contain errors might be better completely hidden from the scene rather than a zero value being shown.</em></p></span><br><h3>Reactive Variables
+</h3><p>Variables can be made reactive in a scene by being appended with a tilde. The variable will update whenever the value of the variable changes. Variables without the tilde will only update if the scene is re-rendered.
 </p><pre><code>    variable_that_changes := "hello"
 
     -- Variable becomes reactive in this scene
@@ -114,17 +114,12 @@
     variable_that_changes := "world"
 </code></pre><br><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
 </h3></div></footer></main>
-<script type="module">
-  import init, { parse_int_expr, parse_float_expr } from "./../pkg/bs_wasm_generator.js";
-  init().then(() => {
-    function uInnerHTML(id,update){
+<script type="module">function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }
-  });
-</script>
+            }</script>
 </body>
 </html>

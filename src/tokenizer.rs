@@ -4,8 +4,10 @@ use crate::tokenize_scene::{tokenize_codeblock, tokenize_markdown, tokenize_scen
 use std::iter::Peekable;
 use std::str::Chars;
 
-pub fn tokenize(source_code: &str, module_name: &str) -> Vec<Token> {
+pub fn tokenize(source_code: &str, module_name: &str) -> (Vec<Token>, Vec<u32>) {
     let mut tokens: Vec<Token> = Vec::new();
+    let mut line_number: u32 = 1;
+    let mut token_line_numbers: Vec<u32> = Vec::new();
     let mut chars: Peekable<Chars<'_>> = source_code.chars().peekable();
     let mut tokenize_mode: TokenizeMode = TokenizeMode::Normal;
     let mut scene_nesting_level: &mut i64 = &mut 0;
@@ -62,7 +64,8 @@ pub fn tokenize(source_code: &str, module_name: &str) -> Vec<Token> {
         }
 
         tokens.push(token);
-        token = get_next_token(&mut chars, &mut tokenize_mode, &mut scene_nesting_level);
+        token_line_numbers.push(line_number);
+        token = get_next_token(&mut chars, &mut tokenize_mode, &mut scene_nesting_level, &mut line_number);
     }
 
     // Mark unused variables for removal in AST
@@ -73,13 +76,14 @@ pub fn tokenize(source_code: &str, module_name: &str) -> Vec<Token> {
     }
 
     tokens.push(token);
-    tokens
+    (tokens, token_line_numbers)
 }
 
 pub fn get_next_token(
     chars: &mut Peekable<Chars>,
     tokenize_mode: &mut TokenizeMode,
     scene_nesting_level: &mut i64,
+    line_number: &mut u32,
 ) -> Token {
     let mut current_char = match chars.next() {
         Some(ch) => ch,
@@ -136,15 +140,16 @@ pub fn get_next_token(
                 *tokenize_mode = TokenizeMode::SceneHead;
             }
         }
-        return tokenize_scenehead(chars, tokenize_mode, scene_nesting_level);
+        return tokenize_scenehead(chars, tokenize_mode, scene_nesting_level, line_number);
     }
 
     if tokenize_mode == &TokenizeMode::Markdown && current_char != ']' {
-        return tokenize_markdown(chars, &mut current_char);
+        return tokenize_markdown(chars, &mut current_char, line_number);
     }
 
-    // Skip non-newline whitespace
+    // Whitespace 
     if current_char == '\n' {
+        *line_number += 1;
         return Token::Newline;
     }
     while current_char.is_whitespace() {
@@ -294,11 +299,15 @@ pub fn get_next_token(
                 if let Some(&next_next_char) = chars.peek() {
                     if next_next_char == '\n' {
                         // Mutliline Comment
+                        *line_number += 1;
                         chars.next();
 
                         // Multiline Comment
                         while let Some(ch) = chars.next() {
                             token_value.push(ch);
+                            if ch == '\n' {
+                                *line_number += 1;
+                            }
                             if token_value.ends_with("--") {
                                 return Token::MultilineComment(
                                     token_value.trim_end_matches("\n--").to_string(),
@@ -310,6 +319,7 @@ pub fn get_next_token(
                     // Inline Comment
                     while let Some(ch) = chars.next() {
                         if ch == '\n' {
+                            *line_number += 1;
                             return Token::Comment(token_value);
                         }
                         token_value.push(ch);
@@ -536,6 +546,23 @@ fn keyword_or_variable(
                     "code" => return Token::CodeKeyword,
                     "blank" => return Token::Blank,
                     "bg" => return Token::BG,
+
+                    // Theme stuff
+                    "clr" => return Token::ThemeColor,
+
+                    // Colour keywords
+                    "red" => return Token::Red,
+                    "green" => return Token::Green,
+                    "blue" => return Token::Blue,
+                    "yellow" => return Token::Yellow,
+                    "cyan" => return Token::Cyan,
+                    "magenta" => return Token::Magenta,
+                    "white" => return Token::White,
+                    "black" => return Token::Black,
+                    "orange" => return Token::Orange,
+                    "pink" => return Token::Pink,
+                    "purple" => return Token::Purple,
+                    "grey" => return Token::Grey,
 
                     // Layout
                     "pad" => return Token::Padding,
