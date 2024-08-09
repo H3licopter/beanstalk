@@ -22,14 +22,18 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
 [code:
     [main:
 
-    The open square bracket is used to start a new scene. The colon begins the scene body. This is defining the main scene, which by default will add a main tag to the HTML and wrap the content in a centered container.
+    The open square bracket is used to start a new scene. 
+    The colon begins the scene body. 
+    This is defining the main scene, 
+    which by default will add a main tag to the HTML and wrap the content in a centered container.
 
     # A Heading
     Some text that has a [link "example.com": link] inside it.
 
     A constant variable from the code inserted into the scene: [ constant ].
 
-    The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets [red: *cannot*] be used without an escape character or by using backticks to create a raw string.
+    The body of a scene is mostly like a simple flavour of markdown, 
+    the main difference being square brackets [red: *cannot*] be used without an escape character or by using backticks to create a raw string.
 
     ]
 ]
@@ -125,13 +129,13 @@ More keywords will be added and more documentation about the aruments you can pa
 ]
 
 ### HTTP 
+These are directly from the HTMX library and will be the same keywords, but without the leading 'hx-' prefix. More to be added soon!
 [table 2:
     [: Property] [: Description]
 
-    [: post]
-    [: get]
-    [: delete]
-    [: swap]
+    [: get] [: ]
+    [: post]  [: ]
+    [: swap] [: ]
 ]
 
 ### Other

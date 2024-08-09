@@ -4,7 +4,7 @@
 ][main:
 
 ## What is Beanstalk?
-This website was created using Beanstalk! It's a statically typed language that compiles to HTML, CSS, Javascript and (hopefully soon) Web Assembly.
+This website was created using Beanstalk! It's a statically typed language that compiles to HTML, CSS, Javascript and (eventually) Web Assembly.
 
 For the most part you use it a lot like markdown, but instead of writing HTML or seperate Javascript code for a webpage, Beanstalk has it's own unique syntax that blends modern utility class styles into a minimilistic and modern framework-replacing language.
 
@@ -28,6 +28,22 @@ This is a work in progress site for Beanstalk documentation as it's being develo
 As the language and compiler are in the early stages of development, the documentation has only just started being written and is subject to frequent changes. The syntax for the language itself outside of the scene syntax is still being iterated on and refined.
 
 The source code for this site on [link "https://github.com/H3licopter/beanstalk/tree/main/docs/src": Github]. You can view the output of the Beanstalk compiler [link "https://github.com/H3licopter/beanstalk/tree/main/docs/dist": here]!
+
+## Roadmap
+If you are intersted in contributing, show some interest on Github. It's very early days, but a fun project to work on!
+
+### Immediate Goals
+- Finish implementing all basic scene styling and keywords
+- Proper exporting / modules / globals for components and code reuse (especially for scenes)
+- Complete all JS codegen compiling
+- Full theme system and CSS importing
+
+### Later Goals
+- Refactor compiler to be more modular and performant
+- Finish implementing constant folding and basic compile time evaluation
+- Basic scene components and reactivity implemented
+- Full WASM codegen and wasmer runtime compile target
+- Make the compiler a proper command line tool and installable on any system
 
 ]
 

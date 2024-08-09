@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><p>Beanstalk has its own templating language. These are called scenes.
+            }.bs-0 > * {color:inherit;}</style></head><body><nav style="background-color:rgba(100), 220), 0), 0.06));" class="bs-nav-1 "  ><ul><li><a href="../") style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><p>Beanstalk has its own templating language. These are called scenes.
 </p><p>Scenes have two sections, the head and the body. 
 </p><p><strong><em>The head&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the styling and positioning of the scene.
 </span></p><p><strong><em>The body&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the content of the scene.
@@ -41,14 +41,18 @@
 </h2><p>Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a scene body. Beanstalk markdown supports the familiar heading, bold and italic syntax from most markdown parsers.
 </p><pre><code>    [main:
 
-    The open square bracket is used to start a new scene. The colon begins the scene body. This is defining the main scene, which by default will add a main tag to the HTML and wrap the content in a centered container.
+    The open square bracket is used to start a new scene. 
+    The colon begins the scene body. 
+    This is defining the main scene, 
+    which by default will add a main tag to the HTML and wrap the content in a centered container.
 
     # A Heading
     Some text that has a [link "example.com": link] inside it.
 
     A constant variable from the code inserted into the scene: [ constant ].
 
-    The body of a scene is mostly like a simple flavour of markdown, the main difference being square brackets [red: *cannot*] be used without an escape character or by using backticks to create a raw string.
+    The body of a scene is mostly like a simple flavour of markdown, 
+    the main difference being square brackets [red: *cannot*] be used without an escape character or by using backticks to create a raw string.
 
     ]
 </code></pre><br><h2>Scene exmaple
@@ -87,7 +91,8 @@
 </h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>pad</td><td>The padding around the element</td></tr><tr><td>space</td><td>The margin around the element</td></tr><tr><td>center</td><td>Centers the element horizontally. Pass in a bool of true to center vertically</td></tr><tr><td>table</td><td>A table element</td></tr><tr><td>size</td><td>The size of the text in the element</td></tr><tr><td>nav</td><td>A navigation element. Basically a nav bar, will automatically add ul tags for child scenes</td></tr><tr><td>order</td><td>The order of the element inside a container</td></tr><tr><td>gap</td><td>Creates a gap between elements</td></tr><tr><td>main</td><td>The main element of the page. Creates a main tag with a centered container</td></tr><tr><td>header</td><td>The header element of the page. Creates a header tag with a centered container</td></tr><tr><td>footer</td><td>The footer element of the page. Creates a footer tag with a centered container</td></tr><tr><td>section</td><td>A section element of the page. Creates a section tag with a centered container</td></tr></tbody></table><br><h3>Interactive 
 </h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>link</td><td>link (anchor tag)</td></tr><tr><td>button</td><td>A button</td></tr><tr><td>input</td><td>An input element</td></tr><tr><td>click</td><td>You can provide a function as an argument to the click event</td></tr><tr><td>form</td><td>A form element</td></tr><tr><td>option</td><td>An option element</td></tr><tr><td>dropdown</td><td>A dropdown element</td></tr></tbody></table><br><h3>Media
 </h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>img</td><td>An image element</td></tr><tr><td>video</td><td>A video element</td></tr><tr><td>audio</td><td>An audio element</td></tr><tr><td>alt</td><td>An alternative text for media</td></tr></tbody></table><br><h3>HTTP 
-</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>post</td><td>get</td></tr><tr><td>delete</td><td>swap</td></tr></tbody></table><br><h3>Other
+</h3><p>These are directly from the HTMX library and will be the same keywords, but without the leading 'hx-' prefix. More to be added soon!
+</p><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>get</td><td></td></tr><tr><td>post</td><td></td></tr><tr><td>swap</td><td></td></tr></tbody></table><br><h3>Other
 </h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>ignore</td><td>Creates a comment, but does not add it to the final output</td></tr><tr><td>canvas</td><td>An HTML canvas element</td></tr></tbody></table><br><h2>Unique Scene Logic
 </h2><p>Variables and expressions are typecast into strings when put into a scene. This is the behaviour of all the numerical types and most of the string types. There are some exceptions to how other types are handled by scenes.
 </p><h3>Booleans

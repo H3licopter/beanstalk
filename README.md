@@ -108,14 +108,8 @@ Reactivity, (scene) components, compile time evaluation and more will be built i
 
 ### Technologies currently used in the compiler
 - [Pico CSS](https://picocss.com/) for the default CSS styling
+- [HTMX](https://htmx.org/) for the functionality behind many of the scene keywords
 
 <br>
 
 ---
-
-### Current Goals
-  - Finish implementing all basic scene styling and keywords for scenes
-  - Finish implimenting constant folding and basic compile time evaluation
-  - Basic scene components and reactivity implemented
-  - Full WASM codegen and wasmer runtime compile target
-  - Complete all the basic features of the initial compiler so it can actually be downloaded and used easily 

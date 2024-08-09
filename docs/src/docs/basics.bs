@@ -3,6 +3,15 @@
 [header center: [title 1: BASIC BEANSTALK SYNTAX]]
 [main:
 
+# Language Design Goals
+The syntax of Beanstalk is designed to be:
+- Simple
+- Concise
+- Statically typed
+- Seemless intergration with scenes
+- Procedural
+- Fast compile times
+
 # Style Guide
 The style guide is:
 - snake_case as the default choice for variables and other things
@@ -36,8 +45,6 @@ Colon means initialise, equals means assign. The type of a variable goes after t
 The @ symbol is used to export variables and methods/functions outside of a module or object.
 
 ## Assignment
-Assigning a new variable to an existing variable will create a reference to the existing variable, unless you specify the type as a 'copy'.
-
 Types will be inferred if not specified, and implicit conversions will be used to convert the value to the inferred type.
 
 ### Compile time immutable variable
@@ -48,17 +55,11 @@ Types will be inferred if not specified, and implicit conversions will be used t
 
 ## Static Assignment
 [code:
-    -- UTF-8 string
+    -- UTF-16 string
     my_brain := "Dumb"
-
-    -- 32 bit integer
-    integer :: 69
 
     -- 32 bit float
     float := 69.420
-
-    -- pointed sized unsigned integer
-    my_brain : Index : 420 
 
     -- 
         Implicit string conversion (string type must be specified in the type definition for this to work)
@@ -104,21 +105,21 @@ There are
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
-    [: Int ] [: 32 bit signed integer ] [: 0]
+    [: Int ] [: *NOT YET SUPPORTED*32 bit signed integer ] [: 0]
     
-    [: Idx ] [: Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible. ] [: 0]
+    [: Idx ] [: *NOT YET SUPPORTED* Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible. ] [: 0]
 
-    [: Float ] [: 32 bit floating point number ] [: 0.0]
+    [: Float ] [: 64 bit floating point number ] [: 0.0]
     
-    [: Decimal ] [: A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision] [: 0.00]
+    [: Decimal ] [: *NOT YET SUPPORTED* A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision] [: 0.00]
 
-    [: Unit] [: Special numeric unit syntax for appending numerical types ] [: error]
+    [: Unit] [: *NOT YET SUPPORTED* Special numeric unit syntax for appending numerical types ] [: error]
 ]
 ## String based Types
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
-    [: String ] [: UTF-8] [: ""]
+    [: String ] [: UTF-16] [: ""]
 
     [: Unicode ] [: Unicode strings are UTF-32 strings. They must be created with a type annotation. ] [: ""]
 
