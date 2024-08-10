@@ -150,7 +150,7 @@ pub fn new_scene(
                         // Need to add JS DOM hooks to change text color at runtime.
                     }
                 } else {
-                    scene_styles.push(Style::TextColor(AstNode::Literal(Token::IntLiteral(0)), color_type));
+                    scene_styles.push(Style::TextColor(AstNode::Literal(Token::FloatLiteral(0.0)), color_type));
                 }
             }
 
@@ -186,7 +186,7 @@ pub fn new_scene(
                 let eval_arg;
                 // Default to 1 if no argument is provided
                 if !check_if_arg(scene_head, &mut j) {
-                    eval_arg = AstNode::Literal(Token::IntLiteral(1));
+                    eval_arg = AstNode::Literal(Token::FloatLiteral(1.0));
                 } else {
                     let arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers);
                     eval_arg = eval_expression(arg, &DataType::Inferred, ast);
@@ -194,9 +194,6 @@ pub fn new_scene(
 
                 match eval_arg {
                     AstNode::Literal(literal_token) => match literal_token {
-                        Token::IntLiteral(value) => {
-                            scene_tags.push(Tag::Table(value as u32));
-                        }
                         Token::FloatLiteral(value) => {
                             scene_tags.push(Tag::Table(value as u32));
                         }
@@ -276,7 +273,7 @@ pub fn new_scene(
             }
 
             // Expressions to Parse
-            Token::FloatLiteral(_) | Token::IntLiteral(_) | Token::DecLiteral(_) => {
+            Token::FloatLiteral(_) => {
                 scene.push(eval_expression(
                     create_expression(scene_head, &mut j, true, &ast, token_line_numbers),
                     &DataType::CoerseToString,
@@ -332,7 +329,7 @@ pub fn new_scene(
                 let eval_arg;
                 // TODO: get a default margin value
                 if !check_if_arg(scene_head, &mut j) {
-                    eval_arg = AstNode::Literal(Token::IntLiteral(0));
+                    eval_arg = AstNode::Literal(Token::FloatLiteral(0.0));
                 } else {
                     let arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers);
                     eval_arg = eval_expression(arg, &DataType::Inferred, ast);
@@ -350,7 +347,7 @@ pub fn new_scene(
                 let eval_arg;
                 // TODO: get a default margin value
                 if !check_if_arg(scene_head, &mut j) {
-                    eval_arg = AstNode::Literal(Token::IntLiteral(0));
+                    eval_arg = AstNode::Literal(Token::FloatLiteral(0.0));
                 } else {
                     let arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers);
                     eval_arg = eval_expression(arg, &DataType::Inferred, ast);

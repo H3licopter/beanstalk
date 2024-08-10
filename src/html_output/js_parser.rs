@@ -21,7 +21,6 @@ pub fn expression_to_js(expr: &AstNode, id: &mut usize, wasm_module: &mut String
                 //             return "".to_string();
                 //         }
                 //     };
-                   
                 // }
                 DataType::String | DataType::Float | DataType::Int => {
                     js.push_str(&format!("("));
@@ -37,9 +36,6 @@ pub fn expression_to_js(expr: &AstNode, id: &mut usize, wasm_module: &mut String
             for node in nodes {
                 match node {
                     AstNode::Literal(token) => match token {
-                        Token::IntLiteral(value) => {
-                            js.push_str(&value.to_string());
-                        }
                         Token::FloatLiteral(value) => {
                             js.push_str(&value.to_string());
                         }
@@ -71,9 +67,6 @@ pub fn expression_to_js(expr: &AstNode, id: &mut usize, wasm_module: &mut String
         }
 
         AstNode::Literal(token) => match token {
-            Token::IntLiteral(value) => {
-                js.push_str(&value.to_string());
-            }
             Token::FloatLiteral(value) => {
                 js.push_str(&value.to_string());
             }
@@ -148,7 +141,7 @@ pub fn _collection_to_vec_of_js(collection: &AstNode, id: &mut usize, wasm_modul
 }
 // BS function created in WASM that can be called from JS
 // Naming Convention: wf<id>()
-pub fn wasm_math_expr_fn(nodes: &Vec<AstNode>, id: &mut usize, data_type: &DataType, js: &mut String) -> Result<String, &'static str>  {
+pub fn _wasm_math_expr_fn(nodes: &Vec<AstNode>, id: &mut usize, data_type: &DataType, js: &mut String) -> Result<String, &'static str>  {
     js.push_str(&format!("wsx.wf{id}("));
     
     let type_sig = match data_type {
@@ -169,9 +162,6 @@ pub fn wasm_math_expr_fn(nodes: &Vec<AstNode>, id: &mut usize, data_type: &DataT
     for node in nodes {
         match node {
             AstNode::Literal(token) => match token {
-                Token::IntLiteral(value) => {
-                    wasm_fn.push_str(&format!("{value}"));
-                }
                 Token::FloatLiteral(value) => {
                     wasm_fn.push_str(&format!("{value}"));
                 }

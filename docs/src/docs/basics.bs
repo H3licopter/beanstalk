@@ -7,7 +7,7 @@
 The syntax of Beanstalk is designed to be:
 - Simple
 - Concise
-- Statically typed
+- Strongly typed
 - Seemless intergration with scenes
 - Procedural
 - Fast compile times

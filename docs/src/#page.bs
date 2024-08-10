@@ -4,7 +4,7 @@
 ][main:
 
 ## What is Beanstalk?
-This website was created using Beanstalk! It's a statically typed language that compiles to HTML, CSS, Javascript and (eventually) Web Assembly.
+This website was created using Beanstalk! It's a strongly typed language that compiles to HTML, CSS, Javascript and (eventually) Web Assembly.
 
 For the most part you use it a lot like markdown, but instead of writing HTML or seperate Javascript code for a webpage, Beanstalk has it's own unique syntax that blends modern utility class styles into a minimilistic and modern framework-replacing language.
 

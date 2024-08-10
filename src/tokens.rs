@@ -14,6 +14,7 @@ pub struct Declaration {
     pub index: usize,
     pub has_ref: bool,
     pub next_token_index: usize,
+    pub is_exported: bool,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -60,12 +61,14 @@ pub enum Token {
     // Literals
     TypeInference,
     StringLiteral(String),
-    RawStringLiteral(String),
-    RuneLiteral(char),
-    IntLiteral(i64),
     FloatLiteral(f64),
-    DecLiteral(f64), // Will eventually be some bignum type thing
+    RawStringLiteral(String),
     BoolLiteral(bool),
+
+    // Not yet supported
+    IntLiteral(i64), 
+    RuneLiteral(char),
+    DecLiteral(f64), // Will eventually be some bignum type thing
 
     // Stucture of Syntax
     Newline,

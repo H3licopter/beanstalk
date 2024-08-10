@@ -70,7 +70,7 @@ pub fn tokenize(source_code: &str, module_name: &str) -> (Vec<Token>, Vec<u32>) 
 
     // Mark unused variables for removal in AST
     for var_dec in var_names.iter() {
-        if !var_dec.has_ref {
+        if !var_dec.has_ref && !var_dec.is_exported {
             tokens[var_dec.index] = Token::DeadVarible;
         }
     }
@@ -91,6 +91,18 @@ pub fn get_next_token(
     };
 
     let mut token_value: String = String::new();
+
+    // Whitespace 
+    if current_char == '\n' {
+        *line_number += 1;
+        return Token::Newline;
+    }
+    while current_char.is_whitespace() {
+        current_char = match chars.next() {
+            Some(ch) => ch,
+            None => return Token::EOF,
+        };
+    }
 
     // Check for raw strings (backticks)
     // Also used in scenes for raw outputs
@@ -145,18 +157,6 @@ pub fn get_next_token(
 
     if tokenize_mode == &TokenizeMode::Markdown && current_char != ']' {
         return tokenize_markdown(chars, &mut current_char, line_number);
-    }
-
-    // Whitespace 
-    if current_char == '\n' {
-        *line_number += 1;
-        return Token::Newline;
-    }
-    while current_char.is_whitespace() {
-        current_char = match chars.next() {
-            Some(ch) => ch,
-            None => return Token::EOF,
-        };
     }
 
     if current_char == ']' {
@@ -448,6 +448,7 @@ pub fn get_next_token(
     // Numbers
     if current_char.is_numeric() {
         token_value.push(current_char);
+        let mut dot_count = 0;
 
         while let Some(&next_char) = chars.peek() {
             if next_char == '_' {
@@ -461,22 +462,34 @@ pub fn get_next_token(
             // Check for dot to determine if it's a float
             } else {
                 if next_char == '.' {
-                    token_value.push(chars.next().unwrap());
-                    while let Some(&next_char) = chars.peek() {
-                        if next_char.is_numeric() {
-                            token_value.push(chars.next().unwrap());
-                        } else {
-                            break;
-                        }
+                    dot_count += 1;
+
+                    if dot_count > 1 {
+                        return Token::Error("Cannot have more than one decimal point in a number".to_string());
                     }
-                    return Token::FloatLiteral(token_value.parse::<f64>().unwrap());
+
+                    token_value.push(chars.next().unwrap());
+
+                    // FOR SEPERATE FLOAT PARSING IN FUTURE - ALWAYS FLOATS FOR NOW
+
+                    // while let Some(&next_char) = chars.peek() {
+                    //     if next_char.is_numeric() {
+                    //         token_value.push(chars.next().unwrap());
+                    //     } else {
+                    //         break;
+                    //     }
+                    // }
+                    // return Token::FloatLiteral(token_value.parse::<f64>().unwrap());
                 }
-                break;
+                // break;
             }
         }
 
         // If no dot, parse as an integer
-        return Token::IntLiteral(token_value.parse::<i64>().unwrap());
+        // return Token::IntLiteral(token_value.parse::<i64>().unwrap());
+
+        // ALWAYS PARSE AS FLOAT FOR NOW
+        return Token::FloatLiteral(token_value.parse::<f64>().unwrap());
     }
 
     if current_char.is_alphabetic() {
@@ -486,7 +499,7 @@ pub fn get_next_token(
 
     if current_char == '_' {}
 
-    Token::Error(format!("Invalid Token Used. Token: {}", current_char))
+    Token::Error(format!("Invalid Token Used (tokenizer). Token: {}", current_char))
 }
 
 // Nested function because may need multiple searches for variables
@@ -672,8 +685,9 @@ pub fn new_var_or_ref(
             var_names.push(Declaration {
                 name,
                 index: token_index,
-                has_ref: is_public,
+                has_ref: false,
                 next_token_index: token_index + 1,
+                is_exported: is_public,
             });
             return Token::VarDeclaration(token_index);
         }

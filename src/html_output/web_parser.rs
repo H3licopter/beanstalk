@@ -116,7 +116,7 @@ fn parse_scene(
     module_references: &mut Vec<AstNode>,
     class_id: &mut usize,
     exp_id: &mut usize,
-    positions: &mut Vec<i64>,
+    positions: &mut Vec<f64>,
     wasm_module: &mut String,
     wasm_fn_id: &mut usize,
 ) -> String {
@@ -150,14 +150,14 @@ fn parse_scene(
                 // If literal, pass it straight in
                 // If tuple, spread the values into the padding property
                 match arg {
-                    AstNode::Literal(Token::IntLiteral(value)) => {
+                    AstNode::Literal(Token::FloatLiteral(value)) => {
                         scene_wrap.style.push_str(&format!("padding:{}rem;", value));
                     }
                     AstNode::Tuple(values, line_number) => {
                         let mut padding = String::new();
                         for value in values {
                             match value {
-                                AstNode::Literal(Token::IntLiteral(value)) => {
+                                AstNode::Literal(Token::FloatLiteral(value)) => {
                                     padding.push_str(&format!("{}rem ", value));
                                 }
                                 _ => {
@@ -230,7 +230,6 @@ fn parse_scene(
             Style::Size(node) => {
                 let value = match node {
                     AstNode::Literal(token) => match token {
-                        Token::IntLiteral(value) => value as f64,
                         Token::FloatLiteral(value) => value,
                         _ => {
                             red_ln!("Error: Size argument was not numeric");
@@ -263,10 +262,10 @@ fn parse_scene(
             }
             // Must adapt it's behaviour based on the parent tag and siblings
             Style::Order(node) => {
-                let mut order = 0;
+                let mut order = 0.0;
                 match node {
                     AstNode::Literal(token) => match token {
-                        Token::IntLiteral(value) => {
+                        Token::FloatLiteral(value) => {
                             order = value;
                         }
                         _ => {
@@ -765,16 +764,7 @@ fn parse_scene(
                 Token::StringLiteral(value) | Token::RawStringLiteral(value) => {
                     js_string = format!("'{}'", value);
                 }
-                Token::RuneLiteral(char) => {
-                    js_string = format!("'{}'", char);
-                }
-                Token::IntLiteral(value) => {
-                    js_string = value.to_string();
-                }
                 Token::FloatLiteral(value) => {
-                    js_string = value.to_string();
-                }
-                Token::DecLiteral(value) => {
                     js_string = value.to_string();
                 }
                 Token::BoolLiteral(value) => {
@@ -931,10 +921,10 @@ fn parse_scene(
         }
         Tag::Nav(nav_style) => {
             let class_id = match nav_style {
-                AstNode::Literal(Token::IntLiteral(value)) => value,
+                AstNode::Literal(Token::FloatLiteral(value)) => value,
                 _ => {
                     red_ln!("Error: nav style must be an integer literal, none provided");
-                    0
+                    0.0
                 }
             };
 
@@ -951,10 +941,10 @@ fn parse_scene(
         }
         Tag::Title(size) => {
             let class_id = match size {
-                AstNode::Literal(Token::IntLiteral(value)) => value,
+                AstNode::Literal(Token::FloatLiteral(value)) => value,
                 _ => {
                     red_ln!("Error: title size must be an integer literal, none provided");
-                    0
+                    0.0
                 }
             };
             html.insert_str(

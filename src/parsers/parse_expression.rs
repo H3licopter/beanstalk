@@ -111,6 +111,10 @@ pub fn create_expression(
                 expression.push(AstNode::Literal(Token::StringLiteral(string.clone())));
             }
 
+            // Scenes - Should always be a parent scene? (Maybe not, could cause issues)
+            Token::ParentScene => {
+                expression.push(AstNode::Literal(Token::ParentScene));
+            }
 
             // OPERATORS
             // Will push as a string so shunting yard can handle it later just as a string
@@ -397,10 +401,8 @@ pub fn check_if_arg(scene_head: &Vec<Token>, i: &mut usize) -> bool {
         // Check if open bracket, literal or prefixed unary operator
         Token::OpenParenthesis
         | Token::Negative
-        | Token::IntLiteral(_)
         | Token::StringLiteral(_)
         | Token::BoolLiteral(_)
-        | Token::DecLiteral(_)
         | Token::RawStringLiteral(_)
         | Token::FloatLiteral(_) => true,
         _ => {
