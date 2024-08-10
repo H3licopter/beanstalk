@@ -30,9 +30,9 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }</style></head><body><nav style="background-color:rgba(100), 220), 0), 0.06));" class="bs-nav-1 "  ><ul><li><a href="../") style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ERROR HANDLING</b></div></header><main class="container"><br><p>Errors are treated as values in Beanstalk, any function can return an error as one of it's values must have it's error handled.
-</p><p>The ? operator is used to check if one of the values in a tuple is an error. If it is, the error can then be handled in a new scope, or passed up the call stack if no scope is provided.
-</p><pre><code>    func_call_that_can_return_an_error() ? {
+            }</style></head><body><nav style="" class="bs-nav-1 "  ><ul><li><a href="../") style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ERROR HANDLING</b></div></header><main class="container"><br><br><p>Errors are treated as values in Beanstalk, any function can return an error as one of it's values must have it's error handled.
+</p><br><p>The ? operator is used to check if one of the values in a tuple is an error. If it is, the error can then be handled in a new scope, or passed up the call stack if no scope is provided.
+</p><br><pre><code>    func_call_that_can_return_an_error() ? {
         -- Error handling code
     }
 
@@ -41,10 +41,10 @@
         return func_call_that_can_return_an_error() ?
     }
 
-</code></pre><br><p>You can think of this as similar to err != nil in golang, but with a more concise syntax.
-</p><h2>Using the ? operator
+</code></pre><br><br><p>You can think of this as similar to err != nil in golang, but with a more concise syntax.
+</p><br><h2>Using the ? operator
 </h2><p>These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code, as well as providing a way to avoid opening a new scope for every error check.
-</p><pre><code>    -- Always returns a string even if an error is thrown by getNetworkRequest()
+</p><br><pre><code>    -- Always returns a string even if an error is thrown by getNetworkRequest()
     -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
     
     getURL :: () -> string {
@@ -58,7 +58,7 @@
     getURL :: () -> string? {
         return getNetworkRequest()
     }
-</code></pre><br></main><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
+</code></pre><br><br></main><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
 </h3></div></footer>
 <script type="module">function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);

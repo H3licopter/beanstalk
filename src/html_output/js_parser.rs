@@ -4,25 +4,14 @@ use crate::{bs_types::DataType, parsers::ast_nodes::AstNode, Token};
 
 // Create everything necissary in JS
 // Break out pieces in WASM calls
-pub fn expression_to_js(expr: &AstNode, id: &mut usize, wasm_module: &mut String) -> String {
+pub fn expression_to_js(expr: &AstNode) -> String {
     let mut js = String::new(); //Open the template string
 
     match expr {
-        // CREATE THE JS CODE FOR THE EXPRESSION -> Uses webassembly functions to handle types properly
         AstNode::RuntimeExpression(nodes, expression_type) => {
             // If numerical type, create a function call to WASM to parse the expression
             match expression_type {
-                // NOT SUPPORTING WASM FUNCTIONS YET
-                // DataType::Int => {
-                //     match wasm_math_expr_fn(nodes, id, expression_type, &mut js) {
-                //         Ok(wasm_fn) => {wasm_module.push_str(&wasm_fn)}
-                //         Err(err) => {
-                //             red_ln!("Error creating WASM function for expression: {:?}", err);
-                //             return "".to_string();
-                //         }
-                //     };
-                // }
-                DataType::String | DataType::Float | DataType::Int => {
+                DataType::String | DataType::Float => {
                     js.push_str(&format!("("));
                 },
                 DataType::CoerseToString => {
@@ -56,7 +45,7 @@ pub fn expression_to_js(expr: &AstNode, id: &mut usize, wasm_module: &mut String
                     }
 
                     AstNode::Tuple(values, _) => {
-                        js.push_str(&format!("[{}]", combine_vec_to_js(values, id, wasm_module)));
+                        js.push_str(&format!("[{}]", combine_vec_to_js(values)));
                     }
 
                     _ => {
@@ -81,7 +70,7 @@ pub fn expression_to_js(expr: &AstNode, id: &mut usize, wasm_module: &mut String
         // If the expression is just a tuple,
         // then it should automatically destructure into multiple arguments like this
         AstNode::Tuple(values, _) => {
-            js.push_str(&format!("[{}]", combine_vec_to_js(values, id, wasm_module)));
+            js.push_str(&format!("[{}]", combine_vec_to_js(values)));
         }
 
         _ => {
@@ -95,7 +84,7 @@ pub fn expression_to_js(expr: &AstNode, id: &mut usize, wasm_module: &mut String
     js
 }
 
-pub fn combine_vec_to_js(collection: &Vec<AstNode>, id: &mut usize, wasm_module: &mut String) -> String {
+pub fn combine_vec_to_js(collection: &Vec<AstNode>) -> String {
     let mut js = String::new();
 
     let mut i: usize = 0;
@@ -103,7 +92,7 @@ pub fn combine_vec_to_js(collection: &Vec<AstNode>, id: &mut usize, wasm_module:
         // Make sure correct commas at end of each element but not last one
         js.push_str(&format!(
             "{}{}",
-            expression_to_js(&node, id, wasm_module),
+            expression_to_js(&node),
             if i < collection.len() - 1 { ", " } else { "" }
         ));
         i += 1;
@@ -112,10 +101,10 @@ pub fn combine_vec_to_js(collection: &Vec<AstNode>, id: &mut usize, wasm_module:
     js
 }
 
-pub fn collection_to_js(collection: &AstNode, id: &mut usize, wasm_module: &mut String) -> String {
+pub fn collection_to_js(collection: &AstNode) -> String {
     match collection {
         AstNode::Tuple(nodes, _) => {
-            return combine_vec_to_js(nodes, id, wasm_module);
+            return combine_vec_to_js(nodes);
         }
         _ => {
             return "".to_string();
@@ -123,13 +112,13 @@ pub fn collection_to_js(collection: &AstNode, id: &mut usize, wasm_module: &mut 
     }
 }
 
-pub fn _collection_to_vec_of_js(collection: &AstNode, id: &mut usize, wasm_module: &mut String) -> Vec<String> {
+pub fn _collection_to_vec_of_js(collection: &AstNode) -> Vec<String> {
     let mut js = Vec::new();
 
     match collection {
         AstNode::Tuple(nodes, _) => {
             for node in nodes {
-                js.push(expression_to_js(node, id, wasm_module));
+                js.push(expression_to_js(node));
             }
         }
         _ => {

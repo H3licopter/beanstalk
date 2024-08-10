@@ -92,18 +92,6 @@ pub fn get_next_token(
 
     let mut token_value: String = String::new();
 
-    // Whitespace 
-    if current_char == '\n' {
-        *line_number += 1;
-        return Token::Newline;
-    }
-    while current_char.is_whitespace() {
-        current_char = match chars.next() {
-            Some(ch) => ch,
-            None => return Token::EOF,
-        };
-    }
-
     // Check for raw strings (backticks)
     // Also used in scenes for raw outputs
     if current_char == '`' {
@@ -123,6 +111,18 @@ pub fn get_next_token(
         }
 
         return tokenize_codeblock(chars);
+    }
+
+    // Whitespace 
+    if current_char == '\n' {
+        *line_number += 1;
+        return Token::Newline;
+    }
+    while current_char.is_whitespace() {
+        current_char = match chars.next() {
+            Some(ch) => ch,
+            None => return Token::EOF,
+        };
     }
 
     if current_char == '[' {
@@ -456,37 +456,19 @@ pub fn get_next_token(
                 continue;
             }
 
-            if next_char.is_numeric() {
-                token_value.push(chars.next().unwrap());
-
-            // Check for dot to determine if it's a float
-            } else {
+            if next_char.is_numeric() {     
+                // Stop if too many dots           
                 if next_char == '.' {
                     dot_count += 1;
-
                     if dot_count > 1 {
                         return Token::Error("Cannot have more than one decimal point in a number".to_string());
                     }
-
-                    token_value.push(chars.next().unwrap());
-
-                    // FOR SEPERATE FLOAT PARSING IN FUTURE - ALWAYS FLOATS FOR NOW
-
-                    // while let Some(&next_char) = chars.peek() {
-                    //     if next_char.is_numeric() {
-                    //         token_value.push(chars.next().unwrap());
-                    //     } else {
-                    //         break;
-                    //     }
-                    // }
-                    // return Token::FloatLiteral(token_value.parse::<f64>().unwrap());
                 }
-                // break;
+                token_value.push(chars.next().unwrap());
+            } else {
+                break;
             }
         }
-
-        // If no dot, parse as an integer
-        // return Token::IntLiteral(token_value.parse::<i64>().unwrap());
 
         // ALWAYS PARSE AS FLOAT FOR NOW
         return Token::FloatLiteral(token_value.parse::<f64>().unwrap());

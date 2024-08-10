@@ -102,26 +102,23 @@ The zero value is the value a variable will be assigned if it is not assigned a 
 There are 
 
 ## Numerical Types
+There is an intention to support integers, a special decimal type and an unsigned index type in the future. This will require efficient enough ties with WASM to make it worth it.
+
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
-    [: Int ] [: *NOT YET SUPPORTED*32 bit signed integer ] [: 0]
-    
-    [: Idx ] [: *NOT YET SUPPORTED* Pointer sized unsigned integers. If this value can be inffered at compile time by the compiler, it becomes unsigned 32 bit integer when used for a varaible. ] [: 0]
-
     [: Float ] [: 64 bit floating point number ] [: 0.0]
-    
-    [: Decimal ] [: *NOT YET SUPPORTED* A fixed point number to a specified number of decimal places, you can also specify the offset of the decimal point to define your precision] [: 0.00]
 
-    [: Unit] [: *NOT YET SUPPORTED* Special numeric unit syntax for appending numerical types ] [: error]
+    [: Unit] [: *NOT YET SUPPORTED* Special numeric unit syntax for appending numerical types. The underlaying primative will be the same, but automatic conversions will be applied to the result. ] [: error]
 ]
+
 ## String based Types
+Future support (WASM dependent) for Unicode chars and UTF-8 strings are planned for the future. But only if UT8 strings can be made faster than JS native strings with WASM.
+
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
     [: String ] [: UTF-16] [: ""]
-
-    [: Unicode ] [: Unicode strings are UTF-32 strings. They must be created with a type annotation. ] [: ""]
 
     [: Error] [: Contains a special type of debug string detailing the error] [: "ERROR"]
 
@@ -136,7 +133,7 @@ There are
 
     [: Scene] [: The templating syntax of Beanstalk] [: "`[]`" -  an empty scene]
     
-    [: Choice] [: Rust style enums] [: error]
+    [: Choice] [: Rust style enums. To be implemented. ] [: error]
 
     [: Type] [: For generics and datatype related operations] [: error]
 ]
@@ -152,11 +149,6 @@ Backticks are used for RAW strings. To escape a backtick it must be preceded wit
 
 [code: `9 "is" {5 + 4}` -- 9 "is" {5 + 4}]
 
-# Unicode Strings
-Single quotes are used to create UTF-32 strings. This is useful for emoji and other special characters that are not in the UTF-8 character set. 
-
-[code: cool_emoji : '😂']
-
 # Logical Operators
 The 'is' keyword is used to check equality. Not ==. The "and / or" keywords are used for logical and / or and 'not' is used to invert a truthy value to falsy or vice versa.
 
@@ -171,10 +163,12 @@ Only false, ! and ? are falsy values. Any other check with an if statement will 
     [: %]          [: Modulo (truncated)]   [: 7]
     [: %%]         [: Remainder (floored)]  [: 7]
     [: +]          [: Sum]                  [: 6]
-    [: `-`]          [: Subtraction]          [: 6]
+    [: `-`]        [: Subtraction]          [: 6]
 ]
 
 # Numeric Units
+[red: In development]
+
 Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
 
 The first unit in the operation will be used if no unit type is specified in the type parameter. 

@@ -59,7 +59,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
 
             // JAVASCRIPT / WASM
             AstNode::VarDeclaration(id, ref expr, _) | AstNode::Const(id, ref expr, _) => {
-                js.push_str(&format!("let v{} = {};", id, expression_to_js(&expr, &mut wasm_fn_id, &mut wasm_module)));
+                js.push_str(&format!("let v{} = {};", id, expression_to_js(&expr)));
                 module_references.push(node);
             }
             
@@ -73,7 +73,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
                 ));
             }
             AstNode::Print(expr) => {
-                js.push_str(&format!("console.log({});", expression_to_js(&expr, &mut wasm_fn_id, &mut wasm_module)));
+                js.push_str(&format!("console.log({});", expression_to_js(&expr)));
             }
             AstNode::Comment(_) => {
                 // Comments are not added to the final output (Atm). Maybe there will be some documentation thing eventually.
@@ -179,21 +179,21 @@ fn parse_scene(
             Style::Margin(arg) => {
                 scene_wrap
                     .style
-                    .push_str(&format!("margin:{}rem;", expression_to_js(&arg, wasm_fn_id, wasm_module)));
+                    .push_str(&format!("margin:{}rem;", expression_to_js(&arg)));
                 // Only switch to span if there is no tag
                 style_assigned = true;
             }
             Style::BackgroundColor(args) => {
                 scene_wrap.style.push_str(&format!(
                     "background-color:rgba({});",
-                    collection_to_js(&args, wasm_fn_id, wasm_module)
+                    collection_to_js(&args)
                 ));
                 style_assigned = true;
             }
             Style::TextColor(args, type_of_color) => {
                 let color = match type_of_color {
-                    Token::Rgb => format!("rgba({})", collection_to_js(&args, wasm_fn_id, wasm_module)),
-                    Token::Hsl => format!("hsla({})", collection_to_js(&args, wasm_fn_id, wasm_module)),
+                    Token::Rgb => format!("rgba({})", collection_to_js(&args)),
+                    Token::Hsl => format!("hsla({})", collection_to_js(&args)),
 
                     Token::Red | Token::Green | Token::Blue | Token::Yellow | Token::Cyan | Token::Magenta | Token::White | Token::Black | Token::Orange | Token::Pink | Token::Purple | Token::Grey => {
                         format!("hsla({})", get_color(&type_of_color, &args))
@@ -380,7 +380,7 @@ fn parse_scene(
                     }
                     AstNode::RuntimeExpression(expr, data_type) => {
                         if *data_type == DataType::String {
-                            &expression_to_js(&AstNode::RuntimeExpression(expr.clone(), DataType::String), wasm_fn_id, wasm_module)
+                            &expression_to_js(&AstNode::RuntimeExpression(expr.clone(), DataType::String))
                         } else {
                             red_ln!("Error: src attribute must be a string literal (Webparser - get src)");
                             continue;
@@ -403,13 +403,13 @@ fn parse_scene(
                 scene_wrap.tag = Tag::Img(images[0].clone());
             }
             Tag::Video(_) => {
-                let poster = format!("{}{}", img_default_dir, get_src(images[0], wasm_fn_id, wasm_module));
+                let poster = format!("{}{}", img_default_dir, get_src(images[0]));
                 scene_wrap
                     .properties
                     .push_str(&format!(" poster=\"{}\"", poster));
             }
             Tag::A(_) => {
-                let img_src = get_src(images[0], wasm_fn_id, wasm_module);
+                let img_src = get_src(images[0]);
                 html.push_str(&format!("<img src=\"{img_src}\" />"));
             }
             _ => {}
@@ -428,7 +428,7 @@ fn parse_scene(
         ));
         let img_resize = 100.0 / f32::sqrt(img_count as f32);
         for node in images {
-            let img = get_src(node, wasm_fn_id, wasm_module);
+            let img = get_src(node);
             html.push_str(&format!(
                 "<img src=\"{img}\" style=\"width:{img_resize}%;height:{img_resize}%;\"/>"
             ));
@@ -758,7 +758,7 @@ fn parse_scene(
 
         match literal.0 {
             AstNode::RuntimeExpression(expr, expr_type) => {
-                js_string = expression_to_js(&AstNode::RuntimeExpression(expr, expr_type), wasm_fn_id, wasm_module);
+                js_string = expression_to_js(&AstNode::RuntimeExpression(expr, expr_type));
             }
             AstNode::Literal(token) => match token {
                 Token::StringLiteral(value) | Token::RawStringLiteral(value) => {
@@ -832,7 +832,7 @@ fn parse_scene(
                 0,
                 &format!(
                     "<a href={} style=\"{}\" class=\"{}\" {}>",
-                    expression_to_js(&href, wasm_fn_id, wasm_module),
+                    expression_to_js(&href),
                     scene_wrap.style,
                     scene_wrap.classes,
                     scene_wrap.properties
@@ -845,7 +845,7 @@ fn parse_scene(
                 0,
                 &format!(
                     "<img src={} style=\"{}\" class=\"{}\" {} />",
-                    expression_to_js(&src, wasm_fn_id, wasm_module),
+                    expression_to_js(&src),
                     scene_wrap.style,
                     scene_wrap.classes,
                     scene_wrap.properties
@@ -883,7 +883,7 @@ fn parse_scene(
                 0,
                 &format!(
                     "<video src=\"{}\" style=\"{}\" {} class=\"{}\" controls />",
-                    expression_to_js(&src, wasm_fn_id, wasm_module),
+                    expression_to_js(&src),
                     scene_wrap.style,
                     scene_wrap.properties,
                     scene_wrap.classes
@@ -902,7 +902,7 @@ fn parse_scene(
                 0,
                 &format!(
                     "<audio src=\"{}\" style=\"{}\" {} class=\"{}\" controls />",
-                    expression_to_js(&src, wasm_fn_id, wasm_module),
+                    expression_to_js(&src),
                     scene_wrap.style,
                     scene_wrap.properties,
                     scene_wrap.classes
@@ -998,7 +998,7 @@ fn collect_closing_tags(closing_tags: &mut Vec<String>) -> String {
     tags
 }
 
-fn get_src(value: &AstNode, wasm_fn_id: &mut usize, wasm_module: &mut String) -> String {
+fn get_src(value: &AstNode) -> String {
     let mut src: String = String::new();
     match value {
         AstNode::Literal(Token::StringLiteral(value)) => {
@@ -1006,7 +1006,7 @@ fn get_src(value: &AstNode, wasm_fn_id: &mut usize, wasm_module: &mut String) ->
         }
         AstNode::RuntimeExpression(expr, data_type) => {
             if *data_type == DataType::String {
-                src = expression_to_js(&AstNode::RuntimeExpression(expr.clone(), DataType::String), wasm_fn_id, wasm_module)
+                src = expression_to_js(&AstNode::RuntimeExpression(expr.clone(), DataType::String))
             } else {
                 red_ln!("Error: src attribute must be a string literal (Webparser - get src)");
             }

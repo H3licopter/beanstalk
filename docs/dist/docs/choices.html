@@ -18,12 +18,12 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><br><h1>Choices (enums)
+<style></style></head><body><br><br><h1>Choices (enums)
 </h1><p>Choices are a way to define a set of possible values for a variable.
-</p><p>Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
-</p><p>Choices are written in SCREAMING_SNAKE_CASE. 
-</p><p>Each choice can optionally contain data that can be accessed inside that Choice.
-</p><p>RESPONSE : choice : (data: string, error: !)
+</p><br><p>Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
+</p><br><p>Choices are written in SCREAMING_SNAKE_CASE. 
+</p><br><p>Each choice can optionally contain data that can be accessed inside that Choice.
+</p><br><span>RESPONSE : choice : (data: string, error: !)
 
     STATE : choice : (
         paused,
@@ -38,7 +38,7 @@
             STATE.error_message =&gt; print( now value )
         )
     )
-</p>
+</span><br>
 <script type="module">function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
