@@ -521,15 +521,12 @@ fn keyword_or_variable(
                 // Keywords
                 "io" => return Token::Print,
 
-                // Data Types
-                "int" => return Token::TypeKeyword(DataType::Int),
-                "idx" => return Token::TypeKeyword(DataType::Int),
-                "flt" => return Token::TypeKeyword(DataType::Float),
-                "str" => return Token::TypeKeyword(DataType::String),
-                "uni" => return Token::TypeKeyword(DataType::Rune),
-                "bool" => return Token::TypeKeyword(DataType::Bool),
-                "dec" => return Token::TypeKeyword(DataType::Decimal),
+                
                 _ => {}
+            }
+
+            if let Some(token) = check_if_datatype_keyword(&token_value) {
+                return token;
             }
 
             // only bother tokenizing / reserving these keywords if inside of a scene head
@@ -646,12 +643,14 @@ pub fn new_var_or_ref(
             // POSSIBLE OUT OF BOUNDS ERROR TO SORT OUT??? or will that never happen because of the check_if_ref?
             let token_after = &tokens[var_names[index].next_token_index];
 
-            if token_after == &Token::AssignConstant {
-                return Token::ConstReference(var_names[index].index);
-            }
-
-            if token_after == &Token::Colon {
-                return Token::CompileTimeConstReference(var_names[index].index);
+            match token_after {
+                Token::AssignConstant => {
+                    return Token::ConstReference(var_names[index].index);
+                }
+                Token::Colon => {
+                    return Token::CompileTimeConstReference(var_names[index].index);
+                }
+                _ => {}
             }
 
             return Token::VarReference(var_names[index].index);
@@ -674,4 +673,15 @@ pub fn new_var_or_ref(
             return Token::VarDeclaration(token_index);
         }
     }
+}
+
+
+fn check_if_datatype_keyword(token_value: &String) -> Option<Token> {
+    match token_value.as_str() {
+        "float" => return Some(Token::TypeKeyword(DataType::Float)),
+        "string" => return Some(Token::TypeKeyword(DataType::String)),
+        "bool" => return Some(Token::TypeKeyword(DataType::Bool)),
+        _ => {}
+    }
+    None
 }

@@ -58,12 +58,31 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
             }
 
             // JAVASCRIPT / WASM
-            AstNode::VarDeclaration(id, ref expr, _) | AstNode::Const(id, ref expr, _) => {
-                js.push_str(&format!("let v{} = {};", id, expression_to_js(&expr)));
+            AstNode::VarDeclaration(id, ref expr, _, ref data_type) => {
+                match data_type {
+                    DataType::Float | DataType::String | DataType::Bool => {
+                        js.push_str(&format!("let v{} = {};", id, expression_to_js(&expr)));
+                    }
+                    DataType::Scene => {
+                        let unboxed_scene = *expr.clone();
+                        match unboxed_scene {
+                            AstNode::Scene(scene, scene_tags, scene_styles) => {
+                                let scene_to_js_string = parse_scene(scene, scene_tags, scene_styles, &mut Tag::None, &mut js, &mut css, &mut module_references, &mut class_id, &mut exp_id, &mut Vec::new(), &mut wasm_module, &mut wasm_fn_id);
+                                js.push_str(&format!("let v{} = `{}`;", id, scene_to_js_string));
+                            }
+                            _ => {
+                                red_ln!("Error: Scene expression must be a scene in HTML parser");
+                            }
+                        }
+                    }
+                    _ => {
+                        js.push_str(&format!("let v{} = {};", id, expression_to_js(&expr)));
+                    }
+                }
                 module_references.push(node);
             }
             
-            AstNode::Function(name, args, body, is_exported) => {
+            AstNode::Function(name, args, body, is_exported, _) => {
                 js.push_str(&format!(
                     "{}function f{}({:?}){{\n{:?}\n}}",
                     if is_exported { "export " } else { "" },
@@ -106,7 +125,7 @@ struct SceneTag {
 }
 
 // Returns a string of the HTML and the tag the scene is inside of
-fn parse_scene(
+pub fn parse_scene(
     scene: Vec<AstNode>,
     scene_tags: Vec<Tag>,
     scene_styles: Vec<Style>,

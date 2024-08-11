@@ -79,7 +79,7 @@ pub enum Token {
     Dot,
     Colon, // :
 
-    // Declarations
+    // Declarations - Should contain a type declaration if there is one
     Assign,         // =
     AssignVariable, // :=
     AssignConstant, // ::

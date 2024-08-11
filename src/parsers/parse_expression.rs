@@ -2,7 +2,7 @@
 
 use colour::red_ln;
 
-use super::{ast_nodes::AstNode, build_ast::find_var_declaration_index, collections::new_tuple};
+use super::{ast_nodes::AstNode, collections::new_tuple, create_scene_node::new_scene, variables::find_var_declaration_index};
 use crate::{bs_types::DataType, Token};
 
 /*  CAN RETURN:
@@ -21,6 +21,7 @@ pub fn create_expression(
     inside_tuple: bool,
     ast: &Vec<AstNode>,
     token_line_numbers: &Vec<u32>,
+    data_type: &DataType,
 ) -> AstNode {
     let mut expression = Vec::new();
 
@@ -57,7 +58,7 @@ pub fn create_expression(
                 break;
             }
 
-            Token::EOF | Token::SceneClose(_) => {
+            Token::EOF | Token::SceneClose(_) | Token::Arrow => {
                 if bracket_nesting != 0 {
                     return AstNode::Error(
                         "Not enough closing parenthesis for expression. Need more ')' at the end of the expression!".to_string(),
@@ -95,25 +96,27 @@ pub fn create_expression(
             }
 
             // Check if is a literal
-
-            // Numbers
-            Token::IntLiteral(mut int) => {
-                if next_number_negative {int = -int; next_number_negative = false;}
-                expression.push(AstNode::Literal(Token::IntLiteral(int)));
-            }
             Token::FloatLiteral(mut float) => {
+                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                    return AstNode::Error("Float literal used in non-float expression".to_string(), token_line_numbers[*i]);
+                }
                 if next_number_negative {float = -float; next_number_negative = false;}
                 expression.push(AstNode::Literal(Token::FloatLiteral(float)));
             }
-
-            // Strings
             Token::StringLiteral(string) => {
+                if data_type != &DataType::String || data_type != &DataType::Inferred {
+                    return AstNode::Error("String literal used in non-string expression".to_string(), token_line_numbers[*i]);
+                }
                 expression.push(AstNode::Literal(Token::StringLiteral(string.clone())));
             }
 
-            // Scenes - Should always be a parent scene? (Maybe not, could cause issues)
-            Token::ParentScene => {
-                expression.push(AstNode::Literal(Token::ParentScene));
+            // Scenes - Create a new scene node
+            // Maybe scenes can be added together like strings
+            Token::SceneHead(scene_head_tokens) => {
+                if data_type != &DataType::Scene || data_type != &DataType::Inferred {
+                    return AstNode::Error("Scene used in non-scene expression".to_string(), token_line_numbers[*i]);
+                }
+                expression.push(new_scene(scene_head_tokens, tokens, i, &ast, token_line_numbers));
             }
 
             // OPERATORS
@@ -132,21 +135,39 @@ pub fn create_expression(
                 expression.push(AstNode::Operator(" + ".to_string()));
             }
             Token::Subtract => {
+                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                    return AstNode::Error("Subtraction used in non-float expression".to_string(), token_line_numbers[*i]);
+                }
                 expression.push(AstNode::Operator(" - ".to_string()));
             }
             Token::Multiply => {
+                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                    return AstNode::Error("Multiplication used in non-float expression".to_string(), token_line_numbers[*i]);
+                }
                 expression.push(AstNode::Operator(" * ".to_string()));
             }
             Token::Divide => {
+                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                    return AstNode::Error("Division used in non-float expression".to_string(), token_line_numbers[*i]);
+                }
                 expression.push(AstNode::Operator(" / ".to_string()));
             }
             Token::Modulus => {
+                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                    return AstNode::Error("Modulus used in non-float expression".to_string(), token_line_numbers[*i]);
+                }
                 expression.push(AstNode::Operator(" % ".to_string()));
             }
             Token::Remainder => {
+                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                    return AstNode::Error("Remainder used in non-float expression".to_string(), token_line_numbers[*i]);
+                }
                 expression.push(AstNode::Operator(" %% ".to_string()));
             }
             Token::Root => {
+                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                    return AstNode::Error("Root used in non-float expression".to_string(), token_line_numbers[*i]);
+                }
                 expression.push(AstNode::Operator(" // ".to_string()));
             }
 
@@ -184,14 +205,14 @@ pub fn create_expression(
         *i += 1;
     }
 
-    AstNode::Expression(expression, token_line_numbers[*i])
+    return evaluate_expression(AstNode::Expression(expression, token_line_numbers[*i]), data_type, ast);
 }
 
 // This function takes in an Expression node or Collection of expressions that has a Vec of Nodes to evaluate
 // And evaluates everything possible at compile time (Constant Folding)
 // If it returns a literal, then everything was evaluated at compile time
 // Otherwise it will return an EvaluatedExpression, which has a strict type and will be evaluated at runtime
-pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<AstNode>) -> AstNode {
+pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<AstNode>) -> AstNode {
     let mut current_type = type_declaration.to_owned();
     let mut simplified_expression = Vec::new();
     let mut compile_time_eval = true;
@@ -207,6 +228,9 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                             &mut current_type,
                             line_number
                         ));
+                    }
+                    AstNode::Scene(_, _, _) => {
+                        simplified_expression.push(node);
                     }
                     AstNode::Operator(op) => {
                         // If the current type is a string, then must be a + operator or create an error
@@ -229,8 +253,8 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
                     AstNode::ConstReference(value) | AstNode::VarReference(value) => {
                         compile_time_eval = false;
                         match &ast[value] {
-                            AstNode::VarDeclaration(_, assignment, _)
-                            | AstNode::Const(_, assignment, _) => {
+                            AstNode::VarDeclaration(_, assignment, _, _)
+                            | AstNode::Const(_, assignment, _, _) => {
                                 let expr = *assignment.clone();
 
                                 // Get the type and value of the original variable
@@ -281,7 +305,7 @@ pub fn eval_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<Ast
             for node in e {
                 match node {
                     AstNode::Expression(e, line_number) | AstNode::Tuple(e, line_number) => {
-                        simplified_expression.push(eval_expression(
+                        simplified_expression.push(evaluate_expression(
                             AstNode::Expression(e, line_number),
                             type_declaration,
                             ast,
@@ -353,17 +377,6 @@ fn check_literal(
         return AstNode::Literal(value);
     }
     match value {
-        Token::IntLiteral(_) => {
-            if type_declaration == &DataType::Inferred {
-                *current_type = DataType::Int;
-            } else if type_declaration != &DataType::Int {
-                return AstNode::Error(
-                    "Error Mixing types. You must explicitly convert types to use them in the same expression".to_string(),
-                    line_number
-                );
-            }
-            AstNode::Literal(value)
-        }
         Token::FloatLiteral(_) => {
             if type_declaration == &DataType::Inferred {
                 *current_type = DataType::Float;

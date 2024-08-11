@@ -1,5 +1,5 @@
 use super::ast_nodes::AstNode;
-use super::parse_expression::eval_expression;
+use super::parse_expression::evaluate_expression;
 use crate::parsers::parse_expression::create_expression;
 use crate::{bs_types::DataType, Token};
 
@@ -10,7 +10,7 @@ pub fn new_tuple(
     ast: &Vec<AstNode>,
     token_line_numbers: &Vec<u32>,
 ) -> AstNode {
-    let first_item_eval = eval_expression(first_item, &DataType::Inferred, ast);
+    let first_item_eval = evaluate_expression(first_item, &DataType::Inferred, ast);
     let mut items: Vec<AstNode> = vec![first_item_eval];
 
     while let Some(token) = tokens.get(*i) {
@@ -21,11 +21,11 @@ pub fn new_tuple(
 
             Token::OpenParenthesis | Token::Comma => {
                 *i += 1;
-                items.push(create_expression(tokens, i, true, &ast, token_line_numbers));
+                items.push(create_expression(tokens, i, true, &ast, token_line_numbers, &DataType::Inferred));
             }
 
             _ => {
-                items.push(create_expression(tokens, i, true, &ast, token_line_numbers));
+                items.push(create_expression(tokens, i, true, &ast, token_line_numbers, &DataType::Inferred));
             }
         }
 
@@ -62,7 +62,7 @@ pub fn new_array(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, token_l
 
             // TO DO: Type checking and adding values to array
             _ => {
-                items.push(create_expression(tokens, i, true, ast, token_line_numbers));
+                items.push(create_expression(tokens, i, true, ast, token_line_numbers, &collection_type));
             }
         }
 

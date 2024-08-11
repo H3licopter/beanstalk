@@ -8,15 +8,15 @@ pub enum AstNode {
     Settings(Vec<AstNode>),
 
     // Blocks
-    Function(usize, Box<AstNode>, Vec<AstNode>, bool), // Function name, Args, Body, Public
+    Function(usize, Box<AstNode>, Vec<AstNode>, bool, Vec<DataType>), // Function name, Args, Body, Public
     Expression(Vec<AstNode>, u32),                      // Expression that can contain mixed types, line number
     RuntimeExpression(Vec<AstNode>, DataType),         //Expression, Result type
 
     // Basics
     Error(String, u32), // Message, line number
     Comment(String),
-    VarDeclaration(usize, Box<AstNode>, bool), // Variable name, Value, Public
-    Const(usize, Box<AstNode>, bool),          // Constant name, Value, Public
+    VarDeclaration(usize, Box<AstNode>, bool, DataType), // Variable name, Value, Public, Type
+    Const(usize, Box<AstNode>, bool, DataType),          // Constant name, Value, Public, Type
 
     // IO
     Print(Box<AstNode>),

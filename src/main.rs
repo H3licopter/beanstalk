@@ -24,6 +24,8 @@ mod parsers {
     pub mod parse_expression;
     pub mod styles;
     pub mod util;
+    pub mod functions;
+    pub mod variables;
 }
 mod html_output {
     mod dom_hooks;
