@@ -120,6 +120,8 @@ Future support (WASM dependent) for Unicode chars and UTF-8 strings are planned 
 
     [: String ] [: UTF-16] [: ""]
 
+    [: path] [: Path to a file, uses single quotes. ] [: '']
+
     [: Error] [: Contains a special type of debug string detailing the error] [: "ERROR"]
 
     [: Style] [: Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML)] [: ""]

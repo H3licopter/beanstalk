@@ -14,7 +14,6 @@ pub fn tokenize(source_code: &str, module_name: &str) -> (Vec<Token>, Vec<u32>) 
 
     // For variable optimisation
     let mut var_names: Vec<Declaration> = Vec::new();
-
     let mut token: Token = Token::ModuleStart(module_name.to_string());
 
     loop {
@@ -674,7 +673,6 @@ pub fn new_var_or_ref(
         }
     }
 }
-
 
 fn check_if_datatype_keyword(token_value: &String) -> Option<Token> {
     match token_value.as_str() {

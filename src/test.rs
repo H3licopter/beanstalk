@@ -16,11 +16,12 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     // Read content from a test file
     yellow_ln_bold!("\nREADING TEST FILE\n");
     let path = PathBuf::from("test_output/src/#page.bs");
-    let content = fs::read_to_string(path)?;
+    let file_name = path.file_stem().unwrap().to_str().unwrap();
+    let content = fs::read_to_string(&path)?;
 
     // Tokenize File
     yellow_ln_bold!("TOKENIZING FILE\n");
-    let (tokens, token_line_numbers) = tokenizer::tokenize(&content, &"Test File".to_string());
+    let (tokens, token_line_numbers) = tokenizer::tokenize(&content, file_name);
 
     for token in &tokens {
         match token {
@@ -75,8 +76,11 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     }
 
     yellow_ln_bold!("\nCREATING HTML OUTPUT\n");
-    let html_output = web_parser::parse(ast, get_html_config(), false);
-
+    let (html_output, exports) = web_parser::parse(ast, get_html_config(), false, "test".to_string());
+    for export in exports {
+        println!("EXPORTS:");
+        println!("{:?}", export.id);
+    }
     // Print the HTML output
     // Create a regex to match the content between the <main> and </main> tags
     let re = Regex::new(r"(?s)<body>(.*?)</body>").unwrap();
@@ -94,7 +98,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     let formatted_content = re_tags.replace_all(main_content, "\n$1");
 
     // Print the formatted content
-    println!("\n{}", formatted_content);
+    println!("\n\n{}", formatted_content);
 
     dev_server::start_dev_server("test_output".to_string())?;
 

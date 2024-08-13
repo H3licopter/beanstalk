@@ -1,8 +1,8 @@
 use colour::{blue_ln, dark_cyan_ln, dark_yellow_ln, print_bold, print_ln_bold, red_ln};
 
 use crate::html_output::web_parser;
-use crate::{parsers, settings};
 use crate::parsers::ast_nodes::AstNode;
+use crate::{parsers, settings};
 use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::Token;
@@ -13,6 +13,20 @@ use std::fs;
 pub struct OutputFile {
     source_code: String,
     file: PathBuf,
+}
+pub struct ExportedJS {
+    pub js: String,
+    // ID of the variable or function being imported
+    pub id: i32,
+    // Path to the output file exporting the module (just for namespacing)
+    pub module_path: String,
+}
+pub struct ImportedJS {
+    // Path to the output file importing the module
+    pub path: PathBuf,
+    pub id: i32,
+    // Path to the src file being imported
+    pub module_path: String,
 }
 
 #[allow(unused_variables)]
@@ -107,7 +121,7 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
                         return Err(e.into());
                     }
                 };
-            match add_bs_files_to_parse(&mut source_code_to_parse, src_dir, entry_dir.join(output_dir_folder)) {
+            match add_bs_files_to_parse(&mut source_code_to_parse, src_dir, entry_dir.join(&output_dir_folder)) {
                 Ok(_) => {}
                 Err(e) => {
                     red_ln!("Error adding bs files to parse: {:?}", e);
@@ -117,9 +131,16 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
     }
 
     // Compile all output files
+    // And collect all exported functions and variables from the module
+    // After compiling, collect all imported modules and add them to the list of exported modules
+    // Then add the imports to the files importing them
+    let mut exported_js: Vec<ExportedJS> = Vec::new();
+    let mut imported_js: Vec<ImportedJS> = Vec::new();
     for file in &source_code_to_parse {
-        match compile(file, release_build, &project_config) {
-            Ok(_) => {}
+        match compile(file, release_build, &project_config, &mut exported_js) {
+            Ok(import_requests) => {
+                imported_js.extend(import_requests);
+            }
             Err(e) => {
                 red_ln!("Error compiling file: {:?}", e);
             }
@@ -260,13 +281,14 @@ fn compile(
     output: &OutputFile,
     release_build: bool,
     config: &Config,
-) -> Result<Vec<AstNode>, Box<dyn Error>> {
+    exported_js: &mut Vec<ExportedJS>,
+) -> Result<Vec<ImportedJS>, Box<dyn Error>> {
     print_bold!("Compiling: ");
-    let file_name = output.file.file_name().unwrap().to_str().unwrap();
+    let file_name = output.file.file_stem().unwrap().to_str().unwrap();
     dark_yellow_ln!("{:?}", file_name);
 
     let (tokens, token_line_numbers): (Vec<Token>, Vec<u32>) = tokenizer::tokenize(&output.source_code, file_name);
-    let ast = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers).0;
+    let (ast, imports) = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers);
 
     // If the output directory does not exist, create it
     let parent_dir = output.file.parent().unwrap();
@@ -303,9 +325,35 @@ fn compile(
         html_config.page_dist_url.push_str("../");
     }
 
+    // find the imports 
+    let mut import_requests = Vec::new();
+    for import in imports {
+        match import {
+            AstNode::Use(module_path) => {
+                import_requests.push(ImportedJS {
+                    path: output.file.clone(),
+                    id: -1,
+                    module_path,
+                });
+            }
+            _ => {
+                red_ln!("Error: Import must be a string literal");
+            }
+        }
+
+    }
+
+    let (module_output, exports) = web_parser::parse(
+        ast,
+        html_config, 
+        release_build, 
+        file_name.to_string()
+    );
+    exported_js.extend(exports);
+
     match fs::write(
         output_path,
-        web_parser::parse(ast, html_config, release_build),
+        module_output,
     ) {
         Ok(_) => {}
         Err(e) => {
@@ -313,7 +361,7 @@ fn compile(
         }
     }
 
-    Ok(Vec::new())
+    Ok(import_requests)
 }
 
 // fn get_config_data(config_source_code: &str) -> Result<Config, Box<dyn Error>> {

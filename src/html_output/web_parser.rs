@@ -3,28 +3,25 @@ use super::{
     dom_hooks::{generate_dom_update_js, DOMUpdate}, generate_html::create_html_boilerplate, js_parser::{collection_to_js, expression_to_js}
 };
 use crate::{
-    bs_css::get_bs_css,
-    bs_types::DataType,
-    parsers::{
+    bs_css::get_bs_css, bs_types::DataType, build::ExportedJS, parsers::{
         ast_nodes::AstNode,
         styles::{Style, Tag},
         util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
-    },
-    settings::{get_html_config, HTMLMeta},
-    Token,
+    }, settings::{get_html_config, HTMLMeta}, Token
 };
 use colour::red_ln;
 
 // Parse ast into valid JS, HTML and CSS
-pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String {
+pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_path: String) -> (String, Vec<ExportedJS>) {
     let mut js = generate_dom_update_js(DOMUpdate::InnerHTML).to_string();
-
     let mut wasm_fn_id: usize = 0;
     let mut wasm_module = String::from("(module ");
     let mut html = String::new();
     let mut css = String::new();
     let mut page_title = String::new();
     let mut exp_id: usize = 0;
+
+    let mut exported_js: Vec<ExportedJS> = Vec::new();
 
     let mut module_references: Vec<AstNode> = Vec::new();
 
@@ -58,38 +55,51 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
             }
 
             // JAVASCRIPT / WASM
-            AstNode::VarDeclaration(id, ref expr, _, ref data_type) => {
-                match data_type {
+            AstNode::VarDeclaration(id, ref expr, is_exported, ref data_type) => {
+                let var_dec = match data_type {
                     DataType::Float | DataType::String | DataType::Bool => {
-                        js.push_str(&format!("let v{} = {};", id, expression_to_js(&expr)));
+                        format!("let v{} = {};", id, expression_to_js(&expr))
                     }
                     DataType::Scene => {
                         let unboxed_scene = *expr.clone();
                         match unboxed_scene {
                             AstNode::Scene(scene, scene_tags, scene_styles) => {
                                 let scene_to_js_string = parse_scene(scene, scene_tags, scene_styles, &mut Tag::None, &mut js, &mut css, &mut module_references, &mut class_id, &mut exp_id, &mut Vec::new(), &mut wasm_module, &mut wasm_fn_id);
-                                js.push_str(&format!("let v{} = `{}`;", id, scene_to_js_string));
+                                format!("let v{} = `{}`;", id, scene_to_js_string)
                             }
                             _ => {
                                 red_ln!("Error: Scene expression must be a scene in HTML parser");
+                                continue;
                             }
                         }
                     }
                     _ => {
-                        js.push_str(&format!("let v{} = {};", id, expression_to_js(&expr)));
+                        format!("let v{} = {};", id, expression_to_js(&expr))
                     }
+                };
+                if is_exported {
+                    exported_js.push(
+                        ExportedJS {js: var_dec.to_owned(), id: id.to_owned() as i32, module_path: module_path.to_owned() }
+                    );
                 }
+                js.push_str(&var_dec);
                 module_references.push(node);
             }
             
             AstNode::Function(name, args, body, is_exported, _) => {
-                js.push_str(&format!(
+                let func = format!(
                     "{}function f{}({:?}){{\n{:?}\n}}",
                     if is_exported { "export " } else { "" },
                     name,
                     args, // NEED TO PARSE ARGUMENTS
                     body
-                ));
+                );
+                if is_exported {
+                    exported_js.push(
+                        ExportedJS {js: func.to_owned(), id: name as i32, module_path: module_path.to_owned()}
+                    );
+                }
+                js.push_str(&func);
             }
             AstNode::Print(expr) => {
                 js.push_str(&format!("console.log({});", expression_to_js(&expr)));
@@ -108,11 +118,13 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool) -> String
         page_title += &(" | ".to_owned() + &config.site_title.clone());
     }
 
-    create_html_boilerplate(config, release_build)
+    let html = create_html_boilerplate(config, release_build)
         .replace("page-template", &html)
         .replace("@page-css", &css)
         .replace("page-title", &page_title)
-        .replace("//js", &js)
+        .replace("//js", &js);
+
+    (html, exported_js)
 }
 
 struct SceneTag {

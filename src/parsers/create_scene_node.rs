@@ -14,7 +14,7 @@ pub fn new_scene(
     tokens: &Vec<Token>,
     i: &mut usize,
     ast: &Vec<AstNode>,
-    token_line_numbers: &Vec<u32>,
+    token_line_number: &u32,
 ) -> AstNode {
     let mut scene = Vec::new();
     *i += 1;
@@ -43,7 +43,7 @@ pub fn new_scene(
                     continue;
                 }
 
-                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Inferred);
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::A(eval_arg));
                 } else {
@@ -59,7 +59,7 @@ pub fn new_scene(
                 if !check_if_arg(scene_head, &mut j) {
                     eval_arg = AstNode::Literal(Token::FloatLiteral(1.5));
                 } else {
-                    eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                    eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Inferred);
                 }
 
                 if check_if_comptime_value(&eval_arg) {
@@ -77,7 +77,8 @@ pub fn new_scene(
                 if !check_if_arg(scene_head, &mut j) {
                     eval_arg = AstNode::Literal(Token::FloatLiteral(2.0));
                 } else {
-                    eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                    // Must be inferred as it could be a tuple
+                    eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Inferred);
                 }
 
                 if check_if_comptime_value(&eval_arg) {
@@ -94,7 +95,7 @@ pub fn new_scene(
                 if !check_if_arg(scene_head, &mut j) {
                     continue;
                 }
-                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Float);
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::Order(eval_arg));
                 } else {
@@ -108,7 +109,7 @@ pub fn new_scene(
                     continue;
                 }
                 // TO DO: Accept color names and hex values
-                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Inferred);
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::BackgroundColor(eval_arg));
                 } else {
@@ -124,7 +125,7 @@ pub fn new_scene(
                     continue;
                 }
                 // TO DO: Accept color names and hex values
-                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Inferred);
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::TextColor(eval_arg, color_type));
                 } else {
@@ -136,7 +137,7 @@ pub fn new_scene(
                 j += 1;
                 if check_if_arg(scene_head, &mut j) {
                     // TO DO: Accept color names and hex values
-                    let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                    let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Inferred);
                     if check_if_comptime_value(&eval_arg) {
                         scene_styles.push(Style::TextColor(eval_arg, color_type));
                     } else {
@@ -154,7 +155,7 @@ pub fn new_scene(
             Token::Size => {
                 j += 1;
                 if check_if_arg(scene_head, &mut j) {
-                    let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                    let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Inferred);
                     if check_if_comptime_value(&eval_arg) {
                         scene_styles.push(Style::Size(eval_arg));
                     } else {
@@ -180,7 +181,7 @@ pub fn new_scene(
                 if !check_if_arg(scene_head, &mut j) {
                     eval_arg = AstNode::Literal(Token::FloatLiteral(1.0));
                 } else {
-                    eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                    eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Inferred);
                 }
 
                 match eval_arg {
@@ -200,7 +201,7 @@ pub fn new_scene(
 
             Token::Img => {
                 j += 1;
-                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::String);
+                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::String);
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Img(eval_arg));
                 } else {
@@ -212,7 +213,7 @@ pub fn new_scene(
 
             Token::Alt => {
                 j += 1;
-                let eval_arg: AstNode = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::String);
+                let eval_arg: AstNode = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::String);
                 if check_if_comptime_value(&eval_arg) {
                     match eval_arg {
                         AstNode::Literal(token) => match token {
@@ -222,13 +223,13 @@ pub fn new_scene(
                             _ => {
                                 scene.push(AstNode::Error(
                                     "Wrong datatype provided for alt".to_string(),
-                                    token_line_numbers[j],
+                                    token_line_number.to_owned(),
                                 ));
                             }
                         },
                         _ => {
                             scene.push(AstNode::Error("No string provided for alt".to_string(),
-                            token_line_numbers[*i + j]));
+                            token_line_number.to_owned()));
                         }
                     }
                 } else {
@@ -239,7 +240,7 @@ pub fn new_scene(
 
             Token::Video => {
                 j += 1;
-                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::String);
+                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::String);
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Video(eval_arg));
                 } else {
@@ -250,7 +251,7 @@ pub fn new_scene(
 
             Token::Audio => {
                 j += 1;
-                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::String);
+                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::String);
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Audio(eval_arg));
                 } else {
@@ -262,7 +263,7 @@ pub fn new_scene(
             // Expressions to Parse
             Token::FloatLiteral(_) => {
                 scene.push(
-                    create_expression(scene_head, &mut j, true, &ast, token_line_numbers, &DataType::CoerseToString),
+                    create_expression(scene_head, &mut j, true, &ast, token_line_number, &DataType::CoerseToString),
                 );
             }
 
@@ -275,7 +276,7 @@ pub fn new_scene(
 
             Token::StringLiteral(_) | Token::RawStringLiteral(_) => {
                 scene.push(
-                    create_expression(scene_head, &mut j, true, &ast, token_line_numbers, &DataType::CoerseToString),
+                    create_expression(scene_head, &mut j, true, &ast, token_line_number, &DataType::CoerseToString),
                 );
             }
 
@@ -314,7 +315,7 @@ pub fn new_scene(
                 if !check_if_arg(scene_head, &mut j) {
                     eval_arg = AstNode::Literal(Token::FloatLiteral(0.0));
                 } else {
-                    eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                    eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Inferred);
                 }
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Nav(eval_arg));
@@ -331,7 +332,7 @@ pub fn new_scene(
                 if !check_if_arg(scene_head, &mut j) {
                     eval_arg = AstNode::Literal(Token::FloatLiteral(0.0));
                 } else {
-                    eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::Float);
+                    eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::Float);
                 }
 
                 if check_if_comptime_value(&eval_arg) {
@@ -357,7 +358,7 @@ pub fn new_scene(
 
             Token::Redirect => {
                 j += 1;
-                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_numbers, &DataType::String);
+                let eval_arg = create_expression(scene_head, &mut j, false, ast, token_line_number, &DataType::String);
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Redirect(eval_arg));
                 } else {
@@ -374,7 +375,7 @@ pub fn new_scene(
                 scene.push(AstNode::Error(format!(
                     "Invalid Token Used inside Scene Head: '{:?}'",
                     &scene_head[j]
-                ), token_line_numbers[*i + j]));
+                ), token_line_number.to_owned()));
                 red_ln!(
                     "Invalid Token Used inside Scene Head: '{:?}'",
                     &scene_head[j]
@@ -399,7 +400,7 @@ pub fn new_scene(
             }
 
             Token::SceneHead(new_scenehead) => {
-                let nested_scene = new_scene(&new_scenehead, tokens, i, ast, token_line_numbers);
+                let nested_scene = new_scene(&new_scenehead, tokens, i, ast, token_line_number);
                 scene.push(nested_scene);
             }
 
@@ -457,7 +458,7 @@ pub fn new_scene(
                 scene.push(AstNode::Error(format!(
                     "Invalid Syntax Used Inside scene body when creating scene node: {:?}",
                     tokens[*i]
-                ), token_line_numbers[*i]));
+                ), token_line_number.to_owned()));
             }
         }
 

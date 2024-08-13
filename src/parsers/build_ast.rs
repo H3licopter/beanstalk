@@ -1,13 +1,12 @@
 use colour::red_ln;
-
 use super::{
     ast_nodes::AstNode, create_scene_node::new_scene, parse_expression::create_expression, variables::{find_var_declaration_index, new_variable}
 };
 use crate::{bs_types::DataType, Token};
 
-
-pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<u32>) -> (Vec<AstNode>, usize) {
+pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<u32>) -> (Vec<AstNode>, Vec<AstNode>) {
     let mut ast = Vec::new();
+    let mut imports = Vec::new();
     let mut i = start_index;
     let mut is_exported = false;
 
@@ -16,9 +15,24 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
             Token::Comment(value) => {
                 ast.push(AstNode::Comment(value.clone()));
             }
-
+            Token::Import => {
+                i += 1;
+                match &tokens[i] {
+                    // Module path that will have all it's exports dumped into the module
+                    Token::StringLiteral(value) => {
+                        imports.push(AstNode::Use(value.clone()));
+                    }
+                    _ => {
+                        ast.push(AstNode::Error(
+                            "Import must have a valid path as a argument".to_string(),
+                            token_line_numbers[i],
+                        ));
+                    }
+                }
+            }
             Token::SceneHead(scene_head) => {
-                ast.push(new_scene(scene_head, &tokens, &mut i, &ast, token_line_numbers));
+                let starting_line_number = &token_line_numbers[i];
+                ast.push(new_scene(scene_head, &tokens, &mut i, &ast, starting_line_number));
             }
             Token::ModuleStart(_) => {
                 // In future, need to structure into code blocks
@@ -37,11 +51,9 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
                 ));
                 is_exported = false;
             }
-
             Token::Export => {
                 is_exported = true;
             }
-
             Token::VarReference(id) => {
                 ast.push(AstNode::VarReference(find_var_declaration_index(&ast, id)));
             }
@@ -87,8 +99,9 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
 
             Token::Print => {
                 i += 1;
+                let starting_line_number = &token_line_numbers[i];
                 ast.push(AstNode::Print(Box::new(
-                    create_expression(&tokens, &mut i, false, &ast, token_line_numbers, &DataType::Inferred),
+                    create_expression(&tokens, &mut i, false, &ast, starting_line_number, &DataType::Inferred),
                 )));
             }
 
@@ -114,7 +127,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
         i += 1;
     }
 
-    (ast, i)
+    (ast, imports)
 }
 
 fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {

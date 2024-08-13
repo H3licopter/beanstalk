@@ -1,3 +1,5 @@
+use colour::red_ln;
+
 use super::ast_nodes::AstNode;
 use super::parse_expression::evaluate_expression;
 use crate::parsers::parse_expression::create_expression;
@@ -8,7 +10,7 @@ pub fn new_tuple(
     i: &mut usize,
     first_item: AstNode,
     ast: &Vec<AstNode>,
-    token_line_numbers: &Vec<u32>,
+    starting_line_number: &u32,
 ) -> AstNode {
     let first_item_eval = evaluate_expression(first_item, &DataType::Inferred, ast);
     let mut items: Vec<AstNode> = vec![first_item_eval];
@@ -16,37 +18,30 @@ pub fn new_tuple(
     while let Some(token) = tokens.get(*i) {
         match token {
             Token::CloseParenthesis => {
+                *i += 1;
                 break;
             }
 
             Token::OpenParenthesis | Token::Comma => {
                 *i += 1;
-                items.push(create_expression(tokens, i, true, &ast, token_line_numbers, &DataType::Inferred));
-            }
-
-            _ => {
-                items.push(create_expression(tokens, i, true, &ast, token_line_numbers, &DataType::Inferred));
-            }
-        }
-
-        match token {
-            Token::CloseParenthesis => {
-                *i += 1;
-                break;
+                items.push(create_expression(tokens, i, true, &ast, starting_line_number, &DataType::Inferred));
             }
 
             _ => {
                 *i += 1;
+                items.push(create_expression(tokens, i, true, &ast, starting_line_number, &DataType::Inferred));
             }
         }
     }
 
     // TO DO: Get all expressions in the tuple
 
-    return AstNode::Tuple(items, token_line_numbers[*i]);
+    red_ln!("Tuple: {:?}", items);
+
+    return AstNode::Tuple(items, starting_line_number.to_owned());
 }
 
-pub fn new_array(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, token_line_numbers: &Vec<u32>) -> AstNode {
+pub fn new_array(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, starting_line_number: &u32) -> AstNode {
     let mut items: Vec<AstNode> = Vec::new();
     let collection_type = DataType::InferredCollection;
 
@@ -62,7 +57,7 @@ pub fn new_array(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, token_l
 
             // TO DO: Type checking and adding values to array
             _ => {
-                items.push(create_expression(tokens, i, true, ast, token_line_numbers, &collection_type));
+                items.push(create_expression(tokens, i, true, ast, starting_line_number, &collection_type));
             }
         }
 

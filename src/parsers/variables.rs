@@ -62,7 +62,8 @@ pub fn new_variable(
         // Otherwise this is just an expression or tuple wrapped in parenthesis
         Token::OpenParenthesis => {
             // Maybe something will use colon rather than constant later
-            parsed_expr = create_expression(tokens, i, false, &ast, token_line_numbers, data_type);
+            let start_line_number = &token_line_numbers[*i];
+            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type);
 
             // FUNCTION? must have arrow after parenthesis close
             if attribute == Attribute::Constant {
@@ -108,24 +109,26 @@ pub fn new_variable(
                     return AstNode::Error(format!("Unexpected token after type declaration: {:?}", next_token), token_line_numbers[*i]);
                 }
             }
-
-            parsed_expr = create_expression(tokens, i, false, &ast, token_line_numbers, data_type);
+            let start_line_number = &token_line_numbers[*i];
+            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type);
         }
 
         Token::OpenScope => match attribute {
             // New struct
             // var_name : {}
             Attribute::TypeDeclaration => {
-                return AstNode::Struct(name, Box::new(new_array(tokens, i, ast, token_line_numbers)), is_exported)
+                let start_line_number = &token_line_numbers[*i];
+                return AstNode::Struct(name, Box::new(new_array(tokens, i, ast, start_line_number)), is_exported)
             }
 
             // Struct literal
             // var_name :: {}
             // var_name := {}
             Attribute::Mutable | Attribute::Constant => {
+                let start_line_number = &token_line_numbers[*i];
                 return AstNode::VarDeclaration(
                     name,
-                    Box::new(new_array(tokens, i, ast, token_line_numbers)),
+                    Box::new(new_array(tokens, i, ast, start_line_number)),
                     is_exported,
                     data_type.to_owned(),
                 )
@@ -138,11 +141,13 @@ pub fn new_variable(
             }
 
             // in future, can just parse the expression if adding scenes together will be a thing
-            return AstNode::VarDeclaration(name, Box::new(new_scene(scene_head, tokens, i, ast, token_line_numbers)), is_exported, data_type.to_owned());
+            let start_line_number = &token_line_numbers[*i];
+            return AstNode::VarDeclaration(name, Box::new(new_scene(scene_head, tokens, i, ast, start_line_number)), is_exported, data_type.to_owned());
         }
         _ => {
             // Maybe need to add a check that this is an expression after the assignment?
-            parsed_expr = create_expression(tokens, i, false, &ast, token_line_numbers, data_type);
+            let start_line_number = &token_line_numbers[*i];
+            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type);
         }
     }
 

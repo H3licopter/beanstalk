@@ -20,7 +20,7 @@ pub fn create_expression(
     i: &mut usize,
     inside_tuple: bool,
     ast: &Vec<AstNode>,
-    token_line_numbers: &Vec<u32>,
+    starting_line_number: &u32,
     data_type: &DataType,
 ) -> AstNode {
     let mut expression = Vec::new();
@@ -62,7 +62,7 @@ pub fn create_expression(
                 if bracket_nesting != 0 {
                     return AstNode::Error(
                         "Not enough closing parenthesis for expression. Need more ')' at the end of the expression!".to_string(),
-                        token_line_numbers[*i],
+                        starting_line_number.to_owned(),
                     );
                 }
 
@@ -84,7 +84,7 @@ pub fn create_expression(
                 if inside_tuple {
                     break;
                 }
-                return new_tuple(tokens, i, AstNode::Expression(expression, token_line_numbers[*i]), ast, token_line_numbers);
+                return new_tuple(tokens, i, AstNode::Expression(expression, starting_line_number.to_owned()), ast, starting_line_number);
             }
 
             // Check if name is a reference to another variable or function call
@@ -98,14 +98,14 @@ pub fn create_expression(
             // Check if is a literal
             Token::FloatLiteral(mut float) => {
                 if data_type != &DataType::Float || data_type != &DataType::Inferred {
-                    return AstNode::Error("Float literal used in non-float expression".to_string(), token_line_numbers[*i]);
+                    return AstNode::Error("Float literal used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
                 if next_number_negative {float = -float; next_number_negative = false;}
                 expression.push(AstNode::Literal(Token::FloatLiteral(float)));
             }
             Token::StringLiteral(string) => {
                 if data_type != &DataType::String || data_type != &DataType::Inferred {
-                    return AstNode::Error("String literal used in non-string expression".to_string(), token_line_numbers[*i]);
+                    return AstNode::Error("String literal used in non-string expression".to_string(), starting_line_number.to_owned());
                 }
                 expression.push(AstNode::Literal(Token::StringLiteral(string.clone())));
             }
@@ -114,9 +114,9 @@ pub fn create_expression(
             // Maybe scenes can be added together like strings
             Token::SceneHead(scene_head_tokens) => {
                 if data_type != &DataType::Scene || data_type != &DataType::Inferred {
-                    return AstNode::Error("Scene used in non-scene expression".to_string(), token_line_numbers[*i]);
+                    return AstNode::Error("Scene used in non-scene expression".to_string(), starting_line_number.to_owned());
                 }
-                expression.push(new_scene(scene_head_tokens, tokens, i, &ast, token_line_numbers));
+                expression.push(new_scene(scene_head_tokens, tokens, i, &ast, starting_line_number));
             }
 
             // OPERATORS
@@ -136,37 +136,37 @@ pub fn create_expression(
             }
             Token::Subtract => {
                 if data_type != &DataType::Float || data_type != &DataType::Inferred {
-                    return AstNode::Error("Subtraction used in non-float expression".to_string(), token_line_numbers[*i]);
+                    return AstNode::Error("Subtraction used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
                 expression.push(AstNode::Operator(" - ".to_string()));
             }
             Token::Multiply => {
                 if data_type != &DataType::Float || data_type != &DataType::Inferred {
-                    return AstNode::Error("Multiplication used in non-float expression".to_string(), token_line_numbers[*i]);
+                    return AstNode::Error("Multiplication used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
                 expression.push(AstNode::Operator(" * ".to_string()));
             }
             Token::Divide => {
                 if data_type != &DataType::Float || data_type != &DataType::Inferred {
-                    return AstNode::Error("Division used in non-float expression".to_string(), token_line_numbers[*i]);
+                    return AstNode::Error("Division used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
                 expression.push(AstNode::Operator(" / ".to_string()));
             }
             Token::Modulus => {
                 if data_type != &DataType::Float || data_type != &DataType::Inferred {
-                    return AstNode::Error("Modulus used in non-float expression".to_string(), token_line_numbers[*i]);
+                    return AstNode::Error("Modulus used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
                 expression.push(AstNode::Operator(" % ".to_string()));
             }
             Token::Remainder => {
                 if data_type != &DataType::Float || data_type != &DataType::Inferred {
-                    return AstNode::Error("Remainder used in non-float expression".to_string(), token_line_numbers[*i]);
+                    return AstNode::Error("Remainder used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
                 expression.push(AstNode::Operator(" %% ".to_string()));
             }
             Token::Root => {
                 if data_type != &DataType::Float || data_type != &DataType::Inferred {
-                    return AstNode::Error("Root used in non-float expression".to_string(), token_line_numbers[*i]);
+                    return AstNode::Error("Root used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
                 expression.push(AstNode::Operator(" // ".to_string()));
             }
@@ -197,7 +197,7 @@ pub fn create_expression(
             _ => {
                 expression.push(AstNode::Error(
                     "Invalid Expression, must be assigned wih a valid datatype".to_string(),
-                    token_line_numbers[*i],
+                    starting_line_number.to_owned(),
                 ));
             }
         }
@@ -205,7 +205,7 @@ pub fn create_expression(
         *i += 1;
     }
 
-    return evaluate_expression(AstNode::Expression(expression, token_line_numbers[*i]), data_type, ast);
+    return evaluate_expression(AstNode::Expression(expression, starting_line_number.to_owned()), data_type, ast);
 }
 
 // This function takes in an Expression node or Collection of expressions that has a Vec of Nodes to evaluate

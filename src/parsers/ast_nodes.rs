@@ -7,6 +7,13 @@ pub enum AstNode {
     // Config settings
     Settings(Vec<AstNode>),
 
+    // Named import path for the module
+    Import(String),
+
+    // Path to a module that will automatically import all styles and scenes 
+    // into the scope of the current module. Doesn't automatically import variables or functions into the scope
+    Use(String),
+
     // Blocks
     Function(usize, Box<AstNode>, Vec<AstNode>, bool, Vec<DataType>), // Function name, Args, Body, Public
     Expression(Vec<AstNode>, u32),                      // Expression that can contain mixed types, line number
