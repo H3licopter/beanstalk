@@ -18,7 +18,12 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><br><h1>Control Flow
+<style>.bs-nav-1 {
+                border-bottom-color: grey;
+                border-bottom-style: solid;
+                border-bottom-width: 1px;
+                padding: 0rem 2rem 0rem 2rem;
+            }</style></head><body><br><h1>Control Flow
 </h1><br><h2>If Statements
 </h2><br><p>If statements can be used as expressions or statements. They can also be used for pattern matching, all with a similar syntax.
 </p><br><pre><code>    v := 1
@@ -80,7 +85,7 @@
         break
     )
 </code></pre><br>
-<script type="module"> function uInnerHTML(id,update){
+<script type="module">const vnavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`; function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {

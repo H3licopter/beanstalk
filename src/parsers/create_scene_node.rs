@@ -452,7 +452,11 @@ pub fn new_scene(
                 scene.push(AstNode::Element(Token::Newline));
             }
 
-            Token::Empty | Token::Colon | Token::DeadVarible => {}
+            Token::Empty | Token::Colon => {}
+
+            Token::DeadVarible(name) => {
+                scene.push(AstNode::Error(format!("Dead Variable used in scene. '{}' was never defined", name), token_line_number.to_owned()));
+            }
 
             _ => {
                 scene.push(AstNode::Error(format!(

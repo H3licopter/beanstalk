@@ -18,7 +18,12 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style></style></head><body><br><br><h1>Collections
+<style>.bs-nav-1 {
+                border-bottom-color: grey;
+                border-bottom-style: solid;
+                border-bottom-width: 1px;
+                padding: 0rem 2rem 0rem 2rem;
+            }</style></head><body><br><br><h1>Collections
 </h1><p>All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
 </p><br><p>Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
 </p><br><h2>Literals
@@ -64,7 +69,7 @@
         8
     )
 </span><br>
-<script type="module"> function uInnerHTML(id,update){
+<script type="module">const vnavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`; function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {

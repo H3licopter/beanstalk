@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}.bs-1 > * {color:inherit;}</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><br><h1>Setting up a Project
+            }.bs-0 > * {color:inherit;}.bs-1 > * {color:inherit;}</style></head><body><span class="cnavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><br><h1>Setting up a Project
 </h1><p>Running the command 'new html' followed by your directory path will create a new static HTML Beanstalk project in that directory. The path is relative to the current directory.
 </p><br><p><em>More project types will be added in the future.</em></p><br><br><span>The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
 </span><br><span>This file is called </span><strong>config.bs&nbsp;</strong><span>and is placed in the root folder of your project by default. A configuration file is also created in the root directory.
@@ -68,12 +68,12 @@
 
 </span></p><br></main><footer class="container"><span style="padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></span><br></footer>
-<script type="module"> function uInnerHTML(id,update){
+<script type="module">const vnavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`; function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }</script>
+            }uInnerHTML("cnavbar", vnavbar);</script>
 </body>
 </html>

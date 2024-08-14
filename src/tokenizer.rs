@@ -21,7 +21,7 @@ pub fn tokenize(source_code: &str, module_name: &str, globals: Vec<Declaration>)
     loop {
         match token {
             Token::Variable(name) => {
-                token = new_var_or_ref(name, &mut var_names, &tokens);
+                token = new_var_or_ref(&name, &mut var_names, &tokens);
             }
 
             // Check for variables used inside of scenehead
@@ -31,7 +31,7 @@ pub fn tokenize(source_code: &str, module_name: &str, globals: Vec<Declaration>)
                 for t in content {
                     match t {
                         Token::Variable(name) => {
-                            let var = new_var_or_ref(name, &mut var_names, &tokens);
+                            let var = new_var_or_ref(&name, &mut var_names, &tokens);
                             match var {
                                 Token::VarReference(id) => {
                                     processed_scenehead.push(Token::VarReference(id));
@@ -40,7 +40,7 @@ pub fn tokenize(source_code: &str, module_name: &str, globals: Vec<Declaration>)
                                     processed_scenehead.push(Token::ConstReference(id));
                                 }
                                 _ => {
-                                    processed_scenehead.push(Token::DeadVarible);
+                                    processed_scenehead.push(Token::DeadVarible(name));
                                 }
                             }
                         }
@@ -66,7 +66,7 @@ pub fn tokenize(source_code: &str, module_name: &str, globals: Vec<Declaration>)
     // Mark unused variables for removal in AST
     for var_dec in var_names.iter() {
         if !var_dec.has_ref && !var_dec.is_exported {
-            tokens[var_dec.index] = Token::DeadVarible;
+            tokens[var_dec.index] = Token::DeadVarible(var_dec.name.to_string());
         }
     }
 
@@ -627,11 +627,11 @@ fn is_valid_identifier(s: &str) -> bool {
 }
 
 pub fn new_var_or_ref(
-    name: String,
+    name: &String,
     var_names: &mut Vec<Declaration>,
     tokens: &Vec<Token>,
 ) -> Token {
-    let check_if_ref = var_names.into_iter().find(|n| n.name == name);
+    let check_if_ref = var_names.into_iter().find(|n| n.name == *name);
     let token_index = tokens.len();
     let previous_token = &tokens[token_index - 1];
 
@@ -644,7 +644,7 @@ pub fn new_var_or_ref(
 
             if tokens.len() <= declaration.index + 1 {
                 red_ln!("Error: Something weird when checking variable reference. No proceeding token found after declaration");
-                return Token::DeadVarible;
+                return Token::DeadVarible(declaration.name.to_string());
             }
             let token_after = &tokens[declaration.index + 1];
 
@@ -675,7 +675,7 @@ pub fn new_var_or_ref(
                 is_exported: is_public,
                 is_imported: false,
             });
-            return Token::VarDeclaration(name);
+            return Token::VarDeclaration(name.to_string());
         }
     }
 }

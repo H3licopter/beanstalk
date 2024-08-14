@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >FUNCTIONS</b></div></header><main class="container"><br><br><h1>Functions
+            }</style></head><body><span class="cnavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >FUNCTIONS</b></div></header><main class="container"><br><br><h1>Functions
 </h1><p>If the function can only return an error, you can use a '?' as the specified return type.
 </p><br><br><br><h2>The arrow operator
 </h2><p>The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
@@ -65,12 +65,12 @@
 
 </code></pre><br><br><footer class="container"><span style="padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></span></footer></main>
-<script type="module"> function uInnerHTML(id,update){
+<script type="module">const vnavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`; function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }</script>
+            }uInnerHTML("cnavbar", vnavbar);</script>
 </body>
 </html>

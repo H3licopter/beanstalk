@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ERROR HANDLING</b></div></header><main class="container"><br><br><p>Errors are treated as values in Beanstalk, any function can return an error as one of it's values must have it's error handled.
+            }</style></head><body><span class="cnavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ERROR HANDLING</b></div></header><main class="container"><br><br><p>Errors are treated as values in Beanstalk, any function can return an error as one of it's values must have it's error handled.
 </p><br><p>The ? operator is used to check if one of the values in a tuple is an error. If it is, the error can then be handled in a new scope, or passed up the call stack if no scope is provided.
 </p><br><pre><code>    func_call_that_can_return_an_error() ? {
         -- Error handling code
@@ -60,12 +60,12 @@
     }
 </code></pre><br><br></main><footer class="container"><span style="padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></span></footer>
-<script type="module"> function uInnerHTML(id,update){
+<script type="module">const vnavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`; function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }</script>
+            }uInnerHTML("cnavbar", vnavbar);</script>
 </body>
 </html>

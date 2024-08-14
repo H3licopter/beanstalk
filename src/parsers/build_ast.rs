@@ -104,10 +104,11 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
                 )));
             }
 
-            Token::DeadVarible => {
+            Token::DeadVarible(name) => {
                 // Remove entire declaration or scope of variable declaration
                 // So don't put any dead code into the AST
                 skip_dead_code(&tokens, &mut i);
+                ast.push(AstNode::Error(format!("Dead Variable Declaration. Variable is never used or declared: {}", name), token_line_numbers[i - 1]));
             }
 
             Token::EOF => {
@@ -118,7 +119,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
             _ => {
                 ast.push(AstNode::Error(
                     format!("Compiler Error: Token not recognised by AST parser when creating AST: {:?}", &tokens[i]).to_string(),
-                    token_line_numbers[i],
+                    token_line_numbers[i - 1],
                 ));
             }
         }

@@ -23,7 +23,7 @@ pub enum Token {
     ModuleStart(String),
     Comptime,
     Error(String, u32), // Error message, line number
-    DeadVarible, // Variable that is never used, to be removed in the AST
+    DeadVarible(String), // Name. Variable that is never used, to be removed in the AST
     EOF,         // End of file
 
     // To later calculate where a token was in the source code
