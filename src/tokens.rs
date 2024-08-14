@@ -13,8 +13,8 @@ pub struct Declaration {
     pub name: String,
     pub index: usize,
     pub has_ref: bool,
-    pub next_token_index: usize,
     pub is_exported: bool,
+    pub is_imported: bool,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -22,7 +22,7 @@ pub enum Token {
     // For Compiler
     ModuleStart(String),
     Comptime,
-    Error(String),
+    Error(String, u32), // Error message, line number
     DeadVarible, // Variable that is never used, to be removed in the AST
     EOF,         // End of file
 
@@ -51,11 +51,9 @@ pub enum Token {
     Variable(String),
 
     // Optimised Variables (Happens just before AST creation)
-    VarDeclaration(usize),
-    VarReference(usize),
-    ConstReference(usize),
-    CompileTimeVarReference(usize),
-    CompileTimeConstReference(usize),
+    VarDeclaration(String),
+    VarReference(String),
+    ConstReference(String),
     Ref, // & operator
 
     // Literals
@@ -81,8 +79,7 @@ pub enum Token {
 
     // Declarations - Should contain a type declaration if there is one
     Assign,         // =
-    AssignVariable, // :=
-    AssignConstant, // ::
+    Initialise(bool), // := / :: (is_const)
 
     // Scope
     OpenParenthesis,  // (

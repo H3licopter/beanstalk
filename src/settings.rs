@@ -1,4 +1,5 @@
 pub const COMP_PAGE_KEYWORD: &str = "#page";
+pub const GLOBAL_PAGE_KEYWORD: &str = "#global";
 pub const INDEX_PAGE_KEYWORD: &str = "index";
 pub const CONFIG_FILE_NAME: &str = "config.bs";
 

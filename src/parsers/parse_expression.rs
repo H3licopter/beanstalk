@@ -2,7 +2,7 @@
 
 use colour::red_ln;
 
-use super::{ast_nodes::AstNode, collections::new_tuple, create_scene_node::new_scene, variables::find_var_declaration_index};
+use super::{ast_nodes::AstNode, collections::new_tuple, create_scene_node::new_scene};
 use crate::{bs_types::DataType, Token};
 
 /*  CAN RETURN:
@@ -51,10 +51,6 @@ pub fn create_expression(
                     continue;
                 }
 
-                if inside_tuple {
-                    *i -= 1;
-                }
-
                 break;
             }
 
@@ -89,22 +85,22 @@ pub fn create_expression(
 
             // Check if name is a reference to another variable or function call
             Token::VarReference(id) => {
-                expression.push(AstNode::VarReference(find_var_declaration_index(ast, id)));
+                expression.push(AstNode::VarReference(id.to_string()));
             }
             Token::ConstReference(id) => {
-                expression.push(AstNode::ConstReference(find_var_declaration_index(ast, id)));
+                expression.push(AstNode::ConstReference(id.to_string()));
             }
 
             // Check if is a literal
             Token::FloatLiteral(mut float) => {
-                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                if data_type != &DataType::Float && data_type != &DataType::Inferred {
                     return AstNode::Error("Float literal used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
                 if next_number_negative {float = -float; next_number_negative = false;}
                 expression.push(AstNode::Literal(Token::FloatLiteral(float)));
             }
             Token::StringLiteral(string) => {
-                if data_type != &DataType::String || data_type != &DataType::Inferred {
+                if data_type != &DataType::String && data_type != &DataType::Inferred {
                     return AstNode::Error("String literal used in non-string expression".to_string(), starting_line_number.to_owned());
                 }
                 expression.push(AstNode::Literal(Token::StringLiteral(string.clone())));
@@ -113,7 +109,7 @@ pub fn create_expression(
             // Scenes - Create a new scene node
             // Maybe scenes can be added together like strings
             Token::SceneHead(scene_head_tokens) => {
-                if data_type != &DataType::Scene || data_type != &DataType::Inferred {
+                if data_type != &DataType::Scene && data_type != &DataType::Inferred {
                     return AstNode::Error("Scene used in non-scene expression".to_string(), starting_line_number.to_owned());
                 }
                 expression.push(new_scene(scene_head_tokens, tokens, i, &ast, starting_line_number));
@@ -232,7 +228,7 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                     AstNode::Scene(_, _, _) => {
                         simplified_expression.push(node);
                     }
-                    AstNode::Operator(op) => {
+                    AstNode::Operator(ref op) => {
                         // If the current type is a string, then must be a + operator or create an error
                         if current_type == DataType::String && op != " + " {
                             return AstNode::Error(
@@ -246,54 +242,13 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                                 line_number
                             );
                         }
-                        simplified_expression.push(AstNode::Operator(op));
+                        simplified_expression.push(node);
                     }
 
-                    // EVENTUALLY NEED TO HANDLE COMPILE TIME VALUES DIFFERENTLY
-                    AstNode::ConstReference(value) | AstNode::VarReference(value) => {
+                    // Eventually should be unpacking the const value
+                    AstNode::ConstReference(_) | AstNode::VarReference(_) => {
                         compile_time_eval = false;
-                        match &ast[value] {
-                            AstNode::VarDeclaration(_, assignment, _, _)
-                            | AstNode::Const(_, assignment, _, _) => {
-                                let expr = *assignment.clone();
-
-                                // Get the type and value of the original variable
-                                match expr {
-                                    AstNode::Literal(t) => {
-                                        simplified_expression.push(check_literal(
-                                            t,
-                                            type_declaration,
-                                            &mut current_type,
-                                            line_number
-                                        ));
-                                    }
-                                    AstNode::RuntimeExpression(e, expr_type) => {
-                                        if current_type == DataType::Inferred
-                                            || current_type != expr_type
-                                        {
-                                            return AstNode::Error(
-                                                "Error Mixing types. You must explicitly convert types to use them in the same expression".to_string()
-                                                , line_number
-                                            );
-                                        }
-                                        simplified_expression
-                                            .push(AstNode::RuntimeExpression(e, expr_type));
-                                    }
-                                    _ => {
-                                        return AstNode::Error(
-                                            "Invalid Expression".to_string(),
-                                            line_number
-                                        );
-                                    }
-                                }
-                            }
-                            _ => {
-                                return AstNode::Error(
-                                    "Reference not found in AST".to_string(),
-                                    line_number
-                                );
-                            }
-                        }
+                        simplified_expression.push(node)
                     }
 
                     _ => {}

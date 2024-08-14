@@ -78,7 +78,14 @@ fn handle_connection(
                 match &parsed_url {
                     // Get the metadata of the file
                     Ok(parsed_url) => {
-                        if has_been_modified(parsed_url, last_modified) {
+                        let global_file_path = PathBuf::from(format!("{}/{}/{}", path, get_default_config().src, settings::GLOBAL_PAGE_KEYWORD)).with_extension("bs");
+                        let global_file_modified = if fs::metadata(&global_file_path).is_ok() {
+                            has_been_modified(&global_file_path, last_modified)
+                        } else {
+                            false
+                        };
+
+                        if has_been_modified(parsed_url, last_modified) || global_file_modified {
                             blue_ln!("Changes detected for {:?}", parsed_url);
                             build_project(&path, false);
                             status_line = "HTTP/1.1 205 Reset Content";

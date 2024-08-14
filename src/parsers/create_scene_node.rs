@@ -267,11 +267,11 @@ pub fn new_scene(
                 );
             }
 
-            Token::VarReference(name) => {
-                scene.push(AstNode::VarReference(*name));
+            Token::VarReference(id) => {
+                scene.push(AstNode::VarReference(id.to_string()));
             }
-            Token::ConstReference(name) => {
-                scene.push(AstNode::ConstReference(*name));
+            Token::ConstReference(id) => {
+                scene.push(AstNode::ConstReference(id.to_string()));
             }
 
             Token::StringLiteral(_) | Token::RawStringLiteral(_) => {

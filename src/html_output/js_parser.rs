@@ -9,23 +9,11 @@ pub fn expression_to_js(expr: &AstNode) -> String {
 
     match expr {
         AstNode::RuntimeExpression(nodes, expression_type) => {
-            // If numerical type, create a function call to WASM to parse the expression
-            match expression_type {
-                DataType::String | DataType::Float => {
-                    js.push_str(&format!("("));
-                },
-                DataType::CoerseToString => {
-                    js.push_str(&format!("String("));
-                },
-                _ => {
-                    red_ln!("Have not implimented this type yet in expression_to_js: {:?}", expression_type);
-                }
-            }
-
             for node in nodes {
                 match node {
                     AstNode::Literal(token) => match token {
                         Token::FloatLiteral(value) => {
+                            red_ln!("value: {:?}", value);
                             js.push_str(&value.to_string());
                         }
                         Token::StringLiteral(value) => {
@@ -53,6 +41,19 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     }
                 }
             };
+
+            match expression_type {
+                DataType::String | DataType::Float => {},
+                DataType::CoerseToString => {
+                    js.insert_str(0, "String(");
+                    js.push_str(")");
+                },
+                _ => {
+                    red_ln!("Have not implimented this type yet in expression_to_js: {:?}", expression_type);
+                }
+            }
+
+            js.push_str(")");
         }
 
         AstNode::Literal(token) => match token {
@@ -80,7 +81,6 @@ pub fn expression_to_js(expr: &AstNode) -> String {
             );
         }
     }
-    js.push_str(")");
     js
 }
 

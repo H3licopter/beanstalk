@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}</style></head><body><nav style="" class="bs-nav-1 "  ><ul><li><a href="../") style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><br><p>Beanstalk has its own templating language. These are called scenes.
+            }.bs-0 > * {color:inherit;}</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><br><p>Beanstalk has its own templating language. These are called scenes.
 </p><br><p>Scenes have two sections, the head and the body. 
 </p><br><p><strong><em>The head&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the styling and positioning of the scene.
 </span></p><br><p><strong><em>The body&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the content of the scene.
@@ -73,7 +73,7 @@
     [table 2:
         [: Heading 1] [: Heading 2]
         [: text] [: text]
-    ]   
+    ] 
 
     [if not text.isBlank():
         [ text: plus some extra text in the same element as the variable text ]
@@ -105,7 +105,7 @@
     ]
 </code></pre><br><br><h3>Errors
 </h3><p>If an error is added to a scene, it will be displayed in the console, rather than injected into the scene. This usually means that the variable with the error has reverted to its default value, which will be shown.
-</p><br><span style="color:hsla(0,90%,55%,1);"  class=" bs-0" ><p><em>This behaviour is an uncertain part of the design, tuples that contain errors might be better completely hidden from the scene rather than a zero value being shown.</em></p></span><br><br><h3>Reactive Variables
+</p><br><span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-0" ><p><em>This behaviour is an uncertain part of the design, tuples that contain errors might be better completely hidden from the scene rather than a zero value being shown.</em></p></span><br><br><h3>Reactive Variables
 </h3><p>Variables can be made reactive in a scene by being appended with a tilde. The variable will update whenever the value of the variable changes. Variables without the tilde will only update if the scene is re-rendered.
 </p><br><pre><code>    variable_that_changes := "hello"
 
@@ -117,9 +117,9 @@
 
     -- This will update the string in the first scene, but not the second
     variable_that_changes := "world"
-</code></pre><br><br><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
-</h3></div><br></footer></main>
-<script type="module">function uInnerHTML(id,update){
+</code></pre><br><br><footer class="container"><span style="padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></span><br></footer></main>
+<script type="module"> function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {

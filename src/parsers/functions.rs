@@ -2,7 +2,7 @@ use crate::{bs_types::DataType, Token};
 use super::ast_nodes::AstNode;
 
 pub fn create_function(
-    name: usize,
+    name: String,
     args: AstNode,
     tokens: &Vec<Token>,
     i: &mut usize,
@@ -25,7 +25,7 @@ pub fn create_function(
 
     // TODO - Get function body
 
-    AstNode::Function(name.clone(), Box::new(args), function_body, is_exported, return_type)
+    AstNode::Function(name, Box::new(args), function_body, is_exported, return_type)
 }
 
 fn parse_return_type(tokens: &Vec<Token>, i: &mut usize) -> Result<Vec<DataType>, &'static str> {

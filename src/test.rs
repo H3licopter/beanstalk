@@ -21,7 +21,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Tokenize File
     yellow_ln_bold!("TOKENIZING FILE\n");
-    let (tokens, token_line_numbers) = tokenizer::tokenize(&content, file_name);
+    let (tokens, token_line_numbers) = tokenizer::tokenize(&content, file_name, Vec::new());
 
     for token in &tokens {
         match token {
@@ -76,11 +76,13 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     }
 
     yellow_ln_bold!("\nCREATING HTML OUTPUT\n");
-    let (html_output, exports) = web_parser::parse(ast, get_html_config(), false, "test".to_string());
-    for export in exports {
-        println!("EXPORTS:");
-        println!("{:?}", export.id);
+    let (html_output, js_exports, css_exports) = web_parser::parse(ast, get_html_config(), false, "test".to_string(), false, String::new());
+    for export in js_exports {
+        println!("JS EXPORTS:");
+        println!("{:?}", export.module_path);
     }
+    println!("CSS EXPORTS: {}", css_exports);
+
     // Print the HTML output
     // Create a regex to match the content between the <main> and </main> tags
     let re = Regex::new(r"(?s)<body>(.*?)</body>").unwrap();

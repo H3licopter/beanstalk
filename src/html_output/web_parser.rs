@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use super::{
     colors::get_color, 
     dom_hooks::{generate_dom_update_js, DOMUpdate}, generate_html::create_html_boilerplate, js_parser::{collection_to_js, expression_to_js}
@@ -12,16 +14,17 @@ use crate::{
 use colour::red_ln;
 
 // Parse ast into valid JS, HTML and CSS
-pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_path: String) -> (String, Vec<ExportedJS>) {
+pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_path: String, is_global: bool, imported_css: String) -> (String, Vec<ExportedJS>, String) {
     let mut js = generate_dom_update_js(DOMUpdate::InnerHTML).to_string();
     let mut wasm_fn_id: usize = 0;
     let mut wasm_module = String::from("(module ");
     let mut html = String::new();
-    let mut css = String::new();
+    let mut css = imported_css;
     let mut page_title = String::new();
     let mut exp_id: usize = 0;
 
     let mut exported_js: Vec<ExportedJS> = Vec::new();
+    let mut exported_css = String::new();
 
     let mut module_references: Vec<AstNode> = Vec::new();
 
@@ -55,17 +58,26 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
             }
 
             // JAVASCRIPT / WASM
-            AstNode::VarDeclaration(id, ref expr, is_exported, ref data_type) => {
+            AstNode::VarDeclaration(ref id, ref expr, is_exported, ref data_type, is_const) => {
+                let assignment_keyword = if is_const { "const" } else { "let" };
                 let var_dec = match data_type {
                     DataType::Float | DataType::String | DataType::Bool => {
-                        format!("let v{} = {};", id, expression_to_js(&expr))
+                        format!("{} v{} = {};", assignment_keyword, id, expression_to_js(&expr))
                     }
                     DataType::Scene => {
                         let unboxed_scene = *expr.clone();
                         match unboxed_scene {
                             AstNode::Scene(scene, scene_tags, scene_styles) => {
-                                let scene_to_js_string = parse_scene(scene, scene_tags, scene_styles, &mut Tag::None, &mut js, &mut css, &mut module_references, &mut class_id, &mut exp_id, &mut Vec::new(), &mut wasm_module, &mut wasm_fn_id);
-                                format!("let v{} = `{}`;", id, scene_to_js_string)
+                                let mut created_css = String::new();
+                                let scene_to_js_string = parse_scene(scene, scene_tags, scene_styles, &mut Tag::None, &mut js, &mut created_css, &mut module_references, &mut class_id, &mut exp_id, &mut Vec::new(), &mut wasm_module, &mut wasm_fn_id);
+                                css.push_str(&created_css);
+
+                                // If this scene is exported, add the CSS it created to the exported CSS
+                                if is_exported {
+                                    exported_css.push_str(&created_css);
+                                }
+
+                                format!("{} v{} = `{}`;", assignment_keyword, id, scene_to_js_string)
                             }
                             _ => {
                                 red_ln!("Error: Scene expression must be a scene in HTML parser");
@@ -74,14 +86,16 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
                         }
                     }
                     _ => {
-                        format!("let v{} = {};", id, expression_to_js(&expr))
+                        format!("{} v{} = {};", assignment_keyword, id, expression_to_js(&expr))
                     }
                 };
+
                 if is_exported {
                     exported_js.push(
-                        ExportedJS {js: var_dec.to_owned(), id: id.to_owned() as i32, module_path: module_path.to_owned() }
+                        ExportedJS {js: var_dec.to_owned(), module_path: Path::new(&module_path).join(id), global: is_global }
                     );
                 }
+
                 js.push_str(&var_dec);
                 module_references.push(node);
             }
@@ -96,7 +110,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
                 );
                 if is_exported {
                     exported_js.push(
-                        ExportedJS {js: func.to_owned(), id: name as i32, module_path: module_path.to_owned()}
+                        ExportedJS {js: func.to_owned(), module_path: Path::new(&module_path).join(name), global: is_global }
                     );
                 }
                 js.push_str(&func);
@@ -124,7 +138,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
         .replace("page-title", &page_title)
         .replace("//js", &js);
 
-    (html, exported_js)
+    (html, exported_js, exported_css)
 }
 
 struct SceneTag {
@@ -728,18 +742,17 @@ pub fn parse_scene(
             }
 
             // STUFF THAT IS INSIDE SCENE HEAD THAT NEEDS TO BE PASSED INTO SCENE BODY
-            AstNode::VarReference(value) | AstNode::ConstReference(value) => {
+            AstNode::VarReference(ref name) | AstNode::ConstReference(ref name) => {
                 // Create a span in the HTML with a class that can be referenced by JS
                 // TO DO: Should be reactive in future -> this can change at runtime
-                html.push_str(&format!("<span class=\"c{value}\"></span>"));
+                html.push_str(&format!("<span class=\"c{name}\"></span>"));
 
                 if !module_references.contains(&node) {
-                    js.push_str(&format!("uInnerHTML(\"c{value}\", v{value});"));
-                    module_references.push(node);
+                    js.push_str(&format!("uInnerHTML(\"c{name}\", v{name});"));
+                    module_references.push(node.to_owned());
                 }
             }
 
-            // WILL CALL WASM FUNCTIONS
             AstNode::RuntimeExpression(expr, expr_type) => {
                 scenehead_literals.push((AstNode::RuntimeExpression(expr, expr_type), html.len()));
             }

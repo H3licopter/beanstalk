@@ -30,14 +30,14 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}.bs-1 > * {color:inherit;}</style></head><body><nav style="" class="bs-nav-1 "  ><ul><li><a href="../") style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><br><h1>Setting up a Project
+            }.bs-0 > * {color:inherit;}.bs-1 > * {color:inherit;}</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><br><h1>Setting up a Project
 </h1><p>Running the command 'new html' followed by your directory path will create a new static HTML Beanstalk project in that directory. The path is relative to the current directory.
 </p><br><p><em>More project types will be added in the future.</em></p><br><br><span>The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
 </span><br><span>This file is called </span><strong>config.bs&nbsp;</strong><span>and is placed in the root folder of your project by default. A configuration file is also created in the root directory.
 </span></p><br><p><em>All Beanstalk files use the .bs file extension.</em></p><br><br><span>The compiler will read through any configuration settings first.
 </span><br><li><span>src folder contains your bs files and determines the file structure of your pages. 
 </span></li><li><span>dist folder contains the compiled files.
-</span></li><br><p>⚠️ <span style="color:hsla(0,90%,55%,1);"  class=" bs-0" ><span>The compiler is not yet a proper command line tool, it currently has to be compiled and ran directly before giving it a command.</span>&nbsp;</span><span>⚠️
+</span></li><br><p>⚠️ <span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-0" ><span>The compiler is not yet a proper command line tool, it currently has to be compiled and ran directly before giving it a command.</span>&nbsp;</span><span>⚠️
 </span></p><br><p>Has development starts to be more stable, the compiler will be set up to install on your system and be run from the command line with the 'bean' command.
 </p><br><h1>Routes
 </h1><p>Beanstalk projects use a directory based router, with a few special naming rules. 
@@ -50,7 +50,7 @@
 </span></li><br><h2>Server files (coming soon)
 </h2><p>Prefixing your BS files with a '+' symbol and keyword means it is a server file. Naming the file the same as a regular page, beans the server file will be called first when the page is requested.
 </p><br><p>Otherwise the server file can contain regular server side BS code.
-</p><br><span style="color:hsla(0,90%,55%,1);"  class=" bs-1" ><p>BS cannot yet be used for server side code</p></span><br><br><h1>Compiling your BS files
+</p><br><span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-1" ><p>BS cannot yet be used for server side code</p></span><br><br><h1>Compiling your BS files
 </h1><h3>Build
 </h3><p>The simpliest way to get the compiler to output some HTML is to use the <em>build&nbsp;</em><span>command.
 </span></p><br><p>While in the root directory of your project, where the config.bs file is, run the command <strong>build&nbsp;</strong><span>to compile your whole project.
@@ -62,13 +62,13 @@
 </p><br><p>This will create a localhost server that will automatically reload the page when you make changes to your bs files. The command line will give you a link to open in your browser.
 </p><br><h1>File Paths
 </h1><p>Any index.bs files will become the main page of the folder they are in, so your main page will be index.bs in the root directory.
-</p><br><p>* * *  ⚠️ The intention is to have a file-system based router built in <a href="https://kit.svelte.dev/docs/routing") style="" class="" >(similar to Svelte)&nbsp;</a><span>so there may be changed in file naming conventions and how the compiler handles those files in the future. ⚠️ </span><span>*
+</p><br><p>* * *  ⚠️ The intention is to have a file-system based router built in <a href="https://kit.svelte.dev/docs/routing" style="" class="" >(similar to Svelte)&nbsp;</a><span>so there may be changed in file naming conventions and how the compiler handles those files in the future. ⚠️ </span><span>*
 *
 *
 
-</span></p><br></main><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
-</h3></div><br></footer>
-<script type="module">function uInnerHTML(id,update){
+</span></p><br></main><footer class="container"><span style="padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></span><br></footer>
+<script type="module"> function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {

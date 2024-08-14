@@ -1,6 +1,7 @@
+use std::path::PathBuf;
 use colour::red_ln;
 use super::{
-    ast_nodes::AstNode, create_scene_node::new_scene, parse_expression::create_expression, variables::{find_var_declaration_index, new_variable}
+    ast_nodes::AstNode, create_scene_node::new_scene, parse_expression::create_expression, variables::new_variable
 };
 use crate::{bs_types::DataType, Token};
 
@@ -20,7 +21,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
                 match &tokens[i] {
                     // Module path that will have all it's exports dumped into the module
                     Token::StringLiteral(value) => {
-                        imports.push(AstNode::Use(value.clone()));
+                        imports.push(AstNode::Use(PathBuf::from(value.clone())));
                     }
                     _ => {
                         ast.push(AstNode::Error(
@@ -42,7 +43,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
             Token::VarDeclaration(id) => {
                 // Need to determine if it is a const that compiles to a literal, should just push a literal in that case
                 ast.push(new_variable(
-                    *id,
+                    id,
                     &tokens,
                     &mut i,
                     is_exported,
@@ -55,12 +56,10 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
                 is_exported = true;
             }
             Token::VarReference(id) => {
-                ast.push(AstNode::VarReference(find_var_declaration_index(&ast, id)));
+                ast.push(AstNode::VarReference(id.to_string()));
             }
             Token::ConstReference(id) => {
-                ast.push(AstNode::ConstReference(find_var_declaration_index(
-                    &ast, id,
-                )));
+                ast.push(AstNode::ConstReference(id.to_string()));
             }
 
             Token::Title => {
@@ -136,7 +135,7 @@ fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {
 
     *i += 1;
     match tokens.get(*i).unwrap_or(&Token::EOF) {
-        Token::Assign | Token::AssignConstant | Token::Colon => {
+        Token::Assign | Token::Initialise(_) | Token::Colon => {
             *i += 1;
         }
         Token::Newline => {

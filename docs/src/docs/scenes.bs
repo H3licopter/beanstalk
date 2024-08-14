@@ -58,7 +58,7 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
     [table 2:
         [: Heading 1] [: Heading 2]
         [: text] [: text]
-    ]   
+    ] 
 
     [if not text.isBlank():
         [ text: plus some extra text in the same element as the variable text ]

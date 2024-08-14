@@ -1,6 +1,6 @@
 use crate::{bs_types::DataType, Token};
 
-use super::{ast_nodes::AstNode, collections::new_array, create_scene_node::new_scene, functions::create_function, parse_expression::create_expression};
+use super::{ast_nodes::AstNode, collections::new_array, functions::create_function, parse_expression::create_expression};
 
 #[derive(PartialEq, Debug)]
 enum Attribute {
@@ -13,7 +13,7 @@ enum Attribute {
 // CAN RETURN:
 // VarDeclaration, Const, Error, Function, Tuple
 pub fn new_variable(
-    name: usize,
+    name: &String,
     tokens: &Vec<Token>,
     i: &mut usize,
     is_exported: bool,
@@ -24,11 +24,8 @@ pub fn new_variable(
 
     *i += 1;
     match &tokens[*i] {
-        &Token::AssignConstant => {
-            attribute = Attribute::Constant;
-        }
-        &Token::AssignVariable => {
-            attribute = Attribute::Mutable;
+        &Token::Initialise(is_const) => {
+            attribute = if is_const { Attribute::Constant } else { Attribute::Mutable };
         }
         &Token::Colon => {
             attribute = Attribute::TypeDeclaration;
@@ -40,7 +37,7 @@ pub fn new_variable(
 
         // Uninitialised variable
         &Token::Newline => {
-            return AstNode::VarDeclaration(name, Box::new(AstNode::Empty), is_exported, DataType::Inferred);
+            return AstNode::VarDeclaration(name.to_string(), Box::new(AstNode::Empty), is_exported, DataType::Inferred, false);
         }
         _ => {
             return AstNode::Error(
@@ -70,7 +67,7 @@ pub fn new_variable(
                 match tokens[*i] {
                     Token::Arrow => {
                         *i += 1;
-                        return create_function(name, parsed_expr, tokens, i, is_exported, token_line_numbers);
+                        return create_function(name.to_string(), parsed_expr, tokens, i, is_exported, token_line_numbers);
                     }
                     // Not a function
                     _ => {
@@ -83,7 +80,7 @@ pub fn new_variable(
         Token::TypeKeyword(type_keyword) => {
             data_type = type_keyword;
             let next_token = if *i + 1 >= tokens.len() { 
-                return AstNode::VarDeclaration(name, Box::new(AstNode::Empty), is_exported, data_type.to_owned());
+                return AstNode::VarDeclaration(name.to_string(), Box::new(AstNode::Empty), is_exported, data_type.to_owned(), false);
             } else { 
                 &tokens[*i + 1]
             };
@@ -91,7 +88,7 @@ pub fn new_variable(
             // Check after the type declaration
             match next_token {
                 Token::Newline | Token::EOF => {
-                    return create_zero_value_var(data_type.to_owned(), name, is_exported);
+                    return create_zero_value_var(data_type.to_owned(), name.to_string(), is_exported);
                 }
                 // Is a constant with a type declaration
                 // var_name : type : expression
@@ -118,31 +115,32 @@ pub fn new_variable(
             // var_name : {}
             Attribute::TypeDeclaration => {
                 let start_line_number = &token_line_numbers[*i];
-                return AstNode::Struct(name, Box::new(new_array(tokens, i, ast, start_line_number)), is_exported)
+                return AstNode::Struct(name.to_string(), Box::new(new_array(tokens, i, ast, start_line_number)), is_exported)
             }
 
             // Struct literal
-            // var_name :: {}
             // var_name := {}
-            Attribute::Mutable | Attribute::Constant => {
+            Attribute::Mutable => {
                 let start_line_number = &token_line_numbers[*i];
                 return AstNode::VarDeclaration(
-                    name,
+                    name.to_string(),
                     Box::new(new_array(tokens, i, ast, start_line_number)),
                     is_exported,
                     data_type.to_owned(),
+                    false,
                 )
             }
-        }
-
-        Token::SceneHead(scene_head) => {
-            if data_type == &DataType::Inferred {
-                data_type = &DataType::Scene;
+            // var_name :: {}
+            Attribute::Constant => {
+                let start_line_number = &token_line_numbers[*i];
+                return AstNode::VarDeclaration(
+                    name.to_string(),
+                    Box::new(new_array(tokens, i, ast, start_line_number)),
+                    is_exported,
+                    data_type.to_owned(),
+                    true,
+                )
             }
-
-            // in future, can just parse the expression if adding scenes together will be a thing
-            let start_line_number = &token_line_numbers[*i];
-            return AstNode::VarDeclaration(name, Box::new(new_scene(scene_head, tokens, i, ast, start_line_number)), is_exported, data_type.to_owned());
         }
         _ => {
             // Maybe need to add a check that this is an expression after the assignment?
@@ -158,8 +156,11 @@ pub fn new_variable(
     // Or whether it is a literal or expression
     // If the expression is an empty expression when the variable is NOT a function, return an error
     match parsed_expr {
-        AstNode::Expression(_, _) | AstNode::Tuple(_, _) => {
-            return create_var_node(attribute, name, parsed_expr, is_exported, data_type.to_owned());
+        AstNode::Expression(_, _) | AstNode::Tuple(_, _) | AstNode::Literal(_) => {
+            return create_var_node(attribute, name.to_string(), parsed_expr, is_exported, data_type.to_owned());
+        }
+        AstNode::Scene(_, _, _) => {
+            return create_var_node(attribute, name.to_string(), parsed_expr, is_exported, DataType::Scene);
         }
         AstNode::Error(err, line) => {
             return AstNode::Error(
@@ -168,13 +169,14 @@ pub fn new_variable(
                     line, err
                 )
                 .to_string(),
-                token_line_numbers[*i],
+                line,
             );
         }
+        
         _ => {
             return AstNode::Error(
-                format!("Invalid expression for variable assignment (creating new variable: {name}) at line {}", token_line_numbers[*i]),
-                token_line_numbers[*i],
+                format!("Invalid expression for variable assignment (creating new variable: {name}). Value was: {:?}", parsed_expr),
+                token_line_numbers[*i - 1],
             );
         }
     }
@@ -182,49 +184,34 @@ pub fn new_variable(
 
 fn create_var_node(
     attribute: Attribute,
-    var_name: usize,
+    var_name: String,
     var_value: AstNode,
     is_exported: bool,
     data_type: DataType,
 ) -> AstNode {
     match attribute {
         Attribute::Constant | Attribute::TypeDeclaration => {
-            return AstNode::Const(var_name, Box::new(var_value), is_exported, data_type);
+            return AstNode::VarDeclaration(var_name, Box::new(var_value), is_exported, data_type, true);
         }
         Attribute::Mutable => {
-            return AstNode::VarDeclaration(var_name, Box::new(var_value), is_exported, data_type);
+            return AstNode::VarDeclaration(var_name, Box::new(var_value), is_exported, data_type, false);
         }
     }
 }
 
-pub fn find_var_declaration_index(ast: &Vec<AstNode>, var_name: &usize) -> usize {
-    for (i, node) in ast.iter().enumerate().rev() {
-        match node {
-            AstNode::VarDeclaration(name, _, _, _) | AstNode::Const(name, _, _, _) => {
-                if name == var_name {
-                    return i;
-                }
-            }
-            _ => {}
-        }
-    }
-
-    0
-}
-
-fn create_zero_value_var(data_type: DataType, name: usize, is_exported: bool) -> AstNode {
+fn create_zero_value_var(data_type: DataType, name: String, is_exported: bool) -> AstNode {
     match data_type {
         DataType::Float => {
-            AstNode::VarDeclaration(name, Box::new(AstNode::Literal(Token::FloatLiteral(0.0))), is_exported, data_type)
+            AstNode::VarDeclaration(name, Box::new(AstNode::Literal(Token::FloatLiteral(0.0))), is_exported, data_type, false)
         }
         DataType::String => {
-            AstNode::VarDeclaration(name, Box::new(AstNode::Literal(Token::StringLiteral("".to_string()))), is_exported, data_type)
+            AstNode::VarDeclaration(name, Box::new(AstNode::Literal(Token::StringLiteral("".to_string()))), is_exported, data_type, false)
         }
         DataType::Bool => {
-            AstNode::VarDeclaration(name, Box::new(AstNode::Literal(Token::BoolLiteral(false))), is_exported, data_type)
+            AstNode::VarDeclaration(name, Box::new(AstNode::Literal(Token::BoolLiteral(false))), is_exported, data_type, false)
         }
         _ => {
-            AstNode::VarDeclaration(name, Box::new(AstNode::Empty), is_exported, data_type)
+            AstNode::VarDeclaration(name, Box::new(AstNode::Empty), is_exported, data_type, false)
         }
     }
 }

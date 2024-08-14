@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use super::styles::{Style, Tag};
 use crate::{bs_types::DataType, Token};
 
@@ -12,31 +14,30 @@ pub enum AstNode {
 
     // Path to a module that will automatically import all styles and scenes 
     // into the scope of the current module. Doesn't automatically import variables or functions into the scope
-    Use(String),
+    Use(PathBuf),
 
     // Blocks
-    Function(usize, Box<AstNode>, Vec<AstNode>, bool, Vec<DataType>), // Function name, Args, Body, Public
+    Function(String, Box<AstNode>, Vec<AstNode>, bool, Vec<DataType>), // Function name, Args, Body, Public
     Expression(Vec<AstNode>, u32),                      // Expression that can contain mixed types, line number
     RuntimeExpression(Vec<AstNode>, DataType),         //Expression, Result type
 
     // Basics
     Error(String, u32), // Message, line number
     Comment(String),
-    VarDeclaration(usize, Box<AstNode>, bool, DataType), // Variable name, Value, Public, Type
-    Const(usize, Box<AstNode>, bool, DataType),          // Constant name, Value, Public, Type
+    VarDeclaration(String, Box<AstNode>, bool, DataType, bool), // Variable name, Value, Public, Type, is_const
 
     // IO
     Print(Box<AstNode>),
 
     // References to existing variables
-    VarReference(usize),
-    ConstReference(usize),
-    FunctionCall(usize, Box<AstNode>),
+    VarReference(String), // Index of declaration, variable name
+    ConstReference(String), // Index of declaration, variable name
+    FunctionCall(String, Box<AstNode>), // Index of declaration, variable name, arguments
 
     // Literals
     Literal(Token),
     Collection(Vec<AstNode>, DataType),
-    Struct(usize, Box<AstNode>, bool), // Name, Fields, Public
+    Struct(String, Box<AstNode>, bool), // Name, Fields, Public
     Tuple(Vec<AstNode>, u32), // Tuple, line number
     Scene(Vec<AstNode>, Vec<Tag>, Vec<Style>),
     SceneTemplate,

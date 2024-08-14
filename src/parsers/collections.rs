@@ -1,5 +1,3 @@
-use colour::red_ln;
-
 use super::ast_nodes::AstNode;
 use super::parse_expression::evaluate_expression;
 use crate::parsers::parse_expression::create_expression;
@@ -35,8 +33,6 @@ pub fn new_tuple(
     }
 
     // TO DO: Get all expressions in the tuple
-
-    red_ln!("Tuple: {:?}", items);
 
     return AstNode::Tuple(items, starting_line_number.to_owned());
 }

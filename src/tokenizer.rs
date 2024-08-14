@@ -1,10 +1,12 @@
+use colour::red_ln;
+
 use super::tokens::{Declaration, Token, TokenizeMode};
 use crate::bs_types::DataType;
 use crate::tokenize_scene::{tokenize_codeblock, tokenize_markdown, tokenize_scenehead};
 use std::iter::Peekable;
 use std::str::Chars;
 
-pub fn tokenize(source_code: &str, module_name: &str) -> (Vec<Token>, Vec<u32>) {
+pub fn tokenize(source_code: &str, module_name: &str, globals: Vec<Declaration>) -> (Vec<Token>, Vec<u32>) {
     let mut tokens: Vec<Token> = Vec::new();
     let mut line_number: u32 = 1;
     let mut token_line_numbers: Vec<u32> = Vec::new();
@@ -13,7 +15,7 @@ pub fn tokenize(source_code: &str, module_name: &str) -> (Vec<Token>, Vec<u32>) 
     let mut scene_nesting_level: &mut i64 = &mut 0;
 
     // For variable optimisation
-    let mut var_names: Vec<Declaration> = Vec::new();
+    let mut var_names: Vec<Declaration> = globals;
     let mut token: Token = Token::ModuleStart(module_name.to_string());
 
     loop {
@@ -36,12 +38,6 @@ pub fn tokenize(source_code: &str, module_name: &str) -> (Vec<Token>, Vec<u32>) 
                                 }
                                 Token::ConstReference(id) => {
                                     processed_scenehead.push(Token::ConstReference(id));
-                                }
-                                Token::CompileTimeVarReference(id) => {
-                                    processed_scenehead.push(Token::CompileTimeVarReference(id));
-                                }
-                                Token::CompileTimeConstReference(id) => {
-                                    processed_scenehead.push(Token::CompileTimeConstReference(id));
                                 }
                                 _ => {
                                     processed_scenehead.push(Token::DeadVarible);
@@ -128,10 +124,10 @@ pub fn get_next_token(
         *scene_nesting_level += 1;
         match tokenize_mode {
             TokenizeMode::SceneHead => {
-                return Token::Error("Cannot have nested scenes inside of a scene head, must be inside the scene body".to_string());
+                return Token::Error("Cannot have nested scenes inside of a scene head, must be inside the scene body".to_string(), *line_number);
             }
             TokenizeMode::Codeblock => {
-                return Token::Error("Cannot have nested scenes inside of a codeblock".to_string());
+                return Token::Error("Cannot have nested scenes inside of a codeblock".to_string(), *line_number);
             }
             _ => {
                 // [] is an empty scene
@@ -185,13 +181,13 @@ pub fn get_next_token(
         if chars.peek() == Some(&':') {
             // ::
             chars.next();
-            return Token::AssignConstant;
+            return Token::Initialise(true);
         }
 
         if chars.peek() == Some(&'=') {
             chars.next();
             // :=
-            return Token::AssignVariable;
+            return Token::Initialise(false);
         }
 
         if tokenize_mode == &TokenizeMode::SceneHead {
@@ -206,7 +202,7 @@ pub fn get_next_token(
         *tokenize_mode = TokenizeMode::Window;
 
         //Get compiler directive token
-        return keyword_or_variable(&mut token_value, chars, tokenize_mode);
+        return keyword_or_variable(&mut token_value, chars, tokenize_mode, line_number);
     }
 
     // Check for string literals
@@ -455,14 +451,17 @@ pub fn get_next_token(
                 continue;
             }
 
-            if next_char.is_numeric() {     
+            if next_char == '.' {
+                dot_count += 1;
                 // Stop if too many dots           
-                if next_char == '.' {
-                    dot_count += 1;
-                    if dot_count > 1 {
-                        return Token::Error("Cannot have more than one decimal point in a number".to_string());
-                    }
+                if dot_count > 1 {
+                    return Token::Error("Cannot have more than one decimal point in a number".to_string(), *line_number);
                 }
+                token_value.push(chars.next().unwrap());
+                continue;
+            }
+
+            if next_char.is_numeric() {     
                 token_value.push(chars.next().unwrap());
             } else {
                 break;
@@ -475,12 +474,12 @@ pub fn get_next_token(
 
     if current_char.is_alphabetic() {
         token_value.push(current_char);
-        return keyword_or_variable(&mut token_value, chars, tokenize_mode);
+        return keyword_or_variable(&mut token_value, chars, tokenize_mode, line_number);
     }
 
     if current_char == '_' {}
 
-    Token::Error(format!("Invalid Token Used (tokenizer). Token: {}", current_char))
+    Token::Error(format!("Invalid Token Used (tokenizer). Token: {}", current_char), *line_number)
 }
 
 // Nested function because may need multiple searches for variables
@@ -488,6 +487,7 @@ fn keyword_or_variable(
     token_value: &mut String,
     chars: &mut Peekable<Chars<'_>>,
     tokenize_mode: &mut TokenizeMode,
+    line_number: &u32,
 ) -> Token {
     // Match variables or keywords
     while let Some(&next_char) = chars.peek() {
@@ -614,7 +614,7 @@ fn keyword_or_variable(
         return Token::Variable(token_value.to_string());
     }
 
-    Token::Error(format!("Invalid variable name: {}", token_value))
+    Token::Error(format!("Invalid variable name: {}", token_value), *line_number)
 }
 
 // Checking if the variable name it valid
@@ -631,28 +631,34 @@ pub fn new_var_or_ref(
     var_names: &mut Vec<Declaration>,
     tokens: &Vec<Token>,
 ) -> Token {
-    let check_if_ref = var_names.iter().rposition(|n| n.name == name);
+    let check_if_ref = var_names.into_iter().find(|n| n.name == name);
     let token_index = tokens.len();
     let previous_token = &tokens[token_index - 1];
 
     match check_if_ref {
-        Some(index) => {
-            var_names[index].has_ref = true;
-
-            // POSSIBLE OUT OF BOUNDS ERROR TO SORT OUT??? or will that never happen because of the check_if_ref?
-            let token_after = &tokens[var_names[index].next_token_index];
-
-            match token_after {
-                Token::AssignConstant => {
-                    return Token::ConstReference(var_names[index].index);
-                }
-                Token::Colon => {
-                    return Token::CompileTimeConstReference(var_names[index].index);
-                }
-                _ => {}
+        Some(declaration) => {
+            declaration.has_ref = true;
+            if declaration.is_imported {
+                return Token::ConstReference(declaration.name.to_string())
             }
 
-            return Token::VarReference(var_names[index].index);
+            if tokens.len() <= declaration.index + 1 {
+                red_ln!("Error: Something weird when checking variable reference. No proceeding token found after declaration");
+                return Token::DeadVarible;
+            }
+            let token_after = &tokens[declaration.index + 1];
+
+            match token_after {
+                Token::Initialise(is_const) => {
+                    if *is_const {
+                        return Token::ConstReference(declaration.name.to_string())
+                    }
+                }
+                // Probably should have some error handling here if the declaration is weird
+                // For now it should just always be a var if not a const
+                _ => {}
+            }
+            Token::VarReference(declaration.name.to_string())
         }
         None => {
             // If the variable is exported, then it counts as having a reference
@@ -663,13 +669,13 @@ pub fn new_var_or_ref(
             };
 
             var_names.push(Declaration {
-                name,
+                name: name.to_string(),
                 index: token_index,
                 has_ref: false,
-                next_token_index: token_index + 1,
                 is_exported: is_public,
+                is_imported: false,
             });
-            return Token::VarDeclaration(token_index);
+            return Token::VarDeclaration(name);
         }
     }
 }

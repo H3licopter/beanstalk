@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}</style></head><body><nav style="" class="bs-nav-1 "  ><ul><li><a href="../") style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BASIC BEANSTALK SYNTAX</b></div></header><main class="container"><br><br><h1>Language Design Goals
+            }.bs-0 > * {color:inherit;}</style></head><body><nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BASIC BEANSTALK SYNTAX</b></div></header><main class="container"><br><br><h1>Language Design Goals
 </h1><p>The syntax of Beanstalk is designed to be:
 </p><li><span>Simple
 </span></li><li><span>Concise
@@ -100,8 +100,8 @@
 </h2><p>There is an intention to support integers, a special decimal type and an unsigned index type in the future. This will require efficient enough ties with WASM to make it worth it.
 </p><br><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>Float</td><td>64 bit floating point number</td><td>0.0</td></tr><tr><td>Unit</td><td><em>NOT YET SUPPORTED&nbsp;</em>Special numeric unit syntax for appending numerical types. The underlaying primative will be the same, but automatic conversions will be applied to the result.</td><td>error</td></tr></tbody></table><br><br><h2>String based Types
 </h2><p>Future support (WASM dependent) for Unicode chars and UTF-8 strings are planned for the future. But only if UT8 strings can be made faster than JS native strings with WASM.
-</p><br><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>String</td><td>UTF-16</td><td>""</td></tr><tr><td>Error</td><td>Contains a special type of debug string detailing the error</td><td>"ERROR"</td></tr><tr><td>Style</td><td>Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML)</td><td>""</td></tr></tbody></table><br><br><h2>Collection Types
-</h2><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>()</td><td>Collection. Any number of items seperated by commas. See <a href="../collections") style="" class="" >Collections&nbsp;</a>for more information.</td><td>()</td></tr><tr><td>Scene</td><td>The templating syntax of Beanstalk</td><td>"[]" -&nbsp; an empty scene</td></tr><tr><td>Choice</td><td>Rust style enums. To be implemented.</td><td>error</td></tr><tr><td>Type</td><td>For generics and datatype related operations</td><td>error</td></tr></tbody></table><br><br><h1>Strings
+</p><br><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>String</td><td>UTF-16</td><td>""</td></tr><tr><td>path</td><td>Path to a file, uses single quotes.</td><td>''</td></tr><tr><td>Error</td><td>Contains a special type of debug string detailing the error</td><td>"ERROR"</td></tr><tr><td>Style</td><td>Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML)</td><td>""</td></tr></tbody></table><br><br><h2>Collection Types
+</h2><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>()</td><td>Collection. Any number of items seperated by commas. See <a href="../collections" style="" class="" >Collections&nbsp;</a>for more information.</td><td>()</td></tr><tr><td>Scene</td><td>The templating syntax of Beanstalk</td><td>"[]" -&nbsp; an empty scene</td></tr><tr><td>Choice</td><td>Rust style enums. To be implemented.</td><td>error</td></tr><tr><td>Type</td><td>For generics and datatype related operations</td><td>error</td></tr></tbody></table><br><br><h1>Strings
 </h1><p>String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
 </p><br><pre><code>"Double quotes for a utf8 string literal"</code></pre><br><br><p>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 </p><br><pre><code>"string literal with \{curly braces} in it that is escaped"</code></pre><br><br><pre><code>`9 "is" {5 + 4}` -- 9 "is" {5 + 4}</code></pre><br><br><h1>Logical Operators
@@ -122,9 +122,9 @@
 
     height := (3m * 2m)cm
     -- result is 500
-</code></pre><br><br></main><footer class="container"><div style="padding:2rem 0rem 0rem 0rem ;display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><h3>&#127793;
-</h3></div><br></footer>
-<script type="module">function uInnerHTML(id,update){
+</code></pre><br><br></main><footer class="container"><span style="padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></span><br></footer>
+<script type="module"> function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
