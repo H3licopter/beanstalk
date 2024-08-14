@@ -619,9 +619,9 @@ pub fn parse_scene(
                             Tag::Table(_) | Tag::Nav(_) => {}
                             _ => {
                                 html.push_str(&collect_closing_tags(&mut closing_tags));
-                                if columns == 0 {
-                                    html.push_str("<br>");
-                                }
+                                // if columns == 0 {
+                                //     html.push_str("<br>");
+                                // }
                             }
                         };
                     }

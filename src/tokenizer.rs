@@ -675,7 +675,7 @@ pub fn new_var_or_ref(
                 is_exported: is_public,
                 is_imported: false,
             });
-            return Token::VarDeclaration(name.to_string());
+            return Token::VarDeclaration(name.to_string(), is_public);
         }
     }
 }

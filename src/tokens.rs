@@ -51,7 +51,7 @@ pub enum Token {
     Variable(String),
 
     // Optimised Variables (Happens just before AST creation)
-    VarDeclaration(String),
+    VarDeclaration(String, bool), // Name, is_exported
     VarReference(String),
     ConstReference(String),
     Ref, // & operator

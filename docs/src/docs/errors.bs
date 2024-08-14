@@ -1,4 +1,4 @@
-[navbar]
+[Navbar]
 
 [header center: [title 1: ERROR HANDLING]]
 [main:
@@ -43,6 +43,4 @@ These operators allow for very concise error handling and makes it easy to see w
 
 ]
 
-[footer: [pad(2, 0, 0, 0) center: 
-    ### &#127793;
-]
+[Footer]

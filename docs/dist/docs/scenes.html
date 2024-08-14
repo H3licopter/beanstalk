@@ -30,16 +30,16 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}</style></head><body><span class="cnavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><br><p>Beanstalk has its own templating language. These are called scenes.
-</p><br><p>Scenes have two sections, the head and the body. 
-</p><br><p><strong><em>The head&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the styling and positioning of the scene.
-</span></p><br><p><strong><em>The body&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the content of the scene.
-</span></p><br><p>These two sections are separated by a colon.
-</p><br><p>Scenes are scoped using square brackets and have predefined keywords you use in the scene head that can change their behavior, content and styling. 
-</p><br><p>Inside the body of a scene, you can nest more scenes using square brackets. This allows you to create complex UIs and webpages, while writing mostly in a dialect of markdown.
-</p><br><h2>Beanstalk Markdown
+            }.bs-0 > * {color:inherit;}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><p>Beanstalk has its own templating language. These are called scenes.
+</p><p>Scenes have two sections, the head and the body. 
+</p><p><strong><em>The head&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the styling and positioning of the scene.
+</span></p><p><strong><em>The body&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the content of the scene.
+</span></p><p>These two sections are separated by a colon.
+</p><p>Scenes are scoped using square brackets and have predefined keywords you use in the scene head that can change their behavior, content and styling. 
+</p><p>Inside the body of a scene, you can nest more scenes using square brackets. This allows you to create complex UIs and webpages, while writing mostly in a dialect of markdown.
+</p><h2>Beanstalk Markdown
 </h2><p>Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a scene body. Beanstalk markdown supports the familiar heading, bold and italic syntax from most markdown parsers.
-</p><br><pre><code>    [main:
+</p><pre><code>    [main:
 
     The open square bracket is used to start a new scene. 
     The colon begins the scene body. 
@@ -55,8 +55,8 @@
     the main difference being square brackets [red: *cannot*] be used without an escape character or by using backticks to create a raw string.
 
     ]
-</code></pre><br><br><h2>Scene exmaple
-</h2><br><pre><code>    [head_of_element: content of element that renders as text (markdown / more templates) {string : "this is a code block inside of the scene body, that is scoped to the scene"} ]
+</code></pre><h2>Scene exmaple
+</h2><pre><code>    [head_of_element: content of element that renders as text (markdown / more templates) {string : "this is a code block inside of the scene body, that is scoped to the scene"} ]
 
     [img "images/meme.jpg", alt "meme"]
 
@@ -82,32 +82,32 @@
     [rgb(230,20,150): this is a bunch of text with rgb color]
 
     [ imported_scene ]
-</code></pre><br><br><h3>Units and sizes
+</code></pre><h3>Units and sizes
 </h3><p>By default, beanstalk uses rem for all units by default. This will continue to be the case until later in the project when more specific units will be supported. This will come with the language supporing more complex styling and layout.
-</p><br><h2>Scene Style Keywords
+</p><h2>Scene Style Keywords
 </h2><p>More keywords will be added and more documentation about the aruments you can pass into the styles will be added as the compiler is developed and design desisions are slowly solidified.
-</p><br><h3>Style
-</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>bg</td><td>Changes the background color of the element (will eventually just be passed a style argument such as a color and will automatically make those style changes to the background)</td></tr><tr><td>rgb, hsl, hex</td><td>The color of the element. Color keywords will also be supported in the future</td></tr><tr><td>code</td><td>A code block</td></tr><tr><td>blank</td><td>removes all styling from the element</td></tr><tr><td>title</td><td>An even bigger, more styalized heading</td></tr></tbody></table><br><br><h3>Layout
-</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>pad</td><td>The padding around the element</td></tr><tr><td>space</td><td>The margin around the element</td></tr><tr><td>center</td><td>Centers the element horizontally. Pass in a bool of true to center vertically</td></tr><tr><td>table</td><td>A table element</td></tr><tr><td>size</td><td>The size of the text in the element</td></tr><tr><td>nav</td><td>A navigation element. Basically a nav bar, will automatically add ul tags for child scenes</td></tr><tr><td>order</td><td>The order of the element inside a container</td></tr><tr><td>gap</td><td>Creates a gap between elements</td></tr><tr><td>main</td><td>The main element of the page. Creates a main tag with a centered container</td></tr><tr><td>header</td><td>The header element of the page. Creates a header tag with a centered container</td></tr><tr><td>footer</td><td>The footer element of the page. Creates a footer tag with a centered container</td></tr><tr><td>section</td><td>A section element of the page. Creates a section tag with a centered container</td></tr></tbody></table><br><br><h3>Interactive 
-</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>link</td><td>link (anchor tag)</td></tr><tr><td>button</td><td>A button</td></tr><tr><td>input</td><td>An input element</td></tr><tr><td>click</td><td>You can provide a function as an argument to the click event</td></tr><tr><td>form</td><td>A form element</td></tr><tr><td>option</td><td>An option element</td></tr><tr><td>dropdown</td><td>A dropdown element</td></tr></tbody></table><br><br><h3>Media
-</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>img</td><td>An image element</td></tr><tr><td>video</td><td>A video element</td></tr><tr><td>audio</td><td>An audio element</td></tr><tr><td>alt</td><td>An alternative text for media</td></tr></tbody></table><br><br><h3>HTTP 
+</p><h3>Style
+</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>bg</td><td>Changes the background color of the element (will eventually just be passed a style argument such as a color and will automatically make those style changes to the background)</td></tr><tr><td>rgb, hsl, hex</td><td>The color of the element. Color keywords will also be supported in the future</td></tr><tr><td>code</td><td>A code block</td></tr><tr><td>blank</td><td>removes all styling from the element</td></tr><tr><td>title</td><td>An even bigger, more styalized heading</td></tr></tbody></table><h3>Layout
+</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>pad</td><td>The padding around the element</td></tr><tr><td>space</td><td>The margin around the element</td></tr><tr><td>center</td><td>Centers the element horizontally. Pass in a bool of true to center vertically</td></tr><tr><td>table</td><td>A table element</td></tr><tr><td>size</td><td>The size of the text in the element</td></tr><tr><td>nav</td><td>A navigation element. Basically a nav bar, will automatically add ul tags for child scenes</td></tr><tr><td>order</td><td>The order of the element inside a container</td></tr><tr><td>gap</td><td>Creates a gap between elements</td></tr><tr><td>main</td><td>The main element of the page. Creates a main tag with a centered container</td></tr><tr><td>header</td><td>The header element of the page. Creates a header tag with a centered container</td></tr><tr><td>footer</td><td>The footer element of the page. Creates a footer tag with a centered container</td></tr><tr><td>section</td><td>A section element of the page. Creates a section tag with a centered container</td></tr></tbody></table><h3>Interactive 
+</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>link</td><td>link (anchor tag)</td></tr><tr><td>button</td><td>A button</td></tr><tr><td>input</td><td>An input element</td></tr><tr><td>click</td><td>You can provide a function as an argument to the click event</td></tr><tr><td>form</td><td>A form element</td></tr><tr><td>option</td><td>An option element</td></tr><tr><td>dropdown</td><td>A dropdown element</td></tr></tbody></table><h3>Media
+</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>img</td><td>An image element</td></tr><tr><td>video</td><td>A video element</td></tr><tr><td>audio</td><td>An audio element</td></tr><tr><td>alt</td><td>An alternative text for media</td></tr></tbody></table><h3>HTTP 
 </h3><p>These are directly from the HTMX library and will be the same keywords, but without the leading 'hx-' prefix. More to be added soon!
-</p><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>get</td><td></td></tr><tr><td>post</td><td></td></tr><tr><td>swap</td><td></td></tr></tbody></table><br><br><h3>Other
-</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>ignore</td><td>Creates a comment, but does not add it to the final output</td></tr><tr><td>canvas</td><td>An HTML canvas element</td></tr></tbody></table><br><br><h2>Unique Scene Logic
+</p><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>get</td><td></td></tr><tr><td>post</td><td></td></tr><tr><td>swap</td><td></td></tr></tbody></table><h3>Other
+</h3><table style=""  class="" ><thead><tr><th scope='col'>Property</th><th scope='col'>Description</th></tr></thead><tbody><tr><td>ignore</td><td>Creates a comment, but does not add it to the final output</td></tr><tr><td>canvas</td><td>An HTML canvas element</td></tr></tbody></table><h2>Unique Scene Logic
 </h2><p>Variables and expressions are typecast into strings when put into a scene. This is the behaviour of all the numerical types and most of the string types. There are some exceptions to how other types are handled by scenes.
-</p><br><h3>Booleans
+</p><h3>Booleans
 </h3><p>Booleans in a scenehead will conditonally hide or show itself based on the value of the boolean. If the boolean is true, the scene and it's children will be shown, if false, it will be hidden.
-</p><br><pre><code>    logged_in := false
+</p><pre><code>    logged_in := false
 
     -- Scene is hidden
     [if not logged_in:
         [button: Log In]
     ]
-</code></pre><br><br><h3>Errors
+</code></pre><h3>Errors
 </h3><p>If an error is added to a scene, it will be displayed in the console, rather than injected into the scene. This usually means that the variable with the error has reverted to its default value, which will be shown.
-</p><br><span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-0" ><p><em>This behaviour is an uncertain part of the design, tuples that contain errors might be better completely hidden from the scene rather than a zero value being shown.</em></p></span><br><br><h3>Reactive Variables
+</p><span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-0" ><p><em>This behaviour is an uncertain part of the design, tuples that contain errors might be better completely hidden from the scene rather than a zero value being shown.</em></p></span><h3>Reactive Variables
 </h3><p>Variables can be made reactive in a scene by being appended with a tilde. The variable will update whenever the value of the variable changes. Variables without the tilde will only update if the scene is re-rendered.
-</p><br><pre><code>    variable_that_changes := "hello"
+</p><pre><code>    variable_that_changes := "hello"
 
     -- Variable becomes reactive in this scene
     [ ~variable_that_changes ]
@@ -117,14 +117,14 @@
 
     -- This will update the string in the first scene, but not the second
     variable_that_changes := "world"
-</code></pre><br><br><footer class="container"><span style="padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
-</h3></span><br></footer></main>
-<script type="module">const vnavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`; function uInnerHTML(id,update){
+</code></pre><span class="cFooter"></span></main>
+<script type="module">const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></div></footer>`; function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cnavbar", vnavbar);</script>
+            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);</script>
 </body>
 </html>

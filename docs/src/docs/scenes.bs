@@ -1,4 +1,4 @@
-[navbar]
+[Navbar]
 
 [header center: [title 1: BEANSTALK SCENES]]
 
@@ -183,6 +183,4 @@ Variables can be made reactive in a scene by being appended with a tilde. The va
     variable_that_changes := "world"
 ]
 
-[footer: [pad(2, 0, 0, 0) center: 
-    ### &#127793;
-]
+[Footer]

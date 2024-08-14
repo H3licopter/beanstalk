@@ -27,7 +27,7 @@ This is a work in progress site for Beanstalk documentation as it's being develo
 
 As the language and compiler are in the early stages of development, the documentation has only just started being written and is subject to frequent changes. The syntax for the language itself outside of the scene syntax is still being iterated on and refined.
 
-The source code for this site on [link "https://github.com/H3licopter/beanstalk/tree/main/docs/src": Github]. You can view the output of the Beanstalk compiler [link "https://github.com/H3licopter/beanstalk/tree/main/docs/dist": here]!
+The source code for this site on [link "https://github.com/H3licopter/beanstalk/tree/main/docs/src": Github]. You can view the [link "https://github.com/H3licopter/beanstalk/tree/main/docs/dist": output of the Beanstalk compiler]!
 
 ## Roadmap
 If you are intersted in contributing, show some interest on Github. It's very early days, but a fun project to work on!
@@ -47,6 +47,4 @@ If you are intersted in contributing, show some interest on Github. It's very ea
 
 ]
 
-[footer: [pad(2, 0, 0, 0) center: 
-    ### &#127793;
-]
+[Footer]

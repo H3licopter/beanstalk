@@ -23,9 +23,9 @@
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
                 padding: 0rem 2rem 0rem 2rem;
-            }</style></head><body><span class="cnavbar"></span><main class="container"><br><br><h1>Classes
+            }</style></head><body><span class="cNavbar"></span><main class="container"><h1>Classes
 </h1><p>Classes are a way to group together variables and functions that are related to each other. In Beanstalk, properties and methods are private by default, but can be made public by appending them with the export '@' symbol.
-</p><br><pre><code>    Player : Class : (name: string, hp_modifier: int = 0) {
+</p><pre><code>    Player : Class : (name: string, hp_modifier: int = 0) {
         -- Arguments and regular variables are private by default
         base_hp :: 100
 
@@ -42,14 +42,14 @@
     }
 
     player := new Player("Player 1", 100, 100)
-</code></pre><br><br><footer class="container"><span style="padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
-</h3></span><br><br><br></footer></main>
-<script type="module">const vnavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`; function uInnerHTML(id,update){
+</code></pre><span class="cFooter"></span></main>
+<script type="module">const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></div></footer>`; function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cnavbar", vnavbar);</script>
+            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);</script>
 </body>
 </html>

@@ -23,12 +23,12 @@
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
                 padding: 0rem 2rem 0rem 2rem;
-            }</style></head><body><br><br><h1>Choices (enums)
+            }</style></head><body><h1>Choices (enums)
 </h1><p>Choices are a way to define a set of possible values for a variable.
-</p><br><p>Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
-</p><br><p>Choices are written in SCREAMING_SNAKE_CASE. 
-</p><br><p>Each choice can optionally contain data that can be accessed inside that Choice.
-</p><br><span>RESPONSE : choice : (data: string, error: !)
+</p><p>Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
+</p><p>Choices are written in SCREAMING_SNAKE_CASE. 
+</p><p>Each choice can optionally contain data that can be accessed inside that Choice.
+</p><span>RESPONSE : choice : (data: string, error: !)
 
     STATE : choice : (
         paused,
@@ -43,8 +43,9 @@
             STATE.error_message =&gt; print( now value )
         )
     )
-</span><br>
-<script type="module">const vnavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`; function uInnerHTML(id,update){
+</span>
+<script type="module">const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></div></footer>`; function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {

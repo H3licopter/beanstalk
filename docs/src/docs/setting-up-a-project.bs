@@ -1,4 +1,4 @@
-[navbar]
+[Navbar]
 
 [header center: [title 1: PROJECT SETUP]]
 [main:
@@ -69,6 +69,4 @@ Any index.bs files will become the main page of the folder they are in, so your 
 
 ]
 
-[footer: [pad(2, 0, 0, 0) center: 
-    ### &#127793;
-]
+[Footer]

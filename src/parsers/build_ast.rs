@@ -9,7 +9,6 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
     let mut ast = Vec::new();
     let mut imports = Vec::new();
     let mut i = start_index;
-    let mut is_exported = false;
 
     while i < tokens.len() {
         match &tokens[i] {
@@ -40,21 +39,18 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
             }
 
             // New Function or Variable declaration
-            Token::VarDeclaration(id) => {
+            Token::VarDeclaration(id, is_exported) => {
                 // Need to determine if it is a const that compiles to a literal, should just push a literal in that case
                 ast.push(new_variable(
                     id,
                     &tokens,
                     &mut i,
-                    is_exported,
+                    *is_exported,
                     &ast,
                     token_line_numbers,
                 ));
-                is_exported = false;
             }
-            Token::Export => {
-                is_exported = true;
-            }
+            Token::Export => {}
             Token::VarReference(id) => {
                 ast.push(AstNode::VarReference(id.to_string()));
             }

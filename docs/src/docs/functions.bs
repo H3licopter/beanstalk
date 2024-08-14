@@ -1,4 +1,4 @@
-[navbar]
+[Navbar]
 
 [header center: [title 1: FUNCTIONS]]
 [main:
@@ -44,6 +44,4 @@ A function must always return a value or an error in all of it's branches. If a 
 
 ]
 
-[footer: [pad(2, 0, 0, 0) center: 
-    ### &#127793;
-]
+[Footer]
