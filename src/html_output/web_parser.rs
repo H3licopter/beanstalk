@@ -9,7 +9,9 @@ use crate::{
         ast_nodes::AstNode,
         styles::{Action, Style, Tag},
         util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
-    }, settings::{get_html_config, HTMLMeta}, Token
+    }, 
+    settings::{get_html_config, HTMLMeta}, Token,
+    wasm_output::wat_parser::expression_to_wat
 };
 use colour::red_ln;
 
@@ -17,7 +19,8 @@ use colour::red_ln;
 pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_path: String, is_global: bool, imported_css: String) -> (String, Vec<ExportedJS>, String, String) {
     let mut js = generate_dom_update_js(DOMUpdate::InnerHTML).to_string();
     let mut wasm_fn_id: usize = 0;
-    let mut wasm_module = String::from("(module\n");
+    let mut wat = String::from("(module\n");
+    let mut wat_global_initilisation = String::from("\n(func (export \"set_wasm_globals\") ");
     let mut html = String::new();
     let mut css = imported_css;
     let mut page_title = String::new();
@@ -25,6 +28,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
 
     let mut exported_js: Vec<ExportedJS> = Vec::new();
     let mut exported_css = String::new();
+    let mut _exported_wat = String::new();
 
     let mut module_references: Vec<AstNode> = Vec::new();
 
@@ -47,7 +51,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
                     &mut class_id,
                     &mut exp_id,
                     &mut Vec::new(),
-                    &mut wasm_module,
+                    &mut wat,
                     &mut wasm_fn_id,
                 ));
             }
@@ -61,16 +65,26 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
             // JAVASCRIPT / WASM
             AstNode::VarDeclaration(ref id, ref expr, is_exported, ref data_type, is_const) => {
                 let assignment_keyword = if is_const { "const" } else { "let" };
-                let var_dec = match data_type {
-                    DataType::Float | DataType::String | DataType::Bool => {
-                        format!("{} v{} = {};", assignment_keyword, id, expression_to_js(&expr))
+
+                match data_type {
+                    DataType::Float => {
+                        wat.push_str(&format!("
+                            \n(global $v{} (export \"v{}\") (mut f64) (f64.const 0))
+                            \n(func (export \"get_v{}\") (result f64) (global.get $v{}))", 
+                            id, id, id, id));
+                            
+                        wat_global_initilisation.push_str(&format!("(global.set $v{} {})", id, expression_to_wat(&expr)));
+                    }
+                    DataType::String => {
+                        js.push_str(&format!("{} v{} = {};", assignment_keyword, id, expression_to_js(&expr)));
                     }
                     DataType::Scene => {
                         let unboxed_scene = *expr.clone();
+
                         match unboxed_scene {
-                            AstNode::Scene(scene, scene_tags, scene_styles,     scene_actions) => {
+                            AstNode::Scene(scene, scene_tags, scene_styles, scene_actions) => {
                                 let mut created_css = String::new();
-                                let scene_to_js_string = parse_scene(scene, scene_tags, scene_styles, scene_actions, &mut Tag::None, &mut js, &mut created_css, &mut module_references, &mut class_id, &mut exp_id, &mut Vec::new(), &mut wasm_module, &mut wasm_fn_id);
+                                let scene_to_js_string = parse_scene(scene, scene_tags, scene_styles, scene_actions, &mut Tag::None, &mut js, &mut created_css, &mut module_references, &mut class_id, &mut exp_id, &mut Vec::new(), &mut wat, &mut wasm_fn_id);
                                 css.push_str(&created_css);
 
                                 // If this scene is exported, add the CSS it created to the exported CSS
@@ -78,26 +92,20 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
                                     exported_css.push_str(&created_css);
                                 }
 
-                                format!("{} v{} = `{}`;", assignment_keyword, id, scene_to_js_string)
+                                js.push_str(&format!("{} v{} = `{}`;", assignment_keyword, id, scene_to_js_string));
                             }
                             _ => {
                                 red_ln!("Error: Scene expression must be a scene in HTML parser");
                                 continue;
                             }
-                        }
+                        };
                     }
                     _ => {
-                        format!("{} v{} = {};", assignment_keyword, id, expression_to_js(&expr))
+                        js.push_str(&format!("{} v{} = {};", assignment_keyword, id, expression_to_js(&expr)));
                     }
                 };
 
-                if is_exported {
-                    exported_js.push(
-                        ExportedJS {js: var_dec.to_owned(), module_path: Path::new(&module_path).join(id), global: is_global }
-                    );
-                }
-
-                js.push_str(&var_dec);
+            
                 module_references.push(node);
             }
             
@@ -116,7 +124,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
                 }
                 js.push_str(&func);
             }
-            AstNode::Print(expr) => {
+            AstNode::Print(ref expr) => {
                 js.push_str(&format!("console.log({});", expression_to_js(&expr)));
             }
             AstNode::Comment(_) => {
@@ -133,7 +141,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
         page_title += &(" | ".to_owned() + &config.site_title.clone());
     }
 
-    wasm_module.push_str("\n)");
+    wat.push_str(&format!("{}))", &wat_global_initilisation));
 
     let html = create_html_boilerplate(config, release_build)
         .replace("page-template", &html)
@@ -142,7 +150,7 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
         .replace("//js", &js)
         .replace("wasm-module-name", &module_path);
 
-    (html, exported_js, exported_css, wasm_module)
+    (html, exported_js, exported_css, wat)
 }
 
 struct SceneTag {
@@ -492,7 +500,7 @@ pub fn parse_scene(
                 // Should accept a function as an argument
                 scene_wrap.properties.push_str(&format!(" onclick=\"{}\"", expression_to_js(&node)));
             }
-            Action::Swap => {
+            Action::_Swap => {
                 
             }
         }
@@ -767,7 +775,7 @@ pub fn parse_scene(
                 html.push_str(&format!("<span class=\"c{name}\"></span>"));
 
                 if !module_references.contains(&node) {
-                    js.push_str(&format!("uInnerHTML(\"c{name}\", wsx.v{name});"));
+                    js.push_str(&format!("uInnerHTML(\"c{name}\", wsx.get_v{name}());"));
                     module_references.push(node.to_owned());
                 }
             }

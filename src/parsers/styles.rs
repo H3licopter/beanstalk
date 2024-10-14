@@ -43,7 +43,7 @@ pub enum Tag {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Action {
     Click(AstNode),
-    Swap,
+    _Swap,
 }
 
 // Will contain an expression or collection of expressions to be parsed in the target language

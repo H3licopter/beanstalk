@@ -156,6 +156,9 @@ pub fn new_variable(
     // Or whether it is a literal or expression
     // If the expression is an empty expression when the variable is NOT a function, return an error
     match parsed_expr {
+        AstNode::RuntimeExpression(_, ref evaluated_type) => {
+            return create_var_node(attribute, name.to_string(), parsed_expr.to_owned(), is_exported, evaluated_type.to_owned());
+        }
         AstNode::Expression(_, _) | AstNode::Tuple(_, _) | AstNode::Literal(_) => {
             return create_var_node(attribute, name.to_string(), parsed_expr, is_exported, data_type.to_owned());
         }

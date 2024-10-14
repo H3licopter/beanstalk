@@ -36,6 +36,7 @@ mod html_output {
 }
 mod wasm_output {
     pub mod wasm_generator;
+    pub mod wat_parser;
 }
 use colour::{dark_cyan, green_ln_bold, red_ln};
 pub use tokens::Token;

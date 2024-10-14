@@ -13,7 +13,6 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                 match node {
                     AstNode::Literal(token) => match token {
                         Token::FloatLiteral(value) => {
-                            red_ln!("value: {:?}", value);
                             js.push_str(&value.to_string());
                         }
                         Token::StringLiteral(value) => {
@@ -25,11 +24,19 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     },
 
                     AstNode::VarReference(name) | AstNode::ConstReference(name) => {
-                        js.push_str(&format!(" ${{wsx.v{name}}} "));
+                        js.push_str(&format!(" ${{wsx.get_v{name}()}} "));
                     }
 
-                    AstNode::Operator(op) => {
-                        js.push_str(op);
+                    AstNode::BinaryOperator(op) => {
+                        match op {
+                            Token::Add => js.push_str(" + "),
+                            Token::Subtract => js.push_str(" - "),
+                            Token::Multiply => js.push_str(" * "),
+                            Token::Divide => js.push_str(" / "),
+                            _ => {
+                                red_ln!("Unsupported operator found in operator stack when parsing an expression into JS");
+                            }
+                        }
                     }
 
                     AstNode::Tuple(values, _) => {
@@ -52,8 +59,6 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     red_ln!("Have not implimented this type yet in expression_to_js: {:?}", expression_type);
                 }
             }
-
-            js.push_str(")");
         }
 
         AstNode::Literal(token) => match token {
@@ -67,6 +72,10 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                 red_ln!("unknown literal found in expression");
             }
         },
+
+        AstNode::VarReference(name) | AstNode::ConstReference(name) => {
+            js.push_str(&format!(" `${{wsx.get_v{name}()}}` "));
+        }
 
         // If the expression is just a tuple,
         // then it should automatically destructure into multiple arguments like this

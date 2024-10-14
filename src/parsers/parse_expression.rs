@@ -117,54 +117,37 @@ pub fn create_expression(
 
             // OPERATORS
             // Will push as a string so shunting yard can handle it later just as a string
-
-            // UNARY OPERATORS
             Token::Negative => {
                 next_number_negative = true;
-            }
-            Token::Exponent => {
-                expression.push(AstNode::Operator(" ** ".to_string()));
             }
 
             // BINARY OPERATORS
             Token::Add => {
-                expression.push(AstNode::Operator(" + ".to_string()));
+                expression.push(AstNode::BinaryOperator(token.to_owned()));
             }
             Token::Subtract => {
-                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                if data_type != &DataType::Float && data_type != &DataType::Inferred {
                     return AstNode::Error("Subtraction used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
-                expression.push(AstNode::Operator(" - ".to_string()));
+                expression.push(AstNode::BinaryOperator(token.to_owned()));
             }
             Token::Multiply => {
-                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                if data_type != &DataType::Float && data_type != &DataType::Inferred {
                     return AstNode::Error("Multiplication used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
-                expression.push(AstNode::Operator(" * ".to_string()));
+                expression.push(AstNode::BinaryOperator(token.to_owned()));
             }
             Token::Divide => {
-                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                if data_type != &DataType::Float && data_type != &DataType::Inferred {
                     return AstNode::Error("Division used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
-                expression.push(AstNode::Operator(" / ".to_string()));
+                expression.push(AstNode::BinaryOperator(token.to_owned()));
             }
             Token::Modulus => {
-                if data_type != &DataType::Float || data_type != &DataType::Inferred {
+                if data_type != &DataType::Float && data_type != &DataType::Inferred {
                     return AstNode::Error("Modulus used in non-float expression".to_string(), starting_line_number.to_owned());
                 }
-                expression.push(AstNode::Operator(" % ".to_string()));
-            }
-            Token::Remainder => {
-                if data_type != &DataType::Float || data_type != &DataType::Inferred {
-                    return AstNode::Error("Remainder used in non-float expression".to_string(), starting_line_number.to_owned());
-                }
-                expression.push(AstNode::Operator(" %% ".to_string()));
-            }
-            Token::Root => {
-                if data_type != &DataType::Float || data_type != &DataType::Inferred {
-                    return AstNode::Error("Root used in non-float expression".to_string(), starting_line_number.to_owned());
-                }
-                expression.push(AstNode::Operator(" // ".to_string()));
+                expression.push(AstNode::BinaryOperator(token.to_owned()));
             }
 
             // LOGICAL OPERATORS
@@ -228,9 +211,9 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                     AstNode::Scene(_, _, _, _) => {
                         simplified_expression.push(node);
                     }
-                    AstNode::Operator(ref op) => {
+                    AstNode::BinaryOperator(ref op) => {
                         // If the current type is a string, then must be a + operator or create an error
-                        if current_type == DataType::String && op != " + " {
+                        if current_type == DataType::String && *op != Token::Add {
                             return AstNode::Error(
                                 "Can only use the + operator to manipulate strings inside string expressions".to_string(),
                                 line_number
@@ -309,7 +292,7 @@ fn concat_strings(simplified_expression: &mut Vec<AstNode>) -> AstNode {
                     // Syntax error, must have a + operator between strings when concatinating
                 }
             }
-            AstNode::Operator(_) => {
+            AstNode::BinaryOperator(_) => {
                 // Should always be a plus operator, this is enforced in the eval_expression function
                 previous_node_is_plus = true;
             }

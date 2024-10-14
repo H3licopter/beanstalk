@@ -44,7 +44,7 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
                 dir.join("test_output/src").join(settings::COMP_PAGE_KEYWORD).with_extension("bs")
             },
             Err(e) => {
-                println!("Error getting current directory: {:?}", e);
+                red_ln!("Error getting current directory: {:?}", e);
                 return Err(e.into());
             }
         };
@@ -52,7 +52,7 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
         entry_dir = match std::env::current_dir() {
             Ok(dir) => dir,
             Err(e) => {
-                println!("Error getting current directory: {:?}", e);
+                red_ln!("Error getting current directory: {:?}", e);
                 return Err(e.into());
             }
         };

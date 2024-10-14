@@ -46,7 +46,8 @@ pub enum AstNode {
     // Operators
     // Operator, Precedence
     LogicalOperator(Token, u8), // Negative, Not, Exponent
-    Operator(String),           // For shunting yard to handle later as a string
+    BinaryOperator(Token),           // For shunting yard to handle later as a string
+    UnaryOperator(Token),           // For shunting yard to handle later as a string
 
     // HTML
     Element(Token), // HTML element content
