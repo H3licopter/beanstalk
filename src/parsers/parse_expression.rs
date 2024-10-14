@@ -108,11 +108,11 @@ pub fn create_expression(
 
             // Scenes - Create a new scene node
             // Maybe scenes can be added together like strings
-            Token::SceneHead(scene_head_tokens) => {
+            Token::SceneHead => {
                 if data_type != &DataType::Scene && data_type != &DataType::Inferred {
                     return AstNode::Error("Scene used in non-scene expression".to_string(), starting_line_number.to_owned());
                 }
-                expression.push(new_scene(scene_head_tokens, tokens, i, &ast, starting_line_number));
+                expression.push(new_scene(tokens, i, &ast, starting_line_number));
             }
 
             // OPERATORS
@@ -225,7 +225,7 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                             line_number
                         ));
                     }
-                    AstNode::Scene(_, _, _) => {
+                    AstNode::Scene(_, _, _, _) => {
                         simplified_expression.push(node);
                     }
                     AstNode::Operator(ref op) => {
@@ -361,11 +361,11 @@ fn check_literal(
     }
 }
 
-pub fn check_if_arg(scene_head: &Vec<Token>, i: &mut usize) -> bool {
-    if *i >= scene_head.len() {
+pub fn check_if_arg(tokens: &Vec<Token>, i: &mut usize) -> bool {
+    if *i >= tokens.len() {
         return false;
     }
-    match &scene_head[*i] {
+    match &tokens[*i] {
         // Check if open bracket, literal or prefixed unary operator
         Token::OpenParenthesis
         | Token::Negative

@@ -30,9 +30,9 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
                     }
                 }
             }
-            Token::SceneHead(scene_head) => {
+            Token::SceneHead | Token::ParentScene => {
                 let starting_line_number = &token_line_numbers[i];
-                ast.push(new_scene(scene_head, &tokens, &mut i, &ast, starting_line_number));
+                ast.push(new_scene(&tokens, &mut i, &ast, starting_line_number));
             }
             Token::ModuleStart(_) => {
                 // In future, need to structure into code blocks
@@ -88,7 +88,7 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
                 }
             }
 
-            Token::Newline | Token::Empty | Token::SceneClose(_) | Token::Whitespace => {
+            Token::Newline | Token::Empty | Token::SceneClose(_) => {
                 // Do nothing for now
             }
 

@@ -1,13 +1,10 @@
 // For loading WASM
-WebAssembly.instantiateStreaming(fetch("./page-dist-url/pkg/bs.wasm")).then((obj)=>{
+WebAssembly.instantiateStreaming(fetch("./wasm-module-name.wasm")).then((obj)=>{
 let wsx = obj.instance.exports;//js
 ;});
 
 // WASM will need a JS function to update the DOM
-// 
-
-
-// Functions that shoulden't be passed to WASM directly, so may need glue code
+// Functions that shouldn't be passed to WASM directly, so may need glue code
 function uInnerHTML(id,update){
     const es = document.getElementsByClassName(id);
     if(Array.isArray(update)){update=update.join(' ')}

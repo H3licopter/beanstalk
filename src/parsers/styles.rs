@@ -37,8 +37,13 @@ pub enum Tag {
     // Custom Beanstalk Tags
     Title(AstNode),
 
-    // TO BE IMPLIMENTED
-    Button,
+    Button(AstNode), // Different button styles
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Action {
+    Click(AstNode),
+    Swap,
 }
 
 // Will contain an expression or collection of expressions to be parsed in the target language
@@ -46,7 +51,7 @@ pub enum Tag {
 pub enum Style {
     Padding(AstNode),
     Margin(AstNode),
-    Size(AstNode),             // Size of text
+    Size(AstNode),  // Size of text
     
     // Colours keywords = -100 to 100 as different shades. -100 darkest, 100 lightest
     TextColor(AstNode, Token), // Value, type (rgb, hsl)
@@ -56,5 +61,4 @@ pub enum Style {
     Order(AstNode), // For positioning elements inside a grid/flex container/nav etc
     Hide,
     Blank,
-
 }

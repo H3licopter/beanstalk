@@ -5,6 +5,7 @@ use crate::{parsers, settings};
 use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::{Declaration, Token};
+use wat::parse_str;
 use std::error::Error;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -14,6 +15,7 @@ pub struct OutputFile {
     source_code: String,
     file: PathBuf,
     compiled_code: String,
+    wasm: Vec<u8>,
     imports: Vec<PathBuf>,
 }
 pub struct ExportedJS {
@@ -97,6 +99,7 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
                 source_code: code,
                 file: file_path,
                 compiled_code: String::new(),
+                wasm: Vec::new(),
                 imports: Vec::new(),
             });
         }
@@ -148,8 +151,9 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
     // After compiling, collect all imported modules and add them to the list of exported modules
     for file in &mut source_code_to_parse {
         match compile(&file, release_build, &project_config, &mut exported_js, &mut exported_css) {
-            Ok((compiled_code, imports)) => {
+            Ok((compiled_code, wasm, imports)) => {
                 file.compiled_code = compiled_code;
+                file.wasm = wasm;
                 file.imports.extend(imports);
             }
             Err(e) => {
@@ -264,6 +268,7 @@ pub fn add_bs_files_to_parse(
                             source_code: code,
                             file: output_file_dir.join(file_name).with_extension("html"),
                             compiled_code: String::new(),
+                            wasm: Vec::new(),
                             imports: Vec::new(),
                         });
                     } else {
@@ -271,6 +276,7 @@ pub fn add_bs_files_to_parse(
                             source_code: code,
                             file: output_file_dir.join(file_name).with_extension("html"),
                             compiled_code: String::new(),
+                            wasm: Vec::new(),
                             imports: Vec::new(),
                         });
                     }
@@ -307,6 +313,7 @@ pub fn add_bs_files_to_parse(
                                     source_code: String::new(),
                                     file: output_file_dir.join(file_name),
                                     compiled_code: String::new(),
+                                    wasm: Vec::new(),
                                     imports: Vec::new(),
                                 });
                             }
@@ -333,7 +340,7 @@ fn compile(
     config: &Config,
     exported_js: &mut Vec<ExportedJS>,
     exported_css: &mut String,
-) -> Result<(String, Vec<PathBuf>), Box<dyn Error>> {
+) -> Result<(String, Vec<u8>, Vec<PathBuf>), Box<dyn Error>> {
     print_bold!("Compiling: ");
 
     let file_name = output.file.file_stem().unwrap_or(OsStr::new("")).to_str().unwrap_or("");
@@ -392,7 +399,7 @@ fn compile(
         html_config.page_dist_url.push_str("../");
     }
 
-    let (module_output, js_exports, css_exports) = web_parser::parse(
+    let (module_output, js_exports, css_exports, wat) = web_parser::parse(
         ast,
         html_config, 
         release_build, 
@@ -401,10 +408,18 @@ fn compile(
         exported_css.to_string()
     );
 
+    let wasm = match parse_str(&wat) {
+        Ok(wasm) => wasm,
+        Err(e) => {
+            red_ln!("Error parsing wat to wasm: {:?}", e);
+            Vec::new()
+        }
+    };
+
     exported_js.extend(js_exports);
     exported_css.push_str(&css_exports);
 
-    Ok((module_output, import_requests))
+    Ok((module_output, wasm, import_requests))
 }
 
 fn compile_global_file(
@@ -435,7 +450,7 @@ fn compile_global_file(
     // TO BE REPLACED WITH LOADING CONFIG.BS FILE (When all config tokens are in tokenizer)
     let html_config = get_html_config();
 
-    let (_, js_exports, css_exports) = web_parser::parse(
+    let (_, js_exports, css_exports, _) = web_parser::parse(
         ast,
         html_config, 
         true, 
@@ -476,6 +491,18 @@ fn write_output_file(output: &OutputFile) -> Result<(), Box<dyn Error>> {
         Ok(_) => {}
         Err(e) => {
             red_ln!("Error writing file: {:?}", e);
+            return Err(e.into());
+        }
+    }
+
+    // Write the wasm file
+    match fs::write(
+        output.file.with_extension("wasm"),
+        &output.wasm,
+    ) {
+        Ok(_) => {}
+        Err(e) => {
+            red_ln!("Error writing WASM module file: {:?}", e);
             return Err(e.into());
         }
     }

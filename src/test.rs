@@ -25,7 +25,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     for token in &tokens {
         match token {
-            Token::SceneHead(_) | Token::SceneClose(_) => {
+            Token::SceneHead | Token::SceneClose(_) => {
                 blue_ln!("{:?}", token);
             }
             Token::P(_)
@@ -54,7 +54,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     for node in &ast {
         match node {
-            AstNode::Scene(_, _, _) => {
+            AstNode::Scene(_, _, _, _) => {
                 print_scene(node, 0);
             }
             AstNode::Element(_) => {
@@ -76,12 +76,14 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     }
 
     yellow_ln_bold!("\nCREATING HTML OUTPUT\n");
-    let (html_output, js_exports, css_exports) = web_parser::parse(ast, get_html_config(), false, "test".to_string(), false, String::new());
+    let (html_output, js_exports, css_exports, wat) = web_parser::parse(ast, get_html_config(), false, "test".to_string(), false, String::new());
     for export in js_exports {
         println!("JS EXPORTS:");
         println!("{:?}", export.module_path);
     }
     println!("CSS EXPORTS: {}", css_exports);
+
+    println!("WAT: {}", wat);
 
     // Print the HTML output
     // Create a regex to match the content between the <main> and </main> tags
@@ -115,7 +117,7 @@ fn print_scene(scene: &AstNode, scene_nesting_level: u32) {
     }
 
     match scene {
-        AstNode::Scene(nodes, tags, styles) => {
+        AstNode::Scene(nodes, tags, styles, actions) => {
             blue_ln_bold!("\n{}Scene Head: ", indentation);
             for tag in tags {
                 dark_yellow_ln!("{}  {:?}", indentation, tag);
@@ -123,12 +125,15 @@ fn print_scene(scene: &AstNode, scene_nesting_level: u32) {
             for style in styles {
                 cyan_ln!("{}  {:?}", indentation, style);
             }
+            for action in actions {
+                dark_yellow_ln!("{}  {:?}", indentation, action);
+            }
 
             blue_ln_bold!("{}Scene Body:", indentation);
 
             for scene_node in nodes {
                 match scene_node {
-                    AstNode::Scene(_, _, _) => {
+                    AstNode::Scene(_, _, _, _) => {
                         print_scene(scene_node, scene_nesting_level + 1);
                     }
                     AstNode::Element(token) => match token {

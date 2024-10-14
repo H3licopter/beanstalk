@@ -159,7 +159,7 @@ pub fn new_variable(
         AstNode::Expression(_, _) | AstNode::Tuple(_, _) | AstNode::Literal(_) => {
             return create_var_node(attribute, name.to_string(), parsed_expr, is_exported, data_type.to_owned());
         }
-        AstNode::Scene(_, _, _) => {
+        AstNode::Scene(_, _, _, _) => {
             return create_var_node(attribute, name.to_string(), parsed_expr, is_exported, DataType::Scene);
         }
         AstNode::Error(err, line) => {

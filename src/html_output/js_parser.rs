@@ -25,7 +25,7 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     },
 
                     AstNode::VarReference(name) | AstNode::ConstReference(name) => {
-                        js.push_str(&format!(" ${{v{name}}} "));
+                        js.push_str(&format!(" ${{wsx.v{name}}} "));
                     }
 
                     AstNode::Operator(op) => {

@@ -5,66 +5,54 @@ All Collections are reference types in Beanstalk, which means they are reference
 
 Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
 
-## Literals
-By simply wrapping a list of values in parethesis and not specifying a type, you create a tuple literal.
+## Tuples
+By simply listing literals separated by commas, and not specifying a type, you create a tuple literal.
+
+You can surround the tuple with parenthesis for clarity and multiline.
 
 `
-(1, 2, 3)
+1, 2, 3
+
+(
+    1,
+    2,
+    3,
+)
+
 `
 
-## Fixed Collections
 Tuples are a fixed size and can contain any type. Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
 
-If a tuple only contains one value in parenthesis, it becomes equaivalent to a single value rather than a collection of values.
-
-Tuples can also contain named values that can be accessed by name rather than index. This is done by providing a variable name just before the value.
+If a tuple only contains one value, it becomes equaivalent to a single value rather than a collection of values.
 
 When creating a tuple using a colon, the values inside become immutable.
 
 `
     -- Fixed size tuple of immutable integers
-    tuple :: (1, 2, 3)
-    tuple 0 -- returns 1
-
-    -- Named tuple element (mutable)
-    tuple_of_one := (number 69)
-    int_value := 69
-    tuple_of_one number is int_value -- returns true
-
-    -- Named value with type (mutable)
-    tuple_of_one : float = (number 420)
-    int_value := 420
-    tuple_of_one number is int_value -- returns false
+    tuple :: 1, 2, 3
+    tuple.0 -- returns 1
 `
 ## Dynamic Collections (Arrays)
-When creating a variable collection rather than a constant collection, it becomes a dynamic collection.
+When creating a variable collection rather than a constant collection, it becomes a mutable collection.
 
-Dynamic collections can only contain one data type.
+Dynamic collections can only contain one data type. 
 `
-    array := (3, 4, 5)
-    array push(9)
-    array 3 -- returns 9
-`
+    array := {3, 4, 5}
+    array.push 9 -- error
 
-Specifying the type of your collection.
-
-`
-    -- Empty array of integers
-    empty_array : (int)
-
-    empty_array push(3)
-    empty_array 0 -- returns 3
-
-    strings : (string) = ("hello", "world")
+    array.0 += 1 
+    array.0 -- returns 4
 `
 
-Collections can also have named values or keys. These values can now be defined as mutable or immutable.
-
+Specifying the type and size of your collection. By adding a number before the type, you create a fixed size collection.
 `
-    values :: (
-        default_number :: 0,
-        "cool number" :: 6,
-        7,
-        8
-    )
+    -- Empty dynamically sized int array
+    empty_array : {10 int}
+
+    empty_array.push 3
+    empty_array.0 -- returns 3
+
+    -- dynamically sized immutable string array
+    strings : {string} : {"hello", "world"}
+
 `

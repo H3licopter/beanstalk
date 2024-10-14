@@ -7,17 +7,17 @@ use super::{
 use crate::{
     bs_css::get_bs_css, bs_types::DataType, build::ExportedJS, parsers::{
         ast_nodes::AstNode,
-        styles::{Style, Tag},
+        styles::{Action, Style, Tag},
         util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
     }, settings::{get_html_config, HTMLMeta}, Token
 };
 use colour::red_ln;
 
 // Parse ast into valid JS, HTML and CSS
-pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_path: String, is_global: bool, imported_css: String) -> (String, Vec<ExportedJS>, String) {
+pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_path: String, is_global: bool, imported_css: String) -> (String, Vec<ExportedJS>, String, String) {
     let mut js = generate_dom_update_js(DOMUpdate::InnerHTML).to_string();
     let mut wasm_fn_id: usize = 0;
-    let mut wasm_module = String::from("(module ");
+    let mut wasm_module = String::from("(module\n");
     let mut html = String::new();
     let mut css = imported_css;
     let mut page_title = String::new();
@@ -34,11 +34,12 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
     for node in ast {
         match node {
             // SCENES (HTML)
-            AstNode::Scene(scene, scene_tags, scene_styles) => {
+            AstNode::Scene(scene, scene_tags, scene_styles, scene_actions) => {
                 html.push_str(&parse_scene(
                     scene,
                     scene_tags,
                     scene_styles,
+                    scene_actions,
                     &mut Tag::None,
                     &mut js,
                     &mut css,
@@ -67,9 +68,9 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
                     DataType::Scene => {
                         let unboxed_scene = *expr.clone();
                         match unboxed_scene {
-                            AstNode::Scene(scene, scene_tags, scene_styles) => {
+                            AstNode::Scene(scene, scene_tags, scene_styles,     scene_actions) => {
                                 let mut created_css = String::new();
-                                let scene_to_js_string = parse_scene(scene, scene_tags, scene_styles, &mut Tag::None, &mut js, &mut created_css, &mut module_references, &mut class_id, &mut exp_id, &mut Vec::new(), &mut wasm_module, &mut wasm_fn_id);
+                                let scene_to_js_string = parse_scene(scene, scene_tags, scene_styles, scene_actions, &mut Tag::None, &mut js, &mut created_css, &mut module_references, &mut class_id, &mut exp_id, &mut Vec::new(), &mut wasm_module, &mut wasm_fn_id);
                                 css.push_str(&created_css);
 
                                 // If this scene is exported, add the CSS it created to the exported CSS
@@ -132,13 +133,16 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
         page_title += &(" | ".to_owned() + &config.site_title.clone());
     }
 
+    wasm_module.push_str("\n)");
+
     let html = create_html_boilerplate(config, release_build)
         .replace("page-template", &html)
         .replace("@page-css", &css)
         .replace("page-title", &page_title)
-        .replace("//js", &js);
+        .replace("//js", &js)
+        .replace("wasm-module-name", &module_path);
 
-    (html, exported_js, exported_css)
+    (html, exported_js, exported_css, wasm_module)
 }
 
 struct SceneTag {
@@ -155,6 +159,7 @@ pub fn parse_scene(
     scene: Vec<AstNode>,
     scene_tags: Vec<Tag>,
     scene_styles: Vec<Style>,
+    scene_actions: Vec<Action>,
     parent_tag: &mut Tag,
     js: &mut String,
     css: &mut String,
@@ -345,6 +350,8 @@ pub fn parse_scene(
     let mut img_count = 0;
     let img_default_dir = get_html_config().image_folder_url.to_owned();
 
+    // Scene tags usually override each other, only the last one will actually be used
+    // There may be some exceptions
     for tag in &scene_tags {
         match tag {
             Tag::Img(value) => {
@@ -385,14 +392,12 @@ pub fn parse_scene(
                 scene_wrap.tag = Tag::Title(node.to_owned());
             }
             Tag::Nav(style) => {
-                match scene_wrap.tag {
-                    Tag::Img(_) | Tag::Video(_) | Tag::Audio(_) => {
-                        // TO DO: Error handling that passes correctly into the AST for the end user
-                    }
-                    _ => {
-                        scene_wrap.tag = Tag::Nav(style.to_owned());
-                    }
-                }
+                scene_wrap.tag = Tag::Nav(style.to_owned());
+            }
+
+            // Interactive
+            Tag::Button(node) => {
+                scene_wrap.tag = Tag::Button(node.to_owned());
             }
 
             // Structure of the page
@@ -480,6 +485,19 @@ pub fn parse_scene(
         }
     }
 
+    // Add any actions that need to be added to the scene
+    for action in scene_actions {
+        match action {
+            Action::Click(node) => {
+                // Should accept a function as an argument
+                scene_wrap.properties.push_str(&format!(" onclick=\"{}\"", expression_to_js(&node)));
+            }
+            Action::Swap => {
+                
+            }
+        }
+    }
+
     let mut scenehead_literals: Vec<(AstNode, usize)> = Vec::new();
     let mut scenehead_templates: Vec<usize> = Vec::new();
 
@@ -492,7 +510,7 @@ pub fn parse_scene(
 
                         // Specical tags
                         match scene_wrap.tag {
-                            Tag::Title(_) | Tag::List | Tag::A(_) => {
+                            Tag::Title(_) | Tag::List | Tag::A(_) | Tag::Button(_) => {
                                 html.push_str(&content.to_owned());
                                 continue;
                             }
@@ -532,7 +550,7 @@ pub fn parse_scene(
                                     }
                                 }
                             }
-                            Tag::Table(_) | Tag::List | Tag::A(_) => {
+                            Tag::Table(_) | Tag::List | Tag::A(_) | Tag::Button(_) => {
                                 html.push_str(&content.to_owned());
                             }
                             _ => {
@@ -554,7 +572,7 @@ pub fn parse_scene(
                                 html.push_str(&content.to_owned());
                                 continue;
                             }
-                            Tag::A(_) => {
+                            Tag::A(_) | Tag::Button(_) => {
                                 html.push_str(&collect_closing_tags(&mut closing_tags));
                                 html.push_str(&content.to_owned());
                             }
@@ -569,7 +587,7 @@ pub fn parse_scene(
                                             html.push_str(&format!("<span>{}</span>", content));
                                         }
                                     }
-                                    Tag::Table(_) | Tag::Nav(_) | Tag::List => {
+                                    Tag::Table(_) | Tag::Nav(_) | Tag::List | Tag::Button(_) => {
                                         html.push_str(&content.to_owned());
                                     }
                                     Tag::Heading | Tag::BulletPoint => {
@@ -636,7 +654,7 @@ pub fn parse_scene(
                 };
             }
 
-            AstNode::Scene(new_scene_nodes, new_scene_tags, new_scene_styles) => {
+            AstNode::Scene(new_scene_nodes, new_scene_tags, new_scene_styles, new_scene_actions) => {
                 // Switch scene tag for certain child scenes
                 let mut new_scene_tag = match scene_wrap.tag {
                     Tag::Nav(_) => Tag::List,
@@ -648,6 +666,7 @@ pub fn parse_scene(
                     new_scene_nodes,
                     new_scene_tags,
                     new_scene_styles,
+                    new_scene_actions,
                     &mut new_scene_tag,
                     js,
                     css,
@@ -748,7 +767,7 @@ pub fn parse_scene(
                 html.push_str(&format!("<span class=\"c{name}\"></span>"));
 
                 if !module_references.contains(&node) {
-                    js.push_str(&format!("uInnerHTML(\"c{name}\", v{name});"));
+                    js.push_str(&format!("uInnerHTML(\"c{name}\", wsx.v{name});"));
                     module_references.push(node.to_owned());
                 }
             }
@@ -883,6 +902,19 @@ pub fn parse_scene(
                 ),
             );
             html.push_str("</a>");
+        }
+        Tag::Button(button) => {
+            html.insert_str(
+                0,
+                &format!(
+                    "<button onclick=\"{}\" style=\"{}\" class=\"{}\" {}>",
+                    expression_to_js(&button),
+                    scene_wrap.style,
+                    scene_wrap.classes,
+                    scene_wrap.properties
+                ),
+            );
+            html.push_str("</button>");
         }
         Tag::Img(src) => {
             html.insert_str(

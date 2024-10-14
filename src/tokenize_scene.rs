@@ -1,46 +1,6 @@
-use super::tokens::{Token, TokenizeMode};
-use crate::tokenizer::get_next_token;
+use super::tokens::Token;
 use std::iter::Peekable;
 use std::str::Chars;
-
-pub fn tokenize_scenehead(
-    chars: &mut Peekable<Chars>,
-    tokenize_mode: &mut TokenizeMode,
-    scene_nesting_level: &mut i64,
-    line_number: &mut u32,
-) -> Token {
-    let mut scene_head: Vec<Token> = Vec::new();
-    let mut code_block: bool = false;
-
-    if scene_nesting_level == &1 {
-        scene_head.push(Token::ParentScene);
-    }
-
-    while tokenize_mode == &TokenizeMode::SceneHead {
-        let next_token = get_next_token(chars, tokenize_mode, scene_nesting_level, line_number);
-        match next_token {
-            Token::EOF | Token::Colon => {
-                break;
-            }
-            Token::SceneClose(_) => {
-                scene_head.push(next_token);
-                break;
-            }
-            Token::CodeKeyword => {
-                code_block = true;
-            }
-            _ => {
-                scene_head.push(next_token);
-            }
-        }
-    }
-
-    if code_block {
-        *tokenize_mode = TokenizeMode::Codeblock
-    }
-
-    Token::SceneHead(scene_head)
-}
 
 // Create string of markdown content, only escaping when a closed curly brace is found
 // Any Beanstalk specific extensions to Markdown will need to be implimented here

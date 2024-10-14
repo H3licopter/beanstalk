@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use super::styles::{Style, Tag};
+use super::styles::{Action, Style, Tag};
 use crate::{bs_types::DataType, Token};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -39,7 +39,7 @@ pub enum AstNode {
     Collection(Vec<AstNode>, DataType),
     Struct(String, Box<AstNode>, bool), // Name, Fields, Public
     Tuple(Vec<AstNode>, u32), // Tuple, line number
-    Scene(Vec<AstNode>, Vec<Tag>, Vec<Style>),
+    Scene(Vec<AstNode>, Vec<Tag>, Vec<Style>, Vec<Action>),
     SceneTemplate,
     Empty, // Empty collection
 

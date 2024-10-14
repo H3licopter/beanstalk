@@ -2,7 +2,7 @@ use colour::red_ln;
 
 use super::tokens::{Declaration, Token, TokenizeMode};
 use crate::bs_types::DataType;
-use crate::tokenize_scene::{tokenize_codeblock, tokenize_markdown, tokenize_scenehead};
+use crate::tokenize_scene::{tokenize_codeblock, tokenize_markdown};
 use std::iter::Peekable;
 use std::str::Chars;
 
@@ -22,34 +22,6 @@ pub fn tokenize(source_code: &str, module_name: &str, globals: Vec<Declaration>)
         match token {
             Token::Variable(name) => {
                 token = new_var_or_ref(&name, &mut var_names, &tokens);
-            }
-
-            // Check for variables used inside of scenehead
-            // Replace with reference if it's been declared, otherwise remove it as dead code
-            Token::SceneHead(content) => {
-                let mut processed_scenehead: Vec<Token> = Vec::new();
-                for t in content {
-                    match t {
-                        Token::Variable(name) => {
-                            let var = new_var_or_ref(&name, &mut var_names, &tokens);
-                            match var {
-                                Token::VarReference(id) => {
-                                    processed_scenehead.push(Token::VarReference(id));
-                                }
-                                Token::ConstReference(id) => {
-                                    processed_scenehead.push(Token::ConstReference(id));
-                                }
-                                _ => {
-                                    processed_scenehead.push(Token::DeadVarible(name));
-                                }
-                            }
-                        }
-                        _ => {
-                            processed_scenehead.push(t);
-                        }
-                    }
-                }
-                token = Token::SceneHead(processed_scenehead);
             }
 
             Token::EOF => {
@@ -108,6 +80,10 @@ pub fn get_next_token(
         return tokenize_codeblock(chars);
     }
 
+    if tokenize_mode == &TokenizeMode::Markdown && current_char != ']' && current_char != '[' {
+        return tokenize_markdown(chars, &mut current_char, line_number);
+    }
+
     // Whitespace 
     if current_char == '\n' {
         *line_number += 1;
@@ -124,10 +100,14 @@ pub fn get_next_token(
         *scene_nesting_level += 1;
         match tokenize_mode {
             TokenizeMode::SceneHead => {
-                return Token::Error("Cannot have nested scenes inside of a scene head, must be inside the scene body".to_string(), *line_number);
+                return Token::Error("Cannot have nested scenes inside of a scene head, must be inside the scene body. Use a colon to start the scene body.".to_string(), *line_number)
             }
             TokenizeMode::Codeblock => {
-                return Token::Error("Cannot have nested scenes inside of a codeblock".to_string(), *line_number);
+                return Token::Error("Cannot have nested scenes inside of a codeblock".to_string(), *line_number)
+            }
+            TokenizeMode::Normal => {
+                *tokenize_mode = TokenizeMode::SceneHead;
+                return Token::ParentScene
             }
             _ => {
                 // [] is an empty scene
@@ -145,13 +125,9 @@ pub fn get_next_token(
                 }
 
                 *tokenize_mode = TokenizeMode::SceneHead;
+                return Token::SceneHead
             }
         }
-        return tokenize_scenehead(chars, tokenize_mode, scene_nesting_level, line_number);
-    }
-
-    if tokenize_mode == &TokenizeMode::Markdown && current_char != ']' {
-        return tokenize_markdown(chars, &mut current_char, line_number);
     }
 
     if current_char == ']' {
@@ -196,6 +172,8 @@ pub fn get_next_token(
 
         return Token::Colon;
     }
+
+
 
     //Window
     if current_char == '#' {
@@ -479,7 +457,8 @@ pub fn get_next_token(
 
     if current_char == '_' {}
 
-    Token::Error(format!("Invalid Token Used (tokenizer). Token: {}", current_char), *line_number)
+
+    Token::Error(format!("Invalid Token Used (tokenizer). Token: '{}'. Tokenizer mode: {:?}", current_char, tokenize_mode), *line_number)
 }
 
 // Nested function because may need multiple searches for variables
@@ -532,8 +511,6 @@ fn keyword_or_variable(
             match tokenize_mode {
                 TokenizeMode::SceneHead => match token_value.as_str() {
                     // Style
-                    "rgb" => return Token::Rgb,
-                    "hsl" => return Token::Hsl,
                     "code" => return Token::CodeKeyword,
                     "blank" => return Token::Blank,
                     "bg" => return Token::BG,
@@ -542,6 +519,9 @@ fn keyword_or_variable(
                     "clr" => return Token::ThemeColor,
 
                     // Colour keywords
+                    "rgb" => return Token::Rgb,
+                    "hsl" => return Token::Hsl,
+
                     "red" => return Token::Red,
                     "green" => return Token::Green,
                     "blue" => return Token::Blue,
@@ -568,7 +548,7 @@ fn keyword_or_variable(
                     "link" => return Token::A,
                     "button" => return Token::Button,
                     "input" => return Token::Input,
-                    "click" => return Token::Click,
+                    "click" => return Token::Click, // The action performed when clicked (any element)
                     "form" => return Token::Form,
                     "option" => return Token::Option,
                     "dropdown" => return Token::Dropdown,

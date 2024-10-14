@@ -1,0 +1,41 @@
+[Navbar]
+[header: [title: Styles]]
+[main: 
+
+Structure of a style:
+
+## Tag type
+This is what HTML tag the style will use. This is important for accessibility and for setting some default behaviour.
+
+## CSS
+The CSS that will be applied to the tag. This can be individual CSS properties, or CSS classes.
+
+## Events
+Events that can be performed on the scene. These are things like 'on click'.
+
+## Actions
+Actions that are triggered by an event. This could be something like 'swap' or 'hide'. An event must be defined before an action can be defined.
+
+## Compatibility: 
+Does this style work with other styles? Can be:
+- All
+- Self (define how the style changes when this style is used multiple times)
+- None
+- List of compatible tags (will need specific logic to handle what happens and how the tags will be wrapped)
+
+## Nested Scene Behaviour
+Defines what happens to child scenes placed inside this style. This can involve forcing a style wrapper around all of it's children.
+
+## Wrapper
+Does this style need to be wrapped in a parent style, and what should that style be?
+
+## Content Mode
+The content of the scene may instead be used for properties such as becoming the 'alt' tag for media.
+- Normal
+- Alt
+
+## Newline Rule
+Will this style inline itself with other instances of the same style? (like a p tag)
+
+
+]

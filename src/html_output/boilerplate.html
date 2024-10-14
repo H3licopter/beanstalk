@@ -21,7 +21,9 @@
 <style>@page-css</style></head><body>page-template
 <script type="module">
   //imports
-  //js
+  WebAssembly.instantiateStreaming(fetch("./wasm-module-name.wasm")).then((obj)=>{
+    let wsx = obj.instance.exports;//js
+  ;});
   
   function checkIfFileChanged() {
     const currentUrl = window.location.pathname;
