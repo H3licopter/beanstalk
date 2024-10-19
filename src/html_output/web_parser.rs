@@ -30,6 +30,8 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
     let mut exported_css = String::new();
     let mut _exported_wat = String::new();
 
+    // Keeps track of whether a reference has already been used
+    // This is to prevent duplicate JS code for updating the same element
     let mut module_references: Vec<AstNode> = Vec::new();
 
     let mut class_id: usize = 0;
@@ -65,18 +67,23 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
             // JAVASCRIPT / WASM
             AstNode::VarDeclaration(ref id, ref expr, is_exported, ref data_type, is_const) => {
                 let assignment_keyword = if is_const { "const" } else { "let" };
-
                 match data_type {
                     DataType::Float => {
                         wat.push_str(&format!("
                             \n(global $v{} (export \"v{}\") (mut f64) (f64.const 0))
                             \n(func (export \"get_v{}\") (result f64) (global.get $v{}))", 
                             id, id, id, id));
-                            
+
                         wat_global_initilisation.push_str(&format!("(global.set $v{} {})", id, expression_to_wat(&expr)));
                     }
                     DataType::String => {
-                        js.push_str(&format!("{} v{} = {};", assignment_keyword, id, expression_to_js(&expr)));
+                        let var_dec = format!("{} v{} = {};", assignment_keyword, id, expression_to_js(&expr));
+                        js.push_str(&var_dec);
+                        if is_exported {
+                            exported_js.push(
+                                ExportedJS {js: var_dec, module_path: Path::new(&module_path).join(id), global: is_global }
+                            );
+                        }
                     }
                     DataType::Scene => {
                         let unboxed_scene = *expr.clone();
@@ -92,7 +99,13 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
                                     exported_css.push_str(&created_css);
                                 }
 
-                                js.push_str(&format!("{} v{} = `{}`;", assignment_keyword, id, scene_to_js_string));
+                                let var_dec = format!("{} v{} = `{}`;", assignment_keyword, id, scene_to_js_string);
+                                js.push_str(&var_dec);
+                                if is_exported {
+                                    exported_js.push(
+                                        ExportedJS {js: var_dec, module_path: Path::new(&module_path).join(id), global: is_global }
+                                    );
+                                }
                             }
                             _ => {
                                 red_ln!("Error: Scene expression must be a scene in HTML parser");
@@ -104,7 +117,6 @@ pub fn parse(ast: Vec<AstNode>, config: HTMLMeta, release_build: bool, module_pa
                         js.push_str(&format!("{} v{} = {};", assignment_keyword, id, expression_to_js(&expr)));
                     }
                 };
-
             
                 module_references.push(node);
             }
@@ -274,17 +286,6 @@ pub fn parse_scene(
                 );
                 style_assigned = true;
             }
-            // OLD VERSION OF SIZE, WILL JUST BE TEXT SIZE NOW
-            // Style::Size(arg) => {
-            //     let size = collection_to_vec_of_js(&arg);
-
-            //     // TO DO: Add or remove parameters based on number of arguments
-            //     // And make sure there are no more than 4 arguments
-            //     scene_wrap
-            //         .style
-            //         .push_str(&format!("width:{}rem;height:{}rem", size[0], size[1]));
-            //     style_assigned = true;
-            // }
             Style::Size(node) => {
                 let value = match node {
                     AstNode::Literal(token) => match token {
@@ -769,14 +770,21 @@ pub fn parse_scene(
             }
 
             // STUFF THAT IS INSIDE SCENE HEAD THAT NEEDS TO BE PASSED INTO SCENE BODY
-            AstNode::VarReference(ref name) | AstNode::ConstReference(ref name) => {
+            AstNode::VarReference(ref name, ref data_type) | AstNode::ConstReference(ref name, ref data_type) => {
                 // Create a span in the HTML with a class that can be referenced by JS
                 // TO DO: Should be reactive in future -> this can change at runtime
                 html.push_str(&format!("<span class=\"c{name}\"></span>"));
 
                 if !module_references.contains(&node) {
-                    js.push_str(&format!("uInnerHTML(\"c{name}\", wsx.get_v{name}());"));
                     module_references.push(node.to_owned());
+                    match &data_type { 
+                        DataType::String | DataType::Scene | DataType::Inferred => {
+                            js.push_str(&format!("uInnerHTML(\"c{name}\", v{name});"));
+                        }
+                        _ => {
+                            js.push_str(&format!("uInnerHTML(\"c{name}\", wsx.get_v{name}());"));
+                        }
+                    }
                 }
             }
 

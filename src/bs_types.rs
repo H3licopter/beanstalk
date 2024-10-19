@@ -1,6 +1,6 @@
 #[derive(Debug, Clone, PartialEq)]
 pub enum DataType {
-    Inferred, // Type is inferred
+    Inferred, // Type is inferred, this only gets to the emitter stage if it will definitely be JS rather than WASM
     Float,    // 32 bit
     Bool,
     True,

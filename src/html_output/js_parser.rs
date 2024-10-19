@@ -19,22 +19,26 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                             js.push_str(&format!("\"{}\"", value));
                         }
                         _ => {
-                            red_ln!("unknown literal found in expression");
+                            red_ln!("unknown literal found in expression: {:?}", token);
                         }
                     },
 
-                    AstNode::VarReference(name) | AstNode::ConstReference(name) => {
-                        js.push_str(&format!(" ${{wsx.get_v{name}()}} "));
+                    AstNode::VarReference(name, data_type) | AstNode::ConstReference(name, data_type) => {
+                        // If it's a string, it will just be pure JS, no WASM
+                        match data_type {
+                            DataType::String | DataType::Scene  => js.push_str(&format!(" v{name}")),
+                            _ => js.push_str(&format!(" wsx.get_v{name}()")),
+                        }
                     }
 
-                    AstNode::BinaryOperator(op) => {
+                    AstNode::BinaryOperator(op, _) => {
                         match op {
                             Token::Add => js.push_str(" + "),
                             Token::Subtract => js.push_str(" - "),
                             Token::Multiply => js.push_str(" * "),
                             Token::Divide => js.push_str(" / "),
                             _ => {
-                                red_ln!("Unsupported operator found in operator stack when parsing an expression into JS");
+                                red_ln!("Unsupported operator found in operator stack when parsing an expression into JS: {:?}", op);
                             }
                         }
                     }
@@ -44,7 +48,7 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     }
 
                     _ => {
-                        red_ln!("unknown AST node found in expression when parsing an expression into JS");
+                        red_ln!("unknown AST node found in expression when parsing an expression into JS: {:?}", node);
                     }
                 }
             };
@@ -69,12 +73,16 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                 js.push_str(&format!("\"{}\"", value));
             }
             _ => {
-                red_ln!("unknown literal found in expression");
+                red_ln!("unknown literal found in expression: {:?}", token);
             }
         },
 
-        AstNode::VarReference(name) | AstNode::ConstReference(name) => {
+        AstNode::VarReference(name, data_type) | AstNode::ConstReference(name, data_type) => {
             js.push_str(&format!(" `${{wsx.get_v{name}()}}` "));
+            match data_type {
+                DataType::String | DataType::Scene => js.push_str(&format!("`${{v{name}}}`")),
+                _ => js.push_str(&format!("`${{wsx.get_v{name}()}}`")),
+            }
         }
 
         // If the expression is just a tuple,

@@ -149,9 +149,6 @@ pub fn new_variable(
         }
     }
 
-    // create_expression does not move the token index past the closing token so it is incremented past it here
-    *i += 1;
-
     // Check if a type of collection has been created
     // Or whether it is a literal or expression
     // If the expression is an empty expression when the variable is NOT a function, return an error
@@ -159,7 +156,16 @@ pub fn new_variable(
         AstNode::RuntimeExpression(_, ref evaluated_type) => {
             return create_var_node(attribute, name.to_string(), parsed_expr.to_owned(), is_exported, evaluated_type.to_owned());
         }
-        AstNode::Expression(_, _) | AstNode::Tuple(_, _) | AstNode::Literal(_) => {
+        AstNode::Literal(ref token) => {
+            let data_type = match token {
+                Token::FloatLiteral(_) => DataType::Float,
+                Token::StringLiteral(_) => DataType::String,
+                Token::BoolLiteral(_) => DataType::Bool,
+                _ => DataType::Inferred,
+            };
+            return create_var_node(attribute, name.to_string(), parsed_expr, is_exported, data_type);
+        }
+        AstNode::Tuple(_, _) => {
             return create_var_node(attribute, name.to_string(), parsed_expr, is_exported, data_type.to_owned());
         }
         AstNode::Scene(_, _, _, _) => {

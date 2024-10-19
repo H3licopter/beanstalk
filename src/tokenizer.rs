@@ -36,11 +36,12 @@ pub fn tokenize(source_code: &str, module_name: &str, globals: Vec<Declaration>)
     }
 
     // Mark unused variables for removal in AST
-    for var_dec in var_names.iter() {
-        if !var_dec.has_ref && !var_dec.is_exported {
-            tokens[var_dec.index] = Token::DeadVarible(var_dec.name.to_string());
-        }
-    }
+    // DISABLED FOR NOW
+    // for var_dec in var_names.iter() {
+    //     if !var_dec.has_ref && !var_dec.is_exported {
+    //         tokens[var_dec.index] = Token::DeadVarible(var_dec.name.to_string());
+    //     }
+    // }
 
     tokens.push(token);
     (tokens, token_line_numbers)

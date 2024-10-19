@@ -26,9 +26,10 @@ pub fn new_scene(
     // Look at all the possible properties that can be added to the scene head
     while *i < tokens.len() {
         let token = &tokens[*i];
+        *i += 1;
+
         match token {
             Token::Colon => {
-                *i += 1;
                 break;
             }
             Token::SceneClose(spaces) => {
@@ -40,7 +41,6 @@ pub fn new_scene(
             }
 
             Token::A => {
-                *i += 1;
                 if !check_if_arg(tokens, &mut *i) {
                     continue;
                 }
@@ -55,7 +55,6 @@ pub fn new_scene(
             }
 
             Token::Padding => {
-                *i += 1;
                 let eval_arg;
                 // TODO: get a default padding value
                 if !check_if_arg(tokens, &mut *i) {
@@ -73,7 +72,6 @@ pub fn new_scene(
             }
 
             Token::Margin => {
-                *i += 1;
                 let eval_arg;
 
                 if !check_if_arg(tokens, &mut *i) {
@@ -93,7 +91,6 @@ pub fn new_scene(
 
             // For positioning inside a flex container / grid
             Token::Order => {
-                *i += 1;
                 if !check_if_arg(tokens, &mut *i) {
                     continue;
                 }
@@ -106,12 +103,12 @@ pub fn new_scene(
             }
 
             Token::BG => {
-                *i += 1;
                 if !check_if_arg(tokens, &mut *i) {
                     continue;
                 }
                 // TO DO: Accept color names and hex values
                 let eval_arg = create_expression(tokens, &mut *i, false, ast, token_line_number, &DataType::Inferred);
+                
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::BackgroundColor(eval_arg));
                 } else {
@@ -121,8 +118,7 @@ pub fn new_scene(
 
             // Colours
             Token::Rgb | Token::Hsl => {
-                let color_type = tokens[*i].to_owned();
-                *i+= 1;
+                let color_type = token.to_owned();
                 if !check_if_arg(tokens, &mut *i) {
                     continue;
                 }
@@ -135,8 +131,7 @@ pub fn new_scene(
                 }
             }
             Token::Red | Token::Green | Token::Blue | Token::Yellow | Token::Cyan | Token::Magenta | Token::White | Token::Black => {
-                let color_type = tokens[*i].to_owned();
-                *i+= 1;
+                let color_type = token.to_owned();
                 if check_if_arg(tokens, &mut *i) {
                     // TO DO: Accept color names and hex values
                     let eval_arg = create_expression(tokens, &mut *i, false, ast, token_line_number, &DataType::Inferred);
@@ -155,7 +150,6 @@ pub fn new_scene(
             }
 
             Token::Size => {
-                *i+= 1;
                 if check_if_arg(tokens, &mut *i) {
                     let eval_arg = create_expression(tokens, &mut *i, false, ast, token_line_number, &DataType::Inferred);
                     if check_if_comptime_value(&eval_arg) {
@@ -177,7 +171,6 @@ pub fn new_scene(
             }
 
             Token::Table => {
-                *i+= 1;
                 let eval_arg;
                 // Default to 1 if no argument is provided
                 if !check_if_arg(tokens, &mut *i) {
@@ -202,7 +195,6 @@ pub fn new_scene(
             }
 
             Token::Img => {
-                *i+= 1;
                 let eval_arg = create_expression(tokens, &mut *i, false, ast, token_line_number, &DataType::String);
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Img(eval_arg));
@@ -214,7 +206,6 @@ pub fn new_scene(
             }
 
             Token::Alt => {
-                *i+= 1;
                 let eval_arg: AstNode = create_expression(tokens, &mut *i, false, ast, token_line_number, &DataType::String);
                 if check_if_comptime_value(&eval_arg) {
                     match eval_arg {
@@ -241,7 +232,6 @@ pub fn new_scene(
             }
 
             Token::Video => {
-                *i+= 1;
                 let eval_arg = create_expression(tokens, &mut *i, false, ast, token_line_number, &DataType::String);
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Video(eval_arg));
@@ -252,7 +242,6 @@ pub fn new_scene(
             }
 
             Token::Audio => {
-                *i+= 1;
                 let eval_arg = create_expression(tokens, &mut *i, false, ast, token_line_number, &DataType::String);
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Audio(eval_arg));
@@ -263,31 +252,14 @@ pub fn new_scene(
             }
 
             // Expressions to Parse
-            Token::FloatLiteral(_) => {
+            Token::FloatLiteral(_) | Token::VarReference(_) | Token::ConstReference(_) | Token::StringLiteral(_) | Token::RawStringLiteral(_) => {
+                *i -= 1;
                 scene.push(
                     create_expression(tokens, &mut *i, true, &ast, token_line_number, &DataType::CoerseToString),
                 );
-            }
-
-            Token::VarReference(id) => {
-                scene.push(AstNode::VarReference(id.to_string()));
-            }
-            Token::ConstReference(id) => {
-                scene.push(AstNode::ConstReference(id.to_string()));
-            }
-
-            Token::StringLiteral(_) | Token::RawStringLiteral(_) => {
-                scene.push(
-                    create_expression(tokens, &mut *i, true, &ast, token_line_number, &DataType::CoerseToString),
-                );
-            }
-
-            Token::ParentScene => {
-                // Maybe do something if parent scene should be wrapped in something?
             }
 
             Token::Button => {
-                *i+= 1;
                 if !check_if_arg(tokens, &mut *i) {
                     scene_tags.push(Tag::Button(AstNode::Literal(Token::FloatLiteral(0.0))));
                 } else {
@@ -301,7 +273,6 @@ pub fn new_scene(
                 }
             }
             Token::Click => {
-                *i+= 1;
                 if !check_if_arg(tokens, &mut *i) {
                     continue;
                 } else {
@@ -315,7 +286,7 @@ pub fn new_scene(
                 }
             }
 
-            Token::Comma | Token::Newline => {}
+            Token::Comma | Token::Newline | Token::Empty => {}
 
             Token::Ignore => {
                 // Just create a comment
@@ -340,7 +311,6 @@ pub fn new_scene(
             }
 
             Token::Nav => {
-                *i+= 1;
                 let eval_arg;
                 // TODO: get a default margin value
                 if !check_if_arg(tokens, &mut *i) {
@@ -357,7 +327,6 @@ pub fn new_scene(
             }
 
             Token::Title => {
-                *i+= 1;
                 let eval_arg;
                 // TODO: get a default margin value
                 if !check_if_arg(tokens, &mut *i) {
@@ -388,7 +357,6 @@ pub fn new_scene(
             }
 
             Token::Redirect => {
-                *i+= 1;
                 let eval_arg = create_expression(tokens, &mut *i, false, ast, token_line_number, &DataType::String);
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Redirect(eval_arg));
@@ -399,18 +367,12 @@ pub fn new_scene(
             }
 
             _ => {
-                scene.push(AstNode::Error(format!(
-                    "Invalid Token Used inside Scene Head: '{:?}'",
-                    &tokens[*i]
-                ), token_line_number.to_owned()));
                 red_ln!(
                     "Invalid Token Used inside Scene Head: '{:?}'",
-                    &tokens[*i]
+                    token
                 );
             }
         }
-
-        *i += 1;
     }
 
     //look through everything that can be added to the scene body
@@ -567,7 +529,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize, merge_next_p_line: &mut bool) 
 
 fn check_if_comptime_value(node: &AstNode) -> bool {
     match node {
-        AstNode::Literal(_) | AstNode::ConstReference(_) => true,
+        AstNode::Literal(_) | AstNode::ConstReference(_, _) => true,
         AstNode::Tuple(values, _) => {
             for value in values {
                 if !check_if_comptime_value(value) {

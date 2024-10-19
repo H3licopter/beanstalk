@@ -52,10 +52,10 @@ pub fn new_ast(tokens: Vec<Token>, start_index: usize, token_line_numbers: &Vec<
             }
             Token::Export => {}
             Token::VarReference(id) => {
-                ast.push(AstNode::VarReference(id.to_string()));
+                ast.push(AstNode::VarReference(id.to_string(), get_var_declaration_type(id.to_string(), &ast)));
             }
             Token::ConstReference(id) => {
-                ast.push(AstNode::ConstReference(id.to_string()));
+                ast.push(AstNode::ConstReference(id.to_string(), get_var_declaration_type(id.to_string(), &ast)));
             }
 
             Token::Title => {
@@ -178,5 +178,20 @@ fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {
             }
         }
     }
+}
+
+pub fn get_var_declaration_type(var_name: String, ast: &Vec<AstNode>) -> DataType {
+    for node in ast {
+        match node {
+            AstNode::VarDeclaration(name, _, _, data_type, _) => {
+                if *name == var_name {
+                    return data_type.to_owned();
+                }
+            }
+            _ => {}
+        }
+    }
+
+    DataType::Inferred
 }
 

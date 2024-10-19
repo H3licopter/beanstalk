@@ -1,5 +1,5 @@
 [header center pad(2, 0, 0, 0):
-    [title 1: THE BEANSTALK BOOK]
+    [title(1): THE BEANSTALK BOOK]
     # &#127793;
 ][main:
 

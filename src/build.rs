@@ -17,6 +17,7 @@ pub struct OutputFile {
     compiled_code: String,
     wasm: Vec<u8>,
     imports: Vec<PathBuf>,
+    global: bool,
 }
 pub struct ExportedJS {
     pub js: String,
@@ -66,7 +67,6 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
     dark_yellow_ln!("{:?}", &entry_dir);
 
     let mut source_code_to_parse: Vec<OutputFile> = Vec::new();
-    let mut global_code_to_parse: Vec<OutputFile> = Vec::new();
 
     // check to see if there is a config.bs file in this directory
     // if there is, read it and set the config settings
@@ -101,6 +101,7 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
                 compiled_code: String::new(),
                 wasm: Vec::new(),
                 imports: Vec::new(),
+                global: false,
             });
         }
 
@@ -121,7 +122,7 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
                         return Err(e.into());
                     }
                 };
-            match add_bs_files_to_parse(&mut source_code_to_parse, &mut global_code_to_parse, src_dir, entry_dir.join(&output_dir_folder)) {
+            match add_bs_files_to_parse(&mut source_code_to_parse, src_dir, entry_dir.join(&output_dir_folder)) {
                 Ok(_) => {}
                 Err(e) => {
                     red_ln!("Error adding bs files to parse: {:?}", e);
@@ -132,19 +133,6 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
 
     let mut exported_js: Vec<ExportedJS> = Vec::new();
     let mut exported_css = String::new();
-
-    // Compile global files first
-    for file in &mut global_code_to_parse {
-        match compile_global_file(&file, &mut exported_js, &mut exported_css) {
-            Ok(imports) => {
-                // need to support global file imports in the future, ignored for now
-                file.imports.extend(imports);
-            }
-            Err(e) => {
-                red_ln!("Error compiling global file: {:?}", e);
-            }
-        }
-    }
 
     // Compile all output files
     // And collect all exported functions and variables from the module
@@ -224,7 +212,6 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
 // Look for every subdirectory inside of dir and add all .bs files to the source_code_to_parse
 pub fn add_bs_files_to_parse(
     source_code_to_parse: &mut Vec<OutputFile>,
-    global_code_to_parse: &mut Vec<OutputFile>,
     dir: fs::ReadDir,
     output_file_dir: PathBuf,
 ) -> Result<(), Box<dyn Error>> {
@@ -263,22 +250,19 @@ pub fn add_bs_files_to_parse(
                         }
                     };
 
+                    let final_file = OutputFile {
+                        source_code: code,
+                        file: output_file_dir.join(file_name).with_extension("html"),
+                        compiled_code: String::new(),
+                        wasm: Vec::new(),
+                        imports: Vec::new(),
+                        global,
+                    };
+
                     if global {
-                        global_code_to_parse.push(OutputFile {
-                            source_code: code,
-                            file: output_file_dir.join(file_name).with_extension("html"),
-                            compiled_code: String::new(),
-                            wasm: Vec::new(),
-                            imports: Vec::new(),
-                        });
+                        source_code_to_parse.insert(0, final_file);
                     } else {
-                        source_code_to_parse.push(OutputFile {
-                            source_code: code,
-                            file: output_file_dir.join(file_name).with_extension("html"),
-                            compiled_code: String::new(),
-                            wasm: Vec::new(),
-                            imports: Vec::new(),
-                        });
+                        source_code_to_parse.push(final_file);
                     }
 
                 // If directory, recursively call add_bs_files_to_parse
@@ -295,7 +279,7 @@ pub fn add_bs_files_to_parse(
                     };
 
                     let new_output_dir = output_file_dir.join(file_path.file_stem().unwrap());
-                    match add_bs_files_to_parse(source_code_to_parse, global_code_to_parse, new_dir, new_output_dir) {
+                    match add_bs_files_to_parse(source_code_to_parse, new_dir, new_output_dir) {
                         Ok(_) => {}
                         Err(e) => {
                             red_ln!("Error adding bs files to parse: {:?}", e);
@@ -315,6 +299,7 @@ pub fn add_bs_files_to_parse(
                                     compiled_code: String::new(),
                                     wasm: Vec::new(),
                                     imports: Vec::new(),
+                                    global: false,
                                 });
                             }
                         }
@@ -404,7 +389,7 @@ fn compile(
         html_config, 
         release_build, 
         file_name.to_string(),
-        false,
+        output.global,
         exported_css.to_string()
     );
 
@@ -420,49 +405,6 @@ fn compile(
     exported_css.push_str(&css_exports);
 
     Ok((module_output, wasm, import_requests))
-}
-
-fn compile_global_file(
-    output: &OutputFile,
-    exported_js: &mut Vec<ExportedJS>,
-    exported_css: &mut String,
-) -> Result<Vec<PathBuf>, Box<dyn Error>> {
-    print_ln_bold!("Compiling Global File");
-
-    let (tokens, token_line_numbers): (Vec<Token>, Vec<u32>) = tokenizer::tokenize(&output.source_code, settings::GLOBAL_PAGE_KEYWORD, Vec::new());
-    let (ast, imports) = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers);
-
-    // find the imports 
-    let mut import_requests = Vec::new();
-    for import in imports {
-        match import {
-            AstNode::Use(module_path) => {
-                import_requests.push(
-                    module_path,
-                );
-            }
-            _ => {
-                red_ln!("Error: Import must be a string literal");
-            }
-        }
-    }
-
-    // TO BE REPLACED WITH LOADING CONFIG.BS FILE (When all config tokens are in tokenizer)
-    let html_config = get_html_config();
-
-    let (_, js_exports, css_exports, _) = web_parser::parse(
-        ast,
-        html_config, 
-        true, 
-        settings::GLOBAL_PAGE_KEYWORD.to_string(),
-        true,
-        exported_css.to_string()
-    );
-
-    exported_js.extend(js_exports);
-    exported_css.push_str(&css_exports);
-
-    Ok(import_requests)
 }
 
 fn write_output_file(output: &OutputFile) -> Result<(), Box<dyn Error>> {

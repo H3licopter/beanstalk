@@ -30,9 +30,10 @@ pub enum AstNode {
     Print(Box<AstNode>),
 
     // References to existing variables
-    VarReference(String), // Index of declaration, variable name
-    ConstReference(String), // Index of declaration, variable name
-    FunctionCall(String, Box<AstNode>), // Index of declaration, variable name, arguments
+    VarReference(String, DataType), 
+    ConstReference(String, DataType), 
+    JSStringReference(String), 
+    FunctionCall(String, Box<AstNode>), // variable name, arguments
 
     // Literals
     Literal(Token),
@@ -46,8 +47,8 @@ pub enum AstNode {
     // Operators
     // Operator, Precedence
     LogicalOperator(Token, u8), // Negative, Not, Exponent
-    BinaryOperator(Token),           // For shunting yard to handle later as a string
-    UnaryOperator(Token),           // For shunting yard to handle later as a string
+    BinaryOperator(Token, u8), // Operator, Precedence
+    UnaryOperator(Token),
 
     // HTML
     Element(Token), // HTML element content

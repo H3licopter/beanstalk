@@ -20,19 +20,12 @@ pub fn new_tuple(
                 break;
             }
 
-            Token::OpenParenthesis | Token::Comma => {
-                *i += 1;
-                items.push(create_expression(tokens, i, true, &ast, starting_line_number, &DataType::Inferred));
-            }
-
             _ => {
                 *i += 1;
                 items.push(create_expression(tokens, i, true, &ast, starting_line_number, &DataType::Inferred));
             }
         }
     }
-
-    // TO DO: Get all expressions in the tuple
 
     return AstNode::Tuple(items, starting_line_number.to_owned());
 }

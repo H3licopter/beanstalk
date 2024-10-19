@@ -9,6 +9,7 @@ pub enum TokenizeMode {
     Window,
 }
 // Stores variable name, it's index and whether it has a reference in the token array
+#[derive(Debug, PartialEq)]
 pub struct Declaration {
     pub name: String,
     pub index: usize,
