@@ -36,22 +36,14 @@ pub fn expression_to_wat(expr: &AstNode) -> String {
     wat
 }
 
-struct Operator {
-    precedence: u8,
-    wat: &'static str,
-}
-
-// SHUNTING YARD ALGORITHM
 fn float_expr_to_wat(nodes: &Vec<AstNode>) -> String {
     let mut wat: String = String::new();
-    let mut output_stack: Vec<String> = Vec::new();
-    let mut operators_stack: Vec<Operator> = Vec::new();
 
-    'outer: for node in nodes {
+    for node in nodes {
         match node {
             AstNode::Literal(token) => match token {
                 Token::FloatLiteral(value) => {
-                    output_stack.insert(0, format!(" f64.const {}", value));
+                    wat.push_str(&format!(" f64.const {}", value));
                 }
                 _ => {
                     red_ln!("Compiler error: Wrong literal type found in expression sent to WAT parser");
@@ -59,30 +51,22 @@ fn float_expr_to_wat(nodes: &Vec<AstNode>) -> String {
             },
 
             AstNode::VarReference(name, _) | AstNode::ConstReference(name, _) => {
-                output_stack.insert(0, format!(" global.get $v{name}"));
+                wat.push_str(&format!(" global.get $v{name}"));
             }
 
-            AstNode::BinaryOperator(op, precedence) => {
+            AstNode::BinaryOperator(op, _) => {
                 let wat_op = match op {
-                    Token::Add => Operator { precedence: *precedence, wat: " f64.add"},
-                    Token::Subtract => Operator { precedence: *precedence, wat: " f64.sub"},
-                    Token::Multiply => Operator { precedence: *precedence, wat: " f64.mul"},
-                    Token::Divide => Operator { precedence: *precedence, wat: " f64.div"},
+                    Token::Add => " f64.add",
+                    Token::Subtract => " f64.sub",
+                    Token::Multiply => " f64.mul",
+                    Token::Divide => " f64.div",
                     _ => {
                         red_ln!("Unsupported operator found in operator stack when parsing an expression into WAT");
                         return String::new();
                     }
                 };
-
-                for i in 0..operators_stack.len() {
-                    if &operators_stack[i].precedence < precedence {
-                        output_stack.push(operators_stack[i].wat.to_string());
-                        operators_stack[i] = wat_op;
-                        continue 'outer;
-                    }
-                }
                 
-                operators_stack.push(wat_op);
+                wat.push_str(wat_op);
             }
 
             _ => {
@@ -90,14 +74,6 @@ fn float_expr_to_wat(nodes: &Vec<AstNode>) -> String {
             }
         }
     };
-
-    for operator in operators_stack {
-        output_stack.push(operator.wat.to_string());
-    }
-
-    for value in output_stack {
-        wat.push_str(&value);
-    }
 
     wat
 }

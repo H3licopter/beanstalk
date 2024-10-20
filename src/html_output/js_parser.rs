@@ -78,7 +78,6 @@ pub fn expression_to_js(expr: &AstNode) -> String {
         },
 
         AstNode::VarReference(name, data_type) | AstNode::ConstReference(name, data_type) => {
-            js.push_str(&format!(" `${{wsx.get_v{name}()}}` "));
             match data_type {
                 DataType::String | DataType::Scene => js.push_str(&format!("`${{v{name}}}`")),
                 _ => js.push_str(&format!("`${{wsx.get_v{name}()}}`")),

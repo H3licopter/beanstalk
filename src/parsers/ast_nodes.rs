@@ -48,7 +48,7 @@ pub enum AstNode {
     // Operator, Precedence
     LogicalOperator(Token, u8), // Negative, Not, Exponent
     BinaryOperator(Token, u8), // Operator, Precedence
-    UnaryOperator(Token),
+    UnaryOperator(Token, bool), // Operator, is_postfix
 
     // HTML
     Element(Token), // HTML element content

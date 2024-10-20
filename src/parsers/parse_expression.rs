@@ -199,7 +199,7 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
     let mut operators_stack: Vec<AstNode> = Vec::new();
     match expr {
         AstNode::Expression(e, line_number) => {
-            'outer: for ref node in e {
+            for ref node in e {
                 match node {
                     AstNode::Literal(token) => match token {
                         Token::FloatLiteral(value) => {
@@ -207,7 +207,7 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                                 simplified_expression.push(AstNode::Literal(Token::StringLiteral(value.to_string())));
                                 continue;
                             }
-                            output_stack.insert(0, node.to_owned());
+                            output_stack.push(node.to_owned());
                             if current_type == DataType::Inferred {
                                 current_type = DataType::Float;
                             }
@@ -230,7 +230,7 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
 
                         match current_type {
                             DataType::Float => {
-                                output_stack.insert(0, node.to_owned());
+                                output_stack.push(node.to_owned());
                             }
                             DataType::String | DataType::CoerseToString => {
                                 simplified_expression.push(node.to_owned());
@@ -251,7 +251,7 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
 
                         match current_type {
                             DataType::Float => {
-                                output_stack.insert(0, node.to_owned());
+                                output_stack.push(node.to_owned());
                             }
                             DataType::String | DataType::CoerseToString => {
                                 simplified_expression.push(node.to_owned());
@@ -283,15 +283,16 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                         if current_type == DataType::CoerseToString {
                             simplified_expression.push(node.to_owned());
                         }
-        
-                        for i in 0..operators_stack.len() {
-                            if match &operators_stack[i] { AstNode::BinaryOperator(_, p) => p < &precedence, _=> false} {
-                                output_stack.push(operators_stack[i].to_owned());
-                                operators_stack[i] = node.to_owned();
-                                continue 'outer;
-                            }
+
+                        if operators_stack.last().is_some_and(|x| match x { 
+                            AstNode::BinaryOperator(_, p) => 
+                                p >= &precedence, 
+                                _ => false 
+                        }) {
+                            output_stack.push(operators_stack.pop().unwrap());
+
                         }
-                        
+
                         operators_stack.push(node.to_owned());
                     }
 
@@ -375,7 +376,10 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
 // returns either a literal or an evaluated runtime expression 
 fn math_constant_fold(mut output_stack: Vec<AstNode>, current_type: DataType, runtime_nodes: &usize) -> AstNode {
     let mut i: usize = 0;
+
+    
     while i < output_stack.len() {
+        red_ln!("output_stack: {:?}", output_stack);
         match &output_stack[i] {
             AstNode::BinaryOperator(op, _) => {
                 let right_value = match &output_stack[i - 1] {
