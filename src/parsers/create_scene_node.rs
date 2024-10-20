@@ -306,8 +306,10 @@ pub fn new_scene(
             }
 
             Token::CodeKeyword => {
-                scene_styles.clear();
                 scene_tags.clear();
+            }
+            Token::CodeBlock(content) => {
+                scene.push(AstNode::Element(Token::CodeBlock(content.to_string())));
             }
 
             Token::Nav => {

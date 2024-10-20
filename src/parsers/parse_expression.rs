@@ -379,7 +379,6 @@ fn math_constant_fold(mut output_stack: Vec<AstNode>, current_type: DataType, ru
 
     
     while i < output_stack.len() {
-        red_ln!("output_stack: {:?}", output_stack);
         match &output_stack[i] {
             AstNode::BinaryOperator(op, _) => {
                 let right_value = match &output_stack[i - 1] {

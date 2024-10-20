@@ -71,16 +71,6 @@ pub fn get_next_token(
         }
     }
 
-    if tokenize_mode == &TokenizeMode::Codeblock {
-        if scene_nesting_level == &0 {
-            *tokenize_mode = TokenizeMode::Normal;
-        } else {
-            *tokenize_mode = TokenizeMode::Markdown;
-        }
-
-        return tokenize_codeblock(chars);
-    }
-
     if tokenize_mode == &TokenizeMode::Markdown && current_char != ']' && current_char != '[' {
         return tokenize_markdown(chars, &mut current_char, line_number);
     }
@@ -167,8 +157,20 @@ pub fn get_next_token(
             return Token::Initialise(false);
         }
 
-        if tokenize_mode == &TokenizeMode::SceneHead {
-            *tokenize_mode = TokenizeMode::Markdown;
+        match &tokenize_mode {
+            &TokenizeMode::SceneHead => {
+                *tokenize_mode = TokenizeMode::Markdown;
+            }
+            &TokenizeMode::Codeblock => {
+                chars.next();
+                if scene_nesting_level == &0 {
+                    *tokenize_mode = TokenizeMode::Normal;
+                } else {
+                    *tokenize_mode = TokenizeMode::Markdown;
+                }
+                return tokenize_codeblock(chars);
+            }
+            _ => {}
         }
 
         return Token::Colon;
@@ -512,7 +514,10 @@ fn keyword_or_variable(
             match tokenize_mode {
                 TokenizeMode::SceneHead => match token_value.as_str() {
                     // Style
-                    "code" => return Token::CodeKeyword,
+                    "code" => {
+                        *tokenize_mode = TokenizeMode::Codeblock;
+                        return Token::CodeKeyword
+                    },
                     "blank" => return Token::Blank,
                     "bg" => return Token::BG,
 
