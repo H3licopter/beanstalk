@@ -76,7 +76,14 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     }
 
     yellow_ln_bold!("\nCREATING HTML OUTPUT\n");
-    let (html_output, js_exports, css_exports, wat) = web_parser::parse(ast, get_html_config(), false, "test".to_string(), false, String::new());
+    let (html_output, js_exports, css_exports, wat) = web_parser::parse(
+        ast,
+        get_html_config(),
+        false,
+        "test".to_string(),
+        false,
+        String::new(),
+    );
     for export in js_exports {
         println!("JS EXPORTS:");
         println!("{:?}", export.module_path);

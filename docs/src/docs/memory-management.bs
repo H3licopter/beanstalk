@@ -1,0 +1,64 @@
+[Navbar]
+
+[header center: [title 1: MEMORY MANAGEMENT]]
+[main:
+
+[red: Memory management scheme still in testing / design phase ]
+
+# How Beanstalk handles memory
+The intention is for the language to **not** have a garbage collector, but to use a system similar to Rust's ownership model but trade a bit more speed for abstraction and simplicity.
+
+It is also planned for memory areas to be supported at the language level, allowing for high levels of control over memory allocation and deallocation.
+
+## Ownership
+Variables are cleaned up when they go out of scope, and are not allowed to be used after they are cleaned up. This is to prevent dangling pointers and memory leaks.
+
+Instead of having to explicitly denote references (e.g using & in rust), all variables automatically become immutable references by default when used.
+
+## Borrowing
+To lend a mutable version of a variable, you can use the ~ tilde operator. 
+
+Beanstalk will automatically determine whether it should pass a mutable reference or full ownership of a variable to a function, based on how the variable is used in the rest of the function.
+
+Only one mutable reference to a variable can exist at a time, and it is not allowed to be used after it is lent out.
+
+## Copying
+To copy a variable, you can use the copy keyword. This will create a new variable with the same value as the original.
+
+[code:
+
+    testing_memory : () -> () :
+        var := {
+            x := 5
+            y := 3
+        }
+
+        -- Copy of var
+        var2 := copy var
+
+        -- Immutable Reference to var passed into function
+        change_var(var)
+
+        -- Ownership of var given to function
+        change_var(~var2)
+    end
+
+    testing_memory_2 : () -> () :
+        var := 5
+
+        -- Mutable Reference to var given to function
+        change_var(~var2)
+
+        -- Ownership of var given to function
+        change_var_again(~var2)
+    end
+
+    change_var : (~var : float) -> () :
+        var.x = 3
+    end
+
+    change_var_again : (~var : float) -> () :
+        change_var(var)
+    end
+]
+

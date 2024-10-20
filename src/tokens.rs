@@ -23,9 +23,9 @@ pub enum Token {
     // For Compiler
     ModuleStart(String),
     Comptime,
-    Error(String, u32), // Error message, line number
+    Error(String, u32),  // Error message, line number
     DeadVarible(String), // Name. Variable that is never used, to be removed in the AST
-    EOF,         // End of file
+    EOF,                 // End of file
 
     // Module Import/Export
     Import,
@@ -62,7 +62,7 @@ pub enum Token {
     BoolLiteral(bool),
 
     // Not yet supported
-    IntLiteral(i64), 
+    IntLiteral(i64),
     RuneLiteral(char),
     DecLiteral(f64), // Will eventually be some bignum type thing
 
@@ -76,7 +76,7 @@ pub enum Token {
     Colon, // :
 
     // Declarations - Should contain a type declaration if there is one
-    Assign,         // =
+    Assign,           // =
     Initialise(bool), // := / :: (is_const)
 
     // Scope
@@ -153,7 +153,7 @@ pub enum Token {
     // Scenes
     ParentScene,
     EmptyScene(u32), // Used for templating values in scene heads in the body of scenes, value is numnber of spaces after the scene template
-    
+
     SceneHead,
     SceneBody,
     Signal(String),

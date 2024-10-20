@@ -4,19 +4,32 @@
 [main:
 
 # Language Design Goals
-The syntax of Beanstalk is designed to be:
-- Simple
-- Concise
-- Strongly typed
-- Seemless intergration with scenes
-- Procedural
-- Fast compile times
+The Beanstalk is designed to be:
+
+**Simple**
+Minimal keywords and symbols to reduce cognitive load and syntax noise. One way to do things where possible. Beanstalk trades expressiveness for readibility and simplicity.
+
+**Concise**
+As little boilerplate as possible. Safe type inferance and batteries included core language features to reduce the amount of code you need to write for simple tasks.
+
+**Strongly typed**
+A small but powerful type system that is designed to be easy to use, understand and find errors in before runtime.
+
+**Seemless syntax for declaritive programming**
+Scenes provide a very clean and concide way to describe the structure of a webpage or UI (or any other declaritive structure in the future).
+Having a declaritive syntax inside the language itself makes it easy to reason about desgining UI and visual components.
+
+**Procedural**
+The programming part of the language is designed to be procedural, with a focus on functions and data manipulation. It should be easy to reason about control flow and avoid complex state management.
+
+**Fast compile times**
+Being a compiled language, Beanstalk should have very fast compile times. The compiler is written in Rust and is designed to be fast and efficient. With built in hot reloading you should see changes to your code and UI designes almost instantly for fast iteration.
 
 # Style Guide
 The style guide is:
-- snake_case as the default choice for variables and other things
+- snake_case for variables and collections
 - camelCase for functions
-- PascalCase for objects
+- PascalCase for types and Scenes
 - SCREAMING_SNAKE_CASE for Choices
 
 4 spaces are recommended for indentation. 
@@ -38,11 +51,9 @@ Comments are read by the compiler and can be nested.
 ]
 
 # Variables
-Beanstalk uses pointer semantics by default. This means that a variable is a reference to a value unless it is explicitly copied or assigned to a new value.
-
 Colon means initialise, equals means assign. The type of a variable goes after the colon, but can be omitted if the type is inferred.
 
-The @ symbol is used to export variables and methods/functions outside of a module or object.
+The @ symbol before a name is used to export variables and methods/functions outside of a module or object.
 
 ## Assignment
 Types will be inferred if not specified, and implicit conversions will be used to convert the value to the inferred type.
@@ -99,66 +110,78 @@ All data type keywords contain methods from the standard library for common mani
 The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
 
 **Primatives** 
-There are 
 
 ## Numerical Types
-There is an intention to support integers, a special decimal type and an unsigned index type in the future. This will require efficient enough ties with WASM to make it worth it.
+There is an intention to support all of these number types in the future. **Currently only 64 bit floats are supported.**
 
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
-    [: Float ] [: 64 bit floating point number ] [: 0.0]
+    [: Float ] [: 64 bit floating point number on 64 bit systems, 32 bit on 32 bit systems ] [: 0.0]
+
+    [: Int ] [:  64 bit signed integer on 64 bit systems, 32 bit on 32 bit systems ] [: 0]
+
+    [: Idx ] [: pointer sized unsigned integer ] [: 0]
 
     [: Unit] [: *NOT YET SUPPORTED* Special numeric unit syntax for appending numerical types. The underlaying primative will be the same, but automatic conversions will be applied to the result. ] [: error]
 ]
 
 ## String based Types
-Future support (WASM dependent) for Unicode chars and UTF-8 strings are planned for the future. But only if UT8 strings can be made faster than JS native strings with WASM.
+Beanstalk uses UTF-16 strings by default to keep all string manipulations inside JS. 
+The speed penalty of passing strings in and out of Wasm is currently not worth the extra complexity, 
+so all string expressions will compile to JS rather than Wasm.
+
+Eventually this will be entirely manipulated in Wasm, allowing for different string types and faster string operations. For now, JS is fast enough.
 
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
-    [: String ] [: UTF-16] [: ""]
-
-    [: path] [: Path to a file, uses single quotes. ] [: '']
+    [: String ] [: UTF-16 (For JS compatibility)] [: ""]
 
     [: Error] [: Contains a special type of debug string detailing the error] [: "ERROR"]
 
-    [: Style] [: Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML)] [: ""]
+    [: Path] [: *NOT YET SUPPORTED* Path to a file, must be specified as the type of the string. Will handle OS specific paths. ] [: ""]
 ]
 
 ## Collection Types
 [table 3:
-    [: Type] [: Description] [: Zero Value]
+    [: Type ] [: Description] [: Zero Value]
 
-    [: ()] [: Collection. Any number of items seperated by commas. See [link "../collections": Collections] for more information.] [: ()]
+    [: Tuple ] [: Any number of immutable items seperated by commas. See [link "../collections": Collections] for more information.] [: ()]
 
-    [: Scene] [: The templating syntax of Beanstalk] [: "`[]`" -  an empty scene]
+    [: Collection ] [: A blend between arrays and structs. See [link "../collections": Collections] for more information.] [: {}]
     
-    [: Choice] [: Rust style enums. To be implemented. ] [: error]
+    [: Choice ] [: Rust style enums. To be implemented. ] [: error]
 
-    [: Type] [: For generics and datatype related operations] [: error]
+    [: Type ] [: For generics and datatype related operations] [: error]
+]
+
+## Scene Types
+[table 3:
+    [: Type ] [: Description] [: Zero Value]
+
+    [: Scene ] [: The templating syntax of Beanstalk. See [link "./scenes": Scenes for more info!]] [: "`[]`" -  an empty scene]
+
+    [: Style] [: Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML. See [link: "./styles": Styles] for more info)] [: ""]
 ]
 
 # Strings
-String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
+String is the keyword for string types in Beanstalk. Double quotes are automatically strings. 
 
-[code: "Double quotes for a utf8 string literal"]
+[code: "Double quotes for a UTF-16 string literal"]
 
 Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 
-[code: "string literal with \{curly braces} in it that is escaped"]
+[code: "string literal with \{curly braces} in it that are escaped"]
 
 [code: `9 "is" {5 + 4}` -- 9 "is" {5 + 4}]
 
 # Logical Operators
 The 'is' keyword is used to check equality. Not ==. The "and / or" keywords are used for logical and / or and 'not' is used to invert a truthy value to falsy or vice versa.
 
-Only false, ! and ? are falsy values. Any other check with an if statement will return true. 
-
 [table 3:
     [: Operator] [: Description]          [: Precedence]
-    [: `**`]       [: Exponents]            [: 8]
+    [: `^`]        [: Exponents]            [: 8]
     [: `//`]       [: Roots]                [: 8]
     [: `*`]        [: Multiplication]       [: 7]
     [: `/`]        [: Division]             [: 7]

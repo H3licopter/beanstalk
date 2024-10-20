@@ -1,13 +1,16 @@
 use colour::red_ln;
 
-use super::{ast_nodes::AstNode, build_ast::get_var_declaration_type, collections::new_tuple, create_scene_node::new_scene};
+use super::{
+    ast_nodes::AstNode, build_ast::get_var_declaration_type, collections::new_tuple,
+    create_scene_node::new_scene,
+};
 use crate::{bs_types::DataType, Token};
 
 /*  CAN RETURN:
      - an expression
      - a tuple of expresions
      - an error
-     
+
      DOES NOT CARE ABOUT TYPES (yet)
      can return a mix of types in the same expression
      Enforcing the type is done when the expression is evaluated
@@ -76,30 +79,57 @@ pub fn create_expression(
                 if inside_tuple {
                     break;
                 }
-                return new_tuple(tokens, i, AstNode::Expression(expression, starting_line_number.to_owned()), ast, starting_line_number);
+                return new_tuple(
+                    tokens,
+                    i,
+                    AstNode::Expression(expression, starting_line_number.to_owned()),
+                    ast,
+                    starting_line_number,
+                );
             }
 
             // Check if name is a reference to another variable or function call
             Token::VarReference(id) => {
-                let reference = AstNode::VarReference(id.to_string(), get_var_declaration_type(id.to_string(), &ast));
+                let reference = AstNode::VarReference(
+                    id.to_string(),
+                    get_var_declaration_type(id.to_string(), &ast),
+                );
                 expression.push(reference);
             }
             Token::ConstReference(id) => {
-                let reference = AstNode::ConstReference(id.to_string(), get_var_declaration_type(id.to_string(), &ast));
+                let reference = AstNode::ConstReference(
+                    id.to_string(),
+                    get_var_declaration_type(id.to_string(), &ast),
+                );
                 expression.push(reference);
             }
 
             // Check if is a literal
             Token::FloatLiteral(mut float) => {
-                if data_type != &DataType::Float && data_type != &DataType::Inferred && data_type != &DataType::CoerseToString {
-                    return AstNode::Error("Float literal used in non-float expression".to_string(), starting_line_number.to_owned());
+                if data_type != &DataType::Float
+                    && data_type != &DataType::Inferred
+                    && data_type != &DataType::CoerseToString
+                {
+                    return AstNode::Error(
+                        "Float literal used in non-float expression".to_string(),
+                        starting_line_number.to_owned(),
+                    );
                 }
-                if next_number_negative {float = -float; next_number_negative = false;}
+                if next_number_negative {
+                    float = -float;
+                    next_number_negative = false;
+                }
                 expression.push(AstNode::Literal(Token::FloatLiteral(float)));
             }
             Token::StringLiteral(string) => {
-                if data_type != &DataType::String && data_type != &DataType::CoerseToString && data_type != &DataType::Inferred {
-                    return AstNode::Error("String literal used in non-string expression".to_string(), starting_line_number.to_owned());
+                if data_type != &DataType::String
+                    && data_type != &DataType::CoerseToString
+                    && data_type != &DataType::Inferred
+                {
+                    return AstNode::Error(
+                        "String literal used in non-string expression".to_string(),
+                        starting_line_number.to_owned(),
+                    );
                 }
                 expression.push(AstNode::Literal(Token::StringLiteral(string.clone())));
             }
@@ -108,7 +138,10 @@ pub fn create_expression(
             // Maybe scenes can be added together like strings
             Token::SceneHead | Token::ParentScene => {
                 if data_type != &DataType::Scene && data_type != &DataType::Inferred {
-                    return AstNode::Error("Scene used in non-scene expression".to_string(), starting_line_number.to_owned());
+                    return AstNode::Error(
+                        "Scene used in non-scene expression".to_string(),
+                        starting_line_number.to_owned(),
+                    );
                 }
                 return new_scene(tokens, i, &ast, starting_line_number);
             }
@@ -124,26 +157,50 @@ pub fn create_expression(
                 expression.push(AstNode::BinaryOperator(token.to_owned(), 1));
             }
             Token::Subtract => {
-                if data_type != &DataType::Float && data_type != &DataType::Inferred && data_type != &DataType::CoerseToString {
-                    return AstNode::Error("Subtraction used in non-float expression".to_string(), starting_line_number.to_owned());
+                if data_type != &DataType::Float
+                    && data_type != &DataType::Inferred
+                    && data_type != &DataType::CoerseToString
+                {
+                    return AstNode::Error(
+                        "Subtraction used in non-float expression".to_string(),
+                        starting_line_number.to_owned(),
+                    );
                 }
                 expression.push(AstNode::BinaryOperator(token.to_owned(), 1));
             }
             Token::Multiply => {
-                if data_type != &DataType::Float && data_type != &DataType::Inferred && data_type != &DataType::CoerseToString {
-                    return AstNode::Error("Multiplication used in non-float expression".to_string(), starting_line_number.to_owned());
+                if data_type != &DataType::Float
+                    && data_type != &DataType::Inferred
+                    && data_type != &DataType::CoerseToString
+                {
+                    return AstNode::Error(
+                        "Multiplication used in non-float expression".to_string(),
+                        starting_line_number.to_owned(),
+                    );
                 }
                 expression.push(AstNode::BinaryOperator(token.to_owned(), 2));
             }
             Token::Divide => {
-                if data_type != &DataType::Float && data_type != &DataType::Inferred && data_type != &DataType::CoerseToString {
-                    return AstNode::Error("Division used in non-float expression".to_string(), starting_line_number.to_owned());
+                if data_type != &DataType::Float
+                    && data_type != &DataType::Inferred
+                    && data_type != &DataType::CoerseToString
+                {
+                    return AstNode::Error(
+                        "Division used in non-float expression".to_string(),
+                        starting_line_number.to_owned(),
+                    );
                 }
                 expression.push(AstNode::BinaryOperator(token.to_owned(), 2));
             }
             Token::Modulus => {
-                if data_type != &DataType::Float && data_type != &DataType::Inferred && data_type != &DataType::CoerseToString {
-                    return AstNode::Error("Modulus used in non-float expression".to_string(), starting_line_number.to_owned());
+                if data_type != &DataType::Float
+                    && data_type != &DataType::Inferred
+                    && data_type != &DataType::CoerseToString
+                {
+                    return AstNode::Error(
+                        "Modulus used in non-float expression".to_string(),
+                        starting_line_number.to_owned(),
+                    );
                 }
                 expression.push(AstNode::BinaryOperator(token.to_owned(), 2));
             }
@@ -173,7 +230,10 @@ pub fn create_expression(
 
             _ => {
                 expression.push(AstNode::Error(
-                    format!("Invalid Expression: {:?}, must be assigned with a valid datatype", token),
+                    format!(
+                        "Invalid Expression: {:?}, must be assigned with a valid datatype",
+                        token
+                    ),
                     starting_line_number.to_owned(),
                 ));
             }
@@ -182,14 +242,22 @@ pub fn create_expression(
         *i += 1;
     }
 
-    return evaluate_expression(AstNode::Expression(expression, starting_line_number.to_owned()), data_type, ast);
+    return evaluate_expression(
+        AstNode::Expression(expression, starting_line_number.to_owned()),
+        data_type,
+        ast,
+    );
 }
 
 // This function takes in an Expression node or Collection of expressions that has a Vec of Nodes to evaluate
 // And evaluates everything possible at compile time (Constant Folding)
 // If it returns a literal, then everything was evaluated at compile time
 // Otherwise it will return an EvaluatedExpression, which has a strict type and will be evaluated at runtime
-pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec<AstNode>) -> AstNode {
+pub fn evaluate_expression(
+    expr: AstNode,
+    type_declaration: &DataType,
+    ast: &Vec<AstNode>,
+) -> AstNode {
     let mut current_type = type_declaration.to_owned();
     let mut simplified_expression = Vec::new();
     let mut runtime_nodes: usize = 0;
@@ -204,7 +272,9 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                     AstNode::Literal(token) => match token {
                         Token::FloatLiteral(value) => {
                             if current_type == DataType::CoerseToString {
-                                simplified_expression.push(AstNode::Literal(Token::StringLiteral(value.to_string())));
+                                simplified_expression.push(AstNode::Literal(Token::StringLiteral(
+                                    value.to_string(),
+                                )));
                                 continue;
                             }
                             output_stack.push(node.to_owned());
@@ -237,8 +307,11 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                             }
                             _ => {
                                 return AstNode::Error(
-                                    format!("unsupported data type for constants in expressions: {:?}", current_type),
-                                    line_number
+                                    format!(
+                                        "unsupported data type for constants in expressions: {:?}",
+                                        current_type
+                                    ),
+                                    line_number,
                                 );
                             }
                         }
@@ -258,8 +331,11 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                             }
                             _ => {
                                 return AstNode::Error(
-                                    format!("unsupported data type for variables in expressions: {:?}", current_type),
-                                    line_number
+                                    format!(
+                                        "unsupported data type for variables in expressions: {:?}",
+                                        current_type
+                                    ),
+                                    line_number,
                                 );
                             }
                         }
@@ -284,13 +360,11 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                             simplified_expression.push(node.to_owned());
                         }
 
-                        if operators_stack.last().is_some_and(|x| match x { 
-                            AstNode::BinaryOperator(_, p) => 
-                                p >= &precedence, 
-                                _ => false 
+                        if operators_stack.last().is_some_and(|x| match x {
+                            AstNode::BinaryOperator(_, p) => p >= &precedence,
+                            _ => false,
                         }) {
                             output_stack.push(operators_stack.pop().unwrap());
-
                         }
 
                         operators_stack.push(node.to_owned());
@@ -304,17 +378,20 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
                         if current_type != DataType::Scene {
                             return AstNode::Error(
                                 "Scene used in non-scene expression".to_string(),
-                                line_number
+                                line_number,
                             );
                         }
                         output_stack.push(node.to_owned());
                     }
-        
+
                     _ => {
-                        red_ln!("unknown AST node found in expression when evaluating expression: {:?}", node);
+                        red_ln!(
+                            "unknown AST node found in expression when evaluating expression: {:?}",
+                            node
+                        );
                     }
                 }
-            };
+            }
         }
 
         AstNode::Tuple(e, line_number) => {
@@ -361,7 +438,7 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
     if current_type == DataType::CoerseToString {
         return AstNode::RuntimeExpression(simplified_expression, current_type);
     }
-    
+
     // MATHS EXPRESSIONS
     // Push everything into the stack, is now in RPN notation
     for operator in operators_stack {
@@ -373,11 +450,14 @@ pub fn evaluate_expression(expr: AstNode, type_declaration: &DataType, ast: &Vec
 }
 
 // This will evaluate everything possible recursively at compile time
-// returns either a literal or an evaluated runtime expression 
-fn math_constant_fold(mut output_stack: Vec<AstNode>, current_type: DataType, runtime_nodes: &usize) -> AstNode {
+// returns either a literal or an evaluated runtime expression
+fn math_constant_fold(
+    mut output_stack: Vec<AstNode>,
+    current_type: DataType,
+    runtime_nodes: &usize,
+) -> AstNode {
     let mut i: usize = 0;
 
-    
     while i < output_stack.len() {
         match &output_stack[i] {
             AstNode::BinaryOperator(op, _) => {
@@ -385,14 +465,22 @@ fn math_constant_fold(mut output_stack: Vec<AstNode>, current_type: DataType, ru
                     AstNode::Literal(Token::FloatLiteral(value)) => value,
                     _ => {
                         red_ln!("Compiler Bug: Must have a value to the right of an operator");
-                        return AstNode::Error("Compiler Bug: Must have a value to the right of an operator".to_string(), 0);
+                        return AstNode::Error(
+                            "Compiler Bug: Must have a value to the right of an operator"
+                                .to_string(),
+                            0,
+                        );
                     }
                 };
                 let left_value = match output_stack[i - 2] {
                     AstNode::Literal(Token::FloatLiteral(value)) => value,
                     _ => {
                         red_ln!("Compiler Bug: Must have a value to the left of an operator");
-                        return AstNode::Error("Compiler Bug: Must have a value to the left of an operator".to_string(), 0);
+                        return AstNode::Error(
+                            "Compiler Bug: Must have a value to the left of an operator"
+                                .to_string(),
+                            0,
+                        );
                     }
                 };
 
@@ -425,7 +513,7 @@ fn math_constant_fold(mut output_stack: Vec<AstNode>, current_type: DataType, ru
     }
 
     if output_stack.len() - runtime_nodes > 1 {
-        return math_constant_fold(output_stack, current_type, runtime_nodes)
+        return math_constant_fold(output_stack, current_type, runtime_nodes);
     }
 
     AstNode::RuntimeExpression(output_stack, current_type)
@@ -444,7 +532,9 @@ fn concat_strings(simplified_expression: &mut Vec<AstNode>) -> AstNode {
                     previous_node_is_plus = false;
                 } else {
                     // Syntax error, must have a + operator between strings when concatinating
-                    red_ln!("Syntax Error: Must have a + operator between strings when concatinating");
+                    red_ln!(
+                        "Syntax Error: Must have a + operator between strings when concatinating"
+                    );
                 }
             }
             AstNode::BinaryOperator(_, _) => {
@@ -465,19 +555,17 @@ fn concat_scene(simplified_expression: &mut Vec<AstNode>) -> AstNode {
 
     for node in simplified_expression {
         match node {
-            AstNode::Scene(vec1, vec2, vec3, vec4) => {
-                match new_scene {
-                    AstNode::Scene(ref mut v1, ref mut v2, ref mut v3, ref mut v4) => {
-                        v1.append(vec1);
-                        v2.append(vec2);
-                        v3.append(vec3);
-                        v4.append(vec4);
-                    }
-                    _ => {
-                        red_ln!("Compiler Bug: Cannot evaluate scene expression at compile time. Compiler should be creating a runtime scene expression");
-                    }
+            AstNode::Scene(vec1, vec2, vec3, vec4) => match new_scene {
+                AstNode::Scene(ref mut v1, ref mut v2, ref mut v3, ref mut v4) => {
+                    v1.append(vec1);
+                    v2.append(vec2);
+                    v3.append(vec3);
+                    v4.append(vec4);
                 }
-            }
+                _ => {
+                    red_ln!("Compiler Bug: Cannot evaluate scene expression at compile time. Compiler should be creating a runtime scene expression");
+                }
+            },
             _ => {
                 red_ln!("Compiler Bug: Cannot evaluate scene expression at compile time. Compiler should be creating a runtime scene expression");
             }
@@ -520,9 +608,7 @@ fn _check_literal(
 
             AstNode::Literal(value)
         }
-        _ => AstNode::Error("Invalid Literal (check_literal)".to_string(),
-            line_number
-        ),
+        _ => AstNode::Error("Invalid Literal (check_literal)".to_string(), line_number),
     }
 }
 
@@ -538,8 +624,6 @@ pub fn check_if_arg(tokens: &Vec<Token>, i: &mut usize) -> bool {
         | Token::BoolLiteral(_)
         | Token::RawStringLiteral(_)
         | Token::FloatLiteral(_) => true,
-        _ => {
-            false
-        }
+        _ => false,
     }
 }

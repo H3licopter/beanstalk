@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport"content="width=device-width, initial-scale=1">
+<title> | Website Title</title>
+<meta name="description"content="Website Description"/>
+<meta property="og:title"content=""/>
+<meta property="og:description"content=""/>
+<meta property="og:image"content="localhost:6969/"/>
+<meta property="og:image:alt"content=""/>
+<meta property="og:locale"content="en_US"/>
+<meta property="og:type"content="website"/>
+<meta property="og:url"content="localhost:6969/"/>
+<meta name="twitter:card"content=""/>
+<meta name="color-scheme" content="light dark" />
+<link rel="canonical"href="">
+<link rel="icon"href="../images/favicons/favicon.ico">
+<!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
+<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="../css/pico.min.css" />
+<style>.bs-nav-1 {
+                border-bottom-color: grey;
+                border-bottom-style: solid;
+                border-bottom-width: 1px;
+                padding: 0rem 2rem 0rem 2rem;
+            }.bs-title-1 {
+                font-size: 3rem;
+                font-weight: bold;
+                letter-spacing: 0.3rem;
+                word-spacing: 0.4rem;
+                margin: 1.3rem 0 1.2rem 0;
+                line-height: 3.5rem;
+            }.bs-0 > * {color:inherit;}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >MEMORY MANAGEMENT</b></div></header><main class="container"><span style="color:hsla(0,90%,55%,1);"  class=" bs-0" ><p>Memory management scheme still in testing / design phase</p></span><h1>How Beanstalk handles memory
+</h1><p>The intention is for the language to <strong>not&nbsp;</strong><span>have a garbage collector, but to use a system similar to Rust's ownership model but trade a bit more speed for abstraction and simplicity.
+</span></p><p>It is also planned for memory areas to be supported at the language level, allowing for high levels of control over memory allocation and deallocation.
+</p><h2>Ownership
+</h2><p>Variables are cleaned up when they go out of scope, and are not allowed to be used after they are cleaned up. This is to prevent dangling pointers and memory leaks.
+</p><p>Instead of having to explicitly denote references (e.g using & in rust), all variables automatically become immutable references by default when used.
+</p><h2>Borrowing
+</h2><p>To lend a mutable version of a variable, you can use the ~ tilde operator. 
+</p><p>Beanstalk will automatically determine whether it should pass a mutable reference or full ownership of a variable to a function, based on how the variable is used in the rest of the function.
+</p><p>Only one mutable reference to a variable can exist at a time, and it is not allowed to be used after it is lent out.
+</p><h2>Copying
+</h2><p>To copy a variable, you can use the copy keyword. This will create a new variable with the same value as the original.
+</p><pre><code>
+    testing_memory : () -> () :
+        var := {
+            x := 5
+            y := 3
+        }
+
+        -- Copy of var
+        var2 := copy var
+
+        -- Immutable Reference to var passed into function
+        change_var(var)
+
+        -- Ownership of var given to function
+        change_var(~var2)
+    end
+
+    testing_memory_2 : () -> () :
+        var := 5
+
+        -- Mutable Reference to var given to function
+        change_var(~var2)
+
+        -- Ownership of var given to function
+        change_var_again(~var2)
+    end
+
+    change_var : (~var : float) -> () :
+        var.x = 3
+    end
+
+    change_var_again : (~var : float) -> () :
+        change_var(var)
+    end
+</code></pre></main>
+<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
+</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></div></footer>`;
+  WebAssembly.instantiateStreaming(fetch("./memory-management.wasm")).then((obj)=>{
+    let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
+                const es = document.getElementsByClassName(id);
+                if (Array.isArray(update)){update = update.join(' ')}
+                for (let i = 0;i<es.length;i++) {
+                  es[i].innerHTML=update
+                }
+            }uInnerHTML("cNavbar", vNavbar);
+  ;});</script>
+</body>
+</html>

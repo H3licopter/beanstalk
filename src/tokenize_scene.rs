@@ -4,7 +4,11 @@ use std::str::Chars;
 
 // Create string of markdown content, only escaping when a closed curly brace is found
 // Any Beanstalk specific extensions to Markdown will need to be implimented here
-pub fn tokenize_markdown(chars: &mut Peekable<Chars>, current_char: &mut char, line_number: &mut u32) -> Token {
+pub fn tokenize_markdown(
+    chars: &mut Peekable<Chars>,
+    current_char: &mut char,
+    line_number: &mut u32,
+) -> Token {
     let mut content = String::new(); // To keep track of current chars being parsed
     let mut previous_newlines = 0;
     let mut current_token = Token::Empty;

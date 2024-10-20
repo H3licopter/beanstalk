@@ -26,56 +26,53 @@
             }</style></head><body><h1>Collections
 </h1><p>All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
 </p><p>Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
-</p><h2>Literals
-</h2><p>By simply wrapping a list of values in parethesis and not specifying a type, you create a tuple literal.
-</p><span>(1, 2, 3)
-</span><h2>Fixed Collections
-</h2><p>Tuples are a fixed size and can contain any type. Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
-</p><p>If a tuple only contains one value in parenthesis, it becomes equaivalent to a single value rather than a collection of values.
-</p><p>Tuples can also contain named values that can be accessed by name rather than index. This is done by providing a variable name just before the value.
+</p><h2>Tuples
+</h2><p>By simply listing literals separated by commas, and not specifying a type, you create a tuple literal.
+</p><p>You can surround the tuple with parenthesis for clarity and multiline.
+</p><p>1, 2, 3
+
+(
+    1,
+    2,
+    3,
+)
+
+</p><p>Tuples are a fixed size and can contain any type. Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
+</p><p>If a tuple only contains one value, it becomes equaivalent to a single value rather than a collection of values.
 </p><p>When creating a tuple using a colon, the values inside become immutable.
-</p><span>-- Fixed size tuple of immutable integers
-    tuple :: (1, 2, 3)
-    tuple 0 -- returns 1
+</p><p>-- Fixed size tuple of immutable integers
+    tuple :: 1, 2, 3
+    tuple.0 -- returns 1
+</p><h2>Dynamic Collections (Arrays)
+</h2><p>When creating a variable collection rather than a constant collection, it becomes a mutable collection.
+</p><p>Dynamic collections can only contain one data type. 
+</p><span>array := {3, 4, 5}
+    array.push 9 -- error
 
-    -- Named tuple element (mutable)
-    tuple_of_one := (number 69)
-    int_value := 69
-    tuple_of_one number is int_value -- returns true
+    array.0 += 1 
+    array.0 -- returns 4
+</span><p>Specifying the type and size of your collection. By adding a number before the type, you create a fixed size collection.
+</p><span>-- Empty dynamically sized int array
+    empty_array : {10 int}
 
-    -- Named value with type (mutable)
-    tuple_of_one : float = (number 420)
-    int_value := 420
-    tuple_of_one number is int_value -- returns false
-</span><h2>Dynamic Collections (Arrays)
-</h2><p>When creating a variable collection rather than a constant collection, it becomes a dynamic collection.
-</p><p>Dynamic collections can only contain one data type.
-</p><span>array := (3, 4, 5)
-    array push(9)
-    array 3 -- returns 9
-</span><p>Specifying the type of your collection.
-</p><span>-- Empty array of integers
-    empty_array : (int)
+    empty_array.push 3
+    empty_array.0 -- returns 3
 
-    empty_array push(3)
-    empty_array 0 -- returns 3
+    -- dynamically sized immutable string array
+    strings : {string} : {"hello", "world"}
 
-    strings : (string) = ("hello", "world")
-</span><p>Collections can also have named values or keys. These values can now be defined as mutable or immutable.
-</p><span>values :: (
-        default_number :: 0,
-        "cool number" :: 6,
-        7,
-        8
-    )
 </span>
-<script type="module">const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
-</h3></div></footer>`; function uInnerHTML(id,update){
+<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
+</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></div></footer>`;
+  WebAssembly.instantiateStreaming(fetch("./collections.wasm")).then((obj)=>{
+    let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }</script>
+            }
+  ;});</script>
 </body>
 </html>

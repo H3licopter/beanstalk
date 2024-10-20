@@ -31,18 +31,19 @@
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
             }.bs-0 > * {color:inherit;}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BASIC BEANSTALK SYNTAX</b></div></header><main class="container"><h1>Language Design Goals
-</h1><p>The syntax of Beanstalk is designed to be:
-</p><li><span>Simple
-</span></li><li><span>Concise
-</span></li><li><span>Strongly typed
-</span></li><li><span>Seemless intergration with scenes
-</span></li><li><span>Procedural
-</span></li><li><span>Fast compile times
-</span></li><h1>Style Guide
+</h1><p>The Beanstalk is designed to be:
+</p><p><strong>Simple</strong></p><span>Minimal keywords and symbols to reduce cognitive load and syntax noise. One way to do things where possible. Beanstalk trades expressiveness for readibility and simplicity.
+</span><strong>Concise</strong><span>As little boilerplate as possible. Safe type inferance and batteries included core language features to reduce the amount of code you need to write for simple tasks.
+</span><strong>Strongly typed</strong><span>A small but powerful type system that is designed to be easy to use, understand and find errors in before runtime.
+</span><strong>Seemless syntax for declaritive programming</strong><span>Scenes provide a very clean and concide way to describe the structure of a webpage or UI (or any other declaritive structure in the future).
+</span><span>Having a declaritive syntax inside the language itself makes it easy to reason about desgining UI and visual components.
+</span></p><p><strong>Procedural</strong></p><span>The programming part of the language is designed to be procedural, with a focus on functions and data manipulation. It should be easy to reason about control flow and avoid complex state management.
+</span><strong>Fast compile times</strong><span>Being a compiled language, Beanstalk should have very fast compile times. The compiler is written in Rust and is designed to be fast and efficient. With built in hot reloading you should see changes to your code and UI designes almost instantly for fast iteration.
+</span><h1>Style Guide
 </h1><p>The style guide is:
-</p><li><span>snake_case as the default choice for variables and other things
+</p><li><span>snake_case for variables and collections
 </span></li><li><span>camelCase for functions
-</span></li><li><span>PascalCase for objects
+</span></li><li><span>PascalCase for types and Scenes
 </span></li><li><span>SCREAMING_SNAKE_CASE for Choices
 </span></li><p>4 spaces are recommended for indentation. 
 </p><h1>Comments
@@ -58,9 +59,8 @@
     Woo
     --
 </code></pre><h1>Variables
-</h1><p>Beanstalk uses pointer semantics by default. This means that a variable is a reference to a value unless it is explicitly copied or assigned to a new value.
-</p><p>Colon means initialise, equals means assign. The type of a variable goes after the colon, but can be omitted if the type is inferred.
-</p><p>The @ symbol is used to export variables and methods/functions outside of a module or object.
+</h1><p>Colon means initialise, equals means assign. The type of a variable goes after the colon, but can be omitted if the type is inferred.
+</p><p>The @ symbol before a name is used to export variables and methods/functions outside of a module or object.
 </p><h2>Assignment
 </h2><p>Types will be inferred if not specified, and implicit conversions will be used to convert the value to the inferred type.
 </p><h3>Compile time immutable variable
@@ -95,20 +95,21 @@
 </code></pre><h1>Data Types
 </h1><p>All data type keywords contain methods from the standard library for common manipulation of types. 
 </p><span>The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
-</span><p><strong>Primatives&nbsp;</strong></p><span>There are 
-</span><h2>Numerical Types
-</h2><p>There is an intention to support integers, a special decimal type and an unsigned index type in the future. This will require efficient enough ties with WASM to make it worth it.
-</p><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>Float</td><td>64 bit floating point number</td><td>0.0</td></tr><tr><td>Unit</td><td><em>NOT YET SUPPORTED&nbsp;</em>Special numeric unit syntax for appending numerical types. The underlaying primative will be the same, but automatic conversions will be applied to the result.</td><td>error</td></tr></tbody></table><h2>String based Types
-</h2><p>Future support (WASM dependent) for Unicode chars and UTF-8 strings are planned for the future. But only if UT8 strings can be made faster than JS native strings with WASM.
-</p><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>String</td><td>UTF-16</td><td>""</td></tr><tr><td>path</td><td>Path to a file, uses single quotes.</td><td>''</td></tr><tr><td>Error</td><td>Contains a special type of debug string detailing the error</td><td>"ERROR"</td></tr><tr><td>Style</td><td>Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML)</td><td>""</td></tr></tbody></table><h2>Collection Types
-</h2><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>()</td><td>Collection. Any number of items seperated by commas. See <a href="../collections" style="" class="" >Collections&nbsp;</a>for more information.</td><td>()</td></tr><tr><td>Scene</td><td>The templating syntax of Beanstalk</td><td>"[]" -&nbsp; an empty scene</td></tr><tr><td>Choice</td><td>Rust style enums. To be implemented.</td><td>error</td></tr><tr><td>Type</td><td>For generics and datatype related operations</td><td>error</td></tr></tbody></table><h1>Strings
-</h1><p>String is the keyword for string types in Beanstalk. Double quotes are automatically UTF8 strings. 
-</p><pre><code>"Double quotes for a utf8 string literal"</code></pre><p>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
-</p><pre><code>"string literal with \{curly braces} in it that is escaped"</code></pre><pre><code>`9 "is" {5 + 4}` -- 9 "is" {5 + 4}</code></pre><h1>Logical Operators
+</span><p><strong>Primatives&nbsp;</strong></p><h2>Numerical Types
+</h2><p>There is an intention to support all of these number types in the future. <strong>Currently only 64 bit floats are supported.</strong></p><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>Float</td><td>64 bit floating point number on 64 bit systems, 32 bit on 32 bit systems</td><td>0.0</td></tr><tr><td>Int</td><td>64 bit signed integer on 64 bit systems, 32 bit on 32 bit systems</td><td>0</td></tr><tr><td>Idx</td><td>pointer sized unsigned integer</td><td>0</td></tr><tr><td>Unit</td><td><em>NOT YET SUPPORTED&nbsp;</em>Special numeric unit syntax for appending numerical types. The underlaying primative will be the same, but automatic conversions will be applied to the result.</td><td>error</td></tr></tbody></table><h2>String based Types
+</h2><p>Beanstalk uses UTF-16 strings by default to keep all string manipulations inside JS. 
+</p><span>The speed penalty of passing strings in and out of Wasm is currently not worth the extra complexity, 
+</span><span>so all string expressions will compile to JS rather than Wasm.
+</span><p>Eventually this will be entirely manipulated in Wasm, allowing for different string types and faster string operations. For now, JS is fast enough.
+</p><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>String</td><td>UTF-16 (For JS compatibility)</td><td>""</td></tr><tr><td>Error</td><td>Contains a special type of debug string detailing the error</td><td>"ERROR"</td></tr><tr><td>Path</td><td><em>NOT YET SUPPORTED&nbsp;</em>Path to a file, must be specified as the type of the string. Will handle OS specific paths.</td><td>""</td></tr></tbody></table><h2>Collection Types
+</h2><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>Tuple</td><td>Any number of immutable items seperated by commas. See <a href="../collections" style="" class="" >Collections&nbsp;</a>for more information.</td><td>()</td></tr><tr><td>Collection</td><td>A blend between arrays and structs. See <a href="../collections" style="" class="" >Collections&nbsp;</a>for more information.</td><td>{}</td></tr><tr><td>Choice</td><td>Rust style enums. To be implemented.</td><td>error</td></tr><tr><td>Type</td><td>For generics and datatype related operations</td><td>error</td></tr></tbody></table><h2>Scene Types
+</h2><table style=""  class="" ><thead><tr><th scope='col'>Type</th><th scope='col'>Description</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>Scene</td><td>The templating syntax of Beanstalk. See <a href="./scenes" style="" class="" >Scenes for more info!</a></td><td>"[]" -&nbsp; an empty scene</td></tr><tr><td>Style</td><td>Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML. See <span>"./styles": Styles</span>&nbsp;for more info)</td><td>""</td></tr></tbody></table><h1>Strings
+</h1><p>String is the keyword for string types in Beanstalk. Double quotes are automatically strings. 
+</p><pre><code>"Double quotes for a UTF-16 string literal"</code></pre><p>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
+</p><pre><code>"string literal with \{curly braces} in it that are escaped"</code></pre><pre><code>`9 "is" {5 + 4}` -- 9 "is" {5 + 4}</code></pre><h1>Logical Operators
 </h1><p>The 'is' keyword is used to check equality. Not ==. The "and / or" keywords are used for logical and / or and 'not' is used to invert a truthy value to falsy or vice versa.
-</p><p>Only false, ! and ? are falsy values. Any other check with an if statement will return true. 
-</p><table style=""  class="" ><thead><tr><th scope='col'>Operator</th><th scope='col'>Description</th><th scope='col'>Precedence</th></tr></thead><tbody><tr><td>**</td><td>Exponents</td><td>8</td></tr><tr><td>//</td><td>Roots</td><td>8</td></tr><tr><td>*</td><td>Multiplication</td><td>7</td></tr><tr><td>/</td><td>Division</td><td>7</td></tr><tr><td>%</td><td>Modulo (truncated)</td><td>7</td></tr><tr><td>%%</td><td>Remainder (floored)</td><td>7</td></tr><tr><td>+</td><td>Sum</td><td>6</td></tr><tr><td>-</td><td>Subtraction</td><td>6</td></tr></tbody></table><h1>Numeric Units
-</h1><span style="color:hsla(0,90%,55%,1);"  class=" bs-0" ><span>In development</span></span><p>Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
+</p><table style=""  class="" ><thead><tr><th scope='col'>Operator</th><th scope='col'>Description</th><th scope='col'>Precedence</th></tr></thead><tbody><tr><td>^</td><td>Exponents</td><td>8</td></tr><tr><td>//</td><td>Roots</td><td>8</td></tr><tr><td>*</td><td>Multiplication</td><td>7</td></tr><tr><td>/</td><td>Division</td><td>7</td></tr><tr><td>%</td><td>Modulo (truncated)</td><td>7</td></tr><tr><td>%%</td><td>Remainder (floored)</td><td>7</td></tr><tr><td>+</td><td>Sum</td><td>6</td></tr><tr><td>-</td><td>Subtraction</td><td>6</td></tr></tbody></table><h1>Numeric Units
+</h1><span style="color:hsla(0,90%,55%,1);"  class=" bs-0" ><p>In development</p></span><p>Values can be appended with special unit types. These can represent a real world unit and will inform how operations with other units will work. 
 </p><p>The first unit in the operation will be used if no unit type is specified in the type parameter. 
 </p><p>You don't need to have a space between a literal value and the unit type, but variables must have a space between the value and the unit type.
 </p><p>If you are mixing unit types in an operation, the first unit type will be used for the result.
@@ -123,13 +124,17 @@
     height := (3m * 2m)cm
     -- result is 500
 </code></pre></main><span class="cFooter"></span>
-<script type="module">const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
-</h3></div></footer>`; function uInnerHTML(id,update){
+<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
+</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></div></footer>`;
+  WebAssembly.instantiateStreaming(fetch("./basics.wasm")).then((obj)=>{
+    let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);</script>
+            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);
+  ;});</script>
 </body>
 </html>

@@ -8,13 +8,9 @@ pub fn get_color(color: &Token, shade: &AstNode) -> String {
     let mut transparency = 1.0;
     let param = match shade {
         AstNode::Literal(token) => match token {
-            Token::IntLiteral(value) => {
-                *value as f64
-            }
-            Token::FloatLiteral(value) => {
-                *value
-            }
-            _ => 0.0
+            Token::IntLiteral(value) => *value as f64,
+            Token::FloatLiteral(value) => *value,
+            _ => 0.0,
         },
         AstNode::Tuple(values, _) => {
             if values.len() > 2 {
@@ -22,30 +18,22 @@ pub fn get_color(color: &Token, shade: &AstNode) -> String {
             }
             transparency = match &values[1] {
                 AstNode::Literal(token) => match token {
-                    Token::IntLiteral(value) => {
-                        *value as f64
-                    }
-                    Token::FloatLiteral(value) => {
-                        *value
-                    }
-                    _ => 0.0
+                    Token::IntLiteral(value) => *value as f64,
+                    Token::FloatLiteral(value) => *value,
+                    _ => 0.0,
                 },
-                _ => 0.0
+                _ => 0.0,
             };
             match &values[0] {
                 AstNode::Literal(token) => match token {
-                    Token::IntLiteral(value) => {
-                        *value as f64
-                    }
-                    Token::FloatLiteral(value) => {
-                        *value
-                    }
-                    _ => 0.0
+                    Token::IntLiteral(value) => *value as f64,
+                    Token::FloatLiteral(value) => *value,
+                    _ => 0.0,
                 },
-                _ => 0.0
+                _ => 0.0,
             }
         }
-        _ => 0.0
+        _ => 0.0,
     };
 
     let mut sat_param = param * -0.05;

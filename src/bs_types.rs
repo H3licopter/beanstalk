@@ -5,12 +5,12 @@ pub enum DataType {
     Bool,
     True,
     False,
-    String,         // UTF-8 (will probably just be utf 16 because js for now)
-    
+    String, // UTF-8 (will probably just be utf 16 because js for now)
+
     // Any type can be used in the expression and will be coerced to a string (for scenes only)
     // Mathematical operations will still work and take priority, but strings can be used in these expressions
     // And all types will finally be coerced to strings after everything is evaluated
-    CoerseToString, 
+    CoerseToString,
 
     Collection,
     Scene,

@@ -21,18 +21,18 @@ mod parsers {
     pub mod build_ast;
     pub mod collections;
     mod create_scene_node;
+    pub mod functions;
     pub mod parse_expression;
     pub mod styles;
     pub mod util;
-    pub mod functions;
     pub mod variables;
 }
 mod html_output {
+    pub mod colors;
     mod dom_hooks;
     mod generate_html;
     pub mod js_parser;
     pub mod web_parser;
-    pub mod colors;
 }
 mod wasm_output {
     pub mod wasm_generator;
@@ -45,7 +45,7 @@ enum Command {
     Build(String),
     Release(String),
     Test,
-    Dev(String), // Runs local dev server
+    Dev(String),  // Runs local dev server
     Wat(PathBuf), // Compiles a WAT file to WebAssembly
 }
 
@@ -156,7 +156,7 @@ fn collect_user_input() -> Command {
                             return Command::NewHTMLProject(PathBuf::from(dir));
                         }
                     } else {
-                       // use current directory
+                        // use current directory
                         return Command::NewHTMLProject(PathBuf::from(""));
                     }
                 }

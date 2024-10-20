@@ -6,7 +6,11 @@ use crate::tokenize_scene::{tokenize_codeblock, tokenize_markdown};
 use std::iter::Peekable;
 use std::str::Chars;
 
-pub fn tokenize(source_code: &str, module_name: &str, globals: Vec<Declaration>) -> (Vec<Token>, Vec<u32>) {
+pub fn tokenize(
+    source_code: &str,
+    module_name: &str,
+    globals: Vec<Declaration>,
+) -> (Vec<Token>, Vec<u32>) {
     let mut tokens: Vec<Token> = Vec::new();
     let mut line_number: u32 = 1;
     let mut token_line_numbers: Vec<u32> = Vec::new();
@@ -32,7 +36,12 @@ pub fn tokenize(source_code: &str, module_name: &str, globals: Vec<Declaration>)
 
         tokens.push(token);
         token_line_numbers.push(line_number);
-        token = get_next_token(&mut chars, &mut tokenize_mode, &mut scene_nesting_level, &mut line_number);
+        token = get_next_token(
+            &mut chars,
+            &mut tokenize_mode,
+            &mut scene_nesting_level,
+            &mut line_number,
+        );
     }
 
     // Mark unused variables for removal in AST
@@ -75,7 +84,7 @@ pub fn get_next_token(
         return tokenize_markdown(chars, &mut current_char, line_number);
     }
 
-    // Whitespace 
+    // Whitespace
     if current_char == '\n' {
         *line_number += 1;
         return Token::Newline;
@@ -175,8 +184,6 @@ pub fn get_next_token(
 
         return Token::Colon;
     }
-
-
 
     //Window
     if current_char == '#' {
@@ -434,15 +441,18 @@ pub fn get_next_token(
 
             if next_char == '.' {
                 dot_count += 1;
-                // Stop if too many dots           
+                // Stop if too many dots
                 if dot_count > 1 {
-                    return Token::Error("Cannot have more than one decimal point in a number".to_string(), *line_number);
+                    return Token::Error(
+                        "Cannot have more than one decimal point in a number".to_string(),
+                        *line_number,
+                    );
                 }
                 token_value.push(chars.next().unwrap());
                 continue;
             }
 
-            if next_char.is_numeric() {     
+            if next_char.is_numeric() {
                 token_value.push(chars.next().unwrap());
             } else {
                 break;
@@ -460,8 +470,13 @@ pub fn get_next_token(
 
     if current_char == '_' {}
 
-
-    Token::Error(format!("Invalid Token Used (tokenizer). Token: '{}'. Tokenizer mode: {:?}", current_char, tokenize_mode), *line_number)
+    Token::Error(
+        format!(
+            "Invalid Token Used (tokenizer). Token: '{}'. Tokenizer mode: {:?}",
+            current_char, tokenize_mode
+        ),
+        *line_number,
+    )
 }
 
 // Nested function because may need multiple searches for variables
@@ -502,7 +517,6 @@ fn keyword_or_variable(
                 // Keywords
                 "io" => return Token::Print,
 
-                
                 _ => {}
             }
 
@@ -516,8 +530,8 @@ fn keyword_or_variable(
                     // Style
                     "code" => {
                         *tokenize_mode = TokenizeMode::Codeblock;
-                        return Token::CodeKeyword
-                    },
+                        return Token::CodeKeyword;
+                    }
                     "blank" => return Token::Blank,
                     "bg" => return Token::BG,
 
@@ -600,7 +614,10 @@ fn keyword_or_variable(
         return Token::Variable(token_value.to_string());
     }
 
-    Token::Error(format!("Invalid variable name: {}", token_value), *line_number)
+    Token::Error(
+        format!("Invalid variable name: {}", token_value),
+        *line_number,
+    )
 }
 
 // Checking if the variable name it valid
@@ -625,7 +642,7 @@ pub fn new_var_or_ref(
         Some(declaration) => {
             declaration.has_ref = true;
             if declaration.is_imported {
-                return Token::ConstReference(declaration.name.to_string())
+                return Token::ConstReference(declaration.name.to_string());
             }
 
             if tokens.len() <= declaration.index + 1 {
@@ -637,7 +654,7 @@ pub fn new_var_or_ref(
             match token_after {
                 Token::Initialise(is_const) => {
                     if *is_const {
-                        return Token::ConstReference(declaration.name.to_string())
+                        return Token::ConstReference(declaration.name.to_string());
                     }
                 }
                 // Probably should have some error handling here if the declaration is weird

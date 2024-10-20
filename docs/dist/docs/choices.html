@@ -28,7 +28,7 @@
 </p><p>Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
 </p><p>Choices are written in SCREAMING_SNAKE_CASE. 
 </p><p>Each choice can optionally contain data that can be accessed inside that Choice.
-</p><span>RESPONSE : choice : (data: string, error: !)
+</p><p>RESPONSE : choice : (data: string, error: !)
 
     STATE : choice : (
         paused,
@@ -43,14 +43,18 @@
             STATE.error_message =&gt; print( now value )
         )
     )
-</span>
-<script type="module">const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
-</h3></div></footer>`; function uInnerHTML(id,update){
+</p>
+<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
+</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></div></footer>`;
+  WebAssembly.instantiateStreaming(fetch("./choices.wasm")).then((obj)=>{
+    let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }</script>
+            }
+  ;});</script>
 </body>
 </html>

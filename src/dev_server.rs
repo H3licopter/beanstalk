@@ -1,9 +1,9 @@
 use crate::{build, settings};
 use colour::{blue_ln, dark_cyan_ln, green_ln_bold, print_bold, red_ln};
+use settings::get_default_config;
 use std::error::Error;
 use std::path::PathBuf;
 use std::time::SystemTime;
-use settings::get_default_config;
 use std::{
     fs::{self, metadata},
     io::{prelude::*, BufReader},
@@ -66,19 +66,29 @@ fn handle_connection(
                         if page_path == "/" {
                             get_home_page_path(&path, true)
                         } else {
-                            let src_path = PathBuf::from(format!("{}/{}{}", path, get_default_config().src, page_path)).with_extension("bs");
+                            let src_path = PathBuf::from(format!(
+                                "{}/{}{}",
+                                path,
+                                get_default_config().src,
+                                page_path
+                            ))
+                            .with_extension("bs");
                             Ok(src_path)
                         }
                     }
-                    None => {
-                        get_home_page_path(&path, true)
-                    }
+                    None => get_home_page_path(&path, true),
                 };
 
                 match &parsed_url {
                     // Get the metadata of the file
                     Ok(parsed_url) => {
-                        let global_file_path = PathBuf::from(format!("{}/{}/{}", path, get_default_config().src, settings::GLOBAL_PAGE_KEYWORD)).with_extension("bs");
+                        let global_file_path = PathBuf::from(format!(
+                            "{}/{}/{}",
+                            path,
+                            get_default_config().src,
+                            settings::GLOBAL_PAGE_KEYWORD
+                        ))
+                        .with_extension("bs");
                         let global_file_modified = if fs::metadata(&global_file_path).is_ok() {
                             has_been_modified(&global_file_path, last_modified)
                         } else {
@@ -152,7 +162,9 @@ fn handle_connection(
 
     let string_response = format!(
         "{}\r\nContent-Length: {}\r\nContent-Type: {}\r\n\r\n",
-        status_line, contents.len(), content_type,
+        status_line,
+        contents.len(),
+        content_type,
     );
 
     let response = &[string_response.as_bytes(), &contents].concat();
@@ -186,7 +198,10 @@ fn has_been_modified(path: &PathBuf, modified: &mut std::time::SystemTime) -> bo
     let path_metadata = match fs::metadata(path) {
         Ok(m) => m,
         Err(_) => {
-            red_ln!("Error reading directory (probably doesn't exist): {:?}", path);
+            red_ln!(
+                "Error reading directory (probably doesn't exist): {:?}",
+                path
+            );
             return false;
         }
     };
@@ -272,13 +287,25 @@ fn get_home_page_path(path: &String, src: bool) -> Result<PathBuf, Box<dyn Error
             Ok(e) => {
                 let page = e.path();
                 if src {
-                    if page.file_stem().unwrap().to_str().unwrap().starts_with(settings::COMP_PAGE_KEYWORD) {
+                    if page
+                        .file_stem()
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .starts_with(settings::COMP_PAGE_KEYWORD)
+                    {
                         Some(page)
                     } else {
                         continue;
                     }
                 } else {
-                    if page.file_stem().unwrap().to_str().unwrap().starts_with(settings::INDEX_PAGE_KEYWORD) {
+                    if page
+                        .file_stem()
+                        .unwrap()
+                        .to_str()
+                        .unwrap()
+                        .starts_with(settings::INDEX_PAGE_KEYWORD)
+                    {
                         Some(page)
                     } else {
                         continue;
@@ -293,12 +320,17 @@ fn get_home_page_path(path: &String, src: bool) -> Result<PathBuf, Box<dyn Error
     }
 
     match first_page {
-        Some(index_page_path) => {
-            Ok(index_page_path)
-        }
+        Some(index_page_path) => Ok(index_page_path),
         None => {
-            red_ln!("No page found in {} directory: {:?}", if src { "src" } else { "dev" }, first_page);
-            return Err(Box::new(std::io::Error::new(std::io::ErrorKind::NotFound, "No page found in src directory")));
+            red_ln!(
+                "No page found in {} directory: {:?}",
+                if src { "src" } else { "dev" },
+                first_page
+            );
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "No page found in src directory",
+            )));
         }
     }
 }

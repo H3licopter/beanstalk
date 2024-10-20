@@ -1,15 +1,15 @@
-use colour::{blue_ln, dark_cyan_ln, dark_yellow_ln, print_bold, print_ln_bold, red_ln};
 use crate::html_output::web_parser;
 use crate::parsers::ast_nodes::AstNode;
-use crate::{parsers, settings};
 use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::{Declaration, Token};
-use wat::parse_str;
+use crate::{parsers, settings};
+use colour::{blue_ln, dark_cyan_ln, dark_yellow_ln, print_bold, print_ln_bold, red_ln};
 use std::error::Error;
 use std::ffi::OsStr;
-use std::path::PathBuf;
 use std::fs;
+use std::path::PathBuf;
+use wat::parse_str;
 
 pub struct OutputFile {
     source_code: String,
@@ -37,13 +37,14 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
     };
 
     // Create a new PathBuf from the entry_path
-    let entry_dir ;
+    let entry_dir;
     // If entry_path is "test", use the compiler test directory
     if entry_path == "test" {
         entry_dir = match std::env::current_dir() {
-            Ok(dir) => {
-                dir.join("test_output/src").join(settings::COMP_PAGE_KEYWORD).with_extension("bs")
-            },
+            Ok(dir) => dir
+                .join("test_output/src")
+                .join(settings::COMP_PAGE_KEYWORD)
+                .with_extension("bs"),
             Err(e) => {
                 red_ln!("Error getting current directory: {:?}", e);
                 return Err(e.into());
@@ -73,16 +74,14 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
     // and check where the project entry points are
     enum CompileType {
         SingleFile(PathBuf, String), // File Name, Source Code
-        MultiFile(PathBuf, String),          // Config file content
+        MultiFile(PathBuf, String),  // Config file content
         Error(String),
     }
 
     let config = if entry_dir.extension() == Some("bs".as_ref()) {
         let source_code = fs::read_to_string(&entry_dir);
         match source_code {
-            Ok(content) => {
-                CompileType::SingleFile(entry_dir.with_extension("html"), content)
-            }
+            Ok(content) => CompileType::SingleFile(entry_dir.with_extension("html"), content),
             Err(_) => CompileType::Error("No file found".to_string()),
         }
     } else {
@@ -114,15 +113,18 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
             // Get config settings from config file
             // let project_config = get_config_data(&source_code)?;
             // Just get the default config for now until can parse the config settings
-            let src_dir: fs::ReadDir =
-                match fs::read_dir(entry_dir.join(&project_config.src)) {
-                    Ok(dir) => dir,
-                    Err(e) => {
-                        red_ln!("Error reading directory: {:?}", e);
-                        return Err(e.into());
-                    }
-                };
-            match add_bs_files_to_parse(&mut source_code_to_parse, src_dir, entry_dir.join(&output_dir_folder)) {
+            let src_dir: fs::ReadDir = match fs::read_dir(entry_dir.join(&project_config.src)) {
+                Ok(dir) => dir,
+                Err(e) => {
+                    red_ln!("Error reading directory: {:?}", e);
+                    return Err(e.into());
+                }
+            };
+            match add_bs_files_to_parse(
+                &mut source_code_to_parse,
+                src_dir,
+                entry_dir.join(&output_dir_folder),
+            ) {
                 Ok(_) => {}
                 Err(e) => {
                     red_ln!("Error adding bs files to parse: {:?}", e);
@@ -138,7 +140,13 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
     // And collect all exported functions and variables from the module
     // After compiling, collect all imported modules and add them to the list of exported modules
     for file in &mut source_code_to_parse {
-        match compile(&file, release_build, &project_config, &mut exported_js, &mut exported_css) {
+        match compile(
+            &file,
+            release_build,
+            &project_config,
+            &mut exported_js,
+            &mut exported_css,
+        ) {
             Ok((compiled_code, wasm, imports)) => {
                 file.compiled_code = compiled_code;
                 file.wasm = wasm;
@@ -153,7 +161,11 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
     // Add imports and globals to the compiled code of the files
     for file in &mut source_code_to_parse {
         // Add the imports to the files source code importing them after compiling all of them
-        let mut imports = exported_js.iter().filter(|e| e.global).map(|e| e.js.clone()).collect::<String>();
+        let mut imports = exported_js
+            .iter()
+            .filter(|e| e.global)
+            .map(|e| e.js.clone())
+            .collect::<String>();
         for import in &file.imports {
             let requested_module = exported_js.iter().find(|e| e.module_path == *import);
             match requested_module {
@@ -161,7 +173,10 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
                     imports += &export.js;
                 }
                 None => {
-                    red_ln!("Error: Could not find module to add import to. May not be exported. {:?}", import);
+                    red_ln!(
+                        "Error: Could not find module to add import to. May not be exported. {:?}",
+                        import
+                    );
                 }
             }
         }
@@ -192,7 +207,10 @@ pub fn build(entry_path: String, release_build: bool) -> Result<(), Box<dyn Erro
             };
             let file_path = file.path();
             if file_path.extension() == Some("html".as_ref()) {
-                if !source_code_to_parse.iter().any(|f| f.file.file_stem() == file_path.file_stem()) {
+                if !source_code_to_parse
+                    .iter()
+                    .any(|f| f.file.file_stem() == file_path.file_stem())
+                {
                     match fs::remove_file(&file_path) {
                         Ok(_) => {
                             blue_ln!("Deleted unused file: {:?}", file_path);
@@ -232,11 +250,13 @@ pub fn add_bs_files_to_parse(
                     let file_name = match file_path.file_stem() {
                         Some(stem) => match stem.to_str() {
                             Some(stem_str) => match stem_str {
-                                settings::COMP_PAGE_KEYWORD => settings::INDEX_PAGE_KEYWORD.to_string(),
+                                settings::COMP_PAGE_KEYWORD => {
+                                    settings::INDEX_PAGE_KEYWORD.to_string()
+                                }
                                 settings::GLOBAL_PAGE_KEYWORD => {
                                     global = true;
                                     settings::GLOBAL_PAGE_KEYWORD.to_string()
-                                },
+                                }
                                 _ => stem_str.to_string(),
                             },
                             None => {
@@ -285,7 +305,7 @@ pub fn add_bs_files_to_parse(
                             red_ln!("Error adding bs files to parse: {:?}", e);
                         }
                     }
-                
+
                 // HANDLE USING JS / HTML / CSS MIXED INTO THE PROJECT
                 } else {
                     match file_path.extension() {
@@ -306,8 +326,6 @@ pub fn add_bs_files_to_parse(
                         None => {}
                     }
                 }
-
-
             }
 
             Err(e) => {
@@ -328,34 +346,51 @@ fn compile(
 ) -> Result<(String, Vec<u8>, Vec<PathBuf>), Box<dyn Error>> {
     print_bold!("Compiling: ");
 
-    let file_name = output.file.file_stem().unwrap_or(OsStr::new("")).to_str().unwrap_or("");
-    
+    let file_name = output
+        .file
+        .file_stem()
+        .unwrap_or(OsStr::new(""))
+        .to_str()
+        .unwrap_or("");
+
     if file_name.is_empty() {
         red_ln!("Error: File name is empty");
-        return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "Error getting file name when compiling file. String was empty or file stem was None")));
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "Error getting file name when compiling file. String was empty or file stem was None",
+        )));
     }
 
     dark_yellow_ln!("{:?}", file_name);
 
-    let globals: Vec<Declaration> = exported_js.iter().filter(|e| e.global).map(|e| Declaration {
-        name: e.module_path.file_stem().unwrap().to_str().unwrap().to_string(),
-        index: 0, // Not used
-        has_ref: true,
-        is_exported: true, // Not used
-        is_imported: true,
-    }).collect();
+    let globals: Vec<Declaration> = exported_js
+        .iter()
+        .filter(|e| e.global)
+        .map(|e| Declaration {
+            name: e
+                .module_path
+                .file_stem()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string(),
+            index: 0, // Not used
+            has_ref: true,
+            is_exported: true, // Not used
+            is_imported: true,
+        })
+        .collect();
 
-    let (tokens, token_line_numbers): (Vec<Token>, Vec<u32>) = tokenizer::tokenize(&output.source_code, file_name, globals);
+    let (tokens, token_line_numbers): (Vec<Token>, Vec<u32>) =
+        tokenizer::tokenize(&output.source_code, file_name, globals);
     let (ast, imports) = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers);
 
-    // find the imports 
+    // find the imports
     let mut import_requests = Vec::new();
     for import in imports {
         match import {
             AstNode::Use(module_path) => {
-                import_requests.push(
-                    module_path,
-                );
+                import_requests.push(module_path);
             }
             _ => {
                 red_ln!("Error: Import must be a string literal");
@@ -386,11 +421,11 @@ fn compile(
 
     let (module_output, js_exports, css_exports, wat) = web_parser::parse(
         ast,
-        html_config, 
-        release_build, 
+        html_config,
+        release_build,
         file_name.to_string(),
         output.global,
-        exported_css.to_string()
+        exported_css.to_string(),
     );
 
     let wasm = match parse_str(&wat) {
@@ -412,8 +447,14 @@ fn write_output_file(output: &OutputFile) -> Result<(), Box<dyn Error>> {
     let parent_dir = match output.file.parent() {
         Some(dir) => dir,
         None => {
-            red_ln!("Error getting parent directory of output file when writing: {:?}", output.file);
-            return Err(Box::new(std::io::Error::new(std::io::ErrorKind::Other, "Error getting parent directory of output file")));
+            red_ln!(
+                "Error getting parent directory of output file when writing: {:?}",
+                output.file
+            );
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "Error getting parent directory of output file",
+            )));
         }
     };
 
@@ -426,10 +467,7 @@ fn write_output_file(output: &OutputFile) -> Result<(), Box<dyn Error>> {
         }
     }
 
-    match fs::write(
-        &output.file,
-        &output.compiled_code,
-    ) {
+    match fs::write(&output.file, &output.compiled_code) {
         Ok(_) => {}
         Err(e) => {
             red_ln!("Error writing file: {:?}", e);
@@ -438,10 +476,7 @@ fn write_output_file(output: &OutputFile) -> Result<(), Box<dyn Error>> {
     }
 
     // Write the wasm file
-    match fs::write(
-        output.file.with_extension("wasm"),
-        &output.wasm,
-    ) {
+    match fs::write(output.file.with_extension("wasm"), &output.wasm) {
         Ok(_) => {}
         Err(e) => {
             red_ln!("Error writing WASM module file: {:?}", e);

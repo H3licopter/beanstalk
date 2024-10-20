@@ -118,13 +118,17 @@
     -- This will update the string in the first scene, but not the second
     variable_that_changes := "world"
 </code></pre><span class="cFooter"></span></main>
-<script type="module">const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
-</h3></div></footer>`; function uInnerHTML(id,update){
+<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
+</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></div></footer>`;
+  WebAssembly.instantiateStreaming(fetch("./scenes.wasm")).then((obj)=>{
+    let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);</script>
+            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);
+  ;});</script>
 </body>
 </html>

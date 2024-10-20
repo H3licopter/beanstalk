@@ -14,7 +14,7 @@ pub enum Tag {
     Section,
 
     // Scripts
-    Redirect(AstNode),  // src
+    Redirect(AstNode), // src
 
     // HTML tags
     Span,
@@ -51,8 +51,8 @@ pub enum Action {
 pub enum Style {
     Padding(AstNode),
     Margin(AstNode),
-    Size(AstNode),  // Size of text
-    
+    Size(AstNode), // Size of text
+
     // Colours keywords = -100 to 100 as different shades. -100 darkest, 100 lightest
     TextColor(AstNode, Token), // Value, type (rgb, hsl)
     BackgroundColor(AstNode),

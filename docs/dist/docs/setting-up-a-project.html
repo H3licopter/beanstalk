@@ -30,23 +30,27 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}.bs-1 > * {color:inherit;}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><h1>Setting up a Project
-</h1><p>Running the command 'new html' followed by your directory path will create a new static HTML Beanstalk project in that directory. The path is relative to the current directory.
+            }.bs-0 > * {color:inherit;}.bs-1 > * {color:inherit;}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><h2>The Compiler
+</h2><p>You currently have to compile the Beanstalk compiler yourself. The compiler is written in Rust. This will change once the compiler and language development is more stable.
+</p><p>The compiler can be found on <a href="https://github.com/H3licopter/beanstalk/" style="" class="" >Github</a><span>.
+</span></p><h2>Setting up a Project
+</h2><p>Running the command 'new html' followed by your directory path will create a new static HTML Beanstalk project in that directory. The path is relative to the current directory.
 </p><p><em>More project types will be added in the future.</em></p><span>The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
-</span><span>This file is called </span><strong>config.bs&nbsp;</strong><span>and is placed in the root folder of your project by default. A configuration file is also created in the root directory.
+</span><span>This file is called </span><strong>config.bs&nbsp;</strong><span>and is placed in the root folder of your project by default, this is the entry point for the compiler. 
 </span></p><p><em>All Beanstalk files use the .bs file extension.</em></p><span>The compiler will read through any configuration settings first.
 </span><li><span>src folder contains your bs files and determines the file structure of your pages. 
-</span></li><li><span>dist folder contains the compiled files.
-</span></li><p>⚠️ <span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-0" ><span>The compiler is not yet a proper command line tool, it currently has to be compiled and ran directly before giving it a command.</span>&nbsp;</span><span>⚠️
-</span></p><p>Has development starts to be more stable, the compiler will be set up to install on your system and be run from the command line with the 'bean' command.
+</span></li><li><span>dev folder contains the dev output of the compiler.
+</span></li><li><span>release folder contains the release builds.
+</span></li><p>⚠️ <span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-0" ><p>The compiler is not yet a proper command line tool, it currently has to be compiled and ran directly before giving it a command.&nbsp;</p></span><span>⚠️
+</span></p><p>As development starts to be more stable, there will be an installable release of the compiler. This will run from the command line with the 'bean' command.
 </p><h1>Routes
-</h1><p>Beanstalk projects use a directory based router, with a few special naming rules. 
+</h1><p>Beanstalk web projects use a directory based router, with a few special naming rules. 
 </p><h2>Comptime files
-</h2><p>Prefixing your BS files with a '#' symbol and keyword means it is a special comptime file. The compiler recognises different kinds of comptime files and will handle them differently. 
+</h2><p>Prefixing your BS files with a '#' symbol and keyword means it is a special comptime file. The compiler recognises different kinds of compile time files and will handle them differently. 
 </p><p>After the special file name, you can leave a space and name the file whatever you want.
-</p><li><span>'#page' is the main page of the folder it is in.
+</p><li><span>'#page' is the main page of the folder it is in. This page takes the name of the directory that it's in if there is no name specified after the #page keyword.
 </span></li><li><span>'#layout' automatically wraps all pages in the same directory in a parent layout. Use the 'slot' keyword in a scenehead to specify where the content should be placed. 
-</span></li><li><span>'#error' handles what the server does by default when an error occurs on the server, such as a 404.
+</span></li><li><span>'#error' handles what the server does by default when an error occurs on the server, such as a 404. This will eventually extend to handle all different types of errors.
 </span></li><h2>Server files (coming soon)
 </h2><p>Prefixing your BS files with a '+' symbol and keyword means it is a server file. Naming the file the same as a regular page, beans the server file will be called first when the page is requested.
 </p><p>Otherwise the server file can contain regular server side BS code.
@@ -55,7 +59,7 @@
 </h3><p>The simpliest way to get the compiler to output some HTML is to use the <em>build&nbsp;</em><span>command.
 </span></p><p>While in the root directory of your project, where the config.bs file is, run the command <strong>build&nbsp;</strong><span>to compile your whole project.
 </span></p><pre><code>    $ build ./path_to_project
-</code></pre><p>If you specify a specific bs file, build will only compile that specific file.
+</code></pre><p>If you specify a specific bs file, build will only compile that specific file and will output it into the same directory.
 </p><pre><code>    $ build ./path_to_project/src/index.bs
 </code></pre><h3>Dev
 </h3><p>To create a development server with a watcher, run the command 'dev' in the root directory of your project. This is the main way to develop your HTML project.
@@ -67,13 +71,17 @@
 *
 
 </span></p></main><span class="cFooter"></span>
-<script type="module">const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
-</h3></div></footer>`; function uInnerHTML(id,update){
+<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
+</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</h3></div></footer>`;
+  WebAssembly.instantiateStreaming(fetch("./setting-up-a-project.wasm")).then((obj)=>{
+    let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);</script>
+            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);
+  ;});</script>
 </body>
 </html>

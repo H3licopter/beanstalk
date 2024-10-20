@@ -1,20 +1,18 @@
-use colour::red_ln;
 use crate::{bs_types::DataType, parsers::ast_nodes::AstNode, Token};
+use colour::red_ln;
 
 pub fn expression_to_wat(expr: &AstNode) -> String {
     let mut wat = String::new();
 
     match expr {
-        AstNode::RuntimeExpression(nodes, datatype) => {
-            match datatype {
-                &DataType::Float => {
-                    return float_expr_to_wat(nodes);
-                }
-                _ => {
-                    red_ln!("Unsupported datatype found in expression sent to WAT parser");
-                }
+        AstNode::RuntimeExpression(nodes, datatype) => match datatype {
+            &DataType::Float => {
+                return float_expr_to_wat(nodes);
             }
-        }
+            _ => {
+                red_ln!("Unsupported datatype found in expression sent to WAT parser");
+            }
+        },
 
         AstNode::Literal(token) => match token {
             Token::FloatLiteral(value) => {
@@ -41,14 +39,16 @@ fn float_expr_to_wat(nodes: &Vec<AstNode>) -> String {
 
     for node in nodes {
         match node {
-            AstNode::Literal(token) => match token {
-                Token::FloatLiteral(value) => {
-                    wat.push_str(&format!(" f64.const {}", value));
+            AstNode::Literal(token) => {
+                match token {
+                    Token::FloatLiteral(value) => {
+                        wat.push_str(&format!(" f64.const {}", value));
+                    }
+                    _ => {
+                        red_ln!("Compiler error: Wrong literal type found in expression sent to WAT parser");
+                    }
                 }
-                _ => {
-                    red_ln!("Compiler error: Wrong literal type found in expression sent to WAT parser");
-                }
-            },
+            }
 
             AstNode::VarReference(name, _) | AstNode::ConstReference(name, _) => {
                 wat.push_str(&format!(" global.get $v{name}"));
@@ -65,7 +65,7 @@ fn float_expr_to_wat(nodes: &Vec<AstNode>) -> String {
                         return String::new();
                     }
                 };
-                
+
                 wat.push_str(wat_op);
             }
 
@@ -73,11 +73,10 @@ fn float_expr_to_wat(nodes: &Vec<AstNode>) -> String {
                 red_ln!("unknown AST node found in expression when parsing float expression into WAT: {:?}", node);
             }
         }
-    };
+    }
 
     wat
 }
-
 
 // if operators_stack.len() > 0 && output_stack.len() > 0 {
 //     let operator = match operators_stack.pop() {

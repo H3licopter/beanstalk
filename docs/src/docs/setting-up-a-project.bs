@@ -2,37 +2,43 @@
 
 [header center: [title 1: PROJECT SETUP]]
 [main:
-# Setting up a Project
+## The Compiler
+You currently have to compile the Beanstalk compiler yourself. The compiler is written in Rust. This will change once the compiler and language development is more stable.
+
+The compiler can be found on [link "https://github.com/H3licopter/beanstalk/": Github].
+
+## Setting up a Project
 Running the command 'new html' followed by your directory path will create a new static HTML Beanstalk project in that directory. The path is relative to the current directory.
 
 *More project types will be added in the future.*
 
 The entry point for a Beanstalk project is configured when creating a new Beanstalk project. 
 
-This file is called **config.bs** and is placed in the root folder of your project by default. A configuration file is also created in the root directory.
+This file is called **config.bs** and is placed in the root folder of your project by default, this is the entry point for the compiler. 
 
 *All Beanstalk files use the .bs file extension.*
 
 The compiler will read through any configuration settings first.
 
 - src folder contains your bs files and determines the file structure of your pages. 
-- dist folder contains the compiled files.
+- dev folder contains the dev output of the compiler.
+- release folder contains the release builds.
 
 ⚠️ [red size(0.85):  The compiler is not yet a proper command line tool, it currently has to be compiled and ran directly before giving it a command.] ⚠️
 
-Has development starts to be more stable, the compiler will be set up to install on your system and be run from the command line with the 'bean' command.
+As development starts to be more stable, there will be an installable release of the compiler. This will run from the command line with the 'bean' command.
 
 # Routes
-Beanstalk projects use a directory based router, with a few special naming rules. 
+Beanstalk web projects use a directory based router, with a few special naming rules. 
 
 ## Comptime files
-Prefixing your BS files with a '#' symbol and keyword means it is a special comptime file. The compiler recognises different kinds of comptime files and will handle them differently. 
+Prefixing your BS files with a '#' symbol and keyword means it is a special comptime file. The compiler recognises different kinds of compile time files and will handle them differently. 
 
 After the special file name, you can leave a space and name the file whatever you want.
 
-- '#page' is the main page of the folder it is in.
+- '#page' is the main page of the folder it is in. This page takes the name of the directory that it's in if there is no name specified after the #page keyword.
 - '#layout' automatically wraps all pages in the same directory in a parent layout. Use the 'slot' keyword in a scenehead to specify where the content should be placed. 
-- '#error' handles what the server does by default when an error occurs on the server, such as a 404.
+- '#error' handles what the server does by default when an error occurs on the server, such as a 404. This will eventually extend to handle all different types of errors.
 
 ## Server files (coming soon)
 Prefixing your BS files with a '+' symbol and keyword means it is a server file. Naming the file the same as a regular page, beans the server file will be called first when the page is requested.
@@ -51,7 +57,7 @@ While in the root directory of your project, where the config.bs file is, run th
     $ build ./path_to_project
 ]
 
-If you specify a specific bs file, build will only compile that specific file.
+If you specify a specific bs file, build will only compile that specific file and will output it into the same directory.
 
 [code:
     $ build ./path_to_project/src/index.bs

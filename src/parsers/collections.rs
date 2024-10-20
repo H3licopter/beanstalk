@@ -22,7 +22,14 @@ pub fn new_tuple(
 
             _ => {
                 *i += 1;
-                items.push(create_expression(tokens, i, true, &ast, starting_line_number, &DataType::Inferred));
+                items.push(create_expression(
+                    tokens,
+                    i,
+                    true,
+                    &ast,
+                    starting_line_number,
+                    &DataType::Inferred,
+                ));
             }
         }
     }
@@ -30,7 +37,12 @@ pub fn new_tuple(
     return AstNode::Tuple(items, starting_line_number.to_owned());
 }
 
-pub fn new_array(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, starting_line_number: &u32) -> AstNode {
+pub fn new_array(
+    tokens: &Vec<Token>,
+    i: &mut usize,
+    ast: &Vec<AstNode>,
+    starting_line_number: &u32,
+) -> AstNode {
     let mut items: Vec<AstNode> = Vec::new();
     let collection_type = DataType::InferredCollection;
 
@@ -46,7 +58,14 @@ pub fn new_array(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, startin
 
             // TO DO: Type checking and adding values to array
             _ => {
-                items.push(create_expression(tokens, i, true, ast, starting_line_number, &collection_type));
+                items.push(create_expression(
+                    tokens,
+                    i,
+                    true,
+                    ast,
+                    starting_line_number,
+                    &collection_type,
+                ));
             }
         }
 

@@ -1,6 +1,6 @@
+use colour::red_ln;
 use std::fs;
 use std::path::{Path, PathBuf};
-use colour::red_ln;
 use wat::parse_file;
 
 pub fn compile_wat_file(path: &Path) {

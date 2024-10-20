@@ -1,0 +1,36 @@
+[Navbar]
+
+[header center: [title 1: ROADMAP FOR BEANSTALK]]
+
+[main:
+Beanstalk is a new language and is still in development. It doesn't even have a version number yet!
+
+Here is a list of current bugs, development goals and planned features.
+
+## Current immediate task list
+- rename dist folder to release folder
+- Finish implimenting all math operators and brackets
+- get variables and mostly folded expressions working fully in WASM
+
+## Core Features Being Implemented
+- Finish implementing Style system for scenes (separate from core language into library of keywords)
+- Tidy up Error reporting
+- Boolean expressions and operators
+- If statements
+- Loops
+- Importing/exporting working fully
+- Functions and function calls working fully, including inside expressions
+- Scene reactivity and full component system
+- Importing HTML, CSS and JS libraries seemlessly into a BS project
+- Scoping and variable shadowing
+- Commit to final memory management strategy for the language
+- Compiler as a proper command line tool
+
+## Current Bugs
+*Scenes*
+- Emphasis and strong tags are not being parsed correctly for bullet points. Markdown parser needs some work.
+- Scenes sometimes not nesting correctly and escaping it's parent scene.
+
+## Future Design Plans and proposals
+- Better Dev server with web sockets handling hot reloading (rather than the current janky system)
+- Server files and server side BS code (Using a Wasm runtime on the server)

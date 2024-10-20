@@ -1,5 +1,5 @@
-use crate::{bs_types::DataType, Token};
 use super::ast_nodes::AstNode;
+use crate::{bs_types::DataType, Token};
 
 pub fn create_function(
     name: String,
@@ -10,7 +10,7 @@ pub fn create_function(
     token_line_numbers: &Vec<u32>,
 ) -> AstNode {
     let function_body = Vec::new();
-    let return_type =  match parse_return_type(tokens, i) {
+    let return_type = match parse_return_type(tokens, i) {
         Ok(return_type) => return_type,
         Err(err) => {
             return AstNode::Error(err.to_string(), token_line_numbers[*i]);
@@ -18,14 +18,23 @@ pub fn create_function(
     };
 
     if &tokens[*i] != &Token::OpenScope {
-        return AstNode::Error("Expected '{' to open function scope".to_string(),token_line_numbers[*i]);
+        return AstNode::Error(
+            "Expected '{' to open function scope".to_string(),
+            token_line_numbers[*i],
+        );
     }
 
     *i += 1;
 
     // TODO - Get function body
 
-    AstNode::Function(name, Box::new(args), function_body, is_exported, return_type)
+    AstNode::Function(
+        name,
+        Box::new(args),
+        function_body,
+        is_exported,
+        return_type,
+    )
 }
 
 fn parse_return_type(tokens: &Vec<Token>, i: &mut usize) -> Result<Vec<DataType>, &'static str> {
@@ -63,7 +72,7 @@ fn parse_return_type(tokens: &Vec<Token>, i: &mut usize) -> Result<Vec<DataType>
     }
 
     if open_parenthesis != 0 {
-        return Err("Wrong number of parenthesis used when declaring return type")
+        return Err("Wrong number of parenthesis used when declaring return type");
     }
 
     return Ok(return_type);

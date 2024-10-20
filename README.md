@@ -20,19 +20,10 @@
       Documentation
     </a>
   </h1>
-  <p>The docs are written entirely in Beanstalk!</p>
+  <p>The docs were created entirely using Beanstalk, and uploading the compiler ouput straight to Github pages.</p>
 
 </div>
 <br>
-<br>
-
-# Principles
-  - Fast Development of content heavy web pages
-  - Concise, minimal and consistent syntax
-  - As little boilerplate as possible
-  - Fast compile times with hot module reloading for rapid development
-  - Batteries included. Built in dev server and other various tools.
-
 <br>
 
 # Example
@@ -81,34 +72,29 @@
 <br>
 
 # Overview
-Beanstalk is a compiled, statically typed programming language which outputs HTML, CSS and JS/WASM all in one consistent syntax without having to switch between any languages. 
+Beanstalk is a compiled, statically typed programming language which outputs HTML, CSS and WASM/JS all in one consistent syntax without having to switch between any languages. 
 
-It's core syntax feature is using scenes.
+It's core syntax feature is using scenes, which are a declarative syntax built into an otherwise procedural language.
 
 Scenes are a markup syntax that can be used to create content, styling and logic all in one place. It is designed to be very concise, easy to read and flexibly interop with regular code with built in reactivity.
 
-### Markdown
-Write text content in a simple dialect of markdown. Images, videos and other media are easy to add and style with basic sensible modern styling built in as a starting point.
-
-### HTML
 Scenes provide a template for your styles and content, with the ability to add custom elements and styling.
 They can be nested and used as components in other scenes.
 
+**Markdown Built In**
+Write text content in a simple dialect of markdown. Images, videos and other media are easy to add and style with basic sensible modern styling built in as a starting point.
+
 **🔥 You can finally center that div with only one keyword! 🔥**
 
-### CSS
 Scenes have utility classes built in. Use keywords at the start of scenes to not only defined your elememts, but style and position them as well.
 
-You can also import CSS into your Beanstalk scenes for more complex styling.
+You can import CSS into your Beanstalk scenes for more complex styling.
 
-### JS/WASM
-Beanstalk will be a full programming language that compiles into Web Assembly, allowing you to add dynamic and interactive behaviours in your scenes naturally and concisely in it's own language.
-
-Reactivity, (scene) components, compile time evaluation and more will be built into the language with many more features already planned out in the language syntax for the future.
+### WASM
+Beanstalk is a programming language that compiles mostly into Web Assembly, allowing you to add dynamic and interactive behaviours in your scenes naturally and concisely while performing faster than regular web page.
 
 ### Technologies currently used in the compiler
 - [Pico CSS](https://picocss.com/) for the default CSS styling
-- [HTMX](https://htmx.org/) for the functionality behind many of the scene keywords
 
 <br>
 
