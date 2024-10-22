@@ -6,23 +6,29 @@
 # Language Design Goals
 The Beanstalk is designed to be:
 
-**Simple**
+### Simple
+
 Minimal keywords and symbols to reduce cognitive load and syntax noise. One way to do things where possible. Beanstalk trades expressiveness for readibility and simplicity.
 
-**Concise**
+### Concise
+
 As little boilerplate as possible. Safe type inferance and batteries included core language features to reduce the amount of code you need to write for simple tasks.
 
-**Strongly typed**
+### Strongly typed
+
 A small but powerful type system that is designed to be easy to use, understand and find errors in before runtime.
 
-**Seemless syntax for declaritive programming**
+### Seemless syntax for declaritive programming
+
 Scenes provide a very clean and concide way to describe the structure of a webpage or UI (or any other declaritive structure in the future).
 Having a declaritive syntax inside the language itself makes it easy to reason about desgining UI and visual components.
 
-**Procedural**
+### Procedural
+
 The programming part of the language is designed to be procedural, with a focus on functions and data manipulation. It should be easy to reason about control flow and avoid complex state management.
 
-**Fast compile times**
+### Fast compile times
+
 Being a compiled language, Beanstalk should have very fast compile times. The compiler is written in Rust and is designed to be fast and efficient. With built in hot reloading you should see changes to your code and UI designes almost instantly for fast iteration.
 
 # Style Guide
@@ -108,8 +114,6 @@ Parenthesis are used to group expressions together.
 # Data Types
 All data type keywords contain methods from the standard library for common manipulation of types. 
 The zero value is the value a variable will be assigned if it is not assigned a value when being initialized.
-
-**Primatives** 
 
 ## Numerical Types
 There is an intention to support all of these number types in the future. **Currently only 64 bit floats are supported.**

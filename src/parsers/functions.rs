@@ -17,9 +17,9 @@ pub fn create_function(
         }
     };
 
-    if &tokens[*i] != &Token::OpenScope {
+    if &tokens[*i] != &Token::Colon {
         return AstNode::Error(
-            "Expected '{' to open function scope".to_string(),
+            "Expected ':' to open function scope".to_string(),
             token_line_numbers[*i],
         );
     }
@@ -43,7 +43,7 @@ fn parse_return_type(tokens: &Vec<Token>, i: &mut usize) -> Result<Vec<DataType>
     // Check if there is a return type
     let mut open_parenthesis = 0;
     let mut next_in_list: bool = true;
-    while tokens[*i] != Token::OpenScope {
+    while tokens[*i] != Token::Colon {
         match &tokens[*i] {
             Token::OpenParenthesis => {
                 open_parenthesis += 1;

@@ -157,13 +157,13 @@ pub fn get_next_token(
         if chars.peek() == Some(&':') {
             // ::
             chars.next();
-            return Token::Initialise(true);
+            return Token::InitialiseInfer(true);
         }
 
         if chars.peek() == Some(&'=') {
             chars.next();
             // :=
-            return Token::Initialise(false);
+            return Token::InitialiseInfer(false);
         }
 
         match &tokenize_mode {
@@ -257,10 +257,10 @@ pub fn get_next_token(
 
     // Collections
     if current_char == '{' {
-        return Token::OpenScope;
+        return Token::OpenCurly;
     }
     if current_char == '}' {
-        return Token::CloseScope;
+        return Token::CloseCurly;
     }
 
     //Error handling
@@ -339,10 +339,6 @@ pub fn get_next_token(
     }
     if current_char == '*' {
         if let Some(&next_char) = chars.peek() {
-            if next_char == '*' {
-                chars.next();
-                return Token::Exponent;
-            }
             if next_char == '=' {
                 chars.next();
                 return Token::MultiplyAssign;
@@ -497,6 +493,7 @@ fn keyword_or_variable(
             match token_value.as_str() {
                 // Control Flow
                 "return" => return Token::Return,
+                "end" => return Token::End,
                 "if" => return Token::If,
                 "else" => return Token::Else,
                 "for" => return Token::For,
@@ -652,7 +649,7 @@ pub fn new_var_or_ref(
             let token_after = &tokens[declaration.index + 1];
 
             match token_after {
-                Token::Initialise(is_const) => {
+                Token::InitialiseInfer(is_const) => {
                     if *is_const {
                         return Token::ConstReference(declaration.name.to_string());
                     }

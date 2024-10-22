@@ -38,30 +38,69 @@
 )
 
 </p><p>Tuples are a fixed size and can contain any type. Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
-</p><p>If a tuple only contains one value, it becomes equaivalent to a single value rather than a collection of values.
+</p><p>A tuple of one value is indistinguishable from the value itself.
 </p><p>When creating a tuple using a colon, the values inside become immutable.
 </p><p>-- Fixed size tuple of immutable integers
     tuple :: 1, 2, 3
     tuple.0 -- returns 1
+</p><h2>Fixed Collections (Structs)
+</h2><p>By creating a constant collection, you can define a struct. This can then be used as a type to create new instances of the struct.
+</p><p>-- Vector struct
+    Coords :: {
+        x : float,
+        y : float,
+        z : float,
+    }
+
+    -- Creating default values for a struct, type can be inffered
+    Coords :: {
+        x : float = 0,
+        y : float = 0,
+        z : float = 0,
+    }
+
+    -- Creating a new instance of the struct
+    enemy_vec : Coords =  {
+        x = 1,
+        y = 2,
+        z = 3,
+    }
+
+    enemy_vec.x -- returns 1
 </p><h2>Dynamic Collections (Arrays)
-</h2><p>When creating a variable collection rather than a constant collection, it becomes a mutable collection.
+</h2><p>When creating a variable collection rather than a constant collection, it becomes a dynamically sized collection.
 </p><p>Dynamic collections can only contain one data type. 
-</p><span>array := {3, 4, 5}
-    array.push 9 -- error
+</p><span>-- dynamically sized int array
+    array := {3, 4, 5}
+    array.push 9 -- works, collection is dynamically sized
+    io array -- prints {3, 4, 5, 9}
+
+    -- Array with fixed size of 64 elements
+    -- Will initialise all values with the types default value
+    array : 64 int = {3, 4, 5}
+    array.push 9 -- Error, collection is fixed size
+    array.length -- returns 64
+    array.43 -- returns 0
 
     array.0 += 1 
     array.0 -- returns 4
-</span><p>Specifying the type and size of your collection. By adding a number before the type, you create a fixed size collection.
-</p><span>-- Empty dynamically sized int array
-    empty_array : {10 int}
 
-    empty_array.push 3
-    empty_array.0 -- returns 3
+    array := {3, 4, 5, 6}
+    array.push 9 -- works, collection is dynamically sized
+    array.length -- returns 5
 
-    -- dynamically sized immutable string array
-    strings : {string} : {"hello", "world"}
+    -- Initialising an empty array with a type
+    array : {} int
+</span><p>By using statements inside your collection rather than literals, you can define keys for the items in the collection. 
+</p><p>dictionary := {
+        "key1" : 1,
+        "key2" : 2,
+        "key3" : 3,
+    }
 
-</span>
+    dictionary "key1" -- returns 1
+
+</p>
 <script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
 </a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;

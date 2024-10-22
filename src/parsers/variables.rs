@@ -1,7 +1,7 @@
 use crate::{bs_types::DataType, Token};
 
 use super::{
-    ast_nodes::AstNode, collections::new_array, functions::create_function,
+    ast_nodes::AstNode, collections::new_collection, functions::create_function,
     parse_expression::create_expression,
 };
 
@@ -26,7 +26,7 @@ pub fn new_variable(
 
     *i += 1;
     match &tokens[*i] {
-        &Token::Initialise(is_const) => {
+        &Token::InitialiseInfer(is_const) => {
             attribute = if is_const {
                 Attribute::Constant
             } else {
@@ -36,24 +36,15 @@ pub fn new_variable(
         &Token::Colon => {
             attribute = Attribute::TypeDeclaration;
         }
-        &Token::Comma => {
-            // TO DO: Multiple assignments
-            attribute = Attribute::Constant;
-        }
 
-        // Uninitialised variable
-        &Token::Newline => {
-            return AstNode::VarDeclaration(
-                name.to_string(),
-                Box::new(AstNode::Empty),
-                is_exported,
-                DataType::Inferred,
-                false,
-            );
-        }
+        // TO DO: Multiple assignments
+        // &Token::Comma => {
+        // }
+
+        // Anything else is a syntax error
         _ => {
             return AstNode::Error(
-                "Expected ':' or '=' after variable name for initialising. Variable does not yet exsist".to_string(),
+                "Syntax Error: Expected ':' or '=' after variable name for initialising. Variable does not yet exsist".to_string(),
                 token_line_numbers[*i],
             );
         }
@@ -140,36 +131,39 @@ pub fn new_variable(
             parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type);
         }
 
-        Token::OpenScope => match attribute {
-            // New struct
+        // COLLECTIONS
+        Token::OpenCurly => match attribute {
+            // New struct declaration
             // var_name : {}
             Attribute::TypeDeclaration => {
                 let start_line_number = &token_line_numbers[*i];
                 return AstNode::Struct(
                     name.to_string(),
-                    Box::new(new_array(tokens, i, ast, start_line_number)),
+                    Box::new(new_collection(tokens, i, ast, start_line_number)),
                     is_exported,
                 );
             }
 
-            // Struct literal
+            // Dynamic Collection literal
             // var_name := {}
             Attribute::Mutable => {
                 let start_line_number = &token_line_numbers[*i];
                 return AstNode::VarDeclaration(
                     name.to_string(),
-                    Box::new(new_array(tokens, i, ast, start_line_number)),
+                    Box::new(new_collection(tokens, i, ast, start_line_number)),
                     is_exported,
                     data_type.to_owned(),
                     false,
                 );
             }
+
+            // Fixed Collection literal
             // var_name :: {}
             Attribute::Constant => {
                 let start_line_number = &token_line_numbers[*i];
                 return AstNode::VarDeclaration(
                     name.to_string(),
-                    Box::new(new_array(tokens, i, ast, start_line_number)),
+                    Box::new(new_collection(tokens, i, ast, start_line_number)),
                     is_exported,
                     data_type.to_owned(),
                     true,

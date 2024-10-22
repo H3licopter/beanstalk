@@ -61,6 +61,10 @@ pub enum Token {
     RawStringLiteral(String),
     BoolLiteral(bool),
 
+    // Collections
+    OpenCurly,        // {
+    CloseCurly,       // }
+
     // Not yet supported
     IntLiteral(i64),
     RuneLiteral(char),
@@ -77,13 +81,11 @@ pub enum Token {
 
     // Declarations - Should contain a type declaration if there is one
     Assign,           // =
-    Initialise(bool), // := / :: (is_const)
+    InitialiseInfer(bool), // := / :: (is_const)
 
     // Scope
     OpenParenthesis,  // (
     CloseParenthesis, // )
-    OpenScope,        // {
-    CloseScope,       // }
     SceneOpen,        // [
     SceneClose(u32),  // Keeps track of the spaces following the scene
 
@@ -146,6 +148,7 @@ pub enum Token {
     Break,
     Continue, // Might also operate as a fallthrough operator
     Return,
+    End,
     Match,
     When,
     Defer,

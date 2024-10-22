@@ -37,7 +37,7 @@ pub fn new_tuple(
     return AstNode::Tuple(items, starting_line_number.to_owned());
 }
 
-pub fn new_array(
+pub fn new_collection(
     tokens: &Vec<Token>,
     i: &mut usize,
     ast: &Vec<AstNode>,
@@ -52,7 +52,7 @@ pub fn new_array(
 
     while let Some(token) = tokens.get(*i) {
         match token {
-            Token::CloseScope => {
+            Token::CloseCurly => {
                 break;
             }
 

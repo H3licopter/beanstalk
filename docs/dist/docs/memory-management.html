@@ -31,9 +31,9 @@
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
             }.bs-0 > * {color:inherit;}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >MEMORY MANAGEMENT</b></div></header><main class="container"><span style="color:hsla(0,90%,55%,1);"  class=" bs-0" ><p>Memory management scheme still in testing / design phase</p></span><h1>How Beanstalk handles memory
-</h1><p>The intention is for the language to <strong>not&nbsp;</strong><span>have a garbage collector, but to use a system similar to Rust's ownership model but trade a bit more speed for abstraction and simplicity.
-</span></p><p>It is also planned for memory areas to be supported at the language level, allowing for high levels of control over memory allocation and deallocation.
-</p><h2>Ownership
+</h1><p>The intention is for the language to <strong>not&nbsp;</strong><span>have a garbage collector, but to use a system similar to Rust's ownership model but trade a bit more speed for abstraction and simplicity and have first class language support for memory arenas/regions.
+</span></p><p>The memory management model is heavily inspired by <a href="https://verdagon.dev/blog/linear-types-borrowing" style="" class="" >Vale's Linear Types and Generational References</a><span>.
+</span></p><h2>Ownership
 </h2><p>Variables are cleaned up when they go out of scope, and are not allowed to be used after they are cleaned up. This is to prevent dangling pointers and memory leaks.
 </p><p>Instead of having to explicitly denote references (e.g using & in rust), all variables automatically become immutable references by default when used.
 </p><h2>Borrowing
@@ -52,21 +52,52 @@
         -- Copy of var
         var2 := copy var
 
-        -- Immutable Reference to var passed into function
+        -- Ownership given to function
         change_var(var)
 
-        -- Ownership of var given to function
-        change_var(~var2)
+        -- Error, var was dropped after being given to change_var
+        change_var(var)
     end
 
+    -- References
     testing_memory_2 : () -> () :
-        var := 5
+        var1 := {
+            x := 5
+            y := 3
+        }
+
+        -- Var1 ownership given to function, but function gives it back at the end of it's scope
+        change_var(~var1)
+
+        -- Giving var1 to var2
+        var2 := var1
+
+        -- var1 ownership is given to function
+        change_var(var1)
+    end
+
+
+    -- References
+    testing_memory_3 : () -> () :
+        var1 := {
+            x := 5
+            y := 3
+        }
 
         -- Mutable Reference to var given to function
-        change_var(~var2)
+        change_var(~var1)
 
-        -- Ownership of var given to function
-        change_var_again(~var2)
+        -- Ownership given back to var1
+
+        -- Giving var1 to var2 and var3
+        var2 := ~var1
+        var3 := ~var1
+
+        -- Error, var2 was given to var3
+        var2 = {4, 5}
+
+        -- 
+        change_var(~var1)
     end
 
     change_var : (~var : float) -> () :
