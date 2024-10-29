@@ -20,7 +20,7 @@ pub fn get_default_config() -> Config {
         project: String::from("html"),
         src: String::from("src"),
         dev_folder: String::from("dev"),
-        release_folder: String::from("dist"),
+        release_folder: String::from("release"),
         name: String::from("html_project"),
         version: String::from("0.1.0"),
         author: String::new(),

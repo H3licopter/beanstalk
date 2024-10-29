@@ -30,35 +30,49 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ERROR HANDLING</b></div></header><main class="container"><p>Errors are treated as values in Beanstalk, any function can return an error as one of it's values must have it's error handled.
-</p><p>The ? operator is used to check if one of the values in a tuple is an error. If it is, the error can then be handled in a new scope, or passed up the call stack if no scope is provided.
-</p><pre><code>    func_call_that_can_return_an_error() ? {
+            }</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ERROR HANDLING</b></div></header><main class="container"><p>Errors are treated as values in Beanstalk, 
+</p><span>any function that can return an error as one of its values must have its error handled.
+</span><p>The ? operator is used to check if one of the values in a tuple is an error. 
+</p><span>If it is, the error can then be handled in a new scope that the ? immediately opens.
+</span><p>If you go to a newline after the ?, you will need an end statement to close the scope. 
+</p><span>Otherwise, you can handle it inline.
+</span><pre><code>    func_call_that_can_return_an_error() ?
         -- Error handling code
-    }
+    end
 
     -- Passing the error up to the calling function
-    parent_func :: () -> string? {
-        return func_call_that_can_return_an_error() ?
-    }
-
-</code></pre><p>You can think of this as similar to err != nil in golang, but with a more concise syntax.
-</p><h2>Using the ? operator
-</h2><p>These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code, as well as providing a way to avoid opening a new scope for every error check.
-</p><pre><code>    -- Always returns a string even if an error is thrown by getNetworkRequest()
+    parent_func () -> string? :
+        return func_call_that_can_return_an_error()
+    end
+</code></pre><h2>Using the ? operator
+</h2><p>These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code.
+</p><span>They also provide a way to avoid opening a new scope for every error check.
+</span><pre><code>    -- Always returns a string even if an error is thrown by getNetworkRequest()
     -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
     
-    getURL :: () -> string {
-        return getNetworkRequest() ? {
-            io "Network Request Error: " + error
+    getURL () -> string :
+        return getNetworkRequest() ?
+            print("Network Request Error: ", error, " Using default URL")
             return "example.com"
-        }
-    }
+        end
+    end
 
     -- Returns a string or an error
-    getURL :: () -> string? {
+    getURL () -> string? :
         return getNetworkRequest()
-    }
-</code></pre></main><span class="cFooter"></span>
+    end
+</code></pre><h2>Asserts and Exceptions
+</h2><p>There are cases where you want to either catch unexpected state for debugging, 
+</p><span>or prevent the program from continuing if a certain condition is not met or an error is thrown.
+</span><p>For these cases the !! operator is used. It can be used to immediately stop the program.
+</p><pre><code>    -- stops the program if 1 is not equal to 1 (like an assert)
+    if 1 is not 1: print("1 is not 1") !! 
+
+    dodgyFunc() ? 
+        print("dodgyFunc() returned an error, STOP EVERYTHING!!!!") 
+        !! 
+    end
+</code></pre><span class="cFooter"></span></main>
 <script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
 </a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;

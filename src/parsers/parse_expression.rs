@@ -23,13 +23,11 @@ pub fn create_expression(
     ast: &Vec<AstNode>,
     starting_line_number: &u32,
     data_type: &DataType,
+    inside_brackets: bool,
 ) -> AstNode {
     let mut expression = Vec::new();
 
-    // Check if value is wrapped in brackets and move on until first value is found
-    let mut bracket_nesting: i32 = 0;
-    while &tokens[*i] == &Token::OpenParenthesis {
-        bracket_nesting += 1;
+    if inside_brackets {
         *i += 1;
     }
 
@@ -41,21 +39,38 @@ pub fn create_expression(
         match token {
             // Conditions that close the expression
             Token::CloseParenthesis => {
-                bracket_nesting -= 1;
-
-                if bracket_nesting < 1 {
+                if inside_brackets {
                     if expression.is_empty() {
                         return AstNode::Empty;
                     }
-                    if !inside_tuple {
-                        *i += 1;
-                    }
+                    *i += 1;
                     break;
+                } else {
+                    if inside_tuple {
+                        break;
+                    }
+                    // Mismatched brackets, return an error
+                    return AstNode::Error(
+                        "Mismatched brackets in expression".to_string(),
+                        starting_line_number.to_owned(),
+                    );
                 }
             }
 
+            Token::OpenParenthesis => {
+                return create_expression(
+                    tokens,
+                    i,
+                    false,
+                    ast,
+                    starting_line_number,
+                    &DataType::Inferred,
+                    true,
+                );
+            }
+
             Token::EOF | Token::SceneClose(_) | Token::Arrow | Token::Colon => {
-                if bracket_nesting != 0 {
+                if inside_brackets {
                     return AstNode::Error(
                         "Not enough closing parenthesis for expression. Need more ')' at the end of the expression!".to_string(),
                         starting_line_number.to_owned(),
@@ -68,7 +83,7 @@ pub fn create_expression(
             Token::Newline => {
                 // Fine if inside of brackets (not closed yet)
                 // Otherwise break out of the expression
-                if bracket_nesting > 0 {
+                if inside_brackets {
                     continue;
                 } else {
                     break;
@@ -76,6 +91,7 @@ pub fn create_expression(
             }
 
             Token::Comma => {
+                *i += 1;
                 if inside_tuple {
                     break;
                 }
@@ -269,6 +285,14 @@ pub fn evaluate_expression(
         AstNode::Expression(e, line_number) => {
             for ref node in e {
                 match node {
+
+                    AstNode::Expression(nested_e, nested_line_number) => {
+                        simplified_expression.push(evaluate_expression(
+                            AstNode::Expression(nested_e.to_owned(), nested_line_number.to_owned()),
+                            type_declaration,
+                            ast,
+                        ));
+                    }
                     AstNode::Literal(token) => match token {
                         Token::FloatLiteral(value) => {
                             if current_type == DataType::CoerseToString {
@@ -446,77 +470,73 @@ pub fn evaluate_expression(
     }
 
     // Evaluate all constants in the maths expression
-    return math_constant_fold(output_stack, current_type, &runtime_nodes);
+    return math_constant_fold(output_stack, current_type);
 }
 
-// This will evaluate everything possible recursively at compile time
+// This will evaluate everything possible at compile time
 // returns either a literal or an evaluated runtime expression
 fn math_constant_fold(
-    mut output_stack: Vec<AstNode>,
+    output_stack: Vec<AstNode>,
     current_type: DataType,
-    runtime_nodes: &usize,
 ) -> AstNode {
-    let mut i: usize = 0;
+    let mut stack: Vec<AstNode> = Vec::new();
 
-    while i < output_stack.len() {
-        match &output_stack[i] {
+    for node in &output_stack {
+        match node {
             AstNode::BinaryOperator(op, _) => {
-                let right_value = match &output_stack[i - 1] {
+                // Make sure there are at least 2 nodes on the stack
+                if stack.len() < 2 {
+                    return AstNode::Error("Not enough nodes on the stack for binary operator when parsing an expression".to_string(), 0);
+                }
+                let right = stack.pop().unwrap();
+                let left = stack.pop().unwrap();
+
+                // Check if top 2 of stack are literals
+                // if at least one is not then this must be a runtime expression
+                // And just push the operator onto the stack instead of evaluating
+                let left_value = match left {
                     AstNode::Literal(Token::FloatLiteral(value)) => value,
                     _ => {
-                        red_ln!("Compiler Bug: Must have a value to the right of an operator");
-                        return AstNode::Error(
-                            "Compiler Bug: Must have a value to the right of an operator"
-                                .to_string(),
-                            0,
-                        );
-                    }
-                };
-                let left_value = match output_stack[i - 2] {
-                    AstNode::Literal(Token::FloatLiteral(value)) => value,
-                    _ => {
-                        red_ln!("Compiler Bug: Must have a value to the left of an operator");
-                        return AstNode::Error(
-                            "Compiler Bug: Must have a value to the left of an operator"
-                                .to_string(),
-                            0,
-                        );
+                        stack.push(left);
+                        stack.push(right);
+                        stack.push(node.to_owned());
+                        continue;
                     }
                 };
 
-                let result = match op {
+                let right_value = match right {
+                    AstNode::Literal(Token::FloatLiteral(value)) => value,
+                    _ => {
+                        stack.push(left);
+                        stack.push(right);
+                        stack.push(node.to_owned());
+                        continue;
+                    }
+                };
+                
+                stack.push(AstNode::Literal(Token::FloatLiteral(match op {
                     Token::Add => left_value + right_value,
                     Token::Subtract => left_value - right_value,
                     Token::Multiply => left_value * right_value,
                     Token::Divide => left_value / right_value,
                     Token::Modulus => left_value % right_value,
                     _ => {
-                        red_ln!("Unsupported operator found in operator stack when parsing an expression into WAT");
-                        return AstNode::Error("Unsupported operator found in operator stack when parsing an expression into WAT".to_string(), 0);
+                        return AstNode::Error(format!("Unsupported operator: {:?}", op), 0);
                     }
-                };
-
-                // Remove the last 3 nodes from the output stack and replace with the result
-                output_stack.remove(i);
-                output_stack.remove(i - 1);
-                output_stack[i - 2] = AstNode::Literal(Token::FloatLiteral(result));
-                i -= 1;
+                })));
             }
+            // Some runtime thing
             _ => {
-                i += 1;
+                stack.push(node.to_owned());
             }
         }
     }
 
-    if output_stack.len() == 1 {
-        return output_stack[0].clone();
+    if stack.len() == 1 {
+        return stack.pop().unwrap();
     }
 
-    if output_stack.len() - runtime_nodes > 1 {
-        return math_constant_fold(output_stack, current_type, runtime_nodes);
-    }
-
-    AstNode::RuntimeExpression(output_stack, current_type)
+    AstNode::RuntimeExpression(stack, current_type)
 }
 
 // Concat strings at COMPILE TIME ONLY

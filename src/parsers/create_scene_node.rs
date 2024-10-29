@@ -26,6 +26,7 @@ pub fn new_scene(
     // Look at all the possible properties that can be added to the scene head
     while *i < tokens.len() {
         let token = &tokens[*i];
+        let inside_brackets = token == &Token::OpenParenthesis;
         *i += 1;
 
         match token {
@@ -52,6 +53,7 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::Inferred,
+                    inside_brackets,
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::A(eval_arg));
@@ -74,6 +76,7 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
+                        inside_brackets
                     );
                 }
 
@@ -99,6 +102,7 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
+                        inside_brackets
                     );
                 }
 
@@ -122,6 +126,7 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::Float,
+                    inside_brackets
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::Order(eval_arg));
@@ -142,6 +147,7 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::Inferred,
+                    inside_brackets
                 );
 
                 if check_if_comptime_value(&eval_arg) {
@@ -165,6 +171,7 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::Inferred,
+                    inside_brackets
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::TextColor(eval_arg, color_type));
@@ -190,6 +197,7 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
+                        inside_brackets
                     );
                     if check_if_comptime_value(&eval_arg) {
                         scene_styles.push(Style::TextColor(eval_arg, color_type));
@@ -217,6 +225,7 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
+                        inside_brackets
                     );
                     if check_if_comptime_value(&eval_arg) {
                         scene_styles.push(Style::Size(eval_arg));
@@ -249,6 +258,7 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
+                        inside_brackets
                     );
                 }
 
@@ -275,6 +285,7 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::String,
+                    inside_brackets
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Img(eval_arg));
@@ -293,6 +304,7 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::String,
+                    inside_brackets
                 );
                 if check_if_comptime_value(&eval_arg) {
                     match eval_arg {
@@ -328,6 +340,7 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::String,
+                    inside_brackets
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Video(eval_arg));
@@ -345,6 +358,7 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::String,
+                    inside_brackets
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Audio(eval_arg));
@@ -368,6 +382,7 @@ pub fn new_scene(
                     &ast,
                     token_line_number,
                     &DataType::CoerseToString,
+                    inside_brackets
                 ));
             }
 
@@ -382,6 +397,7 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
+                        inside_brackets
                     );
                     if check_if_comptime_value(&eval_arg) {
                         scene_tags.push(Tag::Button(eval_arg));
@@ -402,6 +418,7 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
+                        inside_brackets
                     );
                     if check_if_comptime_value(&eval_arg) {
                         scene_actions.push(Action::Click(eval_arg));
@@ -451,6 +468,7 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
+                        inside_brackets
                     );
                 }
                 if check_if_comptime_value(&eval_arg) {
@@ -474,6 +492,7 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Float,
+                        inside_brackets
                     );
                 }
 
@@ -506,6 +525,7 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::String,
+                    true
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Redirect(eval_arg));

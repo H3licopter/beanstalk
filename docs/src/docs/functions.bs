@@ -6,43 +6,31 @@
 # Functions
 If the function can only return an error, you can use a '?' as the specified return type.
 
-[]
-
 ## The arrow operator
-The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
-
-A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
+The arrow operator is used to define the signature of a function. 
+Functions must always have a return type specified, even if it is an error.
 
 [code:
-    doNothing : () :
+    -- Returns an int
+    multipleReturns (x) -> int : return 1 + x
+
+    -- Returns a struct
+    returnStruct (x) -> Some_Struct :
+        return (1, 2)
     end
 
-    -- Returns a tuple of values
-    multipleReturns : () -> (int, int, int) :
-        return (1, 2, 3)
-    end
-
-    differentReturns : (spicy : bool = false) -> (int, int, int) :
-        if spicy: return (69, 420, 1337)
+    differentReturns (spicy bool = false) -> (int, int, int) :
+        if spicy return (69, 420, 1337)
         
         return (1, 2, 3)
     end
 
-    nestedReturns : () -> bool :
-        if state is (
-            STATE.normal => return true
-            => return false
-        )
+    justIncrement (x) -> () : x += 1
+
+    canError (x) -> string? : 
+        msg : fetch(x) ? return error(msg)
+        return msg
     end
-
-    defaultReturn : () -> (int) :
-        if time.now is time.last (
-            time.now += 1
-        )
-
-        return time now
-    end
-
 ]
 
 [Footer]

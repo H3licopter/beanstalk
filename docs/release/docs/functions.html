@@ -23,79 +23,50 @@
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
                 padding: 0rem 2rem 0rem 2rem;
-            }</style></head><body><h1>Control Flow
-</h1><h2>If Statements
-</h2><p>If statements can be used as expressions or statements. They can also be used for pattern matching, all with a similar syntax.
-</p><pre><code>    v := 1
+            }.bs-title-1 {
+                font-size: 3rem;
+                font-weight: bold;
+                letter-spacing: 0.3rem;
+                word-spacing: 0.4rem;
+                margin: 1.3rem 0 1.2rem 0;
+                line-height: 3.5rem;
+            }</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >FUNCTIONS</b></div></header><main class="container"><h1>Functions
+</h1><p>If the function can only return an error, you can use a '?' as the specified return type.
+</p><h2>The arrow operator
+</h2><p>The arrow operator is used to define the signature of a function. 
+</p><span>Functions must always have a return type specified, even if it is an error.
+</span><pre><code>    -- Returns an int
+    multipleReturns (x) -> int : return 1 + x
 
-    if v is not 1 (
-        print "nope"
-    ) else (
-        print "yep"
-    )
+    -- Returns a struct
+    returnStruct (x) -> Some_Struct :
+        return (1, 2)
+    end
 
-    -- If as a statement
-    if v is (
-        0 => print "nope"
-        1 => print "yep"
-        => print "defintely nope"
-    )
+    differentReturns (spicy bool = false) -> (int, int, int) :
+        if spicy return (69, 420, 1337)
+        
+        return (1, 2, 3)
+    end
 
-    -- If as an expression
-    msg := if v is (
-        0 => return "nope"
-        1 => return "yep"
-        => return "defintely nope"
-    )
+    justIncrement (x) -> () : x += 1
 
-    print(msg)
-
-    v = 69
-
-    if v is (
-        0 => (
-            v += 1
-            print "yep"
-        )
-        1 => print "yep"
-        => print "defintely nope"
-    )
-</code></pre><h1>Loops
-</h1><p>Only 1 keyword for loops "for". 
-</p><p>Using the "in" keyword, you can specify an integer, float or collection to iterate through or define a new integer, float or collection. 
-</p><pre><code>    for thing in things (
-        print("ye")
-    )
-
-    for thing in 5 (
-        print(thing)
-    )
-
-    for checkIfTrue() (
-        io("ye")
-    )
-
-    -- reversed iterator, using the 'to' keyword to specify a range
-    for t in text_array length to 0 (
-        print(text_array t)
-    )
-
-    for (
-        print("ye")
-        break
-    )
-</code></pre>
+    canError (x) -> string? : 
+        msg : fetch(x) ? return error(msg)
+        return msg
+    end
+</code></pre><span class="cFooter"></span></main>
 <script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
 </a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
-  WebAssembly.instantiateStreaming(fetch("./control-flow.wasm")).then((obj)=>{
+  WebAssembly.instantiateStreaming(fetch("./functions.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }
+            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);
   ;});</script>
 </body>
 </html>

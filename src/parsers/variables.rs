@@ -63,7 +63,7 @@ pub fn new_variable(
         Token::OpenParenthesis => {
             // Maybe something will use colon rather than constant later
             let start_line_number = &token_line_numbers[*i];
-            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type);
+            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type, true);
 
             // FUNCTION? must have arrow after parenthesis close
             if attribute == Attribute::Constant {
@@ -128,7 +128,7 @@ pub fn new_variable(
                 }
             }
             let start_line_number = &token_line_numbers[*i];
-            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type);
+            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type, false);
         }
 
         // COLLECTIONS
@@ -173,7 +173,7 @@ pub fn new_variable(
         _ => {
             // Maybe need to add a check that this is an expression after the assignment?
             let start_line_number = &token_line_numbers[*i];
-            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type);
+            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type, false);
         }
     }
 

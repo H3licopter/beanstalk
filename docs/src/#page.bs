@@ -10,11 +10,16 @@ Beanstalk has it's own unique, modern syntax that allows it to replace boilerpla
 
 ## Documentation
 [red size(0.85): 
-    *Only some of this documentation is implemented. It is being used as a design plan and notes on the vision for the language and to keep track of ideas.*
+    *Only a fraction of this documentation is implemented so far. It is being used as a design plan and notes on the vision for the language and to keep track of ideas.*
 ]
 - [link "./docs/setting-up-a-project": Setting up a project]
 - [link "./docs/basics": Basic Language Syntax ]
 - [link "./docs/scenes": Introduction to scenes]
+- [link "./docs/control-flow": Control Flow]
+- [link "./docs/collections": Collections]
+- [link "./docs/choices": Choices]
+- [link "./docs/functions": Functions]
+- [link "./docs/errors": Error Handling]
 
 More documentation to be added soon!
 

@@ -105,6 +105,7 @@ pub fn new_ast(
 
             Token::Print => {
                 i += 1;
+                let inside_brackets = &tokens[i] == &Token::OpenParenthesis;
                 let starting_line_number = &token_line_numbers[i];
                 ast.push(AstNode::Print(Box::new(create_expression(
                     &tokens,
@@ -113,6 +114,7 @@ pub fn new_ast(
                     &ast,
                     starting_line_number,
                     &DataType::Inferred,
+                    inside_brackets,
                 ))));
             }
 

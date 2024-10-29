@@ -1,6 +1,8 @@
 use fs_extra::dir::{copy, CopyOptions};
 use std::{env, fs, path::PathBuf};
 
+use crate::settings::get_default_config;
+
 pub fn create_project(
     user_project_path: PathBuf,
     project_name: &String,
@@ -24,10 +26,12 @@ pub fn create_project(
     )?;
 
     // Create new dev folder
-    let new_dev_folder = &full_path.join("html_project_template").join("dev");
+    let dev_folder_name = get_default_config().dev_folder;
+    let release_folder_name = get_default_config().release_folder;
+    let new_dev_folder = &full_path.join("html_project_template").join(dev_folder_name);
     // Copy the dist folder to the dev folder
     copy(
-        &full_path.join("html_project_template").join("dist"),
+        &full_path.join("html_project_template").join(release_folder_name),
         new_dev_folder,
         &options.content_only(true),
     )?;

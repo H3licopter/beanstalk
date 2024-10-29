@@ -7,22 +7,31 @@ Choices are created by specifying 'choice' as their type, then defining a tuple 
 
 Choices are written in SCREAMING_SNAKE_CASE. 
 
-Each choice can optionally contain data that can be accessed inside that Choice.
+Each choice can optionally contain data that can be accessed inside that choice.
 
-`
-    RESPONSE : choice : (data: string, error: !)
+[code:
+    THING : choice
+        cool string,
+        not_cool string,
+        wild,
+        beans bool,
+    end
 
-    STATE : choice : (
-        paused,
-        running,
-        error_message: string,
-    )
+    Coords : {
+        x int,
+        y int,
+    }
 
-    now := STATE.error_message("Something went wrong")
+    -- Creating a new instance of a choice
+    a_choice : THING wild
 
-    if now is STATE.error_message (
-        if now is (
-            STATE.error_message => print( now value )
-        )
-    )
-`
+    -- Creating a new choice that has a value associated with it
+    another_choice : THING cool("very cool")
+
+    collection_of_choices = THING{} {
+        THING cool("cool"),
+        THING not_cool("not cool"),
+        THING wild,
+        THING beans(true),
+    }
+]

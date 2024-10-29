@@ -8,7 +8,9 @@ The Beanstalk is designed to be:
 
 ### Simple
 
-Minimal keywords and symbols to reduce cognitive load and syntax noise. One way to do things where possible. Beanstalk trades expressiveness for readibility and simplicity.
+Minimal keywords and symbols to reduce cognitive load and syntax noise. 
+One way to do things where possible. 
+Beanstalk trades expressiveness for readibility and simplicity.
 
 ### Concise
 
@@ -35,7 +37,7 @@ Being a compiled language, Beanstalk should have very fast compile times. The co
 The style guide is:
 - snake_case for variables and collections
 - camelCase for functions
-- PascalCase for types and Scenes
+- Upper_Snake_Case for Scenes
 - SCREAMING_SNAKE_CASE for Choices
 
 4 spaces are recommended for indentation. 
@@ -43,17 +45,16 @@ The style guide is:
 # Comments
 Comments use a double minus sign '--'. 
 
-If you put a newline immediately after a comment mark, the comment will become multi line and must be closed with - again. 
-Comments are read by the compiler and can be nested.
+Multiline (block) comments use a triple minus (or more) to start and end the comment.
 
 [code: 
     -- normal comment
 
-    --
+    ---
     Multiline comment
 
     Woo
-    --
+    ---
 ]
 
 # Variables
@@ -65,50 +66,47 @@ The @ symbol before a name is used to export variables and methods/functions out
 Types will be inferred if not specified, and implicit conversions will be used to convert the value to the inferred type.
 
 ### Compile time immutable variable
-[code: comptime_immutable_var : int : 69]
+[code: 
+    comptime_immutable_var int : 69
+]
 
 ### Runtime Variable
-[code: mutable_var : int = 0]
+[code: 
+    mutable_var int = 0
+]
 
 ## Static Assignment
 [code:
-    -- UTF-16 string
-    my_brain := "Dumb"
+    -- UTF-16 string with type annotation
+    my_brain string = "Dumb"
 
-    -- 32 bit float
-    float := 69.420
-
-    -- 
-        Implicit string conversion (string type must be specified in the type definition for this to work)
-        
-        Any expression you assign to this string variable will be converted to a string
-    --
-    cool_string := 14 + 42 + " is a cool number " + '😂' -- "56 is a cool number 😂"
+    -- 64 bit float constant with inferred type
+    number : 69.420
 ]
 
-Variables must be given a value or a type when they are declared. There is no such thing as 'null' in Beanstalk, the closest equivalent is an Error type or an empty tuple.
+Variables must be given a value or a type when they are declared. 
+There is no such thing as 'null' in Beanstalk, the closest equivalent is an Error type or an empty tuple.
 
-If an error occurs during assignment of a variable, it's type becomes an Error type and must be handled. Unhandled assignment errors at runtime will default the variable to it's zero value.
+If an error occurs during assignment of a variable, it's type becomes an Error and must be handled. 
+Unhandled assignment errors at runtime will default the variable to it's zero value.
 
 All copies of collections are explicit and must use the 'copy' keyword in place of a type.
 
 [code:
     -- Deep copy of a collection
-    thing : copy = a_collection 
+    thing copy = a_collection 
 
     -- Reference to a_collection
-    thing := a_collection
+    thing = a_collection
 ]
 
 If you are creating a non-collection variable and need it to be formatted over multiple lines, 
-you must wrap the value in parenthesis.
-
-Parenthesis are used to group expressions together.
+you must start a newline after the assignment operator and close the statement with the 'end' keyword.
 
 [code:
-    some_int := (
+    some_int =
         4 + 5 + 6 + 7 + 8 + 9 + 10
-    )
+    end
 ]
 
 # Data Types
@@ -121,13 +119,13 @@ There is an intention to support all of these number types in the future. **Curr
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
-    [: Float ] [: 64 bit floating point number on 64 bit systems, 32 bit on 32 bit systems ] [: 0.0]
+    [: float ] [: 64 bit floating point number on 64 bit systems, 32 bit on 32 bit systems ] [: 0.0]
 
-    [: Int ] [:  64 bit signed integer on 64 bit systems, 32 bit on 32 bit systems ] [: 0]
+    [: int ] [:  64 bit signed integer on 64 bit systems, 32 bit on 32 bit systems ] [: 0]
 
-    [: Idx ] [: pointer sized unsigned integer ] [: 0]
+    [: idx ] [: pointer sized unsigned integer ] [: 0]
 
-    [: Unit] [: *NOT YET SUPPORTED* Special numeric unit syntax for appending numerical types. The underlaying primative will be the same, but automatic conversions will be applied to the result. ] [: error]
+    [: unit] [: *NOT YET SUPPORTED* Special numeric unit syntax for appending numerical types. The underlaying primative will be the same, but automatic conversions will be applied to the result. ] [: error]
 ]
 
 ## String based Types
@@ -140,11 +138,11 @@ Eventually this will be entirely manipulated in Wasm, allowing for different str
 [table 3: 
     [: Type] [: Description] [: Zero Value]
 
-    [: String ] [: UTF-16 (For JS compatibility)] [: ""]
+    [: string ] [: UTF-16 (For JS compatibility)] [: ""]
 
-    [: Error] [: Contains a special type of debug string detailing the error] [: "ERROR"]
+    [: error] [: Contains a special type of debug string detailing the error] [: "ERROR"]
 
-    [: Path] [: *NOT YET SUPPORTED* Path to a file, must be specified as the type of the string. Will handle OS specific paths. ] [: ""]
+    [: path] [: *NOT YET SUPPORTED* Path to a file, must be specified as the type of the string. Will handle OS specific paths. ] [: ""]
 ]
 
 ## Collection Types
@@ -155,18 +153,18 @@ Eventually this will be entirely manipulated in Wasm, allowing for different str
 
     [: Collection ] [: A blend between arrays and structs. See [link "../collections": Collections] for more information.] [: {}]
     
-    [: Choice ] [: Rust style enums. To be implemented. ] [: error]
+    [: choice ] [: Rust style enums. To be implemented. ] [: error]
 
-    [: Type ] [: For generics and datatype related operations] [: error]
+    [: type ] [: For generics and datatype related operations] [: error]
 ]
 
 ## Scene Types
 [table 3:
     [: Type ] [: Description] [: Zero Value]
 
-    [: Scene ] [: The templating syntax of Beanstalk. See [link "./scenes": Scenes for more info!]] [: "`[]`" -  an empty scene]
+    [: scene ] [: The templating syntax of Beanstalk. See [link "./scenes": Scenes for more info!]] [: "`[]`" -  an empty scene]
 
-    [: Style] [: Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML. See [link: "./styles": Styles] for more info)] [: ""]
+    [: style] [: Represents a CSS style that can be used in scenes. Styles can accept arguments of other primatives, including other styles. Ultimately, they become strings of information about how to style a scene (or what tag the scene has in the HTML. See [link: "./styles": Styles] for more info)] [: ""]
 ]
 
 # Strings
@@ -178,21 +176,24 @@ Backticks are used for RAW strings. To escape a backtick it must be preceded wit
 
 [code: "string literal with \{curly braces} in it that are escaped"]
 
-[code: `9 "is" {5 + 4}` -- 9 "is" {5 + 4}]
+[code: 
+    `9 "is" {5 + 4}`
+    -- result is "9 "is" 9"
+]
 
 # Logical Operators
 The 'is' keyword is used to check equality. Not ==. The "and / or" keywords are used for logical and / or and 'not' is used to invert a truthy value to falsy or vice versa.
 
 [table 3:
     [: Operator] [: Description]          [: Precedence]
-    [: `^`]        [: Exponents]            [: 8]
-    [: `//`]       [: Roots]                [: 8]
-    [: `*`]        [: Multiplication]       [: 7]
-    [: `/`]        [: Division]             [: 7]
-    [: %]          [: Modulo (truncated)]   [: 7]
-    [: %%]         [: Remainder (floored)]  [: 7]
-    [: +]          [: Sum]                  [: 6]
-    [: `-`]        [: Subtraction]          [: 6]
+    [: `^`]        [: Exponents]            [: 4]
+    [: `//`]       [: Roots]                [: 4]
+    [: `*`]        [: Multiplication]       [: 3]
+    [: `/`]        [: Division]             [: 3]
+    [: %]          [: Modulo (truncated)]   [: 3]
+    [: %%]         [: Remainder (floored)]  [: 3]
+    [: +]          [: Sum]                  [: 2]
+    [: `-`]        [: Subtraction]          [: 2]
 ]
 
 # Numeric Units
@@ -207,14 +208,14 @@ If you are mixing unit types in an operation, the first unit type will be used f
 
 [code:
     -- Specifies the base type as a float
-    m : Unit : float
-    cm : Unit : m * 0.01
-    mm : Unit : cm * 0.1
+    m unit : float
+    cm unit : m * 0.01
+    mm unit : cm * 0.1
 
-    width := 5m * 230cm
+    width = 5m * 230cm
     -- result is 5.23
 
-    height := (3m * 2m)cm
+    height = (3m * 2m)cm
     -- result is 500
 ]
 

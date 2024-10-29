@@ -3,6 +3,7 @@ use super::parse_expression::evaluate_expression;
 use crate::parsers::parse_expression::create_expression;
 use crate::{bs_types::DataType, Token};
 
+// DONT REALLY WORK YET, BRACKETS ARE FORCED ATM
 pub fn new_tuple(
     tokens: &Vec<Token>,
     i: &mut usize,
@@ -21,7 +22,6 @@ pub fn new_tuple(
             }
 
             _ => {
-                *i += 1;
                 items.push(create_expression(
                     tokens,
                     i,
@@ -29,6 +29,7 @@ pub fn new_tuple(
                     &ast,
                     starting_line_number,
                     &DataType::Inferred,
+                    tokens[*i] == Token::OpenParenthesis,
                 ));
             }
         }
@@ -65,6 +66,7 @@ pub fn new_collection(
                     ast,
                     starting_line_number,
                     &collection_type,
+                    tokens[*i] == Token::OpenParenthesis,
                 ));
             }
         }

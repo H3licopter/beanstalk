@@ -25,11 +25,9 @@
                 padding: 0rem 2rem 0rem 2rem;
             }</style></head><body><h1>Collections
 </h1><p>All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
-</p><p>Single expression or value wrapped in parenthesis is just evaluated as the expression or value itself and does not automatically become a collection.
 </p><h2>Tuples
-</h2><p>By simply listing literals separated by commas, and not specifying a type, you create a tuple literal.
-</p><p>You can surround the tuple with parenthesis for clarity and multiline.
-</p><p>1, 2, 3
+</h2><p>By simply surrounding a list of values separated by commas, you create a tuple literal.
+</p><pre><code>(1, 2, 3)
 
 (
     1,
@@ -37,70 +35,70 @@
     3,
 )
 
-</p><p>Tuples are a fixed size and can contain any type. Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
+</code></pre><p>Tuples are a fixed size and can contain any type. Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
 </p><p>A tuple of one value is indistinguishable from the value itself.
 </p><p>When creating a tuple using a colon, the values inside become immutable.
-</p><p>-- Fixed size tuple of immutable integers
-    tuple :: 1, 2, 3
-    tuple.0 -- returns 1
-</p><h2>Fixed Collections (Structs)
+</p><pre><code>    -- Fixed size tuple of immutable integers
+    tuple : (1, 2, 3)
+    tuple{0} is 1 -- true
+</code></pre><h2>Fixed Collections (Structs)
 </h2><p>By creating a constant collection, you can define a struct. This can then be used as a type to create new instances of the struct.
-</p><p>-- Vector struct
-    Coords :: {
+</p><pre><code>    -- Vector struct
+    Coords : {
         x : float,
         y : float,
         z : float,
     }
 
-    -- Creating default values for a struct, type can be inffered
-    Coords :: {
+    -- Creating default values for a struct when it is initiliased, type can be inffered
+    Coords : {
         x : float = 0,
         y : float = 0,
         z : float = 0,
     }
 
     -- Creating a new instance of the struct
-    enemy_vec : Coords =  {
+    enemy_vec Coords = {
         x = 1,
         y = 2,
         z = 3,
     }
 
-    enemy_vec.x -- returns 1
-</p><h2>Dynamic Collections (Arrays)
+    enemy_vec{x} -- returns 1
+</code></pre><h2>Dynamic Collections (Arrays)
 </h2><p>When creating a variable collection rather than a constant collection, it becomes a dynamically sized collection.
 </p><p>Dynamic collections can only contain one data type. 
-</p><span>-- dynamically sized int array
-    array := {3, 4, 5}
-    array.push 9 -- works, collection is dynamically sized
-    io array -- prints {3, 4, 5, 9}
+</p><pre><code>    -- dynamically sized int array
+    array = {3, 4, 5}
+
+    -- using pipe operator to print the array after pushing a new value
+    array push(9) => print() -- prints {3, 4, 5, 9}
 
     -- Array with fixed size of 64 elements
     -- Will initialise all values with the types default value
     array : 64 int = {3, 4, 5}
-    array.push 9 -- Error, collection is fixed size
-    array.length -- returns 64
-    array.43 -- returns 0
+    array push(9) -- Error, collection is fixed size
+    array length -- returns 64
+    array{43} -- returns 0
 
-    array.0 += 1 
-    array.0 -- returns 4
+    array{0} += 1 
+    array{0} -- returns 4
 
-    array := {3, 4, 5, 6}
-    array.push 9 -- works, collection is dynamically sized
-    array.length -- returns 5
+    array = {3, 4, 5, 6}
+    array push(9) -- works, collection is dynamically sized
+    array length -- returns 5
 
     -- Initialising an empty array with a type
-    array : {} int
-</span><p>By using statements inside your collection rather than literals, you can define keys for the items in the collection. 
-</p><p>dictionary := {
+    array int{} = {}
+</code></pre><p>By using statements inside your collection rather than literals, you can define keys for the items in the collection. 
+</p><pre><code>    dictionary = {
         "key1" : 1,
         "key2" : 2,
         "key3" : 3,
     }
 
-    dictionary "key1" -- returns 1
-
-</p>
+    dictionary{"key1"} -- returns 1
+</code></pre>
 <script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
 </a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;

@@ -23,31 +23,63 @@
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
                 padding: 0rem 2rem 0rem 2rem;
-            }</style></head><body><h1>Choices (enums)
-</h1><p>Choices are a way to define a set of possible values for a variable.
-</p><p>Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
-</p><p>Choices are written in SCREAMING_SNAKE_CASE. 
-</p><p>Each choice can optionally contain data that can be accessed inside that Choice.
-</p><p>RESPONSE : choice : (data: string, error: !)
+            }</style></head><body><h1>Control Flow
+</h1><h2>If Statements
+</h2><p>If statements can be used as expressions or statements. They can also be used for pattern matching, all with a similar syntax.
+</p><pre><code>    v = 1
 
-    STATE : choice : (
-        paused,
-        running,
-        error_message: string,
-    )
+    if v is not 1:
+        print("nope")
+    else
+        print("yep")
+    end
 
-    now := STATE.error_message("Something went wrong")
+    -- If as a match statement
+    if v is
+        0 => print("nope")
+        1 => print("yep")
+        else => print("wat")
+    end
 
-    if now is STATE.error_message (
-        if now is (
-            STATE.error_message =&gt; print( now value )
-        )
-    )
-</p>
+    -- If as an expression
+    msg : if v is:
+        0 => return "nope"
+        1 => return "yep"
+        else => return "defintely nope"
+    end
+
+    print(msg)
+</code></pre><h1>Loops
+</h1><p>Only 1 keyword for loops "loop". 
+</p><p>Using the "in" keyword, you can specify an integer, float or collection to iterate through or define a new integer, float or collection. 
+</p><pre><code>    loop thing in things:
+        print(thing)
+    end
+
+    loop c in collection_of_choices:
+        if c is
+            cool => io(cool value)
+            else => io(cool value)
+        end
+    end
+
+    loop -20 to big_number:
+        print("hello")
+    end
+
+    -- reverse loop
+    loop n in big_number to smaller_number:
+        print(n)
+    end
+
+    loop item in collection:
+        print(item index)
+    end
+</code></pre>
 <script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
 </a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
-  WebAssembly.instantiateStreaming(fetch("./choices.wasm")).then((obj)=>{
+  WebAssembly.instantiateStreaming(fetch("./control-flow.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}

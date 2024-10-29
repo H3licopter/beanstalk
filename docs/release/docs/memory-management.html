@@ -43,14 +43,14 @@
 </p><h2>Copying
 </h2><p>To copy a variable, you can use the copy keyword. This will create a new variable with the same value as the original.
 </p><pre><code>
-    testing_memory : () -> () :
-        var := {
+    testing_memory () -> () :
+        var = {
             x := 5
             y := 3
         }
 
         -- Copy of var
-        var2 := copy var
+        var2 = copy var
 
         -- Ownership given to function
         change_var(var)
@@ -60,17 +60,17 @@
     end
 
     -- References
-    testing_memory_2 : () -> () :
-        var1 := {
-            x := 5
-            y := 3
+    testing_memory_2 () -> () :
+        var1 = {
+            x = 5
+            y = 3
         }
 
         -- Var1 ownership given to function, but function gives it back at the end of it's scope
         change_var(~var1)
 
         -- Giving var1 to var2
-        var2 := var1
+        var2 = var1
 
         -- var1 ownership is given to function
         change_var(var1)
@@ -79,9 +79,9 @@
 
     -- References
     testing_memory_3 : () -> () :
-        var1 := {
-            x := 5
-            y := 3
+        var1 = {
+            x = 5
+            y = 3
         }
 
         -- Mutable Reference to var given to function
@@ -90,8 +90,8 @@
         -- Ownership given back to var1
 
         -- Giving var1 to var2 and var3
-        var2 := ~var1
-        var3 := ~var1
+        var2 = ~var1
+        var3 = ~var1
 
         -- Error, var2 was given to var3
         var2 = {4, 5}
@@ -100,11 +100,11 @@
         change_var(~var1)
     end
 
-    change_var : (~var : float) -> () :
-        var.x = 3
+    change_var (~var : float) -> () :
+        var x = 3
     end
 
-    change_var_again : (~var : float) -> () :
+    change_var_again (~var : float) -> () :
         change_var(var)
     end
 </code></pre></main>

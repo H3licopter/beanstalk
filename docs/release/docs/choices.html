@@ -23,59 +23,47 @@
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
                 padding: 0rem 2rem 0rem 2rem;
-            }.bs-title-1 {
-                font-size: 3rem;
-                font-weight: bold;
-                letter-spacing: 0.3rem;
-                word-spacing: 0.4rem;
-                margin: 1.3rem 0 1.2rem 0;
-                line-height: 3.5rem;
-            }</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >FUNCTIONS</b></div></header><main class="container"><h1>Functions
-</h1><p>If the function can only return an error, you can use a '?' as the specified return type.
-</p><h2>The arrow operator
-</h2><p>The arrow operator can be thought of as a way to pass arguments into a scope and define what that scope should return (if anything). It is used to define the signature of a function.
-</p><p>A function must always return a value or an error in all of it's branches. If a function doesn't return anything, it will return an empty tuple.
-</p><pre><code>    doNothing : () :
+            }</style></head><body><h1>Choices (enums)
+</h1><p>Choices are a way to define a set of possible values for a variable.
+</p><p>Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
+</p><p>Choices are written in SCREAMING_SNAKE_CASE. 
+</p><p>Each choice can optionally contain data that can be accessed inside that choice.
+</p><pre><code>    THING : choice
+        cool string,
+        not_cool string,
+        wild,
+        beans bool,
     end
 
-    -- Returns a tuple of values
-    multipleReturns : () -> (int, int, int) :
-        return (1, 2, 3)
-    end
+    Coords : {
+        x int,
+        y int,
+    }
 
-    differentReturns : (spicy : bool = false) -> (int, int, int) :
-        if spicy: return (69, 420, 1337)
-        
-        return (1, 2, 3)
-    end
+    -- Creating a new instance of a choice
+    a_choice : THING wild
 
-    nestedReturns : () -> bool :
-        if state is (
-            STATE.normal => return true
-            => return false
-        )
-    end
+    -- Creating a new choice that has a value associated with it
+    another_choice : THING cool("very cool")
 
-    defaultReturn : () -> (int) :
-        if time.now is time.last (
-            time.now += 1
-        )
-
-        return time now
-    end
-
-</code></pre><span class="cFooter"></span></main>
+    collection_of_choices = THING{} {
+        THING cool("cool"),
+        THING not_cool("not cool"),
+        THING wild,
+        THING beans(true),
+    }
+</code></pre>
 <script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
 </a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
-  WebAssembly.instantiateStreaming(fetch("./functions.wasm")).then((obj)=>{
+  WebAssembly.instantiateStreaming(fetch("./choices.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);
+            }
   ;});</script>
 </body>
 </html>

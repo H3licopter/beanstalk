@@ -21,54 +21,10 @@
     </a>
   </h1>
   <p>The docs were created entirely using Beanstalk, and uploading the compiler ouput straight to Github pages.</p>
+  <a href="https://github.com/H3licopter/beanstalk-plugin">Language support / syntax highlighting plugin for Visual Studio / VSCode can be found here</a>
 
 </div>
 <br>
-<br>
-
-# Example
-
-    -- Beanstalk example! (this is a comment)
-    float_constant :: 5 * 68.9
-
-    beans_img :: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Heinz_Beanz.jpg/2560px-Heinz_Beanz.jpg"
-
-    [:
-    
-    # Beanstalk scene bodies looks a bit like markdown
-    But all of a sudden you can start nesting *scenes* inside of them!
-
-    [rgb(140, 200, 255): 
-      This block of next is now light blue!
-      
-      Scenes are a way to group and style sections of your content. 
-      They can easily import variables, and can contain expressions. 
-      And it's all [ 60 + 40 ]% clean, concise and readable.
-    ]
-
-    The scene head contains a keywords to style and position your content. This replaces the role of both HTML element names and CSS classes and combines them into a mix of both.
-
-    ## Why use Beanstalk?
-    - You can write your content naturally, without any HTML or CSS boilerplate.
-    - Break out into using powerful compiled expressions anytime
-    - Modern programming language syntax and modern UI sensibilities all in one file.
-
-    You can easily add variables into your scenes such as that float defined earlier ([float_constant]). 
-    And all of this content automatically gets wrapped in the correct HTML tags and CSS classes.
-
-    # Cool Things
-    You can easily add images, videos, and other media to your content,
-    and even add multiple within the same scenehead for them to automatically form a grid.
-
-    **Here's a grid of beans you didn't ask for**
-    [
-      img(beans_img)
-      img(beans_img)
-      img(beans_img)
-      img(beans_img) 
-      alt("BEANS")
-    ]
-
 <br>
 
 # Overview

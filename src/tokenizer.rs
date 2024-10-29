@@ -514,11 +514,14 @@ fn keyword_or_variable(
                 // Keywords
                 "io" => return Token::Print,
 
-                _ => {}
-            }
+                // Data Types
+                "true" => return Token::BoolLiteral(true),
+                "false" => return Token::BoolLiteral(false),
+                "float" => return Token::TypeKeyword(DataType::Float),
+                "string" => return Token::TypeKeyword(DataType::String),
+                "bool" => return Token::TypeKeyword(DataType::Bool),
 
-            if let Some(token) = check_if_datatype_keyword(&token_value) {
-                return token;
+                _ => {}
             }
 
             // only bother tokenizing / reserving these keywords if inside of a scene head
@@ -678,14 +681,4 @@ pub fn new_var_or_ref(
             return Token::VarDeclaration(name.to_string(), is_public);
         }
     }
-}
-
-fn check_if_datatype_keyword(token_value: &String) -> Option<Token> {
-    match token_value.as_str() {
-        "float" => return Some(Token::TypeKeyword(DataType::Float)),
-        "string" => return Some(Token::TypeKeyword(DataType::String)),
-        "bool" => return Some(Token::TypeKeyword(DataType::Bool)),
-        _ => {}
-    }
-    None
 }

@@ -3,44 +3,61 @@
 [header center: [title 1: ERROR HANDLING]]
 [main:
 
-Errors are treated as values in Beanstalk, any function can return an error as one of it's values must have it's error handled.
+Errors are treated as values in Beanstalk, 
+any function that can return an error as one of its values must have its error handled.
 
-The ? operator is used to check if one of the values in a tuple is an error. If it is, the error can then be handled in a new scope, or passed up the call stack if no scope is provided.
+The ? operator is used to check if one of the values in a tuple is an error. 
+If it is, the error can then be handled in a new scope that the ? immediately opens.
+
+If you go to a newline after the ?, you will need an end statement to close the scope. 
+Otherwise, you can handle it inline.
 
 [code:
-    func_call_that_can_return_an_error() ? {
+    func_call_that_can_return_an_error() ?
         -- Error handling code
-    }
+    end
 
     -- Passing the error up to the calling function
-    parent_func :: () -> string? {
-        return func_call_that_can_return_an_error() ?
-    }
-
+    parent_func () -> string? :
+        return func_call_that_can_return_an_error()
+    end
 ]
 
-You can think of this as similar to err != nil in golang, but with a more concise syntax.
-
 ## Using the ? operator
-These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code, as well as providing a way to avoid opening a new scope for every error check.
+These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code.
+They also provide a way to avoid opening a new scope for every error check.
 
 [code:
     -- Always returns a string even if an error is thrown by getNetworkRequest()
     -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
     
-    getURL :: () -> string {
-        return getNetworkRequest() ? {
-            io "Network Request Error: " + error
+    getURL () -> string :
+        return getNetworkRequest() ?
+            print("Network Request Error: ", error, " Using default URL")
             return "example.com"
-        }
-    }
+        end
+    end
 
     -- Returns a string or an error
-    getURL :: () -> string? {
+    getURL () -> string? :
         return getNetworkRequest()
-    }
+    end
 ]
 
+## Asserts and Exceptions
+There are cases where you want to either catch unexpected state for debugging, 
+or prevent the program from continuing if a certain condition is not met or an error is thrown.
+
+For these cases the !! operator is used. It can be used to immediately stop the program.
+
+[code:
+    -- stops the program if 1 is not equal to 1 (like an assert)
+    if 1 is not 1: print("1 is not 1") !! 
+
+    dodgyFunc() ? 
+        print("dodgyFunc() returned an error, STOP EVERYTHING!!!!") 
+        !! 
+    end
 ]
 
 [Footer]

@@ -8,8 +8,7 @@ Beanstalk is a new language and is still in development. It doesn't even have a 
 Here is a list of current bugs, development goals and planned features.
 
 ## Current immediate task list
-- rename dist folder to release folder
-- Finish implimenting all math operators and brackets
+- Finish implementing all math operators and brackets
 - get variables and mostly folded expressions working fully in WASM
 
 ## Core Features Being Implemented
@@ -34,3 +33,30 @@ Here is a list of current bugs, development goals and planned features.
 ## Future Design Plans and proposals
 - Better Dev server with web sockets handling hot reloading (rather than the current janky system)
 - Server files and server side BS code (Using a Wasm runtime on the server)
+
+### Reserved keywords for standard lib functions
+Beanstalk should be a very batteries included language, with a lot of standard library functions.
+The standard library will be the only default import option in the project config file.
+
+print|import|rng|log|round|abs|sin|cos|tan|expo|gcd
+
+### Concurrency (channels/threads) syntax
+Like go, but hopefully simpler and clearer control flow. 
+
+Uses >> and << to specify send / recieve channels. No "chan" keyword.
+
+[code:
+    -- Create a channel
+    channel <<int>>
+
+    -- Send a value to the channel (notice value on the left, not right)
+    -- Channel operator can't be used in the middle of an expression, must be right at the end
+    5 >> channel
+
+    -- Recieve a value from the channel
+    x = << channel
+
+    -- Close the channel
+    channel close()
+]
+
