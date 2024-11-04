@@ -1035,10 +1035,7 @@ pub fn parse_scene(
                 0,
                 &format!(
                     "<img src={} style=\"{}\" class=\"{}\" {} />",
-                    img_src,
-                    scene_wrap.style,
-                    scene_wrap.classes,
-                    scene_wrap.properties
+                    img_src, scene_wrap.style, scene_wrap.classes, scene_wrap.properties
                 ),
             );
             if match *parent_tag {
@@ -1212,7 +1209,10 @@ fn get_src(value: &AstNode) -> String {
         }
         AstNode::RuntimeExpression(expr, data_type) => {
             if *data_type == DataType::String || *data_type == DataType::CoerseToString {
-                src = expression_to_js(&AstNode::RuntimeExpression(expr.clone(), data_type.to_owned()))
+                src = expression_to_js(&AstNode::RuntimeExpression(
+                    expr.clone(),
+                    data_type.to_owned(),
+                ))
             } else {
                 red_ln!("Error: src attribute must be a string literal (Webparser - get src)");
             }
