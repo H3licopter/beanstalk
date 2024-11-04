@@ -1,7 +1,7 @@
 use colour::red_ln;
 
 use super::{
-    ast_nodes::AstNode,
+    ast_nodes::{AstNode, Reference},
     parse_expression::{check_if_arg, create_expression},
     styles::{Action, Style, Tag},
     util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
@@ -14,6 +14,7 @@ pub fn new_scene(
     i: &mut usize,
     ast: &Vec<AstNode>,
     token_line_number: &u32,
+    variable_declarations: &Vec<Reference>,
 ) -> AstNode {
     let mut scene = Vec::new();
     *i += 1;
@@ -54,6 +55,7 @@ pub fn new_scene(
                     token_line_number,
                     &DataType::Inferred,
                     inside_brackets,
+                    variable_declarations,
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::A(eval_arg));
@@ -76,7 +78,8 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
-                        inside_brackets
+                        inside_brackets,
+                        variable_declarations,
                     );
                 }
 
@@ -102,7 +105,8 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
-                        inside_brackets
+                        inside_brackets,
+                        variable_declarations,
                     );
                 }
 
@@ -126,7 +130,8 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::Float,
-                    inside_brackets
+                    inside_brackets,
+                    variable_declarations,
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::Order(eval_arg));
@@ -147,7 +152,8 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::Inferred,
-                    inside_brackets
+                    inside_brackets,
+                    variable_declarations,
                 );
 
                 if check_if_comptime_value(&eval_arg) {
@@ -171,7 +177,8 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::Inferred,
-                    inside_brackets
+                    inside_brackets,
+                    variable_declarations,
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::TextColor(eval_arg, color_type));
@@ -197,7 +204,8 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
-                        inside_brackets
+                        inside_brackets,
+                        variable_declarations,
                     );
                     if check_if_comptime_value(&eval_arg) {
                         scene_styles.push(Style::TextColor(eval_arg, color_type));
@@ -225,7 +233,8 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
-                        inside_brackets
+                        inside_brackets,
+                        variable_declarations,
                     );
                     if check_if_comptime_value(&eval_arg) {
                         scene_styles.push(Style::Size(eval_arg));
@@ -258,7 +267,8 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
-                        inside_brackets
+                        inside_brackets,
+                        variable_declarations,
                     );
                 }
 
@@ -285,7 +295,8 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::String,
-                    inside_brackets
+                    inside_brackets,
+                    variable_declarations,
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Img(eval_arg));
@@ -304,7 +315,8 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::String,
-                    inside_brackets
+                    inside_brackets,
+                    variable_declarations,
                 );
                 if check_if_comptime_value(&eval_arg) {
                     match eval_arg {
@@ -340,7 +352,8 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::String,
-                    inside_brackets
+                    inside_brackets,
+                    variable_declarations,
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Video(eval_arg));
@@ -358,7 +371,8 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::String,
-                    inside_brackets
+                    inside_brackets,
+                    variable_declarations,
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Audio(eval_arg));
@@ -369,9 +383,8 @@ pub fn new_scene(
             }
 
             // Expressions to Parse
-            Token::FloatLiteral(_)
-            | Token::VarReference(_)
-            | Token::ConstReference(_)
+            Token::Variable(_)
+            | Token::FloatLiteral(_)
             | Token::StringLiteral(_)
             | Token::RawStringLiteral(_) => {
                 *i -= 1;
@@ -382,7 +395,8 @@ pub fn new_scene(
                     &ast,
                     token_line_number,
                     &DataType::CoerseToString,
-                    inside_brackets
+                    inside_brackets,
+                    variable_declarations,
                 ));
             }
 
@@ -397,7 +411,8 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
-                        inside_brackets
+                        inside_brackets,
+                        variable_declarations,
                     );
                     if check_if_comptime_value(&eval_arg) {
                         scene_tags.push(Tag::Button(eval_arg));
@@ -418,7 +433,8 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
-                        inside_brackets
+                        inside_brackets,
+                        variable_declarations,
                     );
                     if check_if_comptime_value(&eval_arg) {
                         scene_actions.push(Action::Click(eval_arg));
@@ -452,7 +468,38 @@ pub fn new_scene(
                 scene_tags.clear();
             }
             Token::CodeBlock(content) => {
-                scene.push(AstNode::Element(Token::CodeBlock(content.to_string())));
+                // let mut lang = String::from("bs");
+                // if check_if_arg(tokens, &mut *i) {
+                //     let eval_arg = create_expression(
+                //         tokens,
+                //         &mut *i,
+                //         false,
+                //         ast,
+                //         token_line_number,
+                //         &DataType::CoerseToString,
+                //         inside_brackets,
+                //         variable_declarations,
+                //     );
+                //     if check_if_comptime_value(&eval_arg) {
+                //        match eval_arg {
+                //             AstNode::Literal(token) => match token {
+                //                  Token::StringLiteral(value) => lang = value,
+                //                  _ => {
+                //                       red_ln!("Invalid language provided for code block");
+                //                  }
+                //             },
+                //             _ => {
+                //                  red_ln!("Invalid language provided for code block");
+                //             }
+                //        }
+                //     } else {
+                //         // does not support runtime evaluation of language
+                //         red_ln!("Codeblock language can't be evaluated at runtime (yet)");
+                //     };
+                // }
+
+                // let codeblock = highlight_code_snippet(&lang, content);
+                scene.push(AstNode::Element(Token::CodeBlock(content.to_owned())));
             }
 
             Token::Nav => {
@@ -468,7 +515,8 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Inferred,
-                        inside_brackets
+                        inside_brackets,
+                        variable_declarations,
                     );
                 }
                 if check_if_comptime_value(&eval_arg) {
@@ -492,7 +540,8 @@ pub fn new_scene(
                         ast,
                         token_line_number,
                         &DataType::Float,
-                        inside_brackets
+                        inside_brackets,
+                        variable_declarations,
                     );
                 }
 
@@ -525,7 +574,8 @@ pub fn new_scene(
                     ast,
                     token_line_number,
                     &DataType::String,
-                    true
+                    true,
+                    variable_declarations,
                 );
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Redirect(eval_arg));
@@ -556,7 +606,7 @@ pub fn new_scene(
             }
 
             Token::SceneHead => {
-                let nested_scene = new_scene(tokens, i, ast, token_line_number);
+                let nested_scene = new_scene(tokens, i, ast, token_line_number, variable_declarations);
                 scene.push(nested_scene);
             }
 

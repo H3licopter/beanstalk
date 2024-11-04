@@ -6,21 +6,16 @@
 [red: Memory management scheme still in testing / design phase ]
 
 # How Beanstalk handles memory
-The intention is for the language to **not** have a garbage collector, but to use a system similar to Rust's ownership model but trade a bit more speed for abstraction and simplicity and have first class language support for memory arenas/regions.
+Beanstalk will analyze where variables are used and passed around to determine whether they are copied, moved or passed by reference.
+This will be a bit like Rust, but less explicit and easier to understand. 
 
-The memory management model is heavily inspired by [link "https://verdagon.dev/blog/linear-types-borrowing": Vale's Linear Types and Generational References].
+The cost of this is more work for the compiler, and a higher chance of less optimal code being generated.
 
-## Ownership
-Variables are cleaned up when they go out of scope, and are not allowed to be used after they are cleaned up. This is to prevent dangling pointers and memory leaks.
+The intention is for the language to **not** have a garbage collector.
 
-Instead of having to explicitly denote references (e.g using & in rust), all variables automatically become immutable references by default when used.
+Failing this plan, either a model similar to [link "https://verdagon.dev/blog/linear-types-borrowing": Vale's Linear Types and Generational References] will be used.
 
-## Borrowing
-To lend a mutable version of a variable, you can use the ~ tilde operator. 
-
-Beanstalk will automatically determine whether it should pass a mutable reference or full ownership of a variable to a function, based on how the variable is used in the rest of the function.
-
-Only one mutable reference to a variable can exist at a time, and it is not allowed to be used after it is lent out.
+Or just a GC with first class support for memory arenas if none of these ideas work out.
 
 ## Copying
 To copy a variable, you can use the copy keyword. This will create a new variable with the same value as the original.
@@ -28,30 +23,41 @@ To copy a variable, you can use the copy keyword. This will create a new variabl
 [code:
 
     testing_memory () -> () :
-        var = {
-            x := 5
-            y := 3
-        }
-
-        -- Copy of var
-        var2 = copy var
-
-        -- Ownership given to function
-        change_var(var)
-
-        -- Error, var was dropped after being given to change_var
-        change_var(var)
-    end
-
-    -- References
-    testing_memory_2 () -> () :
-        var1 = {
+        Coords : {
             x = 5
             y = 3
         }
 
-        -- Var1 ownership given to function, but function gives it back at the end of it's scope
-        change_var(~var1)
+        -- VARIABLE BRANCHING
+        -- Coords is now branched into two possible places
+        -- The compiler will collapse the branch depending on the use of either variable
+        Coords2 = Coords
+
+        -- A mutable reference to the original Coords is given to change_var
+        change_var(Coords)
+
+        -- Compiler now has to determine how to handle the double reference
+        change_2_vars(Coords, Coords2)
+
+        -- Branches are collapsed to one variable and ownership is passed to change_var
+        change_var(Coords2)
+    end
+
+    -- References
+    testing_memory_2 () -> () :
+        Coords : {
+            x = 5,
+            y = 3,
+        }
+
+        coord_collection {Coords} = {
+            Coords {x = 1, y = 3}, 
+            Coords {x = 2, y = 4},
+            Coords {x = 3, y = 5},
+        }
+
+        -- mutable reference given to function
+        change_var(var1)
 
         -- Giving var1 to var2
         var2 = var1

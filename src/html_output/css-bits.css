@@ -1,0 +1,22 @@
+/* CLASSES FOR CODE HIGHLIGHTING INSIDE CODE BLOCKS */
+.bs-code-comment {
+  color: #6a9955;
+}
+.bs-code-keyword {
+  color: #cc7832;
+}
+.bs-code-string {
+  color: #6a8759;
+}
+.bs-code-number {
+  color: #6897bb;
+}
+.bs-code-operator {
+  color: #d4d4d4;
+}
+.bs-code-identifier {
+  color: #9876aa;
+}
+.bs-code-type {
+  color: #4c8ea1;
+}

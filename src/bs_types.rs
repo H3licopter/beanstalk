@@ -12,20 +12,15 @@ pub enum DataType {
     // And all types will finally be coerced to strings after everything is evaluated
     CoerseToString,
 
-    Collection,
+    Collection(Box<DataType>), // Collection of a single type, dynamically sized
+    Struct,
     Scene,
     Choice,
     Type,
 
-    // Collections of types
-    InferredCollection,
+    Function(Box<DataType>), // Return types
 
-    Tuple, // Mixed types (fixed size)
+    Tuple(Box<Vec<DataType>>), // Mixed types (fixed size)
 
-    FloatArray,
-    BoolArray,
-    StringArray,
-    CollectionArray,
-    SceneArray,
-    ChoiceArray,
+    None, // Maybe only for function returns?
 }

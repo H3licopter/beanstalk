@@ -1,5 +1,4 @@
 [Navbar]
-
 [header center: [title 1: BASIC BEANSTALK SYNTAX]]
 [main:
 
@@ -94,7 +93,7 @@ All copies of collections are explicit and must use the 'copy' keyword in place 
 
 [code:
     -- Deep copy of a collection
-    thing copy = a_collection 
+    thing = copy a_collection 
 
     -- Reference to a_collection
     thing = a_collection

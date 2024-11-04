@@ -6,16 +6,7 @@ pub enum TokenizeMode {
     Markdown,
     Codeblock,
     SceneHead,
-    Window,
-}
-// Stores variable name, it's index and whether it has a reference in the token array
-#[derive(Debug, PartialEq)]
-pub struct Declaration {
-    pub name: String,
-    pub index: usize,
-    pub has_ref: bool,
-    pub is_exported: bool,
-    pub is_imported: bool,
+    CompilerDirective, // #
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -36,6 +27,8 @@ pub enum Token {
     Component,
     Title,
     Date,
+    JS(String), // JS codeblock
+    CSS(String), // CSS codeblock
 
     // Basics
     Settings, // bs keyword
@@ -48,14 +41,7 @@ pub enum Token {
     Arrow,
     Variable(String),
 
-    // Optimised Variables (Happens just before AST creation)
-    VarDeclaration(String, bool), // Name, is_exported
-    VarReference(String),
-    ConstReference(String),
-    Ref, // & operator
-
     // Literals
-    TypeInference,
     StringLiteral(String),
     FloatLiteral(f64),
     RawStringLiteral(String),
@@ -78,10 +64,7 @@ pub enum Token {
     Comma,
     Dot,
     Colon, // :
-
-    // Declarations - Should contain a type declaration if there is one
-    Assign,           // =
-    InitialiseInfer(bool), // := / :: (is_const)
+    Assign, // =  
 
     // Scope
     OpenParenthesis,  // (
@@ -93,6 +76,8 @@ pub enum Token {
 
     // Type Declarations
     TypeKeyword(DataType),
+
+    FunctionKeyword,
 
     // Errors
     Bang,
@@ -131,14 +116,6 @@ pub enum Token {
     And,
     Or,
 
-    //Memory and Pointers
-    Pointer,
-    Allocate,
-    Free,
-
-    // Bitwise Operators
-    Bitwise,
-
     // Control Flow
     If,
     Else,
@@ -149,7 +126,6 @@ pub enum Token {
     Continue, // Might also operate as a fallthrough operator
     Return,
     End,
-    Match,
     When,
     Defer,
 

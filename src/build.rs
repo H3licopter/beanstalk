@@ -1,14 +1,16 @@
+use crate::bs_types::DataType;
 use crate::html_output::web_parser;
-use crate::parsers::ast_nodes::AstNode;
+use crate::parsers::ast_nodes::{AstNode, Reference};
 use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
-use crate::tokens::{Declaration, Token};
+use crate::tokens::Token;
 use crate::{parsers, settings};
-use colour::{blue_ln, dark_cyan_ln, dark_yellow_ln, print_bold, print_ln_bold, red_ln};
+use colour::{blue_ln, dark_cyan_ln, dark_yellow_ln, green_ln, print_bold, print_ln_bold, red_ln};
 use std::error::Error;
 use std::ffi::OsStr;
 use std::fs;
 use std::path::PathBuf;
+use std::time::Instant;
 use wat::parse_str;
 
 pub struct OutputFile {
@@ -24,6 +26,7 @@ pub struct ExportedJS {
     // Path to the output file exporting the module (just for namespacing)
     pub module_path: PathBuf,
     pub global: bool,
+    pub data_type: DataType,
 }
 
 #[allow(unused_variables)]
@@ -344,7 +347,7 @@ fn compile(
     exported_js: &mut Vec<ExportedJS>,
     exported_css: &mut String,
 ) -> Result<(String, Vec<u8>, Vec<PathBuf>), Box<dyn Error>> {
-    print_bold!("Compiling: ");
+    print_bold!("\nCompiling: ");
 
     let file_name = output
         .file
@@ -363,27 +366,35 @@ fn compile(
 
     dark_yellow_ln!("{:?}", file_name);
 
-    let globals: Vec<Declaration> = exported_js
+    let globals: Vec<Reference> = exported_js
         .iter()
         .filter(|e| e.global)
-        .map(|e| Declaration {
-            name: e
-                .module_path
-                .file_stem()
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .to_string(),
-            index: 0, // Not used
-            has_ref: true,
-            is_exported: true, // Not used
-            is_imported: true,
-        })
-        .collect();
+        .map(|e|
+            Reference {
+                name: e
+                    .module_path
+                    .file_stem()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .to_string(), 
+                data_type: e.data_type.to_owned(),
+                is_const: false,
+            }
+        ).collect();
+
+    let time = Instant::now();
 
     let (tokens, token_line_numbers): (Vec<Token>, Vec<u32>) =
-        tokenizer::tokenize(&output.source_code, file_name, globals);
-    let (ast, imports) = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers);
+        tokenizer::tokenize(&output.source_code, file_name);
+    
+    print!("Tokenized in: "); green_ln!("{:?}", time.elapsed());
+    let time = Instant::now();
+
+    let (ast, imports) = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers, globals, &DataType::None);
+    
+    print!("AST created in: "); green_ln!("{:?}", time.elapsed());
+    let time = Instant::now();
 
     // find the imports
     let mut import_requests = Vec::new();
@@ -419,6 +430,9 @@ fn compile(
         html_config.page_dist_url.push_str("../");
     }
 
+    print!("Added imports in: "); green_ln!("{:?}", time.elapsed());
+    let time = Instant::now();
+
     let (module_output, js_exports, css_exports, wat) = web_parser::parse(
         ast,
         html_config,
@@ -428,6 +442,9 @@ fn compile(
         exported_css.to_string(),
     );
 
+    print!("HTML/CSS/WAT/JS generated in: "); green_ln!("{:?}", time.elapsed());
+    let time = Instant::now();
+
     let wasm = match parse_str(&wat) {
         Ok(wasm) => wasm,
         Err(e) => {
@@ -435,6 +452,8 @@ fn compile(
             Vec::new()
         }
     };
+
+    print!("WAT parsed to WASM in: "); green_ln!("{:?}", time.elapsed());
 
     exported_js.extend(js_exports);
     exported_css.push_str(&css_exports);

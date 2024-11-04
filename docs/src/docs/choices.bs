@@ -1,4 +1,8 @@
-[:
+[Navbar]
+
+[header center: [title 1: BEANSTALK SCENES]]
+
+[main:
 
 # Choices (enums)
 Choices are a way to define a set of possible values for a variable.
@@ -35,3 +39,5 @@ Each choice can optionally contain data that can be accessed inside that choice.
         THING beans(true),
     }
 ]
+
+[Footer]

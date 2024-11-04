@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >MEMORY MANAGEMENT</b></div></header><main class="container"><span style="color:hsla(0,90%,55%,1);"  class=" bs-0" ><p>Memory management scheme still in testing / design phase</p></span><h1>How Beanstalk handles memory
+            }.bs-0 > * {color:inherit;}.bs-code-comment{color:#6a9955}.bs-code-keyword{color:#cc7832}.bs-code-string{color:#6a8759}.bs-code-number{color:#6897bb}.bs-code-operator{color:#d4d4d4}.bs-code-identifier{color:#9876aa}.bs-code-type{color:#4c8ea1}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >MEMORY MANAGEMENT</b></div></header><main class="container"><span style="color:hsla(0,90%,55%,1);"  class=" bs-0" ><p>Memory management scheme still in testing / design phase</p></span><h1>How Beanstalk handles memory
 </h1><p>The intention is for the language to <strong>not&nbsp;</strong><span>have a garbage collector, but to use a system similar to Rust's ownership model but trade a bit more speed for abstraction and simplicity and have first class language support for memory arenas/regions.
 </span></p><p>The memory management model is heavily inspired by <a href="https://verdagon.dev/blog/linear-types-borrowing" style="" class="" >Vale's Linear Types and Generational References</a><span>.
 </span></p><h2>Ownership

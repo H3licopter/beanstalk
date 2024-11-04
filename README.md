@@ -20,7 +20,7 @@
       Documentation
     </a>
   </h1>
-  <p>The docs were created entirely using Beanstalk, and uploading the compiler ouput straight to Github pages.</p>
+  <p>The docs were created entirely using Beanstalk. The output of the compiler is directly pushed to Github pages.</p>
   <a href="https://github.com/H3licopter/beanstalk-plugin">Language support / syntax highlighting plugin for Visual Studio / VSCode can be found here</a>
 
 </div>

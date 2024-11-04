@@ -1,5 +1,6 @@
 [Navbar]
 
+[header center: [title 1: BEANSTALK SCENES]]
 [main:
 
 # Classes

@@ -2,6 +2,7 @@ use colour::{blue_ln, cyan_ln, green_ln, grey_ln, red_ln};
 use colour::{blue_ln_bold, dark_grey_ln, dark_yellow_ln, green_ln_bold, yellow_ln_bold};
 use regex::Regex;
 
+use crate::bs_types::DataType;
 use crate::html_output::web_parser;
 use crate::parsers::ast_nodes::AstNode;
 use crate::settings::get_html_config;
@@ -21,7 +22,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Tokenize File
     yellow_ln_bold!("TOKENIZING FILE\n");
-    let (tokens, token_line_numbers) = tokenizer::tokenize(&content, file_name, Vec::new());
+    let (tokens, token_line_numbers) = tokenizer::tokenize(&content, file_name);
 
     for token in &tokens {
         match token {
@@ -50,7 +51,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Create AST
     yellow_ln_bold!("CREATING AST\n");
-    let ast: Vec<AstNode> = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers).0;
+    let (ast, _var_declarations) = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers, Vec::new(), &DataType::None);
 
     for node in &ast {
         match node {

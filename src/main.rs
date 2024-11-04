@@ -38,7 +38,7 @@ mod wasm_output {
     pub mod wasm_generator;
     pub mod wat_parser;
 }
-use colour::{dark_cyan, green_ln_bold, red_ln};
+use colour::{dark_cyan, green_ln_bold, grey_ln, red_ln};
 pub use tokens::Token;
 enum Command {
     NewHTMLProject(PathBuf),
@@ -83,7 +83,8 @@ fn main() {
             match build::build(path, true) {
                 Ok(_) => {
                     let duration = start.elapsed();
-                    print!("Project built in: ");
+                    grey_ln!("------------------------------------");
+                    print!("\nProject built in: ");
                     green_ln_bold!("{:?}", duration);
 
                     main();
@@ -99,7 +100,8 @@ fn main() {
             match build::build(path, true) {
                 Ok(_) => {
                     let duration = start.elapsed();
-                    print!("Project built in: ");
+                    grey_ln!("------------------------------------");
+                    print!("\nProject built in: ");
                     green_ln_bold!("{:?}", duration);
 
                     main();

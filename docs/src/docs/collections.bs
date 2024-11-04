@@ -1,4 +1,7 @@
-[:
+[Navbar]
+
+[header center: [title 1: BEANSTALK SCENES]]
+[main:
 
 # Collections
 All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
@@ -8,25 +11,25 @@ By simply surrounding a list of values separated by commas, you create a tuple l
 
 [code:
 (1, 2, 3)
-
-(
-    1,
-    2,
-    3,
-)
-
 ]
 
-Tuples are a fixed size and can contain any type. Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
+Tuples have a fixed size and can contain any type. 
+Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
 
 A tuple of one value is indistinguishable from the value itself.
-
-When creating a tuple using a colon, the values inside become immutable.
 
 [code:
     -- Fixed size tuple of immutable integers
     tuple : (1, 2, 3)
     tuple{0} is 1 -- true
+]
+
+## Mutable tuples (fixed sized arrays)
+If a mutable tuple is created, it's elements can be mutated as long as they are the same type.
+
+[code:
+    -- Mutable integers inside the tuple
+    tuple = (1, 2, 3)
 ]
 
 ## Fixed Collections (Structs)
@@ -35,16 +38,16 @@ By creating a constant collection, you can define a struct. This can then be use
 [code:
     -- Vector struct
     Coords : {
-        x : float,
-        y : float,
-        z : float,
+        x float,
+        y float,
+        z float,
     }
 
     -- Creating default values for a struct when it is initiliased, type can be inffered
     Coords : {
-        x : float = 0,
-        y : float = 0,
-        z : float = 0,
+        x float = 0,
+        y float = 0,
+        z float = 0,
     }
 
     -- Creating a new instance of the struct
@@ -57,7 +60,6 @@ By creating a constant collection, you can define a struct. This can then be use
     enemy_vec{x} -- returns 1
 ]
 
-
 ## Dynamic Collections (Arrays)
 When creating a variable collection rather than a constant collection, it becomes a dynamically sized collection.
 
@@ -69,22 +71,14 @@ Dynamic collections can only contain one data type.
     -- using pipe operator to print the array after pushing a new value
     array push(9) => print() -- prints {3, 4, 5, 9}
 
-    -- Array with fixed size of 64 elements
-    -- Will initialise all values with the types default value
-    array : 64 int = {3, 4, 5}
-    array push(9) -- Error, collection is fixed size
-    array length -- returns 64
-    array{43} -- returns 0
-
     array{0} += 1 
     array{0} -- returns 4
 
-    array = {3, 4, 5, 6}
-    array push(9) -- works, collection is dynamically sized
+    array push(1)
     array length -- returns 5
 
-    -- Initialising an empty array with a type
-    array int{} = {}
+    -- Uninitilised empty array
+    array {int}
 ]
 
 By using statements inside your collection rather than literals, you can define keys for the items in the collection. 
@@ -92,9 +86,11 @@ By using statements inside your collection rather than literals, you can define 
 [code:
     dictionary = {
         "key1" : 1,
-        "key2" : 2,
-        "key3" : 3,
+        "key2" = 2,
+        "key3" = 3,
     }
 
     dictionary{"key1"} -- returns 1
 ]
+
+[Footer]

@@ -6,31 +6,41 @@
 # Functions
 If the function can only return an error, you can use a '?' as the specified return type.
 
+Arguments are passed by reference by default, but can be passed by value using the 'copy' keyword.
+
 ## The arrow operator
 The arrow operator is used to define the signature of a function. 
 Functions must always have a return type specified, even if it is an error.
 
 [code:
     -- Returns an int
-    multipleReturns (x) -> int : return 1 + x
+    multipleReturns fn(x int) -> int : return 1 + x
 
     -- Returns a struct
-    returnStruct (x) -> Some_Struct :
-        return (1, 2)
+    returnStruct fn(x int) -> SomeStruct :
+        return SomeStruct{1, 2}
     end
 
-    differentReturns (spicy bool = false) -> (int, int, int) :
+    differentReturns fn(spicy bool = false) -> (int, int, int) :
         if spicy return (69, 420, 1337)
-        
         return (1, 2, 3)
     end
 
-    justIncrement (x) -> () : x += 1
-
-    canError (x) -> string? : 
+    canError fn(x) -> string? : 
         msg : fetch(x) ? return error(msg)
         return msg
     end
+
+    -- Lambda
+    fn(x): return x + 1
+
+    -- Function chaining
+    double fn(x) -> float : return x * 2
+    triple fn(x) -> float : return x * 3
+
+    result = 5 => double => double -- 20
+
+    result2 = double(3) => triple -- 18
 ]
 
 [Footer]

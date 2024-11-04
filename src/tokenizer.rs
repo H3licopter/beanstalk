@@ -1,6 +1,4 @@
-use colour::red_ln;
-
-use super::tokens::{Declaration, Token, TokenizeMode};
+use super::tokens::{Token, TokenizeMode};
 use crate::bs_types::DataType;
 use crate::tokenize_scene::{tokenize_codeblock, tokenize_markdown};
 use std::iter::Peekable;
@@ -9,7 +7,6 @@ use std::str::Chars;
 pub fn tokenize(
     source_code: &str,
     module_name: &str,
-    globals: Vec<Declaration>,
 ) -> (Vec<Token>, Vec<u32>) {
     let mut tokens: Vec<Token> = Vec::new();
     let mut line_number: u32 = 1;
@@ -19,19 +16,11 @@ pub fn tokenize(
     let mut scene_nesting_level: &mut i64 = &mut 0;
 
     // For variable optimisation
-    let mut var_names: Vec<Declaration> = globals;
     let mut token: Token = Token::ModuleStart(module_name.to_string());
 
     loop {
-        match token {
-            Token::Variable(name) => {
-                token = new_var_or_ref(&name, &mut var_names, &tokens);
-            }
-
-            Token::EOF => {
-                break;
-            }
-            _ => {}
+        if token == Token::EOF {
+            break;
         }
 
         tokens.push(token);
@@ -53,6 +42,7 @@ pub fn tokenize(
     // }
 
     tokens.push(token);
+    token_line_numbers.push(line_number);
     (tokens, token_line_numbers)
 }
 
@@ -154,18 +144,6 @@ pub fn get_next_token(
     // Initialisation
     // Check if going into markdown mode
     if current_char == ':' {
-        if chars.peek() == Some(&':') {
-            // ::
-            chars.next();
-            return Token::InitialiseInfer(true);
-        }
-
-        if chars.peek() == Some(&'=') {
-            chars.next();
-            // :=
-            return Token::InitialiseInfer(false);
-        }
-
         match &tokenize_mode {
             &TokenizeMode::SceneHead => {
                 *tokenize_mode = TokenizeMode::Markdown;
@@ -187,7 +165,7 @@ pub fn get_next_token(
 
     //Window
     if current_char == '#' {
-        *tokenize_mode = TokenizeMode::Window;
+        *tokenize_mode = TokenizeMode::CompilerDirective;
 
         //Get compiler directive token
         return keyword_or_variable(&mut token_value, chars, tokenize_mode, line_number);
@@ -236,12 +214,6 @@ pub fn get_next_token(
     }
     if current_char == '.' {
         return Token::Dot;
-    }
-    if current_char == ';' {
-        return Token::Semicolon;
-    }
-    if current_char == '&' {
-        return Token::Ref;
     }
 
     if current_char == '$' {
@@ -420,10 +392,6 @@ pub fn get_next_token(
         return Token::Export;
     }
 
-    if current_char == '~' {
-        return Token::Bitwise;
-    }
-
     // Numbers
     if current_char.is_numeric() {
         token_value.push(current_char);
@@ -498,7 +466,6 @@ fn keyword_or_variable(
                 "else" => return Token::Else,
                 "for" => return Token::For,
                 "import" => return Token::Import,
-                "match" => return Token::Match,
                 "break" => return Token::Break,
                 "when" => return Token::When,
                 "defer" => return Token::Defer,
@@ -511,15 +478,16 @@ fn keyword_or_variable(
                 "and" => return Token::And,
                 "or" => return Token::Or,
 
-                // Keywords
-                "io" => return Token::Print,
-
                 // Data Types
+                "fn" => return Token::FunctionKeyword,
                 "true" => return Token::BoolLiteral(true),
                 "false" => return Token::BoolLiteral(false),
                 "float" => return Token::TypeKeyword(DataType::Float),
                 "string" => return Token::TypeKeyword(DataType::String),
                 "bool" => return Token::TypeKeyword(DataType::Bool),
+
+                // To be moved to standard library in future
+                "print" => return Token::Print,
 
                 _ => {}
             }
@@ -595,11 +563,31 @@ fn keyword_or_variable(
                     _ => {}
                 },
 
-                TokenizeMode::Window => {
-                    *tokenize_mode = TokenizeMode::Normal;
-
-                    if token_value == "date" {
-                        return Token::Date;
+                TokenizeMode::CompilerDirective => {
+                    match token_value.as_str() {
+                        "title" => {
+                            *tokenize_mode = TokenizeMode::Normal;
+                            return Token::Title;
+                        }
+                        "date" => {
+                            *tokenize_mode = TokenizeMode::Normal;
+                            return Token::Date;
+                        }
+                        "JS" => {
+                            *tokenize_mode = TokenizeMode::Normal;
+                            return match string_block(chars, line_number) {
+                                Ok(js_code) => Token::JS(js_code),
+                                Err(err) => err,
+                            };
+                        }
+                        "CSS" => {
+                            *tokenize_mode = TokenizeMode::Normal;
+                            return match string_block(chars, line_number) {
+                                Ok(css_code) => Token::CSS(css_code),
+                                Err(err) => err,
+                            };
+                        }
+                        _ => {}
                     }
                 }
 
@@ -629,56 +617,45 @@ fn is_valid_identifier(s: &str) -> bool {
         && s.chars().all(|c| c.is_alphanumeric() || c == '_')
 }
 
-pub fn new_var_or_ref(
-    name: &String,
-    var_names: &mut Vec<Declaration>,
-    tokens: &Vec<Token>,
-) -> Token {
-    let check_if_ref = var_names.into_iter().find(|n| n.name == *name);
-    let token_index = tokens.len();
-    let previous_token = &tokens[token_index - 1];
+// A block that starts with : and ends with the 'end' keyword
+// Everything inbetween is returned as a string
+// Throws an error if there is no starting colon or ending 'end' keyword
+fn string_block(chars: &mut Peekable<Chars>, line_number: &u32) -> Result<String, Token> {
+    let mut string_value = String::new();
 
-    match check_if_ref {
-        Some(declaration) => {
-            declaration.has_ref = true;
-            if declaration.is_imported {
-                return Token::ConstReference(declaration.name.to_string());
-            }
-
-            if tokens.len() <= declaration.index + 1 {
-                red_ln!("Error: Something weird when checking variable reference. No proceeding token found after declaration");
-                return Token::DeadVarible(declaration.name.to_string());
-            }
-            let token_after = &tokens[declaration.index + 1];
-
-            match token_after {
-                Token::InitialiseInfer(is_const) => {
-                    if *is_const {
-                        return Token::ConstReference(declaration.name.to_string());
-                    }
-                }
-                // Probably should have some error handling here if the declaration is weird
-                // For now it should just always be a var if not a const
-                _ => {}
-            }
-            Token::VarReference(declaration.name.to_string())
+    while let Some(ch) = chars.next() {
+        // Skip whitespace before the first colon that starts the block
+        if ch.is_whitespace() {
+            continue;
         }
-        None => {
-            // If the variable is exported, then it counts as having a reference
-            // (Does not need to be optimised out by the compiler if no other ref to it in the module)
-            let is_public = match previous_token {
-                &Token::Export => true,
-                _ => false,
-            };
 
-            var_names.push(Declaration {
-                name: name.to_string(),
-                index: token_index,
-                has_ref: false,
-                is_exported: is_public,
-                is_imported: false,
-            });
-            return Token::VarDeclaration(name.to_string(), is_public);
+        // Start the code block at the colon
+        if ch != ':' {
+            return Err(Token::Error(
+                "JS block must start with a colon".to_string(),
+                *line_number,
+            ));
         }
     }
+
+    let mut closing_end_keyword = false;
+    while let Some(ch) = chars.next() {
+        // Push everything to the JS code block until the first 'end' keyword
+        // must have newline before and whitespace after the 'end' keyword
+        if string_value.ends_with("\nend ") {
+            closing_end_keyword = true;
+            break;
+        }
+
+        string_value.push(ch);
+    }
+
+    if !closing_end_keyword {
+        return Err(Token::Error(
+            "block must end with 'end' keyword".to_string(),
+            *line_number,
+        ));
+    }
+
+    Ok(string_value)
 }

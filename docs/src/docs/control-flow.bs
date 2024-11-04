@@ -1,4 +1,8 @@
-[:
+[Navbar]
+
+[header center: [title 1: BEANSTALK SCENES]]
+
+[main:
 # Control Flow
 
 ## If Statements
@@ -6,7 +10,7 @@
 If statements can be used as expressions or statements. They can also be used for pattern matching, all with a similar syntax.
 
 [code:
-    v = 1
+    v : 1
 
     if v is not 1:
         print("nope")
@@ -61,3 +65,5 @@ Using the "in" keyword, you can specify an integer, float or collection to itera
         print(item index)
     end
 ]
+
+[Footer]

@@ -1,5 +1,5 @@
 use crate::{build, settings};
-use colour::{blue_ln, dark_cyan_ln, green_ln_bold, print_bold, red_ln};
+use colour::{blue_ln, dark_cyan_ln, green_ln_bold, grey_ln, print_bold, red_ln};
 use settings::get_default_config;
 use std::error::Error;
 use std::path::PathBuf;
@@ -183,7 +183,8 @@ fn build_project(build_path: &String, release: bool) {
     match build::build(build_path.to_string(), release) {
         Ok(_) => {
             let duration = start.elapsed();
-            print_bold!("Project built in: ");
+            grey_ln!("------------------------------------");
+            print!("\nProject built in: ");
             green_ln_bold!("{:?}", duration);
         }
         Err(e) => {

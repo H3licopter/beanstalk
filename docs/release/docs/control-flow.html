@@ -23,7 +23,14 @@
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
                 padding: 0rem 2rem 0rem 2rem;
-            }</style></head><body><h1>Control Flow
+            }.bs-title-1 {
+                font-size: 3rem;
+                font-weight: bold;
+                letter-spacing: 0.3rem;
+                word-spacing: 0.4rem;
+                margin: 1.3rem 0 1.2rem 0;
+                line-height: 3.5rem;
+            }.bs-code-comment{color:#6a9955}.bs-code-keyword{color:#cc7832}.bs-code-string{color:#6a8759}.bs-code-number{color:#6897bb}.bs-code-operator{color:#d4d4d4}.bs-code-identifier{color:#9876aa}.bs-code-type{color:#4c8ea1}.bs-code-comment{color:#6a9955}.bs-code-keyword{color:#cc7832}.bs-code-string{color:#6a8759}.bs-code-number{color:#6897bb}.bs-code-operator{color:#d4d4d4}.bs-code-identifier{color:#9876aa}.bs-code-type{color:#4c8ea1}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><h1>Control Flow
 </h1><h2>If Statements
 </h2><p>If statements can be used as expressions or statements. They can also be used for pattern matching, all with a similar syntax.
 </p><pre><code>    v = 1
@@ -75,7 +82,7 @@
     loop item in collection:
         print(item index)
     end
-</code></pre>
+</code></pre><span class="cFooter"></span></main>
 <script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
 </a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
@@ -86,7 +93,7 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }
+            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);
   ;});</script>
 </body>
 </html>

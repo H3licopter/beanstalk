@@ -1,15 +1,28 @@
 use crate::{bs_types::DataType, Token};
 
 use super::{
-    ast_nodes::AstNode, collections::new_collection, functions::create_function,
+    ast_nodes::{AstNode, Reference}, collections::new_collection, functions::create_function,
     parse_expression::create_expression,
 };
 
-#[derive(PartialEq, Debug)]
-enum Attribute {
-    Constant,
-    Mutable,
-    TypeDeclaration,
+pub fn create_new_var_or_ref(
+    name: &String, 
+    variable_declarations: &mut Vec<Reference>, 
+    tokens: &Vec<Token>, 
+    i: &mut usize,
+    is_exported: bool,
+    ast: &Vec<AstNode>,
+    token_line_numbers: &Vec<u32>,
+) -> AstNode {
+    for var in &mut *variable_declarations {
+        if var.name == *name {
+            if var.is_const {
+                return AstNode::ConstReference(var.name.to_owned(), var.data_type.to_owned());
+            }
+            return AstNode::VarReference(var.name.to_owned(), var.data_type.to_owned());
+        }
+    }
+    new_variable(name, tokens, i, is_exported, ast, token_line_numbers, &mut *variable_declarations)
 }
 
 // CAN RETURN:
@@ -21,20 +34,64 @@ pub fn new_variable(
     is_exported: bool,
     ast: &Vec<AstNode>,
     token_line_numbers: &Vec<u32>,
+    variable_declarations: &mut Vec<Reference>, 
 ) -> AstNode {
-    let mut attribute;
-
     *i += 1;
-    match &tokens[*i] {
-        &Token::InitialiseInfer(is_const) => {
-            attribute = if is_const {
-                Attribute::Constant
-            } else {
-                Attribute::Mutable
-            };
+    let mut data_type = &DataType::Inferred;
+
+    let is_const = match &tokens[*i] {
+        // Type is inferred
+        &Token::Assign => {
+            false
         }
         &Token::Colon => {
-            attribute = Attribute::TypeDeclaration;
+            true
+        }
+
+        &Token::FunctionKeyword => {
+            *i += 1;
+            return create_function(
+                name.to_string(),
+                tokens,
+                i,
+                is_exported,
+                ast,
+                token_line_numbers,
+                variable_declarations,
+            );
+        }
+
+        // Has a type declaration
+        &Token::TypeKeyword(ref type_keyword) => {
+            data_type = type_keyword;
+            *i += 1;
+
+            match &tokens[*i] {
+                &Token::Assign => {
+                    false
+                }
+                &Token::Colon => {
+                    true
+                }
+
+                // If this is the end of the assignment, it is an uninitalised variable
+                // Currently just creates a zero value variable, should be uninitialised in future
+                &Token::Newline | &Token::EOF => {
+                    variable_declarations.push(Reference {
+                        name: name.to_owned(),
+                        data_type: data_type.to_owned(),
+                        is_const: false,
+                    });
+                    
+                    return create_zero_value_var(data_type.to_owned(), name.to_string(), is_exported);
+                }
+                _ => {
+                    return AstNode::Error(
+                        format!("Variable of type: {:?} does not exsist in this scope", data_type),
+                        token_line_numbers[*i],
+                    );
+                }
+            }
         }
 
         // TO DO: Multiple assignments
@@ -44,150 +101,85 @@ pub fn new_variable(
         // Anything else is a syntax error
         _ => {
             return AstNode::Error(
-                "Syntax Error: Expected ':' or '=' after variable name for initialising. Variable does not yet exsist".to_string(),
+                format!("'{}' - Invalid variable declaration: {:?}", name, tokens[*i]),
                 token_line_numbers[*i],
             );
         }
-    }
+    };
 
-    // Get assigned values
-    // Can also be function args
+
+    // Get assigned values 
     *i += 1;
-    let mut data_type = &DataType::Inferred;
     let parsed_expr;
-
-    // Check if function
     match &tokens[*i] {
-        // Need to check if there is an arrow after parenthesis close, if so it's a function
-        // Otherwise this is just an expression or tuple wrapped in parenthesis
-        Token::OpenParenthesis => {
-            // Maybe something will use colon rather than constant later
-            let start_line_number = &token_line_numbers[*i];
-            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type, true);
-
-            // FUNCTION? must have arrow after parenthesis close
-            if attribute == Attribute::Constant {
-                match tokens[*i] {
-                    Token::Arrow => {
-                        *i += 1;
-                        return create_function(
-                            name.to_string(),
-                            parsed_expr,
-                            tokens,
-                            i,
-                            is_exported,
-                            token_line_numbers,
-                        );
-                    }
-                    // Not a function
-                    _ => {}
-                }
-            }
-        }
-
-        Token::TypeKeyword(type_keyword) => {
-            data_type = type_keyword;
-            let next_token = if *i + 1 >= tokens.len() {
-                return AstNode::VarDeclaration(
-                    name.to_string(),
-                    Box::new(AstNode::Empty),
-                    is_exported,
-                    data_type.to_owned(),
-                    false,
-                );
-            } else {
-                &tokens[*i + 1]
-            };
-
-            // Check after the type declaration
-            match next_token {
-                Token::Newline | Token::EOF => {
-                    return create_zero_value_var(
-                        data_type.to_owned(),
-                        name.to_string(),
-                        is_exported,
-                    );
-                }
-                // Is a constant with a type declaration
-                // var_name : type : expression
-                Token::Colon => {
-                    attribute = Attribute::Constant;
-                    *i += 1;
-                }
-                // Is a mutable with a type declaration
-                // var_name : type = expression
-                Token::Assign => {
-                    attribute = Attribute::Mutable;
-                    *i += 1;
-                }
-                _ => {
-                    return AstNode::Error(
-                        format!("Unexpected token after type declaration: {:?}", next_token),
-                        token_line_numbers[*i],
-                    );
-                }
-            }
-            let start_line_number = &token_line_numbers[*i];
-            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type, false);
-        }
-
-        // COLLECTIONS
-        Token::OpenCurly => match attribute {
+        // Check if this is a COLLECTION
+        Token::OpenCurly => {
             // New struct declaration
             // var_name : {}
-            Attribute::TypeDeclaration => {
+            if is_const {
                 let start_line_number = &token_line_numbers[*i];
+                variable_declarations.push(Reference {
+                    name: name.to_owned(),
+                    data_type: DataType::Struct,
+                    is_const,
+                });
                 return AstNode::Struct(
                     name.to_string(),
                     Box::new(new_collection(tokens, i, ast, start_line_number)),
                     is_exported,
                 );
             }
-
+            
             // Dynamic Collection literal
-            // var_name := {}
-            Attribute::Mutable => {
-                let start_line_number = &token_line_numbers[*i];
-                return AstNode::VarDeclaration(
-                    name.to_string(),
-                    Box::new(new_collection(tokens, i, ast, start_line_number)),
-                    is_exported,
-                    data_type.to_owned(),
-                    false,
-                );
-            }
-
-            // Fixed Collection literal
-            // var_name :: {}
-            Attribute::Constant => {
-                let start_line_number = &token_line_numbers[*i];
-                return AstNode::VarDeclaration(
-                    name.to_string(),
-                    Box::new(new_collection(tokens, i, ast, start_line_number)),
-                    is_exported,
-                    data_type.to_owned(),
-                    true,
-                );
+            let start_line_number = &token_line_numbers[*i];
+            let collection = new_collection(tokens, i, ast, start_line_number);
+            match collection {
+                AstNode::Collection(_, ref data_type) => {
+                    let collection_type = data_type.to_owned();
+                    variable_declarations.push(Reference {
+                        name: name.to_owned(),
+                        data_type: DataType::Collection(Box::new(collection_type.to_owned())),
+                        is_const: false,
+                    });
+                    return AstNode::VarDeclaration(
+                        name.to_string(),
+                        Box::new(collection),
+                        is_exported,
+                        DataType::Collection(Box::new(collection_type)),
+                        false,
+                    );
+                }
+                _=> {
+                    return AstNode::Error(
+                        "Invalid collection".to_string(),
+                        token_line_numbers[*i],
+                    );
+                }
             }
         },
+
+        // create_expression will automatically handle tuples
         _ => {
             // Maybe need to add a check that this is an expression after the assignment?
             let start_line_number = &token_line_numbers[*i];
-            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type, false);
+            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type, false, &variable_declarations);
         }
     }
+
 
     // Check if a type of collection has been created
     // Or whether it is a literal or expression
     // If the expression is an empty expression when the variable is NOT a function, return an error
     match parsed_expr {
         AstNode::RuntimeExpression(_, ref evaluated_type) => {
+
             return create_var_node(
-                attribute,
+                is_const,
                 name.to_string(),
                 parsed_expr.to_owned(),
                 is_exported,
                 evaluated_type.to_owned(),
+                variable_declarations,
             );
         }
         AstNode::Literal(ref token) => {
@@ -198,29 +190,32 @@ pub fn new_variable(
                 _ => DataType::Inferred,
             };
             return create_var_node(
-                attribute,
+                is_const,
                 name.to_string(),
                 parsed_expr,
                 is_exported,
                 data_type,
+                variable_declarations,
             );
         }
         AstNode::Tuple(_, _) => {
             return create_var_node(
-                attribute,
+                is_const,
                 name.to_string(),
                 parsed_expr,
                 is_exported,
                 data_type.to_owned(),
+                variable_declarations,
             );
         }
         AstNode::Scene(_, _, _, _) => {
             return create_var_node(
-                attribute,
+                is_const,
                 name.to_string(),
                 parsed_expr,
                 is_exported,
                 DataType::Scene,
+                variable_declarations,
             );
         }
         AstNode::Error(err, line) => {
@@ -243,33 +238,39 @@ pub fn new_variable(
     }
 }
 
+
 fn create_var_node(
-    attribute: Attribute,
+    is_const: bool,
     var_name: String,
     var_value: AstNode,
     is_exported: bool,
     data_type: DataType,
+    variable_declarations: &mut Vec<Reference>,
 ) -> AstNode {
-    match attribute {
-        Attribute::Constant | Attribute::TypeDeclaration => {
-            return AstNode::VarDeclaration(
-                var_name,
-                Box::new(var_value),
-                is_exported,
-                data_type,
-                true,
-            );
-        }
-        Attribute::Mutable => {
-            return AstNode::VarDeclaration(
-                var_name,
-                Box::new(var_value),
-                is_exported,
-                data_type,
-                false,
-            );
-        }
+
+    variable_declarations.push(Reference {
+        name: var_name.to_owned(),
+        data_type: data_type.to_owned(),
+        is_const,
+    });
+
+    if is_const {
+        return AstNode::VarDeclaration(
+            var_name,
+            Box::new(var_value),
+            is_exported,
+            data_type,
+            true,
+        );
     }
+
+    return AstNode::VarDeclaration(
+        var_name,
+        Box::new(var_value),
+        is_exported,
+        data_type,
+        false,
+    );
 }
 
 fn create_zero_value_var(data_type: DataType, name: String, is_exported: bool) -> AstNode {

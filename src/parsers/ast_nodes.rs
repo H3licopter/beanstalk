@@ -3,6 +3,13 @@ use std::path::PathBuf;
 use super::styles::{Action, Style, Tag};
 use crate::{bs_types::DataType, Token};
 
+#[derive(Debug, PartialEq)]
+pub struct Reference {
+    pub name: String,
+    pub data_type: DataType,
+    pub is_const: bool,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 #[allow(dead_code)]
 pub enum AstNode {
@@ -16,12 +23,15 @@ pub enum AstNode {
     // into the scope of the current module. Doesn't automatically import variables or functions into the scope
     Use(PathBuf),
 
-    // Blocks
-    Function(String, Box<AstNode>, Vec<AstNode>, bool, Vec<DataType>), // Function name, Args, Body, Public
+    // Control Flow
+    Return(Box<AstNode>),
+
+    // Basics
+    Function(String, Vec<AstNode>, Vec<AstNode>, bool, DataType), // Function name, Args, Body, Public, return types
+    FunctionArg(String, DataType, Option<Box<AstNode>>), // Arg name, Type, default value
     Expression(Vec<AstNode>, u32), // Expression that can contain mixed types, line number
     RuntimeExpression(Vec<AstNode>, DataType), //Expression, Result type
 
-    // Basics
     Error(String, u32), // Message, line number
     Comment(String),
     VarDeclaration(String, Box<AstNode>, bool, DataType, bool), // Variable name, Value, Public, Type, is_const
@@ -34,6 +44,10 @@ pub enum AstNode {
     ConstReference(String, DataType),
     JSStringReference(String),
     FunctionCall(String, Box<AstNode>), // variable name, arguments
+
+    // Other language code blocks
+    JS(String),
+    CSS(String),
 
     // Literals
     Literal(Token),

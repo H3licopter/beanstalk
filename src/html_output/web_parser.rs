@@ -1,10 +1,7 @@
 use std::path::Path;
 
 use super::{
-    colors::get_color,
-    dom_hooks::{generate_dom_update_js, DOMUpdate},
-    generate_html::create_html_boilerplate,
-    js_parser::{collection_to_js, expression_to_js},
+    colors::get_color, dom_hooks::{generate_dom_update_js, DOMUpdate}, generate_html::create_html_boilerplate, js_parser::{collection_to_js, expression_to_js}
 };
 use crate::{
     bs_css::get_bs_css,
@@ -15,7 +12,7 @@ use crate::{
         styles::{Action, Style, Tag},
         util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
     },
-    settings::{get_html_config, HTMLMeta},
+    settings::{get_html_config, HTMLMeta, BS_VAR_PREFIX},
     wasm_output::wat_parser::expression_to_wat,
     Token,
 };
@@ -84,22 +81,19 @@ pub fn parse(
                     DataType::Float => {
                         wat.push_str(&format!(
                             "
-                            \n(global $v{} (export \"v{}\") (mut f64) (f64.const 0))
-                            \n(func (export \"get_v{}\") (result f64) (global.get $v{}))",
-                            id, id, id, id
+                            \n(global ${BS_VAR_PREFIX}{id} (export \"{BS_VAR_PREFIX}{id}\") (mut f64) (f64.const 0))
+                            \n(func (export \"get_{BS_VAR_PREFIX}{id}\") (result f64) (global.get ${BS_VAR_PREFIX}{id}))",
                         ));
 
                         wat_global_initilisation.push_str(&format!(
-                            "(global.set $v{} {})",
-                            id,
+                            "(global.set ${BS_VAR_PREFIX}{id} {})",
                             expression_to_wat(&expr)
                         ));
                     }
                     DataType::String => {
                         let var_dec = format!(
-                            "{} v{} = {};",
+                            "{} {BS_VAR_PREFIX}{id} = {};",
                             assignment_keyword,
-                            id,
                             expression_to_js(&expr)
                         );
                         js.push_str(&var_dec);
@@ -108,6 +102,7 @@ pub fn parse(
                                 js: var_dec,
                                 module_path: Path::new(&module_path).join(id),
                                 global: is_global,
+                                data_type: data_type.to_owned(),
                             });
                         }
                     }
@@ -140,8 +135,8 @@ pub fn parse(
                                 }
 
                                 let var_dec = format!(
-                                    "{} v{} = `{}`;",
-                                    assignment_keyword, id, scene_to_js_string
+                                    "{} {BS_VAR_PREFIX}{id} = `{}`;",
+                                    assignment_keyword, scene_to_js_string
                                 );
                                 js.push_str(&var_dec);
                                 if is_exported {
@@ -149,6 +144,7 @@ pub fn parse(
                                         js: var_dec,
                                         module_path: Path::new(&module_path).join(id),
                                         global: is_global,
+                                        data_type: data_type.to_owned(),
                                     });
                                 }
                             }
@@ -160,9 +156,8 @@ pub fn parse(
                     }
                     _ => {
                         js.push_str(&format!(
-                            "{} v{} = {};",
+                            "{} {BS_VAR_PREFIX}{id} = {};",
                             assignment_keyword,
-                            id,
                             expression_to_js(&expr)
                         ));
                     }
@@ -171,11 +166,10 @@ pub fn parse(
                 module_references.push(node);
             }
 
-            AstNode::Function(name, args, body, is_exported, _) => {
+            AstNode::Function(name, args, body, is_exported, return_type) => {
                 let func = format!(
-                    "{}function f{}({:?}){{\n{:?}\n}}",
+                    "{}function {BS_VAR_PREFIX}{name}({:?}){{\n{:?}\n}}",
                     if is_exported { "export " } else { "" },
-                    name,
                     args, // NEED TO PARSE ARGUMENTS
                     body
                 );
@@ -184,6 +178,7 @@ pub fn parse(
                         js: func.to_owned(),
                         module_path: Path::new(&module_path).join(name),
                         global: is_global,
+                        data_type: DataType::Function(Box::new(return_type)),
                     });
                 }
                 js.push_str(&func);
@@ -247,6 +242,7 @@ pub fn parse_scene(
 ) -> String {
     let mut html = String::new();
     let mut closing_tags = Vec::new();
+    let mut codeblock_css_added = false;
 
     // For tables
     let mut ele_count: u32 = 0;
@@ -718,6 +714,12 @@ pub fn parse_scene(
                     }
 
                     Token::CodeBlock(content) => {
+                        // Add the CSS for code highlighting
+                        if !codeblock_css_added { 
+                            // css.push_str(&get_highlight_css());
+                            codeblock_css_added = true;
+                        }
+
                         html.push_str(&collect_closing_tags(&mut closing_tags));
                         html.push_str(&format!("<pre><code>{}</code></pre>", content));
                     }
@@ -843,16 +845,16 @@ pub fn parse_scene(
             | AstNode::ConstReference(ref name, ref data_type) => {
                 // Create a span in the HTML with a class that can be referenced by JS
                 // TO DO: Should be reactive in future -> this can change at runtime
-                html.push_str(&format!("<span class=\"c{name}\"></span>"));
+                html.push_str(&format!("<span class=\"{name}\"></span>"));
 
                 if !module_references.contains(&node) {
                     module_references.push(node.to_owned());
                     match &data_type {
                         DataType::String | DataType::Scene | DataType::Inferred => {
-                            js.push_str(&format!("uInnerHTML(\"c{name}\", v{name});"));
+                            js.push_str(&format!("uInnerHTML(\"{name}\", {BS_VAR_PREFIX}{name});"));
                         }
                         _ => {
-                            js.push_str(&format!("uInnerHTML(\"c{name}\", wsx.get_v{name}());"));
+                            js.push_str(&format!("uInnerHTML(\"{name}\", wsx.get_{BS_VAR_PREFIX}{name}());"));
                         }
                     }
                 }

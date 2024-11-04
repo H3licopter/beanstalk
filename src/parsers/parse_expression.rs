@@ -1,7 +1,7 @@
 use colour::red_ln;
 
 use super::{
-    ast_nodes::AstNode, build_ast::get_var_declaration_type, collections::new_tuple,
+    ast_nodes::{AstNode, Reference}, collections::new_tuple,
     create_scene_node::new_scene,
 };
 use crate::{bs_types::DataType, Token};
@@ -24,9 +24,11 @@ pub fn create_expression(
     starting_line_number: &u32,
     data_type: &DataType,
     inside_brackets: bool,
+    variable_declarations: &Vec<Reference>,
 ) -> AstNode {
     let mut expression = Vec::new();
-
+    let mut current_type = data_type.to_owned();
+    
     if inside_brackets {
         *i += 1;
     }
@@ -66,17 +68,17 @@ pub fn create_expression(
                     starting_line_number,
                     &DataType::Inferred,
                     true,
+                    variable_declarations,
                 );
             }
 
-            Token::EOF | Token::SceneClose(_) | Token::Arrow | Token::Colon => {
+            Token::EOF | Token::SceneClose(_) | Token::Arrow | Token::Colon | Token::End => {
                 if inside_brackets {
                     return AstNode::Error(
                         "Not enough closing parenthesis for expression. Need more ')' at the end of the expression!".to_string(),
                         starting_line_number.to_owned(),
                     );
                 }
-
                 break;
             }
 
@@ -91,33 +93,57 @@ pub fn create_expression(
             }
 
             Token::Comma => {
-                *i += 1;
                 if inside_tuple {
                     break;
                 }
+                *i += 1;
+
                 return new_tuple(
                     tokens,
                     i,
                     AstNode::Expression(expression, starting_line_number.to_owned()),
                     ast,
                     starting_line_number,
+                    variable_declarations,
                 );
             }
 
             // Check if name is a reference to another variable or function call
-            Token::VarReference(id) => {
-                let reference = AstNode::VarReference(
-                    id.to_string(),
-                    get_var_declaration_type(id.to_string(), &ast),
-                );
-                expression.push(reference);
-            }
-            Token::ConstReference(id) => {
-                let reference = AstNode::ConstReference(
-                    id.to_string(),
-                    get_var_declaration_type(id.to_string(), &ast),
-                );
-                expression.push(reference);
+            Token::Variable(name) => {
+
+                let var = variable_declarations.iter().find(|var| var.name == *name);
+                match var {
+                    Some(var) => {
+                        // If this expression is inferring it's type from the expression
+                        if current_type == DataType::Inferred {
+                            current_type = var.data_type.to_owned();
+                        }
+
+                        // If the variables type is known and not the same as the type of the expression
+                        // Return a type error
+                        if var.data_type != DataType::Inferred && var.data_type != current_type && current_type != DataType::CoerseToString {
+                            return AstNode::Error(
+                                format!(
+                                    "Variable {} is of type {:?}, but used in an expression of type {:?}",
+                                    var.name, var.data_type, data_type
+                                ),
+                                starting_line_number.to_owned(),
+                            );
+                        }
+
+                        if var.is_const {
+                            expression.push(AstNode::ConstReference(var.name.to_owned(), var.data_type.to_owned()));
+                        } else {
+                            expression.push(AstNode::VarReference(var.name.to_owned(), var.data_type.to_owned()));
+                        };
+                    }
+                    None => {
+                        expression.push(AstNode::Error(
+                            format!("Variable {} not found in scope", name),
+                            starting_line_number.to_owned(),
+                        ));
+                    }
+                }
             }
 
             // Check if is a literal
@@ -159,7 +185,7 @@ pub fn create_expression(
                         starting_line_number.to_owned(),
                     );
                 }
-                return new_scene(tokens, i, &ast, starting_line_number);
+                return new_scene(tokens, i, &ast, starting_line_number, variable_declarations);
             }
 
             // OPERATORS
@@ -285,7 +311,6 @@ pub fn evaluate_expression(
         AstNode::Expression(e, line_number) => {
             for ref node in e {
                 match node {
-
                     AstNode::Expression(nested_e, nested_line_number) => {
                         simplified_expression.push(evaluate_expression(
                             AstNode::Expression(nested_e.to_owned(), nested_line_number.to_owned()),
@@ -312,6 +337,12 @@ pub fn evaluate_expression(
                                 current_type = DataType::String;
                             }
                         }
+                        Token::BoolLiteral(_) => {
+                            output_stack.push(node.to_owned());
+                            if current_type == DataType::Inferred {
+                                current_type = DataType::Bool;
+                            }
+                        }
                         _ => {
                             red_ln!("Compiler error: (Eval Expression) Wrong literal type found in expression");
                         }
@@ -323,7 +354,7 @@ pub fn evaluate_expression(
                         }
 
                         match current_type {
-                            DataType::Float => {
+                            DataType::Float | DataType::Bool => {
                                 output_stack.push(node.to_owned());
                             }
                             DataType::String | DataType::CoerseToString => {
@@ -347,7 +378,7 @@ pub fn evaluate_expression(
                         }
 
                         match current_type {
-                            DataType::Float => {
+                            DataType::Float | DataType::Bool => {
                                 output_stack.push(node.to_owned());
                             }
                             DataType::String | DataType::CoerseToString => {
@@ -382,6 +413,16 @@ pub fn evaluate_expression(
 
                         if current_type == DataType::CoerseToString {
                             simplified_expression.push(node.to_owned());
+                        }
+
+                        if current_type == DataType::Bool {
+                            if *op != Token::Or || *op != Token::And {
+                                return AstNode::Error(
+                                    "Can only use 'or' and 'and' operators with booleans".to_string(),
+                                    line_number
+                                );
+                            }
+                            operators_stack.push(node.to_owned());
                         }
 
                         if operators_stack.last().is_some_and(|x| match x {
@@ -444,6 +485,15 @@ pub fn evaluate_expression(
     // If nothing to evaluate at compile time, just one value, return that value
     if simplified_expression.len() == 1 {
         return simplified_expression[0].clone();
+    }
+
+    // LOGICAL EXPRESSIONS
+    if current_type == DataType::Bool {
+        for operator in operators_stack {
+            output_stack.push(operator);
+        }
+
+        return logical_constant_fold(output_stack, current_type);
     }
 
     // SCENE EXPRESSIONS
@@ -520,6 +570,68 @@ fn math_constant_fold(
                     Token::Multiply => left_value * right_value,
                     Token::Divide => left_value / right_value,
                     Token::Modulus => left_value % right_value,
+                    _ => {
+                        return AstNode::Error(format!("Unsupported operator: {:?}", op), 0);
+                    }
+                })));
+            }
+            // Some runtime thing
+            _ => {
+                stack.push(node.to_owned());
+            }
+        }
+    }
+
+    if stack.len() == 1 {
+        return stack.pop().unwrap();
+    }
+
+    AstNode::RuntimeExpression(stack, current_type)
+}
+
+fn logical_constant_fold(
+    output_stack: Vec<AstNode>,
+    current_type: DataType,
+) -> AstNode {
+    let mut stack: Vec<AstNode> = Vec::new();
+
+    for node in &output_stack {
+        match node {
+            AstNode::LogicalOperator(op, _) => {
+                // Make sure there are at least 2 nodes on the stack
+                if stack.len() < 2 {
+                    return AstNode::Error("Not enough nodes on the stack for logical operator when parsing an expression".to_string(), 0);
+                }
+                let right = stack.pop().unwrap();
+                let left = stack.pop().unwrap();
+
+                // Check if top 2 of stack are literals
+                // if at least one is not then this must be a runtime expression
+                // And just push the operator onto the stack instead of evaluating
+                let left_value = match left {
+                    AstNode::Literal(Token::BoolLiteral(value)) => value,
+                    _ => {
+                        stack.push(left);
+                        stack.push(right);
+                        stack.push(node.to_owned());
+                        continue;
+                    }
+                };
+
+                let right_value = match right {
+                    AstNode::Literal(Token::BoolLiteral(value)) => value,
+                    _ => {
+                        stack.push(left);
+                        stack.push(right);
+                        stack.push(node.to_owned());
+                        continue;
+                    }
+                };
+                
+                stack.push(AstNode::Literal(Token::BoolLiteral(match op {
+                    Token::Equal => left_value == right_value,
+                    Token::And => left_value && right_value,
+                    Token::Or => left_value || right_value,
                     _ => {
                         return AstNode::Error(format!("Unsupported operator: {:?}", op), 0);
                     }
