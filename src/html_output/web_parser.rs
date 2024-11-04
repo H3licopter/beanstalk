@@ -1030,11 +1030,12 @@ pub fn parse_scene(
             html.push_str("</button>");
         }
         Tag::Img(src) => {
+            let img_src = get_src(&src);
             html.insert_str(
                 0,
                 &format!(
                     "<img src={} style=\"{}\" class=\"{}\" {} />",
-                    expression_to_js(&src),
+                    img_src,
                     scene_wrap.style,
                     scene_wrap.classes,
                     scene_wrap.properties
@@ -1210,8 +1211,8 @@ fn get_src(value: &AstNode) -> String {
             }
         }
         AstNode::RuntimeExpression(expr, data_type) => {
-            if *data_type == DataType::String {
-                src = expression_to_js(&AstNode::RuntimeExpression(expr.clone(), DataType::String))
+            if *data_type == DataType::String || *data_type == DataType::CoerseToString {
+                src = expression_to_js(&AstNode::RuntimeExpression(expr.clone(), data_type.to_owned()))
             } else {
                 red_ln!("Error: src attribute must be a string literal (Webparser - get src)");
             }
@@ -1224,7 +1225,7 @@ fn get_src(value: &AstNode) -> String {
     if src.starts_with("http") {
         return src;
     } else {
-        return format!("{}/{}", get_html_config().page_dist_url, src);
+        return format!("/{}/{}", get_html_config().image_folder_url, src);
     }
 }
 

@@ -1,6 +1,6 @@
 @Navbar : [
     nav(1) bg(100, 220, 50, 0.03):
-    [white link("../") pad(0): [img("../images/default.png") size(0.1)]] 
+    [white link("/") pad(0): [img("default.png") size(0.1)]] 
 ]
 
 @Footer : [

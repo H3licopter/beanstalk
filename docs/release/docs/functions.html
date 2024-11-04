@@ -65,7 +65,7 @@
 
     result2 = double(3) => triple -- 18
 </code></pre><span class="Footer"></span></main>
-<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="../" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src="../images/default.png" style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="/" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./functions.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){

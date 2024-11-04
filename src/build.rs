@@ -413,7 +413,7 @@ fn compile(
     // TO BE REPLACED WITH LOADING CONFIG.BS FILE (When all config tokens are in tokenizer)
     let mut html_config = get_html_config();
 
-    // For each subdirectory from the dist or dev folder of the output_dir, add a ../ to the image_folder_url
+    // For each subdirectory from the dist or dev folder of the output_dir, add a ../ to the dist_url
     let output_dir_name = if release_build {
         &config.release_folder
     } else {
@@ -431,10 +431,6 @@ fn compile(
         };
         html_config.page_dist_url.push_str("../");
     }
-
-    print!("Added imports in: ");
-    green_ln!("{:?}", time.elapsed());
-    let time = Instant::now();
 
     let (module_output, js_exports, css_exports, wat) = web_parser::parse(
         ast,

@@ -32,12 +32,12 @@
                 line-height: 3.5rem;
             }.bs-0 > * {color:inherit;}</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><p>Beanstalk has its own templating language. These are called scenes.
 </p><p>Scenes have two sections, the head and the body. 
-</p><p><strong><em>The head&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the styling and positioning of the scene.
-</span></p><p><strong><em>The body&nbsp;&nbsp;&nbsp;</em></strong><span>is used to define the content of the scene.
-</span></p><p>These two sections are separated by a colon.
-</p><p>Scenes are scoped using square brackets and have predefined keywords you use in the scene head that can change their behavior, content and styling. 
-</p><p>Inside the body of a scene, you can nest more scenes using square brackets. This allows you to create complex UIs and webpages, while writing mostly in a dialect of markdown.
-</p><h2>Beanstalk Markdown
+</p><p><strong><em>The head&nbsp;</em></strong></p><span>is used to define the styling and positioning of the scene.
+</span><strong><em>The body&nbsp;</em></strong><span>is used to define the content of the scene.
+</span><span>These two sections are separated by a colon.
+</span><span>Scenes are scoped using square brackets and have predefined keywords you use in the scene head that can change their behavior, content and styling. 
+</span><span>Inside the body of a scene, you can nest more scenes using square brackets. This allows you to create complex UIs and webpages, while writing mostly in a dialect of markdown.
+</span><h2>Beanstalk Markdown
 </h2><p>Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a scene body. Beanstalk markdown supports the familiar heading, bold and italic syntax from most markdown parsers.
 </p><pre><code>    [main:
 
@@ -118,7 +118,7 @@
     -- This will update the string in the first scene, but not the second
     variable_that_changes := "world"
 </code></pre><span class="Footer"></span></main>
-<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="../" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src="../images/default.png" style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="/" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./scenes.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
