@@ -369,31 +369,33 @@ fn compile(
     let globals: Vec<Reference> = exported_js
         .iter()
         .filter(|e| e.global)
-        .map(|e|
-            Reference {
-                name: e
-                    .module_path
-                    .file_stem()
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .to_string(), 
-                data_type: e.data_type.to_owned(),
-                is_const: false,
-            }
-        ).collect();
+        .map(|e| Reference {
+            name: e
+                .module_path
+                .file_stem()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string(),
+            data_type: e.data_type.to_owned(),
+            is_const: false,
+        })
+        .collect();
 
     let time = Instant::now();
 
     let (tokens, token_line_numbers): (Vec<Token>, Vec<u32>) =
         tokenizer::tokenize(&output.source_code, file_name);
-    
-    print!("Tokenized in: "); green_ln!("{:?}", time.elapsed());
+
+    print!("Tokenized in: ");
+    green_ln!("{:?}", time.elapsed());
     let time = Instant::now();
 
-    let (ast, imports) = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers, globals, &DataType::None);
-    
-    print!("AST created in: "); green_ln!("{:?}", time.elapsed());
+    let (ast, imports) =
+        parsers::build_ast::new_ast(tokens, 0, &token_line_numbers, globals, &DataType::None);
+
+    print!("AST created in: ");
+    green_ln!("{:?}", time.elapsed());
     let time = Instant::now();
 
     // find the imports
@@ -430,7 +432,8 @@ fn compile(
         html_config.page_dist_url.push_str("../");
     }
 
-    print!("Added imports in: "); green_ln!("{:?}", time.elapsed());
+    print!("Added imports in: ");
+    green_ln!("{:?}", time.elapsed());
     let time = Instant::now();
 
     let (module_output, js_exports, css_exports, wat) = web_parser::parse(
@@ -442,7 +445,8 @@ fn compile(
         exported_css.to_string(),
     );
 
-    print!("HTML/CSS/WAT/JS generated in: "); green_ln!("{:?}", time.elapsed());
+    print!("HTML/CSS/WAT/JS generated in: ");
+    green_ln!("{:?}", time.elapsed());
     let time = Instant::now();
 
     let wasm = match parse_str(&wat) {
@@ -453,7 +457,8 @@ fn compile(
         }
     };
 
-    print!("WAT parsed to WASM in: "); green_ln!("{:?}", time.elapsed());
+    print!("WAT parsed to WASM in: ");
+    green_ln!("{:?}", time.elapsed());
 
     exported_js.extend(js_exports);
     exported_css.push_str(&css_exports);

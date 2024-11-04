@@ -1,5 +1,7 @@
 use super::{
-    ast_nodes::{AstNode, Reference}, create_scene_node::new_scene, parse_expression::create_expression,
+    ast_nodes::{AstNode, Reference},
+    create_scene_node::new_scene,
+    parse_expression::create_expression,
     variables::create_new_var_or_ref,
 };
 use crate::{bs_types::DataType, Token};
@@ -41,7 +43,13 @@ pub fn new_ast(
             }
             Token::SceneHead | Token::ParentScene => {
                 let starting_line_number = &token_line_numbers[i];
-                ast.push(new_scene(&tokens, &mut i, &ast, starting_line_number, &variable_declarations));
+                ast.push(new_scene(
+                    &tokens,
+                    &mut i,
+                    &ast,
+                    starting_line_number,
+                    &variable_declarations,
+                ));
             }
             Token::ModuleStart(_) => {
                 // In future, need to structure into code blocks
@@ -50,7 +58,7 @@ pub fn new_ast(
             // New Function or Variable declaration
             Token::Variable(name) => {
                 ast.push(create_new_var_or_ref(
-                    name, 
+                    name,
                     &mut variable_declarations,
                     &tokens,
                     &mut i,
@@ -58,11 +66,12 @@ pub fn new_ast(
                     &ast,
                     token_line_numbers,
                 ));
+
+                i += 1;
             }
             Token::Export => {
                 exported = true;
             }
-
             Token::JS(value) => {
                 ast.push(AstNode::JS(value.clone()));
             }
@@ -141,7 +150,6 @@ pub fn new_ast(
                 i += 1;
 
                 let starting_line_number = &token_line_numbers[i];
-
                 let return_value = create_expression(
                     &tokens,
                     &mut i,
@@ -154,6 +162,8 @@ pub fn new_ast(
                 );
 
                 ast.push(AstNode::Return(Box::new(return_value)));
+
+                i -= 1;
             }
 
             // TOKEN END SHOULD NEVER BE AT TOP LEVEL

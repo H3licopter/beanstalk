@@ -4,10 +4,7 @@ use crate::tokenize_scene::{tokenize_codeblock, tokenize_markdown};
 use std::iter::Peekable;
 use std::str::Chars;
 
-pub fn tokenize(
-    source_code: &str,
-    module_name: &str,
-) -> (Vec<Token>, Vec<u32>) {
+pub fn tokenize(source_code: &str, module_name: &str) -> (Vec<Token>, Vec<u32>) {
     let mut tokens: Vec<Token> = Vec::new();
     let mut line_number: u32 = 1;
     let mut token_line_numbers: Vec<u32> = Vec::new();
@@ -451,161 +448,172 @@ fn keyword_or_variable(
     line_number: &u32,
 ) -> Token {
     // Match variables or keywords
-    while let Some(&next_char) = chars.peek() {
-        if next_char.is_alphanumeric() || next_char == '_' {
-            token_value.push(chars.next().unwrap());
-        } else {
-            // If their is whitespace or some termination
-            // First check if there is a match to a keyword
-            // Otherwise break out and check it is a valid variable name
-            match token_value.as_str() {
-                // Control Flow
-                "return" => return Token::Return,
-                "end" => return Token::End,
-                "if" => return Token::If,
-                "else" => return Token::Else,
-                "for" => return Token::For,
-                "import" => return Token::Import,
-                "break" => return Token::Break,
-                "when" => return Token::When,
-                "defer" => return Token::Defer,
-                "in" => return Token::In,
-                "as" => return Token::As,
-
-                // Logical
-                "is" => return Token::Equal,
-                "not" => return Token::Not,
-                "and" => return Token::And,
-                "or" => return Token::Or,
-
-                // Data Types
-                "fn" => return Token::FunctionKeyword,
-                "true" => return Token::BoolLiteral(true),
-                "false" => return Token::BoolLiteral(false),
-                "float" => return Token::TypeKeyword(DataType::Float),
-                "string" => return Token::TypeKeyword(DataType::String),
-                "bool" => return Token::TypeKeyword(DataType::Bool),
-
-                // To be moved to standard library in future
-                "print" => return Token::Print,
-
-                _ => {}
-            }
-
-            // only bother tokenizing / reserving these keywords if inside of a scene head
-            match tokenize_mode {
-                TokenizeMode::SceneHead => match token_value.as_str() {
-                    // Style
-                    "code" => {
-                        *tokenize_mode = TokenizeMode::Codeblock;
-                        return Token::CodeKeyword;
-                    }
-                    "blank" => return Token::Blank,
-                    "bg" => return Token::BG,
-
-                    // Theme stuff
-                    "clr" => return Token::ThemeColor,
-
-                    // Colour keywords
-                    "rgb" => return Token::Rgb,
-                    "hsl" => return Token::Hsl,
-
-                    "red" => return Token::Red,
-                    "green" => return Token::Green,
-                    "blue" => return Token::Blue,
-                    "yellow" => return Token::Yellow,
-                    "cyan" => return Token::Cyan,
-                    "magenta" => return Token::Magenta,
-                    "white" => return Token::White,
-                    "black" => return Token::Black,
-                    "orange" => return Token::Orange,
-                    "pink" => return Token::Pink,
-                    "purple" => return Token::Purple,
-                    "grey" => return Token::Grey,
-
-                    // Layout
-                    "pad" => return Token::Padding,
-                    "space" => return Token::Margin,
-                    "center" => return Token::Center,
-                    "size" => return Token::Size,
-                    "hide" => return Token::Hide,
-                    "nav" => return Token::Nav,
-                    "table" => return Token::Table,
-
-                    // Interactive
-                    "link" => return Token::A,
-                    "button" => return Token::Button,
-                    "input" => return Token::Input,
-                    "click" => return Token::Click, // The action performed when clicked (any element)
-                    "form" => return Token::Form,
-                    "option" => return Token::Option,
-                    "dropdown" => return Token::Dropdown,
-
-                    // Media
-                    "img" => return Token::Img,
-                    "alt" => return Token::Alt,
-                    "video" => return Token::Video,
-                    "audio" => return Token::Audio,
-
-                    "order" => return Token::Order,
-                    "title" => return Token::Title,
-
-                    // Structure of the page
-                    "main" => return Token::Main,
-                    "header" => return Token::Header,
-                    "footer" => return Token::Footer,
-                    "section" => return Token::Section,
-
-                    // Other
-                    "ignore" => return Token::Ignore,
-                    "canvas" => return Token::Canvas,
-                    "redirect" => return Token::Redirect,
-                    _ => {}
-                },
-
-                TokenizeMode::CompilerDirective => {
-                    match token_value.as_str() {
-                        "title" => {
-                            *tokenize_mode = TokenizeMode::Normal;
-                            return Token::Title;
-                        }
-                        "date" => {
-                            *tokenize_mode = TokenizeMode::Normal;
-                            return Token::Date;
-                        }
-                        "JS" => {
-                            *tokenize_mode = TokenizeMode::Normal;
-                            return match string_block(chars, line_number) {
-                                Ok(js_code) => Token::JS(js_code),
-                                Err(err) => err,
-                            };
-                        }
-                        "CSS" => {
-                            *tokenize_mode = TokenizeMode::Normal;
-                            return match string_block(chars, line_number) {
-                                Ok(css_code) => Token::CSS(css_code),
-                                Err(err) => err,
-                            };
-                        }
-                        _ => {}
-                    }
+    loop {
+        let is_a_char = match chars.peek() {
+            // If there is a char that is not None
+            // And is an underscore or alphabetic, add it to the token value
+            Some(char) => {
+                if char.is_alphanumeric() || *char == '_' {
+                    token_value.push(chars.next().unwrap());
+                    continue;
                 }
-
-                _ => {}
+                true
             }
+            None => false,
+        };
 
+        // Always check if token value is a keyword in every other case
+        // If their is whitespace or some termination
+        // First check if there is a match to a keyword
+        // Otherwise break out and check it is a valid variable name
+        match token_value.as_str() {
+            // Control Flow
+            "return" => return Token::Return,
+            "end" => return Token::End,
+            "if" => return Token::If,
+            "else" => return Token::Else,
+            "for" => return Token::For,
+            "import" => return Token::Import,
+            "break" => return Token::Break,
+            "when" => return Token::When,
+            "defer" => return Token::Defer,
+            "in" => return Token::In,
+            "as" => return Token::As,
+
+            // Logical
+            "is" => return Token::Equal,
+            "not" => return Token::Not,
+            "and" => return Token::And,
+            "or" => return Token::Or,
+
+            // Data Types
+            "fn" => return Token::FunctionKeyword,
+            "true" => return Token::BoolLiteral(true),
+            "false" => return Token::BoolLiteral(false),
+            "float" => return Token::TypeKeyword(DataType::Float),
+            "string" => return Token::TypeKeyword(DataType::String),
+            "bool" => return Token::TypeKeyword(DataType::Bool),
+
+            // To be moved to standard library in future
+            "print" => return Token::Print,
+
+            _ => {}
+        }
+
+        // only bother tokenizing / reserving these keywords if inside of a scene head
+        match tokenize_mode {
+            TokenizeMode::SceneHead => match token_value.as_str() {
+                // Style
+                "code" => {
+                    *tokenize_mode = TokenizeMode::Codeblock;
+                    return Token::CodeKeyword;
+                }
+                "id" => return Token::Id,
+                "blank" => return Token::Blank,
+                "bg" => return Token::BG,
+
+                // Theme stuff
+                "clr" => return Token::ThemeColor,
+
+                // Colour keywords
+                "rgb" => return Token::Rgb,
+                "hsl" => return Token::Hsl,
+
+                "red" => return Token::Red,
+                "green" => return Token::Green,
+                "blue" => return Token::Blue,
+                "yellow" => return Token::Yellow,
+                "cyan" => return Token::Cyan,
+                "magenta" => return Token::Magenta,
+                "white" => return Token::White,
+                "black" => return Token::Black,
+                "orange" => return Token::Orange,
+                "pink" => return Token::Pink,
+                "purple" => return Token::Purple,
+                "grey" => return Token::Grey,
+
+                // Layout
+                "pad" => return Token::Padding,
+                "space" => return Token::Margin,
+                "center" => return Token::Center,
+                "size" => return Token::Size, // Changes text size or content (vid/img) size depending on context
+                "hide" => return Token::Hide,
+                "nav" => return Token::Nav,
+                "table" => return Token::Table,
+
+                // Interactive
+                "link" => return Token::A,
+                "button" => return Token::Button,
+                "input" => return Token::Input,
+                "click" => return Token::Click, // The action performed when clicked (any element)
+                "form" => return Token::Form,
+                "option" => return Token::Option,
+                "dropdown" => return Token::Dropdown,
+
+                // Media
+                "img" => return Token::Img,
+                "alt" => return Token::Alt,
+                "video" => return Token::Video,
+                "audio" => return Token::Audio,
+
+                "order" => return Token::Order,
+                "title" => return Token::Title,
+
+                // Structure of the page
+                "main" => return Token::Main,
+                "header" => return Token::Header,
+                "footer" => return Token::Footer,
+                "section" => return Token::Section,
+
+                // Other
+                "ignore" => return Token::Ignore,
+                "canvas" => return Token::Canvas,
+                "redirect" => return Token::Redirect,
+                _ => {}
+            },
+
+            TokenizeMode::CompilerDirective => match token_value.as_str() {
+                "title" => {
+                    *tokenize_mode = TokenizeMode::Normal;
+                    return Token::Title;
+                }
+                "date" => {
+                    *tokenize_mode = TokenizeMode::Normal;
+                    return Token::Date;
+                }
+                "JS" => {
+                    *tokenize_mode = TokenizeMode::Normal;
+                    return match string_block(chars, line_number) {
+                        Ok(js_code) => Token::JS(js_code),
+                        Err(err) => err,
+                    };
+                }
+                "CSS" => {
+                    *tokenize_mode = TokenizeMode::Normal;
+                    return match string_block(chars, line_number) {
+                        Ok(css_code) => Token::CSS(css_code),
+                        Err(err) => err,
+                    };
+                }
+                _ => {}
+            },
+
+            _ => {}
+        }
+
+        // Finally, if this was None, then break at end or make new variable
+        if is_a_char && is_valid_identifier(&token_value) {
+            return Token::Variable(token_value.to_string());
+        } else {
             break;
         }
     }
 
-    if is_valid_identifier(&token_value) {
-        return Token::Variable(token_value.to_string());
-    }
-
-    Token::Error(
+    // Failing all of that, this is an error
+    return Token::Error(
         format!("Invalid variable name: {}", token_value),
         *line_number,
-    )
+    );
 }
 
 // Checking if the variable name it valid
@@ -623,38 +631,53 @@ fn is_valid_identifier(s: &str) -> bool {
 fn string_block(chars: &mut Peekable<Chars>, line_number: &u32) -> Result<String, Token> {
     let mut string_value = String::new();
 
-    while let Some(ch) = chars.next() {
+    while let Some(ch) = chars.peek() {
         // Skip whitespace before the first colon that starts the block
         if ch.is_whitespace() {
+            chars.next();
             continue;
         }
 
         // Start the code block at the colon
-        if ch != ':' {
+        if *ch != ':' {
             return Err(Token::Error(
-                "JS block must start with a colon".to_string(),
+                "Block must start with a colon".to_string(),
                 *line_number,
             ));
+        } else {
+            chars.next();
+            break;
         }
     }
 
     let mut closing_end_keyword = false;
-    while let Some(ch) = chars.next() {
+    loop {
+        match chars.peek() {
+            Some(char) => {
+                string_value.push(*char);
+                chars.next();
+            }
+            None => {
+                if !closing_end_keyword {
+                    return Err(Token::Error(
+                        "block must end with 'end' keyword".to_string(),
+                        *line_number,
+                    ));
+                }
+                break;
+            }
+        };
+
         // Push everything to the JS code block until the first 'end' keyword
         // must have newline before and whitespace after the 'end' keyword
-        if string_value.ends_with("\nend ") {
+        let end_keyword = "\nend";
+        if string_value.ends_with(end_keyword) {
             closing_end_keyword = true;
-            break;
+            string_value = string_value
+                .split_at(string_value.len() - end_keyword.len())
+                .0
+                .to_string();
         }
-
-        string_value.push(ch);
-    }
-
-    if !closing_end_keyword {
-        return Err(Token::Error(
-            "block must end with 'end' keyword".to_string(),
-            *line_number,
-        ));
     }
 
     Ok(string_value)

@@ -42,6 +42,30 @@ pub fn new_scene(
                 return AstNode::Scene(scene, scene_tags, scene_styles, scene_actions);
             }
 
+            Token::Id => {
+                if !check_if_arg(tokens, &mut *i) {
+                    continue;
+                }
+
+                let eval_arg = create_expression(
+                    tokens,
+                    &mut *i,
+                    false,
+                    ast,
+                    token_line_number,
+                    &DataType::CoerseToString,
+                    inside_brackets,
+                    variable_declarations,
+                );
+
+                if check_if_comptime_value(&eval_arg) {
+                    scene_tags.push(Tag::A(eval_arg));
+                } else {
+                    // Need to add JS DOM hooks to change strings at runtime dynamically
+                    scene_tags.push(Tag::A(eval_arg));
+                }
+            }
+
             Token::A => {
                 if !check_if_arg(tokens, &mut *i) {
                     continue;
@@ -53,7 +77,7 @@ pub fn new_scene(
                     false,
                     ast,
                     token_line_number,
-                    &DataType::Inferred,
+                    &DataType::CoerseToString,
                     inside_brackets,
                     variable_declarations,
                 );
@@ -468,37 +492,6 @@ pub fn new_scene(
                 scene_tags.clear();
             }
             Token::CodeBlock(content) => {
-                // let mut lang = String::from("bs");
-                // if check_if_arg(tokens, &mut *i) {
-                //     let eval_arg = create_expression(
-                //         tokens,
-                //         &mut *i,
-                //         false,
-                //         ast,
-                //         token_line_number,
-                //         &DataType::CoerseToString,
-                //         inside_brackets,
-                //         variable_declarations,
-                //     );
-                //     if check_if_comptime_value(&eval_arg) {
-                //        match eval_arg {
-                //             AstNode::Literal(token) => match token {
-                //                  Token::StringLiteral(value) => lang = value,
-                //                  _ => {
-                //                       red_ln!("Invalid language provided for code block");
-                //                  }
-                //             },
-                //             _ => {
-                //                  red_ln!("Invalid language provided for code block");
-                //             }
-                //        }
-                //     } else {
-                //         // does not support runtime evaluation of language
-                //         red_ln!("Codeblock language can't be evaluated at runtime (yet)");
-                //     };
-                // }
-
-                // let codeblock = highlight_code_snippet(&lang, content);
                 scene.push(AstNode::Element(Token::CodeBlock(content.to_owned())));
             }
 
@@ -606,7 +599,8 @@ pub fn new_scene(
             }
 
             Token::SceneHead => {
-                let nested_scene = new_scene(tokens, i, ast, token_line_number, variable_declarations);
+                let nested_scene =
+                    new_scene(tokens, i, ast, token_line_number, variable_declarations);
                 scene.push(nested_scene);
             }
 
@@ -723,7 +717,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize, merge_next_p_line: &mut bool) 
     // It doesn't have 2 newlines ending it and it can be inlined
     // Then return true
     match previous_element {
-        Token::Empty | Token::Newline => false,
+        Token::Empty | Token::Newline | Token::Pre(_) => false,
 
         Token::P(content)
         | Token::Span(content)
@@ -737,15 +731,7 @@ fn check_if_inline(tokens: &Vec<Token>, i: usize, merge_next_p_line: &mut bool) 
             }
         }
 
-        Token::Pre(_) => false,
-
-        Token::A
-        | Token::StringLiteral(_)
-        | Token::EmptyScene(_)
-        | Token::HeadingStart(_)
-        | Token::BulletPointStart(_) => true,
-
-        _ => false,
+        _ => true,
     }
 }
 

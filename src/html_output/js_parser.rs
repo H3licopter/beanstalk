@@ -1,6 +1,6 @@
 use colour::red_ln;
 
-use crate::{bs_types::DataType, parsers::ast_nodes::AstNode, Token};
+use crate::{bs_types::DataType, parsers::ast_nodes::AstNode, settings::BS_VAR_PREFIX, Token};
 
 // Create everything necissary in JS
 // Break out pieces in WASM calls
@@ -27,7 +27,9 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                     | AstNode::ConstReference(name, data_type) => {
                         // If it's a string, it will just be pure JS, no WASM
                         match data_type {
-                            DataType::String | DataType::Scene => js.push_str(&format!(" v{name}")),
+                            DataType::String | DataType::Scene => {
+                                js.push_str(&format!(" {BS_VAR_PREFIX}{name}"))
+                            }
                             _ => js.push_str(&format!(" wsx.get_v{name}()")),
                         }
                     }
@@ -81,7 +83,9 @@ pub fn expression_to_js(expr: &AstNode) -> String {
 
         AstNode::VarReference(name, data_type) | AstNode::ConstReference(name, data_type) => {
             match data_type {
-                DataType::String | DataType::Scene => js.push_str(&format!("`${{v{name}}}`")),
+                DataType::String | DataType::Scene => {
+                    js.push_str(&format!("`${{{BS_VAR_PREFIX}{name}}}`"))
+                }
                 _ => js.push_str(&format!("`${{wsx.get_v{name}()}}`")),
             }
         }

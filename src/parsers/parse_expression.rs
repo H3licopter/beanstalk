@@ -1,7 +1,8 @@
 use colour::red_ln;
 
 use super::{
-    ast_nodes::{AstNode, Reference}, collections::new_tuple,
+    ast_nodes::{AstNode, Reference},
+    collections::new_tuple,
     create_scene_node::new_scene,
 };
 use crate::{bs_types::DataType, Token};
@@ -28,7 +29,7 @@ pub fn create_expression(
 ) -> AstNode {
     let mut expression = Vec::new();
     let mut current_type = data_type.to_owned();
-    
+
     if inside_brackets {
         *i += 1;
     }
@@ -110,7 +111,6 @@ pub fn create_expression(
 
             // Check if name is a reference to another variable or function call
             Token::Variable(name) => {
-
                 let var = variable_declarations.iter().find(|var| var.name == *name);
                 match var {
                     Some(var) => {
@@ -121,7 +121,10 @@ pub fn create_expression(
 
                         // If the variables type is known and not the same as the type of the expression
                         // Return a type error
-                        if var.data_type != DataType::Inferred && var.data_type != current_type && current_type != DataType::CoerseToString {
+                        if var.data_type != DataType::Inferred
+                            && var.data_type != current_type
+                            && current_type != DataType::CoerseToString
+                        {
                             return AstNode::Error(
                                 format!(
                                     "Variable {} is of type {:?}, but used in an expression of type {:?}",
@@ -132,9 +135,15 @@ pub fn create_expression(
                         }
 
                         if var.is_const {
-                            expression.push(AstNode::ConstReference(var.name.to_owned(), var.data_type.to_owned()));
+                            expression.push(AstNode::ConstReference(
+                                var.name.to_owned(),
+                                var.data_type.to_owned(),
+                            ));
                         } else {
-                            expression.push(AstNode::VarReference(var.name.to_owned(), var.data_type.to_owned()));
+                            expression.push(AstNode::VarReference(
+                                var.name.to_owned(),
+                                var.data_type.to_owned(),
+                            ));
                         };
                     }
                     None => {
@@ -418,8 +427,9 @@ pub fn evaluate_expression(
                         if current_type == DataType::Bool {
                             if *op != Token::Or || *op != Token::And {
                                 return AstNode::Error(
-                                    "Can only use 'or' and 'and' operators with booleans".to_string(),
-                                    line_number
+                                    "Can only use 'or' and 'and' operators with booleans"
+                                        .to_string(),
+                                    line_number,
                                 );
                             }
                             operators_stack.push(node.to_owned());
@@ -525,10 +535,7 @@ pub fn evaluate_expression(
 
 // This will evaluate everything possible at compile time
 // returns either a literal or an evaluated runtime expression
-fn math_constant_fold(
-    output_stack: Vec<AstNode>,
-    current_type: DataType,
-) -> AstNode {
+fn math_constant_fold(output_stack: Vec<AstNode>, current_type: DataType) -> AstNode {
     let mut stack: Vec<AstNode> = Vec::new();
 
     for node in &output_stack {
@@ -563,7 +570,7 @@ fn math_constant_fold(
                         continue;
                     }
                 };
-                
+
                 stack.push(AstNode::Literal(Token::FloatLiteral(match op {
                     Token::Add => left_value + right_value,
                     Token::Subtract => left_value - right_value,
@@ -589,10 +596,7 @@ fn math_constant_fold(
     AstNode::RuntimeExpression(stack, current_type)
 }
 
-fn logical_constant_fold(
-    output_stack: Vec<AstNode>,
-    current_type: DataType,
-) -> AstNode {
+fn logical_constant_fold(output_stack: Vec<AstNode>, current_type: DataType) -> AstNode {
     let mut stack: Vec<AstNode> = Vec::new();
 
     for node in &output_stack {
@@ -627,7 +631,7 @@ fn logical_constant_fold(
                         continue;
                     }
                 };
-                
+
                 stack.push(AstNode::Literal(Token::BoolLiteral(match op {
                     Token::Equal => left_value == right_value,
                     Token::And => left_value && right_value,

@@ -51,7 +51,8 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Create AST
     yellow_ln_bold!("CREATING AST\n");
-    let (ast, _var_declarations) = parsers::build_ast::new_ast(tokens, 0, &token_line_numbers, Vec::new(), &DataType::None);
+    let (ast, _var_declarations) =
+        parsers::build_ast::new_ast(tokens, 0, &token_line_numbers, Vec::new(), &DataType::None);
 
     for node in &ast {
         match node {

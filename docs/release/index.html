@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="images/favicons/site.webmanifest">
 <link rel="stylesheet" href="css/pico.min.css" />
-<style>.bs-nav-1 {
+<style>.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}</style></head><body><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><b class="bs-title-1 " style=""  >THE BEANSTALK BOOK</b><h1>&#127793;
+            }.bs-0 > * {color:inherit;}</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><b class="bs-title-1 " style=""  >THE BEANSTALK BOOK</b><h1>&#127793;
 </h1></div></header><main class="container"><h2>What is Beanstalk?
 </h2><p>This website was created using Beanstalk! It's an open source, strongly typed language that compiles to HTML, CSS and Web Assembly (and some necessary Javascript).
 </p><p>Beanstalk has it's own unique, modern syntax that allows it to replace boilerplate and frameworks with a fresh sensible language.
@@ -43,9 +43,8 @@
 </span></p><h2>Contributing
 </h2><p>If you are intersted in contributing, it's very early days, but if you want to contribute to the language, please get in touch.
 </p><p>You can find the <a href="./docs/roadmap" style="" class="" >roadmap here</a><span>.
-</span></p></main><span class="cFooter"></span>
-<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
-</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</span></p></main><span class="Footer"></span>
+<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="../" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src="../images/default.png" style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./index.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
@@ -54,7 +53,7 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cFooter", vFooter);
+            }uInnerHTML("Navbar", bs_Navbar);uInnerHTML("Footer", bs_Footer);
   ;});</script>
 </body>
 </html>

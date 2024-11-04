@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style>.bs-nav-1 {
+<style>.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
@@ -30,44 +30,52 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}.bs-code-comment{color:#6a9955}.bs-code-keyword{color:#cc7832}.bs-code-string{color:#6a8759}.bs-code-number{color:#6897bb}.bs-code-operator{color:#d4d4d4}.bs-code-identifier{color:#9876aa}.bs-code-type{color:#4c8ea1}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >MEMORY MANAGEMENT</b></div></header><main class="container"><span style="color:hsla(0,90%,55%,1);"  class=" bs-0" ><p>Memory management scheme still in testing / design phase</p></span><h1>How Beanstalk handles memory
-</h1><p>The intention is for the language to <strong>not&nbsp;</strong><span>have a garbage collector, but to use a system similar to Rust's ownership model but trade a bit more speed for abstraction and simplicity and have first class language support for memory arenas/regions.
-</span></p><p>The memory management model is heavily inspired by <a href="https://verdagon.dev/blog/linear-types-borrowing" style="" class="" >Vale's Linear Types and Generational References</a><span>.
-</span></p><h2>Ownership
-</h2><p>Variables are cleaned up when they go out of scope, and are not allowed to be used after they are cleaned up. This is to prevent dangling pointers and memory leaks.
-</p><p>Instead of having to explicitly denote references (e.g using & in rust), all variables automatically become immutable references by default when used.
-</p><h2>Borrowing
-</h2><p>To lend a mutable version of a variable, you can use the ~ tilde operator. 
-</p><p>Beanstalk will automatically determine whether it should pass a mutable reference or full ownership of a variable to a function, based on how the variable is used in the rest of the function.
-</p><p>Only one mutable reference to a variable can exist at a time, and it is not allowed to be used after it is lent out.
+            }.bs-0 > * {color:inherit;}</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >MEMORY MANAGEMENT</b></div></header><main class="container"><span style="color:hsla(0,90%,55%,1);"  class=" bs-0" ><span>Memory management scheme still in testing / design phase</span></span><h1>How Beanstalk handles memory
+</h1><p>Beanstalk will analyze where variables are used and passed around to determine whether they are copied, moved or passed by reference.
+</p><span>This will be a bit like Rust, but less explicit and easier to understand. 
+</span><p>The cost of this is more work for the compiler, and a higher chance of less optimal code being generated.
+</p><p>The intention is for the language to <strong>not&nbsp;</strong><span>have a garbage collector.
+</span></p><p>Failing this plan, either a model similar to <a href="https://verdagon.dev/blog/linear-types-borrowing" style="" class="" >Vale's Linear Types and Generational References</a>&nbsp;<span>will be used.
+</span></p><p>Or just a GC with first class support for memory arenas if none of these ideas work out.
 </p><h2>Copying
 </h2><p>To copy a variable, you can use the copy keyword. This will create a new variable with the same value as the original.
 </p><pre><code>
     testing_memory () -> () :
-        var = {
-            x := 5
-            y := 3
-        }
-
-        -- Copy of var
-        var2 = copy var
-
-        -- Ownership given to function
-        change_var(var)
-
-        -- Error, var was dropped after being given to change_var
-        change_var(var)
-    end
-
-    -- References
-    testing_memory_2 () -> () :
-        var1 = {
+        Coords : {
             x = 5
             y = 3
         }
 
-        -- Var1 ownership given to function, but function gives it back at the end of it's scope
-        change_var(~var1)
+        -- VARIABLE BRANCHING
+        -- Coords is now branched into two possible places
+        -- The compiler will collapse the branch depending on the use of either variable
+        Coords2 = Coords
+
+        -- A mutable reference to the original Coords is given to change_var
+        change_var(Coords)
+
+        -- Compiler now has to determine how to handle the double reference
+        change_2_vars(Coords, Coords2)
+
+        -- Branches are collapsed to one variable and ownership is passed to change_var
+        change_var(Coords2)
+    end
+
+    -- References
+    testing_memory_2 () -> () :
+        Coords : {
+            x = 5,
+            y = 3,
+        }
+
+        coord_collection {Coords} = {
+            Coords {x = 1, y = 3}, 
+            Coords {x = 2, y = 4},
+            Coords {x = 3, y = 5},
+        }
+
+        -- mutable reference given to function
+        change_var(var1)
 
         -- Giving var1 to var2
         var2 = var1
@@ -108,8 +116,7 @@
         change_var(var)
     end
 </code></pre></main>
-<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
-</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="../" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src="../images/default.png" style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./memory-management.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
@@ -118,7 +125,7 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cNavbar", vNavbar);
+            }uInnerHTML("Navbar", bs_Navbar);
   ;});</script>
 </body>
 </html>

@@ -1,28 +1,37 @@
 use crate::{bs_types::DataType, Token};
 
 use super::{
-    ast_nodes::{AstNode, Reference}, collections::new_collection, functions::create_function,
+    ast_nodes::{AstNode, Reference},
+    collections::new_collection,
+    functions::create_function,
     parse_expression::create_expression,
 };
 
 pub fn create_new_var_or_ref(
-    name: &String, 
-    variable_declarations: &mut Vec<Reference>, 
-    tokens: &Vec<Token>, 
+    name: &String,
+    variable_declarations: &mut Vec<Reference>,
+    tokens: &Vec<Token>,
     i: &mut usize,
     is_exported: bool,
     ast: &Vec<AstNode>,
     token_line_numbers: &Vec<u32>,
 ) -> AstNode {
-    for var in &mut *variable_declarations {
-        if var.name == *name {
-            if var.is_const {
-                return AstNode::ConstReference(var.name.to_owned(), var.data_type.to_owned());
-            }
-            return AstNode::VarReference(var.name.to_owned(), var.data_type.to_owned());
+    if let Some(var) = variable_declarations.iter().find(|v| v.name == *name) {
+        if var.is_const {
+            return AstNode::ConstReference(var.name.to_owned(), var.data_type.to_owned());
         }
+        return AstNode::VarReference(var.name.to_owned(), var.data_type.to_owned());
     }
-    new_variable(name, tokens, i, is_exported, ast, token_line_numbers, &mut *variable_declarations)
+
+    new_variable(
+        name,
+        tokens,
+        i,
+        is_exported,
+        ast,
+        token_line_numbers,
+        &mut *variable_declarations,
+    )
 }
 
 // CAN RETURN:
@@ -34,19 +43,15 @@ pub fn new_variable(
     is_exported: bool,
     ast: &Vec<AstNode>,
     token_line_numbers: &Vec<u32>,
-    variable_declarations: &mut Vec<Reference>, 
+    variable_declarations: &mut Vec<Reference>,
 ) -> AstNode {
     *i += 1;
     let mut data_type = &DataType::Inferred;
 
     let is_const = match &tokens[*i] {
         // Type is inferred
-        &Token::Assign => {
-            false
-        }
-        &Token::Colon => {
-            true
-        }
+        &Token::Assign => false,
+        &Token::Colon => true,
 
         &Token::FunctionKeyword => {
             *i += 1;
@@ -67,12 +72,8 @@ pub fn new_variable(
             *i += 1;
 
             match &tokens[*i] {
-                &Token::Assign => {
-                    false
-                }
-                &Token::Colon => {
-                    true
-                }
+                &Token::Assign => false,
+                &Token::Colon => true,
 
                 // If this is the end of the assignment, it is an uninitalised variable
                 // Currently just creates a zero value variable, should be uninitialised in future
@@ -82,12 +83,19 @@ pub fn new_variable(
                         data_type: data_type.to_owned(),
                         is_const: false,
                     });
-                    
-                    return create_zero_value_var(data_type.to_owned(), name.to_string(), is_exported);
+
+                    return create_zero_value_var(
+                        data_type.to_owned(),
+                        name.to_string(),
+                        is_exported,
+                    );
                 }
                 _ => {
                     return AstNode::Error(
-                        format!("Variable of type: {:?} does not exsist in this scope", data_type),
+                        format!(
+                            "Variable of type: {:?} does not exsist in this scope",
+                            data_type
+                        ),
                         token_line_numbers[*i],
                     );
                 }
@@ -101,14 +109,16 @@ pub fn new_variable(
         // Anything else is a syntax error
         _ => {
             return AstNode::Error(
-                format!("'{}' - Invalid variable declaration: {:?}", name, tokens[*i]),
+                format!(
+                    "'{}' - Invalid variable declaration: {:?}",
+                    name, tokens[*i]
+                ),
                 token_line_numbers[*i],
             );
         }
     };
 
-
-    // Get assigned values 
+    // Get assigned values
     *i += 1;
     let parsed_expr;
     match &tokens[*i] {
@@ -129,7 +139,7 @@ pub fn new_variable(
                     is_exported,
                 );
             }
-            
+
             // Dynamic Collection literal
             let start_line_number = &token_line_numbers[*i];
             let collection = new_collection(tokens, i, ast, start_line_number);
@@ -149,30 +159,37 @@ pub fn new_variable(
                         false,
                     );
                 }
-                _=> {
+                _ => {
                     return AstNode::Error(
                         "Invalid collection".to_string(),
                         token_line_numbers[*i],
                     );
                 }
             }
-        },
+        }
 
         // create_expression will automatically handle tuples
         _ => {
             // Maybe need to add a check that this is an expression after the assignment?
             let start_line_number = &token_line_numbers[*i];
-            parsed_expr = create_expression(tokens, i, false, &ast, start_line_number, data_type, false, &variable_declarations);
+            parsed_expr = create_expression(
+                tokens,
+                i,
+                false,
+                &ast,
+                start_line_number,
+                data_type,
+                false,
+                &variable_declarations,
+            );
         }
     }
-
 
     // Check if a type of collection has been created
     // Or whether it is a literal or expression
     // If the expression is an empty expression when the variable is NOT a function, return an error
     match parsed_expr {
         AstNode::RuntimeExpression(_, ref evaluated_type) => {
-
             return create_var_node(
                 is_const,
                 name.to_string(),
@@ -238,7 +255,6 @@ pub fn new_variable(
     }
 }
 
-
 fn create_var_node(
     is_const: bool,
     var_name: String,
@@ -247,7 +263,6 @@ fn create_var_node(
     data_type: DataType,
     variable_declarations: &mut Vec<Reference>,
 ) -> AstNode {
-
     variable_declarations.push(Reference {
         name: var_name.to_owned(),
         data_type: data_type.to_owned(),
@@ -264,13 +279,7 @@ fn create_var_node(
         );
     }
 
-    return AstNode::VarDeclaration(
-        var_name,
-        Box::new(var_value),
-        is_exported,
-        data_type,
-        false,
-    );
+    return AstNode::VarDeclaration(var_name, Box::new(var_value), is_exported, data_type, false);
 }
 
 fn create_zero_value_var(data_type: DataType, name: String, is_exported: bool) -> AstNode {

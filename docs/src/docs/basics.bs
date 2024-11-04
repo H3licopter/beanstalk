@@ -148,9 +148,9 @@ Eventually this will be entirely manipulated in Wasm, allowing for different str
 [table 3:
     [: Type ] [: Description] [: Zero Value]
 
-    [: Tuple ] [: Any number of immutable items seperated by commas. See [link "../collections": Collections] for more information.] [: ()]
+    [: Tuple ] [: Any number of immutable items seperated by commas. See [link "./collections": Collections] for more information.] [: ()]
 
-    [: Collection ] [: A blend between arrays and structs. See [link "../collections": Collections] for more information.] [: {}]
+    [: Collection ] [: A blend between arrays and structs. See [link "./collections": Collections] for more information.] [: {}]
     
     [: choice ] [: Rust style enums. To be implemented. ] [: error]
 

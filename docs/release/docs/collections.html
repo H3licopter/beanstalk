@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style>.bs-nav-1 {
+<style>.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
@@ -30,38 +30,35 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-code-comment{color:#6a9955}.bs-code-keyword{color:#cc7832}.bs-code-string{color:#6a8759}.bs-code-number{color:#6897bb}.bs-code-operator{color:#d4d4d4}.bs-code-identifier{color:#9876aa}.bs-code-type{color:#4c8ea1}.bs-code-comment{color:#6a9955}.bs-code-keyword{color:#cc7832}.bs-code-string{color:#6a8759}.bs-code-number{color:#6897bb}.bs-code-operator{color:#d4d4d4}.bs-code-identifier{color:#9876aa}.bs-code-type{color:#4c8ea1}.bs-code-comment{color:#6a9955}.bs-code-keyword{color:#cc7832}.bs-code-string{color:#6a8759}.bs-code-number{color:#6897bb}.bs-code-operator{color:#d4d4d4}.bs-code-identifier{color:#9876aa}.bs-code-type{color:#4c8ea1}.bs-code-comment{color:#6a9955}.bs-code-keyword{color:#cc7832}.bs-code-string{color:#6a8759}.bs-code-number{color:#6897bb}.bs-code-operator{color:#d4d4d4}.bs-code-identifier{color:#9876aa}.bs-code-type{color:#4c8ea1}.bs-code-comment{color:#6a9955}.bs-code-keyword{color:#cc7832}.bs-code-string{color:#6a8759}.bs-code-number{color:#6897bb}.bs-code-operator{color:#d4d4d4}.bs-code-identifier{color:#9876aa}.bs-code-type{color:#4c8ea1}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><h1>Collections
+            }</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><h1>Collections
 </h1><p>All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
 </p><h2>Tuples
 </h2><p>By simply surrounding a list of values separated by commas, you create a tuple literal.
 </p><pre><code>(1, 2, 3)
-
-(
-    1,
-    2,
-    3,
-)
-
-</code></pre><p>Tuples are a fixed size and can contain any type. Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
-</p><p>A tuple of one value is indistinguishable from the value itself.
-</p><p>When creating a tuple using a colon, the values inside become immutable.
+</code></pre><p>Tuples have a fixed size and can contain any type. 
+</p><span>Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
+</span><p>A tuple of one value is indistinguishable from the value itself.
 </p><pre><code>    -- Fixed size tuple of immutable integers
     tuple : (1, 2, 3)
     tuple{0} is 1 -- true
+</code></pre><h2>Mutable tuples (fixed sized arrays)
+</h2><p>If a mutable tuple is created, it's elements can be mutated as long as they are the same type.
+</p><pre><code>    -- Mutable integers inside the tuple
+    tuple = (1, 2, 3)
 </code></pre><h2>Fixed Collections (Structs)
 </h2><p>By creating a constant collection, you can define a struct. This can then be used as a type to create new instances of the struct.
 </p><pre><code>    -- Vector struct
     Coords : {
-        x : float,
-        y : float,
-        z : float,
+        x float,
+        y float,
+        z float,
     }
 
     -- Creating default values for a struct when it is initiliased, type can be inffered
     Coords : {
-        x : float = 0,
-        y : float = 0,
-        z : float = 0,
+        x float = 0,
+        y float = 0,
+        z float = 0,
     }
 
     -- Creating a new instance of the struct
@@ -81,33 +78,24 @@
     -- using pipe operator to print the array after pushing a new value
     array push(9) => print() -- prints {3, 4, 5, 9}
 
-    -- Array with fixed size of 64 elements
-    -- Will initialise all values with the types default value
-    array : 64 int = {3, 4, 5}
-    array push(9) -- Error, collection is fixed size
-    array length -- returns 64
-    array{43} -- returns 0
-
     array{0} += 1 
     array{0} -- returns 4
 
-    array = {3, 4, 5, 6}
-    array push(9) -- works, collection is dynamically sized
+    array push(1)
     array length -- returns 5
 
-    -- Initialising an empty array with a type
-    array int{} = {}
+    -- Uninitilised empty array
+    array {int}
 </code></pre><p>By using statements inside your collection rather than literals, you can define keys for the items in the collection. 
 </p><pre><code>    dictionary = {
         "key1" : 1,
-        "key2" : 2,
-        "key3" : 3,
+        "key2" = 2,
+        "key3" = 3,
     }
 
     dictionary{"key1"} -- returns 1
-</code></pre><span class="cFooter"></span></main>
-<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
-</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</code></pre><span class="Footer"></span></main>
+<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="../" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src="../images/default.png" style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./collections.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
@@ -116,7 +104,7 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);
+            }uInnerHTML("Navbar", bs_Navbar);uInnerHTML("Footer", bs_Footer);
   ;});</script>
 </body>
 </html>

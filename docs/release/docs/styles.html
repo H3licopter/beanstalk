@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style>.bs-nav-1 {
+<style>.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
@@ -30,7 +30,7 @@
                 word-spacing: 0.5rem;
                 margin: 1.5rem 0 1.4rem 0;
                 line-height: 3.7rem;
-            }</style></head><body><span class="cNavbar"></span><header class="container"><b class="bs-title-0 " style=""  >Styles</b></header><main class="container"><p>Structure of a style:
+            }</style></head><body><span class="Navbar"></span><header class="container"><b class="bs-title-0 " style=""  >Styles</b></header><main class="container"><p>Structure of a style:
 </p><h2>Tag type
 </h2><p>This is what HTML tag the style will use. This is important for accessibility and for setting some default behaviour.
 </p><h2>CSS
@@ -56,8 +56,7 @@
 </span></li><h2>Newline Rule
 </h2><p>Will this style inline itself with other instances of the same style? (like a p tag)
 </p></main>
-<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
-</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="../" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src="../images/default.png" style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./styles.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
@@ -66,7 +65,7 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cNavbar", vNavbar);
+            }uInnerHTML("Navbar", bs_Navbar);
   ;});</script>
 </body>
 </html>

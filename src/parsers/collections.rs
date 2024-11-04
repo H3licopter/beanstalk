@@ -58,7 +58,6 @@ pub fn new_collection(
     i: &mut usize,
     ast: &Vec<AstNode>,
     starting_line_number: &u32,
-    
 ) -> AstNode {
     let mut items: Vec<AstNode> = Vec::new();
     let collection_type = DataType::Collection(Box::new(DataType::Inferred));

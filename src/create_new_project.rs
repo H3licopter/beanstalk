@@ -28,10 +28,14 @@ pub fn create_project(
     // Create new dev folder
     let dev_folder_name = get_default_config().dev_folder;
     let release_folder_name = get_default_config().release_folder;
-    let new_dev_folder = &full_path.join("html_project_template").join(dev_folder_name);
+    let new_dev_folder = &full_path
+        .join("html_project_template")
+        .join(dev_folder_name);
     // Copy the dist folder to the dev folder
     copy(
-        &full_path.join("html_project_template").join(release_folder_name),
+        &full_path
+            .join("html_project_template")
+            .join(release_folder_name),
         new_dev_folder,
         &options.content_only(true),
     )?;

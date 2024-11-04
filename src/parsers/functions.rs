@@ -1,4 +1,8 @@
-use super::{ast_nodes::{AstNode, Reference}, build_ast::new_ast, parse_expression::create_expression};
+use super::{
+    ast_nodes::{AstNode, Reference},
+    build_ast::new_ast,
+    parse_expression::create_expression,
+};
 use crate::{bs_types::DataType, Token};
 
 pub fn create_function(
@@ -17,12 +21,13 @@ pub fn create_function(
     */
 
     // get args (tokens should currently be at the open parenthesis)
-    let (args, arg_refs) = match parse_args(tokens, i, ast, token_line_numbers, variable_declarations) {
-        Ok(args) => args,
-        Err(err) => {
-            return AstNode::Error(err.to_string(), token_line_numbers[*i]);
-        }
-    };
+    let (args, arg_refs) =
+        match parse_args(tokens, i, ast, token_line_numbers, variable_declarations) {
+            Ok(args) => args,
+            Err(err) => {
+                return AstNode::Error(err.to_string(), token_line_numbers[*i]);
+            }
+        };
 
     *i += 1;
 
@@ -63,26 +68,27 @@ pub fn create_function(
         *i,
         token_line_numbers,
         arg_refs,
-        &return_type)
-        .0;
-
-    AstNode::Function(
-        name,
-        args,
-        function_body,
-        is_exported,
-        return_type,
+        &return_type,
     )
+    .0;
+
+    AstNode::Function(name, args, function_body, is_exported, return_type)
 }
 
-fn parse_args(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, token_line_numbers: &Vec<u32>, variable_declarations: &Vec<Reference>) -> Result<(Vec<AstNode>, Vec<Reference>), &'static str> {
+fn parse_args(
+    tokens: &Vec<Token>,
+    i: &mut usize,
+    ast: &Vec<AstNode>,
+    token_line_numbers: &Vec<u32>,
+    variable_declarations: &Vec<Reference>,
+) -> Result<(Vec<AstNode>, Vec<Reference>), &'static str> {
     let mut args = Vec::<AstNode>::new();
     let mut arg_refs = Vec::<Reference>::new();
-    
+
     // Check if there are arguments
     let mut open_parenthesis = 0;
     let mut next_in_list: bool = true;
-    
+
     while *i < tokens.len() {
         match &tokens[*i] {
             Token::OpenParenthesis => {
@@ -118,7 +124,7 @@ fn parse_args(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, token_line
                 }
 
                 // Check if there is a type keyword
-                *i += 1; 
+                *i += 1;
 
                 let data_type = match &tokens[*i] {
                     Token::TypeKeyword(data_type) => data_type.to_owned(),
@@ -138,14 +144,14 @@ fn parse_args(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, token_line
                     // So create expression is told it's a tuple inside brackets
                     // So it only parses up to a comma or closing parenthesis
                     default_value = Some(Box::new(create_expression(
-                                tokens,
-                                i,
-                                true,
-                                ast,
-                                &token_line_numbers[*i],
-                                &data_type,
-                                false,
-                                variable_declarations,
+                        tokens,
+                        i,
+                        true,
+                        ast,
+                        &token_line_numbers[*i],
+                        &data_type,
+                        false,
+                        variable_declarations,
                     )));
                 }
 

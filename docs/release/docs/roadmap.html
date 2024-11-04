@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="../css/pico.min.css" />
-<style>.bs-nav-1 {
+<style>.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
@@ -30,11 +30,12 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-code-comment{color:#6a9955}.bs-code-keyword{color:#cc7832}.bs-code-string{color:#6a8759}.bs-code-number{color:#6897bb}.bs-code-operator{color:#d4d4d4}.bs-code-identifier{color:#9876aa}.bs-code-type{color:#4c8ea1}</style></head><body><span class="cNavbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ROADMAP FOR BEANSTALK</b></div></header><main class="container"><p>Beanstalk is a new language and is still in development. It doesn't even have a version number yet!
+            }</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ROADMAP FOR BEANSTALK</b></div></header><main class="container"><p>Beanstalk is a new language and is still in development. It doesn't even have a version number yet!
 </p><p>Here is a list of current bugs, development goals and planned features.
 </p><h2>Current immediate task list
 </h2><li><span>Finish implementing all math operators and brackets
 </span></li><li><span>get variables and mostly folded expressions working fully in WASM
+</span></li><li><span>Markdown Parsing working correctly
 </span></li><h2>Core Features Being Implemented
 </h2><li><span>Finish implementing Style system for scenes (separate from core language into library of keywords)
 </span></li><li><span>Tidy up Error reporting
@@ -73,9 +74,8 @@
 
     -- Close the channel
     channel close()
-</code></pre><span class="cFooter"></span></main>
-<script type="module">  const vNavbar = `<nav style="background-color:rgba(100, 220, 0, 0.06);" class="bs-nav-1 "  ><ul><li><a href="../" style="" class="" >&#127793;
-</a></li></ul></nav>`;const vFooter = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+</code></pre><span class="Footer"></span></main>
+<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="../" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src="../images/default.png" style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./roadmap.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
@@ -84,7 +84,7 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("cNavbar", vNavbar);uInnerHTML("cFooter", vFooter);
+            }uInnerHTML("Navbar", bs_Navbar);uInnerHTML("Footer", bs_Footer);
   ;});</script>
 </body>
 </html>

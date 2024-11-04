@@ -1,7 +1,10 @@
 use std::path::Path;
 
 use super::{
-    colors::get_color, dom_hooks::{generate_dom_update_js, DOMUpdate}, generate_html::create_html_boilerplate, js_parser::{collection_to_js, expression_to_js}
+    colors::get_color,
+    dom_hooks::{generate_dom_update_js, DOMUpdate},
+    generate_html::create_html_boilerplate,
+    js_parser::{collection_to_js, expression_to_js},
 };
 use crate::{
     bs_css::get_bs_css,
@@ -189,6 +192,16 @@ pub fn parse(
             AstNode::Comment(_) => {
                 // Comments are not added to the final output (Atm). Maybe there will be some documentation thing eventually.
             }
+            AstNode::Error(err, line_number) => {
+                red_ln!("Error on Line {}: - {}", line_number, err);
+            }
+            // DIRECT INSERTION OF JS / CSS / HTML into page
+            AstNode::JS(js_string) => {
+                js.push_str(&js_string);
+            }
+            AstNode::CSS(css_string) => {
+                css.push_str(&css_string);
+            }
 
             _ => {
                 red_ln!(
@@ -243,6 +256,10 @@ pub fn parse_scene(
     let mut html = String::new();
     let mut closing_tags = Vec::new();
     let mut codeblock_css_added = false;
+    let mut content_size = 1.0;
+    let mut text_is_size = true;
+
+    let mut spaces_after_closing_tag = 0;
 
     // For tables
     let mut ele_count: u32 = 0;
@@ -344,7 +361,7 @@ pub fn parse_scene(
                 style_assigned = true;
             }
             Style::Size(node) => {
-                let value = match node {
+                content_size = match node {
                     AstNode::Literal(token) => match token {
                         Token::FloatLiteral(value) => value,
                         _ => {
@@ -357,9 +374,6 @@ pub fn parse_scene(
                         continue;
                     }
                 };
-                scene_wrap
-                    .style
-                    .push_str(&format!("font-size:{}rem;", value));
             }
             Style::Alt(value) => {
                 scene_wrap
@@ -414,13 +428,13 @@ pub fn parse_scene(
     }
 
     let mut img_count = 0;
-    let img_default_dir = get_html_config().image_folder_url.to_owned();
 
     // Scene tags usually override each other, only the last one will actually be used
     // There may be some exceptions
     for tag in &scene_tags {
         match tag {
             Tag::Img(value) => {
+                text_is_size = false;
                 images.push(value);
                 img_count += 1;
             }
@@ -436,6 +450,7 @@ pub fn parse_scene(
                 }
             }
             Tag::Video(value) => {
+                text_is_size = false;
                 scene_wrap.tag = Tag::Video(value.to_owned());
 
                 // TO DO, add poster after images are parsed
@@ -449,6 +464,7 @@ pub fn parse_scene(
                 continue;
             }
             Tag::Audio(src) => {
+                text_is_size = false;
                 scene_wrap.tag = Tag::Audio(src.to_owned());
             }
             Tag::A(node) => {
@@ -463,6 +479,7 @@ pub fn parse_scene(
 
             // Interactive
             Tag::Button(node) => {
+                text_is_size = false;
                 scene_wrap.tag = Tag::Button(node.to_owned());
             }
 
@@ -522,7 +539,7 @@ pub fn parse_scene(
                 scene_wrap.tag = Tag::Img(images[0].clone());
             }
             Tag::Video(_) => {
-                let poster = format!("{}{}", img_default_dir, get_src(images[0]));
+                let poster = get_src(images[0]);
                 scene_wrap
                     .properties
                     .push_str(&format!(" poster=\"{}\"", poster));
@@ -545,7 +562,7 @@ pub fn parse_scene(
         scene_wrap.style.push_str(&format!(
             "display:flex;flex-wrap:wrap;justify-content:center;"
         ));
-        let img_resize = 100.0 / f32::sqrt(img_count as f32);
+        let img_resize = (content_size * 100.0) / f64::sqrt(img_count as f64);
         for node in images {
             let img = get_src(node);
             html.push_str(&format!(
@@ -564,6 +581,17 @@ pub fn parse_scene(
                     .push_str(&format!(" onclick=\"{}\"", expression_to_js(&node)));
             }
             Action::_Swap => {}
+        }
+    }
+
+    if content_size != 1.0 {
+        if text_is_size {
+            scene_wrap
+                .style
+                .push_str(&format!("font-size:{}rem;", content_size));
+        } else {
+            let size = content_size * 100.0;
+            scene_wrap.style.push_str(&format!("width:{size}%;"));
         }
     }
 
@@ -715,7 +743,7 @@ pub fn parse_scene(
 
                     Token::CodeBlock(content) => {
                         // Add the CSS for code highlighting
-                        if !codeblock_css_added { 
+                        if !codeblock_css_added {
                             // css.push_str(&get_highlight_css());
                             codeblock_css_added = true;
                         }
@@ -832,12 +860,7 @@ pub fn parse_scene(
             }
 
             AstNode::Space => {
-                match *parent_tag {
-                    Tag::Table(_) | Tag::Nav(_) => {}
-                    _ => {
-                        html.push_str("&nbsp;");
-                    }
-                };
+                spaces_after_closing_tag += 1;
             }
 
             // STUFF THAT IS INSIDE SCENE HEAD THAT NEEDS TO BE PASSED INTO SCENE BODY
@@ -854,7 +877,9 @@ pub fn parse_scene(
                             js.push_str(&format!("uInnerHTML(\"{name}\", {BS_VAR_PREFIX}{name});"));
                         }
                         _ => {
-                            js.push_str(&format!("uInnerHTML(\"{name}\", wsx.get_{BS_VAR_PREFIX}{name}());"));
+                            js.push_str(&format!(
+                                "uInnerHTML(\"{name}\", wsx.get_{BS_VAR_PREFIX}{name}());"
+                            ));
                         }
                     }
                 }
@@ -1124,6 +1149,10 @@ pub fn parse_scene(
         _ => {}
     };
 
+    for _ in 0..spaces_after_closing_tag {
+        html.push_str("&nbsp;");
+    }
+
     match scene_wrap.outer_tag {
         Tag::Main => {
             html.insert_str(0, "<main class=\"container\">");
@@ -1165,8 +1194,20 @@ fn collect_closing_tags(closing_tags: &mut Vec<String>) -> String {
 fn get_src(value: &AstNode) -> String {
     let mut src: String = String::new();
     match value {
-        AstNode::Literal(Token::StringLiteral(value)) => {
-            src = value.clone();
+        AstNode::Literal(literal) => {
+            match literal {
+                Token::StringLiteral(value) => {
+                    src = value.clone();
+                }
+                Token::PathLiteral(value) => {
+                    // Replace slashes with correct platform OS
+                    // for now just make an http link
+                    return format!("https://{}", value);
+                }
+                _ => {
+                    red_ln!("Error: src attribute must be a string literal (Webparser - get src)");
+                }
+            }
         }
         AstNode::RuntimeExpression(expr, data_type) => {
             if *data_type == DataType::String {
@@ -1183,7 +1224,7 @@ fn get_src(value: &AstNode) -> String {
     if src.starts_with("http") {
         return src;
     } else {
-        return format!("{}/{}", get_html_config().image_folder_url, src);
+        return format!("{}/{}", get_html_config().page_dist_url, src);
     }
 }
 

@@ -27,7 +27,7 @@ pub enum Token {
     Component,
     Title,
     Date,
-    JS(String), // JS codeblock
+    JS(String),  // JS codeblock
     CSS(String), // CSS codeblock
 
     // Basics
@@ -43,13 +43,14 @@ pub enum Token {
 
     // Literals
     StringLiteral(String),
+    PathLiteral(String),
     FloatLiteral(f64),
     RawStringLiteral(String),
     BoolLiteral(bool),
 
     // Collections
-    OpenCurly,        // {
-    CloseCurly,       // }
+    OpenCurly,  // {
+    CloseCurly, // }
 
     // Not yet supported
     IntLiteral(i64),
@@ -63,8 +64,8 @@ pub enum Token {
     // Basic Grammar
     Comma,
     Dot,
-    Colon, // :
-    Assign, // =  
+    Colon,  // :
+    Assign, // =
 
     // Scope
     OpenParenthesis,  // (
@@ -142,6 +143,7 @@ pub enum Token {
 
     //HTML element stuff
     //markdown inferred elements
+    Id,
     Span(String),
     P(String),
     Em(u8, String), // Forms the start and the end of an Em tag

@@ -28,7 +28,7 @@ pub enum AstNode {
 
     // Basics
     Function(String, Vec<AstNode>, Vec<AstNode>, bool, DataType), // Function name, Args, Body, Public, return types
-    FunctionArg(String, DataType, Option<Box<AstNode>>), // Arg name, Type, default value
+    FunctionArg(String, DataType, Option<Box<AstNode>>),          // Arg name, Type, default value
     Expression(Vec<AstNode>, u32), // Expression that can contain mixed types, line number
     RuntimeExpression(Vec<AstNode>, DataType), //Expression, Result type
 
@@ -65,6 +65,7 @@ pub enum AstNode {
     UnaryOperator(Token, bool), // Operator, is_postfix
 
     // HTML
+    Id(String),
     Element(Token), // HTML element content
     Heading(u8),
     BulletPoint(u8),
