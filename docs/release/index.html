@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="images/favicons/favicon.ico">
+<link rel="icon"href="./images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="images/favicons/site.webmanifest">
-<link rel="stylesheet" href="css/pico.min.css" />
+<link rel="apple-touch-icon"href="./images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="./images/favicons/site.webmanifest">
+<link rel="stylesheet" href="./css/pico.min.css" />
 <style>.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
@@ -34,17 +34,19 @@
 </h1></div></header><main class="container"><h2>What is Beanstalk?
 </h2><p>This website was created using Beanstalk! 
 </p><span>It's an open source, strongly typed language that compiles to HTML, CSS and Web Assembly (and some necessary Javascript).
+</span><p>The documentation is currently more a collection of evolving design ideas and notes on the language as it's being developed. 
+</p><span>Most of the language is still in the planning stages and not yet implemented.
 </span><h2>Documentation
 </h2><span style="color:hsla(0,90%,55%,1);font-size:0.85rem;"  class=" bs-0" ><p><em>Only a fraction of this documentation is implemented so far. It is being used as a design plan and notes on the vision for the language and to keep track of ideas.</em></p></span><li><a href="./docs/setting-up-a-project" style="" class="" >Setting up a project</a></li><li><a href="./docs/basics" style="" class="" >Basic Language Syntax</a></li><li><a href="./docs/scenes" style="" class="" >Introduction to scenes</a></li><li><a href="./docs/control-flow" style="" class="" >Control Flow</a></li><li><a href="./docs/collections" style="" class="" >Collections</a></li><li><a href="./docs/types-and-tuples" style="" class="" >Types and Tuples</a></li><li><a href="./docs/functions" style="" class="" >Functions</a></li><li><a href="./docs/errors" style="" class="" >Error Handling</a></li><li><a href="./docs/embedding-js" style="" class="" >Embedding JS</a></li><p>More documentation to be added soon!
 </p><h2>Current Status
 </h2><p>This is a work in progress site for Beanstalk documentation as it's being developed. 
 </p><p>Beanstalk is in the early stages of development (it doesn't even have a version number yet!), the documentation is subject to frequent changes. The syntax and design of the language itself is still being iterated on and refined.
-</p><p>The source code for this site on <a href="https://github.com/H3licopter/beanstalk/tree/main/docs/src" style="" class="" >Github</a><span>. You can view the </span><a href="https://github.com/H3licopter/beanstalk/tree/main/docs/dist" style="" class="" >output of the Beanstalk compiler</a><span>!
+</p><p>The source code for this site on <a href="https://github.com/H3licopter/beanstalk/tree/main/docs/src" style="" class="" >Github</a><span>. You can view the </span><a href="https://github.com/H3licopter/beanstalk/tree/main/docs/release" style="" class="" >output of the Beanstalk compiler</a><span>!
 </span></p><h2>Contributing
 </h2><p>If you are intersted in contributing, it's very early days, but if you want to contribute to the language, please get in touch.
 </p><p>You can find the <a href="./docs/roadmap" style="" class="" >roadmap here</a><span>.
 </span></p></main><span class="Footer"></span>
-<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="/" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+<script type="module">  let bs_Navbar = `<nav style="background-color:rgba(100,220,50,0.03);" class="bs-nav-1 "  ><ul><li><a href="https://h3licopter.github.io/beanstalk" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=https://h3licopter.github.io/beanstalk/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;let bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./index.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){

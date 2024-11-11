@@ -32,7 +32,7 @@ This is a work in progress site for Beanstalk documentation as it's being develo
 
 Beanstalk is in the early stages of development (it doesn't even have a version number yet!), the documentation is subject to frequent changes. The syntax and design of the language itself is still being iterated on and refined.
 
-The source code for this site on [link "https://github.com/H3licopter/beanstalk/tree/main/docs/src": Github]. You can view the [link "https://github.com/H3licopter/beanstalk/tree/main/docs/dist": output of the Beanstalk compiler]!
+The source code for this site on [link "https://github.com/H3licopter/beanstalk/tree/main/docs/src": Github]. You can view the [link "https://github.com/H3licopter/beanstalk/tree/main/docs/release": output of the Beanstalk compiler]!
 
 ## Contributing
 If you are intersted in contributing, it's very early days, but if you want to contribute to the language, please get in touch.

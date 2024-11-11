@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="../images/favicons/favicon.ico">
+<link rel="icon"href="./../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="../images/favicons/site.webmanifest">
-<link rel="stylesheet" href="../css/pico.min.css" />
+<link rel="apple-touch-icon"href="./../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="./../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="./../css/pico.min.css" />
 <style>.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
@@ -68,8 +68,8 @@
 
     loop c in collection_of_choices:
         if c is:
-            cool: print(cool value)
-            else: print(cool value)
+            cool: print(cool.value)
+            else: print(cool.value)
         end
     end
 
@@ -83,10 +83,10 @@
     end
 
     loop item in collection:
-        print(item index)
+        print(item.index)
     end
 </code></pre><span class="Footer"></span></main>
-<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="/" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+<script type="module">  let bs_Navbar = `<nav style="background-color:rgba(100,220,50,0.03);" class="bs-nav-1 "  ><ul><li><a href="https://h3licopter.github.io/beanstalk" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=https://h3licopter.github.io/beanstalk/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;let bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./control-flow.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){

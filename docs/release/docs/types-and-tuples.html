@@ -13,11 +13,11 @@
 <meta name="twitter:card"content=""/>
 <meta name="color-scheme" content="light dark" />
 <link rel="canonical"href="">
-<link rel="icon"href="../images/favicons/favicon.ico">
+<link rel="icon"href="./../images/favicons/favicon.ico">
 <!-- <link rel="icon"href="images/favicons/favicon.svg"type="image/svg+xml"> -->
-<link rel="apple-touch-icon"href="../images/favicons/apple-touch-icon.png">
-<link rel="manifest"href="../images/favicons/site.webmanifest">
-<link rel="stylesheet" href="../css/pico.min.css" />
+<link rel="apple-touch-icon"href="./../images/favicons/apple-touch-icon.png">
+<link rel="manifest"href="./../images/favicons/site.webmanifest">
+<link rel="stylesheet" href="./../css/pico.min.css" />
 <style>.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
@@ -37,22 +37,21 @@
 </span><p>The unique thing about tuples in Beanstalk is that they can have named values,
 </p><span>and it creates a new type for that tuple, replacing the need for structs in many cases.
 </span><p>Another unique property of tuples in Beanstalk is that a tuple of one item is the same as the item itself.
-</p><pre><code>    -- Vector tuple
-    Coords = (
-        x Float
-        y Float
-        z Float
-    )
-
-    -- Creating a new instance of the tuple
+</p><pre><code>    -- Creating a new instance of the tuple
     -- You can pass the arguments the same as functions, either in order or named
+    -- Coords now becomes a new type with the properties x, y and z
     enemy_vec Coords = (
         x: 1,
         y: 2,
         z: 3,
     )
 
-    enemy_vec x -- returns 1
+    enemy_vec.x -- returns 1
+
+    single_item = (item: 1)
+    integer = 1
+
+    single_item is integer -- returns true
 </code></pre><h2>Types
 </h2><p>Types are a way to define the equivalent of classes in Beanstalk.
 </p><p>Creating a new type in Beanstalk is done by using the 'type' keyword.
@@ -63,11 +62,7 @@
     -- Any methods inside the construct are automatically exported
     -- The return types are the properties of the construct being declared (the 'this' or 'self' keyword is not needed)
     -- These properties can also be assigned default values
-    Player type(
-        name String, 
-        age Int,
-        level Int = 1,
-    ) ->
+    Player type(name String, age Int, level Int = 1) ->
         name String,
         id Int = 0,
         age Int, 
@@ -88,7 +83,7 @@
     player = Player("Bob", 20)
 
 </code></pre></main><span class="Footer"></span>
-<script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="/" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+<script type="module">  let bs_Navbar = `<nav style="background-color:rgba(100,220,50,0.03);" class="bs-nav-1 "  ><ul><li><a href="https://h3licopter.github.io/beanstalk" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=https://h3licopter.github.io/beanstalk/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;let bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./types-and-tuples.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
