@@ -2,7 +2,7 @@ use colour::red_ln;
 
 use super::{
     ast_nodes::{AstNode, Reference},
-    parse_expression::{check_if_arg, create_expression},
+    expressions::parse_expression::{check_if_arg, create_expression},
     styles::{Action, Style, Tag},
     util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
 };
@@ -301,6 +301,9 @@ pub fn new_scene(
                         Token::FloatLiteral(value) => {
                             scene_tags.push(Tag::Table(value as u32));
                         }
+                        Token::IntLiteral(value) => {
+                            scene_tags.push(Tag::Table(value as u32));
+                        }
                         _ => {
                             red_ln!("Incorrect arguments passed into table declaration");
                         }
@@ -409,6 +412,7 @@ pub fn new_scene(
             // Expressions to Parse
             Token::Variable(_)
             | Token::FloatLiteral(_)
+            | Token::IntLiteral(_)
             | Token::StringLiteral(_)
             | Token::RawStringLiteral(_) => {
                 *i -= 1;

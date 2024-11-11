@@ -33,15 +33,15 @@
             }</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ERROR HANDLING</b></div></header><main class="container"><p>Errors are treated as values in Beanstalk, 
 </p><span>any function that can return an error as one of its values must have its error handled.
 </span><p>The ? operator is used to check if one of the values in a tuple is an error. 
-</p><span>If it is, the error can then be handled in a new scope that the ? immediately opens.
-</span><p>If you go to a newline after the ?, you will need an end statement to close the scope. 
+</p><span>If it is, the error can then be handled immediately on the same line, or in a new block using a colon.
+</span><p>If you use a colon after the ? operator, you will need an end statement to close the scope. 
 </p><span>Otherwise, you can handle it inline.
-</span><pre><code>    func_call_that_can_return_an_error() ?
+</span><pre><code>    func_call_that_can_return_an_error() ?:
         -- Error handling code
     end
 
     -- Passing the error up to the calling function
-    parent_func () -> string? :
+    parent_func () -> string?:
         return func_call_that_can_return_an_error()
     end
 </code></pre><h2>Using the ? operator
@@ -49,28 +49,35 @@
 </p><span>They also provide a way to avoid opening a new scope for every error check.
 </span><pre><code>    -- Always returns a string even if an error is thrown by getNetworkRequest()
     -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
-    
-    getURL () -> string :
-        return getNetworkRequest() ?
+    getURL () -> string:
+        return getNetworkRequest() ?:
             print("Network Request Error: ", error, " Using default URL")
             return "example.com"
         end
     end
 
     -- Returns a string or an error
-    getURL () -> string? :
+    getURL () -> string?:
         return getNetworkRequest()
     end
-</code></pre><h2>Asserts and Exceptions
+</code></pre><h2>Asserts and Panics
 </h2><p>There are cases where you want to either catch unexpected state for debugging, 
 </p><span>or prevent the program from continuing if a certain condition is not met or an error is thrown.
-</span><p>For these cases the !! operator is used. It can be used to immediately stop the program.
-</p><pre><code>    -- stops the program if 1 is not equal to 1 (like an assert)
-    if 1 is not 1: print("1 is not 1") !! 
+</span><p>For these cases the ! operator is used to mark functions that can panic explicitly at runtime.
+</p><span>You can't use the panic keyword unless the function is marked with the ! operator.
+</span><p>You can also create asserts that will stop the program if a condition is not met. 
+</p><span>These are removed by the compiler in release builds.
+</span><p>Functions that can panic at runtime should only be used in cases where the program should absolutely not continue if the function fails.
+</p><span>Such as if there is a high risk of undefined behaviour in a critical and complex part of a program.
+</span><span>Effectively creating a runtime assertion.
+</span><pre><code>    -- stops the program if 1 is not equal to 1
+    -- Runs the code in the block first
+    assert(1 is not 1, "1 is not 1 uh oh")
 
-    dodgyFunc() ? 
-        print("dodgyFunc() returned an error, STOP EVERYTHING!!!!") 
-        !! 
+    function_that_can_panic fn(the_truth Bool) -> !:
+        if the_truth is False: panic("The truth is not true")
+        
+        -- This code will not run if the_truth is false
     end
 </code></pre><span class="Footer"></span></main>
 <script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="/" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;

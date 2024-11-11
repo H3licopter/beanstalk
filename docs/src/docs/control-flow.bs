@@ -1,16 +1,14 @@
 [Navbar]
 
-[header center: [title 1: BEANSTALK SCENES]]
+[header center: [title(1): CONTROL FLOW]]
 
 [main:
-# Control Flow
-
 ## If Statements
-
-If statements can be used as expressions or statements. They can also be used for pattern matching, all with a similar syntax.
+If statements can be used as expressions or statements. 
+They can also be used for pattern matching, all with a similar syntax.
 
 [code:
-    v : 1
+    v = 1
 
     if v is not 1:
         print("nope")
@@ -19,20 +17,23 @@ If statements can be used as expressions or statements. They can also be used fo
     end
 
     -- If as a match statement
-    if v is
-        0 => print("nope")
-        1 => print("yep")
-        else => print("wat")
+    -- Use a colon after the 'is' keyword to start a block for matching
+    if v is:
+        0: print("nope")
+        1: print("yep")
+    else: 
+        print("wat")
     end
 
     -- If as an expression
-    msg : if v is:
-        0 => return "nope"
-        1 => return "yep"
-        else => return "defintely nope"
+    x = "idk"
+    msg = if x is:
+        0: "nope"
+        1: "yep"
+        else: "defintely nope"
     end
 
-    print(msg)
+    print(msg) -- prints "defintely nope"
 ]
 
 # Loops
@@ -46,9 +47,9 @@ Using the "in" keyword, you can specify an integer, float or collection to itera
     end
 
     loop c in collection_of_choices:
-        if c is
-            cool => io(cool value)
-            else => io(cool value)
+        if c is:
+            cool: print(cool.value)
+            else: print(cool.value)
         end
     end
 
@@ -62,7 +63,7 @@ Using the "in" keyword, you can specify an integer, float or collection to itera
     end
 
     loop item in collection:
-        print(item index)
+        print(item.index)
     end
 ]
 

@@ -30,65 +30,67 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >CONTROL FLOW</b></div></header><main class="container"><h2>If Statements
-</h2><p>If statements can be used as expressions or statements. 
-</p><span>They can also be used for pattern matching, all with a similar syntax.
-</span><pre><code>    v = 1
+            }</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >TYPES AND TUPLES</b></div></header><main class="container"><h1>Tuples and Types
+</h1><h2>Tuples
+</h2><p>Tuples are a way to group multiple values together. 
+</p><span>They are created by using parentheses and separating the values with commas.
+</span><p>The unique thing about tuples in Beanstalk is that they can have named values,
+</p><span>and it creates a new type for that tuple, replacing the need for structs in many cases.
+</span><p>Another unique property of tuples in Beanstalk is that a tuple of one item is the same as the item itself.
+</p><pre><code>    -- Vector tuple
+    Coords = (
+        x Float
+        y Float
+        z Float
+    )
 
-    if v is not 1:
-        print("nope")
-    else
-        print("yep")
-    end
+    -- Creating a new instance of the tuple
+    -- You can pass the arguments the same as functions, either in order or named
+    enemy_vec Coords = (
+        x: 1,
+        y: 2,
+        z: 3,
+    )
 
-    -- If as a match statement
-    -- Use a colon after the 'is' keyword to start a block for matching
-    if v is:
-        0: print("nope")
-        1: print("yep")
-    else: 
-        print("wat")
-    end
+    enemy_vec x -- returns 1
+</code></pre><h2>Types
+</h2><p>Types are a way to define the equivalent of classes in Beanstalk.
+</p><p>Creating a new type in Beanstalk is done by using the 'type' keyword.
+</p><span>The rest of the declaration is very similar to creating a function, 
+</span><span>but instead of return types, you specify the properties of the type.
+</span><pre><code>
+    -- The equivalent of a class is creating a new type that returns a list of properties
+    -- Any methods inside the construct are automatically exported
+    -- The return types are the properties of the construct being declared (the 'this' or 'self' keyword is not needed)
+    -- These properties can also be assigned default values
+    Player type(
+        name String, 
+        age Int,
+        level Int = 1,
+    ) ->
+        name String,
+        id Int = 0,
+        age Int, 
+        health Int = 100,
+        level Int,
+        dead Bool = false,
+    :
+        health += level * 10
 
-    -- If as an expression
-    x = "idk"
-    msg = if x is:
-        0: "nope"
-        1: "yep"
-        else: "defintely nope"
-    end
-
-    print(msg) -- prints "defintely nope"
-</code></pre><h1>Loops
-</h1><p>Only 1 keyword for loops "loop". 
-</p><p>Using the "in" keyword, you can specify an integer, float or collection to iterate through or define a new integer, float or collection. 
-</p><pre><code>    loop thing in things:
-        print(thing)
-    end
-
-    loop c in collection_of_choices:
-        if c is:
-            cool: print(cool value)
-            else: print(cool value)
+        -- This method is automatically exported
+        damage fn(amount Int) -> ():
+            health -= amount
+            if health <= 0: dead = true
         end
     end
 
-    loop -20 to big_number:
-        print("hello")
-    end
+    -- Creating a new instance of the type
+    player = Player("Bob", 20)
 
-    -- reverse loop
-    loop n in big_number to smaller_number:
-        print(n)
-    end
-
-    loop item in collection:
-        print(item index)
-    end
-</code></pre><span class="Footer"></span></main>
+</code></pre></main><span class="Footer"></span>
 <script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="/" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
-  WebAssembly.instantiateStreaming(fetch("./control-flow.wasm")).then((obj)=>{
+  WebAssembly.instantiateStreaming(fetch("./types-and-tuples.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}

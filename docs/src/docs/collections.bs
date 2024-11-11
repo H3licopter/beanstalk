@@ -1,64 +1,9 @@
 [Navbar]
 
-[header center: [title 1: BEANSTALK SCENES]]
+[header center: [title(1): COLLECTIONS]]
 [main:
 
-# Collections
-All Collections are reference types in Beanstalk, which means they are references to underlying data. They work a little bit like tables in Lua.
-
-## Tuples
-By simply surrounding a list of values separated by commas, you create a tuple literal.
-
-[code:
-(1, 2, 3)
-]
-
-Tuples have a fixed size and can contain any type. 
-Tuples have implicit behaviours that allow for easy unpacking, comparison and assignment.
-
-A tuple of one value is indistinguishable from the value itself.
-
-[code:
-    -- Fixed size tuple of immutable integers
-    tuple : (1, 2, 3)
-    tuple{0} is 1 -- true
-]
-
-## Mutable tuples (fixed sized arrays)
-If a mutable tuple is created, it's elements can be mutated as long as they are the same type.
-
-[code:
-    -- Mutable integers inside the tuple
-    tuple = (1, 2, 3)
-]
-
-## Fixed Collections (Structs)
-By creating a constant collection, you can define a struct. This can then be used as a type to create new instances of the struct.
-
-[code:
-    -- Vector struct
-    Coords : {
-        x float,
-        y float,
-        z float,
-    }
-
-    -- Creating default values for a struct when it is initiliased, type can be inffered
-    Coords : {
-        x float = 0,
-        y float = 0,
-        z float = 0,
-    }
-
-    -- Creating a new instance of the struct
-    enemy_vec Coords = {
-        x = 1,
-        y = 2,
-        z = 3,
-    }
-
-    enemy_vec{x} -- returns 1
-]
+All Collections are reference types in Beanstalk.
 
 ## Dynamic Collections (Arrays)
 When creating a variable collection rather than a constant collection, it becomes a dynamically sized collection.
@@ -69,19 +14,19 @@ Dynamic collections can only contain one data type.
     array = {3, 4, 5}
 
     -- using pipe operator to print the array after pushing a new value
-    array push(9) => print() -- prints {3, 4, 5, 9}
+    array.push(9) => print() -- prints {3, 4, 5, 9}
 
-    array{0} += 1 
-    array{0} -- returns 4
+    array.0 += 1 
+    array.0 -- returns 4
 
-    array push(1)
-    array length -- returns 5
+    array.push(1)
+    array.length() -- returns 5
 
     -- Uninitilised empty array
-    array {int}
+    array {Int}
 ]
 
-By using statements inside your collection rather than literals, you can define keys for the items in the collection. 
+By using statements inside your collection rather than expressions, you can define keys for the items in the collection. 
 
 [code:
     dictionary = {

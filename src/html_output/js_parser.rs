@@ -15,6 +15,9 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                         Token::FloatLiteral(value) => {
                             js.push_str(&value.to_string());
                         }
+                        Token::IntLiteral(value) => {
+                            js.push_str(&value.to_string());
+                        }
                         Token::StringLiteral(value) => {
                             js.push_str(&format!("\"{}\"", value));
                         }
@@ -30,7 +33,21 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                             DataType::String | DataType::Scene => {
                                 js.push_str(&format!(" {BS_VAR_PREFIX}{name}"))
                             }
-                            _ => js.push_str(&format!(" wsx.get_v{name}()")),
+                            _ => js.push_str(&format!(" wsx.get_{BS_VAR_PREFIX}{name}()")),
+                        }
+                    }
+
+                    AstNode::CollectionAccess(name, index, data_type)
+                    | AstNode::TupleAccess(name, index, data_type) => {
+                        // If it's a string, it will just be pure JS, no WASM
+
+                        // CURRENTLY WORKS AS TUPLES DON'T SUPPORT NAMED ARGS YET,
+                        // so it's all just accessing an array or struct by number
+                        match data_type {
+                            DataType::String | DataType::Scene => {
+                                js.push_str(&format!(" {BS_VAR_PREFIX}{name}_{index}"))
+                            }
+                            _ => js.push_str(&format!(" wsx.get_{BS_VAR_PREFIX}{name}_{index}")),
                         }
                     }
 
@@ -55,7 +72,7 @@ pub fn expression_to_js(expr: &AstNode) -> String {
             }
 
             match expression_type {
-                DataType::String | DataType::Float => {}
+                DataType::String | DataType::Float | DataType::Int => {}
                 DataType::CoerseToString => {
                     js.insert_str(0, "String(");
                     js.push_str(")");
@@ -73,6 +90,9 @@ pub fn expression_to_js(expr: &AstNode) -> String {
             Token::FloatLiteral(value) => {
                 js.push_str(&value.to_string());
             }
+            Token::IntLiteral(value) => {
+                js.push_str(&value.to_string());
+            }
             Token::StringLiteral(value) => {
                 js.push_str(&format!("\"{}\"", value));
             }
@@ -86,7 +106,7 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                 DataType::String | DataType::Scene => {
                     js.push_str(&format!("`${{{BS_VAR_PREFIX}{name}}}`"))
                 }
-                _ => js.push_str(&format!("`${{wsx.get_v{name}()}}`")),
+                _ => js.push_str(&format!("`${{wsx.get_{BS_VAR_PREFIX}{name}()}}`")),
             }
         }
 
@@ -97,12 +117,10 @@ pub fn expression_to_js(expr: &AstNode) -> String {
         }
 
         _ => {
-            red_ln!(
-                "Non-expression / Literal AST node given to expression_to_js: {:?}",
-                expr
-            );
+            red_ln!("Invalid AST node given to expression_to_js: {:?}", expr);
         }
     }
+
     js
 }
 
@@ -115,7 +133,7 @@ pub fn combine_vec_to_js(collection: &Vec<AstNode>) -> String {
         js.push_str(&format!(
             "{}{}",
             expression_to_js(&node),
-            if i < collection.len() - 1 { ", " } else { "" }
+            if i < collection.len() - 1 { "," } else { "" }
         ));
         i += 1;
     }

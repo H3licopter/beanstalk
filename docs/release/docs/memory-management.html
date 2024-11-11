@@ -40,15 +40,19 @@
 </p><h2>Copying
 </h2><p>To copy a variable, you can use the copy keyword. This will create a new variable with the same value as the original.
 </p><pre><code>
-    testing_memory () -> () :
-        Coords : {
+    testing_memory fn() -> ():
+    
+        Coords Type = {
             x = 5
             y = 3
+
+            swap fn() -> ():
+                x = this.x
+                this.x = this.y
+                this.y = x
+            end
         }
 
-        -- VARIABLE BRANCHING
-        -- Coords is now branched into two possible places
-        -- The compiler will collapse the branch depending on the use of either variable
         Coords2 = Coords
 
         -- A mutable reference to the original Coords is given to change_var

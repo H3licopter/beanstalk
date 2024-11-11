@@ -1,13 +1,15 @@
 use std::path::PathBuf;
 
 use super::styles::{Action, Style, Tag};
-use crate::{bs_types::DataType, Token};
+use crate::{
+    bs_types::{return_datatype, DataType},
+    Token,
+};
 
 #[derive(Debug, PartialEq)]
 pub struct Reference {
     pub name: String,
     pub data_type: DataType,
-    pub is_const: bool,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -45,6 +47,10 @@ pub enum AstNode {
     JSStringReference(String),
     FunctionCall(String, Box<AstNode>), // variable name, arguments
 
+    // Accessing fields
+    CollectionAccess(String, usize, DataType), // Name, Index, Type
+    TupleAccess(String, usize, DataType),      // Name, Index, Type
+
     // Other language code blocks
     JS(String),
     CSS(String),
@@ -53,7 +59,7 @@ pub enum AstNode {
     Literal(Token),
     Collection(Vec<AstNode>, DataType),
     Struct(String, Box<AstNode>, bool), // Name, Fields, Public
-    Tuple(Vec<AstNode>, u32),           // Tuple, line number
+    Tuple(Vec<AstNode>, u32),           // Tuple, line number, contained types
     Scene(Vec<AstNode>, Vec<Tag>, Vec<Style>, Vec<Action>),
     SceneTemplate,
     Empty, // Empty collection
@@ -76,4 +82,14 @@ pub enum AstNode {
     // SCENE META DATA
     Title(String),
     Date(String),
+}
+
+pub trait Node {
+    fn get_type(&self) -> DataType;
+}
+
+impl Node for AstNode {
+    fn get_type(&self) -> DataType {
+        return_datatype(self)
+    }
 }

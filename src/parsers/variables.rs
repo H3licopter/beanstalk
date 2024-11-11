@@ -1,10 +1,10 @@
 use crate::{bs_types::DataType, Token};
 
 use super::{
-    ast_nodes::{AstNode, Reference},
+    ast_nodes::{AstNode, Node, Reference},
     collections::new_collection,
+    expressions::parse_expression::create_expression,
     functions::create_function,
-    parse_expression::create_expression,
 };
 
 pub fn create_new_var_or_ref(
@@ -16,8 +16,10 @@ pub fn create_new_var_or_ref(
     ast: &Vec<AstNode>,
     token_line_numbers: &Vec<u32>,
 ) -> AstNode {
+    let is_const = name.to_uppercase() == *name;
+
     if let Some(var) = variable_declarations.iter().find(|v| v.name == *name) {
-        if var.is_const {
+        if is_const {
             return AstNode::ConstReference(var.name.to_owned(), var.data_type.to_owned());
         }
         return AstNode::VarReference(var.name.to_owned(), var.data_type.to_owned());
@@ -31,6 +33,7 @@ pub fn create_new_var_or_ref(
         ast,
         token_line_numbers,
         &mut *variable_declarations,
+        is_const,
     )
 }
 
@@ -44,14 +47,14 @@ pub fn new_variable(
     ast: &Vec<AstNode>,
     token_line_numbers: &Vec<u32>,
     variable_declarations: &mut Vec<Reference>,
+    is_const: bool,
 ) -> AstNode {
     *i += 1;
     let mut data_type = &DataType::Inferred;
 
-    let is_const = match &tokens[*i] {
+    match &tokens[*i] {
         // Type is inferred
-        &Token::Assign => false,
-        &Token::Colon => true,
+        &Token::Assign => {}
 
         &Token::FunctionKeyword => {
             *i += 1;
@@ -72,16 +75,13 @@ pub fn new_variable(
             *i += 1;
 
             match &tokens[*i] {
-                &Token::Assign => false,
-                &Token::Colon => true,
-
+                &Token::Assign => {}
                 // If this is the end of the assignment, it is an uninitalised variable
                 // Currently just creates a zero value variable, should be uninitialised in future
                 &Token::Newline | &Token::EOF => {
                     variable_declarations.push(Reference {
                         name: name.to_owned(),
                         data_type: data_type.to_owned(),
-                        is_const: false,
                     });
 
                     return create_zero_value_var(
@@ -118,8 +118,10 @@ pub fn new_variable(
         }
     };
 
+    // Current token (SHOULD BE) the assignment operator
     // Get assigned values
     *i += 1;
+
     let parsed_expr;
     match &tokens[*i] {
         // Check if this is a COLLECTION
@@ -131,7 +133,6 @@ pub fn new_variable(
                 variable_declarations.push(Reference {
                     name: name.to_owned(),
                     data_type: DataType::Struct,
-                    is_const,
                 });
                 return AstNode::Struct(
                     name.to_string(),
@@ -149,7 +150,6 @@ pub fn new_variable(
                     variable_declarations.push(Reference {
                         name: name.to_owned(),
                         data_type: DataType::Collection(Box::new(collection_type.to_owned())),
-                        is_const: false,
                     });
                     return AstNode::VarDeclaration(
                         name.to_string(),
@@ -170,7 +170,6 @@ pub fn new_variable(
 
         // create_expression will automatically handle tuples
         _ => {
-            // Maybe need to add a check that this is an expression after the assignment?
             let start_line_number = &token_line_numbers[*i];
             parsed_expr = create_expression(
                 tokens,
@@ -185,7 +184,7 @@ pub fn new_variable(
         }
     }
 
-    // Check if a type of collection has been created
+    // Check if a type of collection / tuple has been created
     // Or whether it is a literal or expression
     // If the expression is an empty expression when the variable is NOT a function, return an error
     match parsed_expr {
@@ -202,6 +201,7 @@ pub fn new_variable(
         AstNode::Literal(ref token) => {
             let data_type = match token {
                 Token::FloatLiteral(_) => DataType::Float,
+                Token::IntLiteral(_) => DataType::Int,
                 Token::StringLiteral(_) => DataType::String,
                 Token::BoolLiteral(_) => DataType::Bool,
                 _ => DataType::Inferred,
@@ -215,13 +215,20 @@ pub fn new_variable(
                 variable_declarations,
             );
         }
-        AstNode::Tuple(_, _) => {
+        AstNode::Tuple(ref values, _) => {
+            let mut tuple_data_type = Vec::new();
+            for value in values {
+                tuple_data_type.push(value.get_type());
+            }
+
+            let data_type = DataType::Tuple(Box::new(tuple_data_type));
+
             return create_var_node(
                 is_const,
                 name.to_string(),
                 parsed_expr,
                 is_exported,
-                data_type.to_owned(),
+                data_type,
                 variable_declarations,
             );
         }
@@ -266,7 +273,6 @@ fn create_var_node(
     variable_declarations.push(Reference {
         name: var_name.to_owned(),
         data_type: data_type.to_owned(),
-        is_const,
     });
 
     if is_const {
@@ -287,6 +293,13 @@ fn create_zero_value_var(data_type: DataType, name: String, is_exported: bool) -
         DataType::Float => AstNode::VarDeclaration(
             name,
             Box::new(AstNode::Literal(Token::FloatLiteral(0.0))),
+            is_exported,
+            data_type,
+            false,
+        ),
+        DataType::Int => AstNode::VarDeclaration(
+            name,
+            Box::new(AstNode::Literal(Token::IntLiteral(0))),
             is_exported,
             data_type,
             false,

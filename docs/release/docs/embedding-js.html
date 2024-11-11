@@ -30,44 +30,31 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >FUNCTIONS</b></div></header><main class="container"><p>If the function can only return an error, you can use a '?' as the specified return type.
-</p><p>Arguments are passed by reference by default, but can be passed by value using the 'copy' keyword.
-</p><h2>The arrow operator
-</h2><p>The arrow operator is used to define the signature of a function. 
-</p><span>Functions must always have a return type specified, even if it is an error.
-</span><pre><code>    -- Returns an int
-    multipleReturns fn(x Int) -> Int: return 1 + x
-
-    -- Returns a struct
-    returnStruct fn(x Int) -> SomeStruct:
-        return SomeStruct{1, 2}
+            }</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >WRITING JS INSIDE BEANSTALK</b></div></header><main class="container"><p>Using the compiler directive '#' we can tell the compiler to parse a block of JS code that will be inserted into the page.
+</p><p>You can't use the end keyword inside the JS block as it's used to end the block of JS code.
+</p><pre><code>    #JS:
+        const x = 5;
+        const y = 10;
+        const z = x + y;
+        console.log(z);
     end
-
-    differentReturns fn(spicy bool = false) -> (Int, Int, Int):
-        if spicy: return (69, 420, 1337)
-        
-        return (1, 2, 3)
+</code></pre><p>JS won't be able to use variables and functions written in Beanstalk directly.
+</p><span>You can currently get variables from Beanstalk by
+</span><span>prefixing the BS variable name with bs_
+</span><p>If it's not a string, you need to get it with the wasx.get function.
+</p><span>but add the name of the variable to the get part.
+</span><p>This may change in the future as the WASM implementation is developed. 
+</p><pre><code>    y = 10
+    x = "5"
+    #JS:
+        const x = bs_x;
+        const y = wasx.get_bs_y();
+        console.log(x + y);
     end
-
-    canError fn(x String) -> String?: 
-        return fetch(x) ? error(msg)
-    end
-
-    -- Anonymous function
-    fn(x Int) -> Int: return x + 1
-
-    -- Shorthand for anonymous function that just returns a single inline expression
-    fn() -> "Hello, World!"
-
-    -- Calling a function
-    multipleReturns(5)
-
-    -- Calling a function with named arguments
-    differentReturns(spicy: true)
 </code></pre><span class="Footer"></span></main>
 <script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="/" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
-  WebAssembly.instantiateStreaming(fetch("./functions.wasm")).then((obj)=>{
+  WebAssembly.instantiateStreaming(fetch("./embedding-js.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){
                 const es = document.getElementsByClassName(id);
                 if (Array.isArray(update)){update = update.join(' ')}

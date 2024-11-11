@@ -1,43 +1,18 @@
 [Navbar]
-
-[header center: [title 1: BEANSTALK SCENES]]
-
+[header center: [title(1): BEANSTALK CHOICES]]
 [main:
 
 # Choices (enums)
-Choices are a way to define a set of possible values for a variable.
+Choices are a way to define a set of possible values.
 
-Choices are created by specifying 'choice' as their type, then defining a tuple of possible values.
-
-Choices are written in SCREAMING_SNAKE_CASE. 
-
-Each choice can optionally contain data that can be accessed inside that choice.
+Choices are created using the `choice` keyword.
 
 [code:
-    THING : choice
-        cool string,
-        not_cool string,
-        wild,
-        beans bool,
+    Thing choice:
+        A Int,
+        B String,
+        C (String, Thing),
     end
-
-    Coords : {
-        x int,
-        y int,
-    }
-
-    -- Creating a new instance of a choice
-    a_choice : THING wild
-
-    -- Creating a new choice that has a value associated with it
-    another_choice : THING cool("very cool")
-
-    collection_of_choices = THING{} {
-        THING cool("cool"),
-        THING not_cool("not cool"),
-        THING wild,
-        THING beans(true),
-    }
 ]
 
 [Footer]

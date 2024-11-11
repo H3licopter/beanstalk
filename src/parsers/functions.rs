@@ -1,7 +1,7 @@
 use super::{
     ast_nodes::{AstNode, Reference},
     build_ast::new_ast,
-    parse_expression::create_expression,
+    expressions::parse_expression::create_expression,
 };
 use crate::{bs_types::DataType, Token};
 
@@ -15,7 +15,7 @@ pub fn create_function(
     variable_declarations: &Vec<Reference>,
 ) -> AstNode {
     /*
-        funcName fn(arg type, arg2 type = default_value) -> returnType :
+        funcName fn(arg type, arg2 type = default_value) -> returnType:
             // Function body
         end
     */
@@ -164,7 +164,6 @@ fn parse_args(
                 arg_refs.push(Reference {
                     name: arg_name.to_owned(),
                     data_type,
-                    is_const: true,
                 });
 
                 next_in_list = false;

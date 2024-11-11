@@ -1,24 +1,24 @@
 [Navbar]
 
-[header center: [title 1: ERROR HANDLING]]
+[header center: [title(1): ERROR HANDLING]]
 [main:
 
 Errors are treated as values in Beanstalk, 
 any function that can return an error as one of its values must have its error handled.
 
 The ? operator is used to check if one of the values in a tuple is an error. 
-If it is, the error can then be handled in a new scope that the ? immediately opens.
+If it is, the error can then be handled immediately on the same line, or in a new block using a colon.
 
-If you go to a newline after the ?, you will need an end statement to close the scope. 
+If you use a colon after the ? operator, you will need an end statement to close the scope. 
 Otherwise, you can handle it inline.
 
 [code:
-    func_call_that_can_return_an_error() ?
+    func_call_that_can_return_an_error() ?:
         -- Error handling code
     end
 
     -- Passing the error up to the calling function
-    parent_func () -> string? :
+    parent_func () -> string?:
         return func_call_that_can_return_an_error()
     end
 ]
@@ -30,33 +30,42 @@ They also provide a way to avoid opening a new scope for every error check.
 [code:
     -- Always returns a string even if an error is thrown by getNetworkRequest()
     -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
-    
-    getURL () -> string :
-        return getNetworkRequest() ?
+    getURL () -> string:
+        return getNetworkRequest() ?:
             print("Network Request Error: ", error, " Using default URL")
             return "example.com"
         end
     end
 
     -- Returns a string or an error
-    getURL () -> string? :
+    getURL () -> string?:
         return getNetworkRequest()
     end
 ]
 
-## Asserts and Exceptions
+## Asserts and Panics
 There are cases where you want to either catch unexpected state for debugging, 
 or prevent the program from continuing if a certain condition is not met or an error is thrown.
 
-For these cases the !! operator is used. It can be used to immediately stop the program.
+For these cases the ! operator is used to mark functions that can panic explicitly at runtime.
+You can't use the panic keyword unless the function is marked with the ! operator.
+
+You can also create asserts that will stop the program if a condition is not met. 
+These are removed by the compiler in release builds.
+
+Functions that can panic at runtime should only be used in cases where the program should absolutely not continue if the function fails.
+Such as if there is a high risk of undefined behaviour in a critical and complex part of a program.
+Effectively creating a runtime assertion.
 
 [code:
-    -- stops the program if 1 is not equal to 1 (like an assert)
-    if 1 is not 1: print("1 is not 1") !! 
+    -- stops the program if 1 is not equal to 1
+    -- Runs the code in the block first
+    assert(1 is not 1, "1 is not 1 uh oh")
 
-    dodgyFunc() ? 
-        print("dodgyFunc() returned an error, STOP EVERYTHING!!!!") 
-        !! 
+    function_that_can_panic fn(the_truth Bool) -> !:
+        if the_truth is False: panic("The truth is not true")
+        
+        -- This code will not run if the_truth is false
     end
 ]
 

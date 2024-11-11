@@ -1,6 +1,6 @@
 [Navbar]
 
-[header center: [title 1: PROJECT SETUP]]
+[header center: [title(1): PROJECT SETUP]]
 [main:
 ## The Compiler
 You currently have to compile the Beanstalk compiler yourself. The compiler is written in Rust. This will change once the compiler and language development is more stable.

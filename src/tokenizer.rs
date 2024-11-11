@@ -420,7 +420,9 @@ pub fn get_next_token(
             }
         }
 
-        // ALWAYS PARSE AS FLOAT FOR NOW
+        if dot_count == 0 {
+            return Token::IntLiteral(token_value.parse::<i64>().unwrap());
+        }
         return Token::FloatLiteral(token_value.parse::<f64>().unwrap());
     }
 
@@ -474,11 +476,13 @@ fn keyword_or_variable(
             "else" => return Token::Else,
             "for" => return Token::For,
             "import" => return Token::Import,
+            "use" => return Token::Use,
             "break" => return Token::Break,
             "when" => return Token::When,
             "defer" => return Token::Defer,
             "in" => return Token::In,
             "as" => return Token::As,
+            "copy" => return Token::Copy,
 
             // Logical
             "is" => return Token::Equal,
@@ -488,14 +492,18 @@ fn keyword_or_variable(
 
             // Data Types
             "fn" => return Token::FunctionKeyword,
-            "true" => return Token::BoolLiteral(true),
-            "false" => return Token::BoolLiteral(false),
-            "float" => return Token::TypeKeyword(DataType::Float),
-            "string" => return Token::TypeKeyword(DataType::String),
-            "bool" => return Token::TypeKeyword(DataType::Bool),
+            "true" | "True" => return Token::BoolLiteral(true),
+            "false" | "False" => return Token::BoolLiteral(false),
+            "Float" => return Token::TypeKeyword(DataType::Float),
+            "Int" => return Token::TypeKeyword(DataType::Int),
+            "String" => return Token::TypeKeyword(DataType::String),
+            "Bool" => return Token::TypeKeyword(DataType::Bool),
+            "type" | "Type" => return Token::TypeKeyword(DataType::Type),
 
             // To be moved to standard library in future
             "print" => return Token::Print,
+            "assert" => return Token::Assert,
+            "math" => return Token::Math,
 
             _ => {}
         }
@@ -573,6 +581,10 @@ fn keyword_or_variable(
             },
 
             TokenizeMode::CompilerDirective => match token_value.as_str() {
+                "settings" => {
+                    *tokenize_mode = TokenizeMode::Normal;
+                    return Token::Settings;
+                }
                 "title" => {
                     *tokenize_mode = TokenizeMode::Normal;
                     return Token::Title;

@@ -250,23 +250,17 @@ pub fn add_bs_files_to_parse(
                     };
 
                     let mut global = false;
-                    let file_name = match file_path.file_stem() {
-                        Some(stem) => match stem.to_str() {
-                            Some(stem_str) => match stem_str {
-                                settings::COMP_PAGE_KEYWORD => {
-                                    settings::INDEX_PAGE_KEYWORD.to_string()
-                                }
-                                settings::GLOBAL_PAGE_KEYWORD => {
-                                    global = true;
-                                    settings::GLOBAL_PAGE_KEYWORD.to_string()
-                                }
-                                _ => stem_str.to_string(),
-                            },
-                            None => {
-                                red_ln!("Error converting file stem to string");
-                                continue;
+                    let file_name = match file_path.file_stem().unwrap().to_str() {
+                        Some(stem_str) => {
+                            if stem_str.contains(settings::GLOBAL_PAGE_KEYWORD) {
+                                global = true;
+                                settings::GLOBAL_PAGE_KEYWORD.to_string()
+                            } else if stem_str.contains(settings::COMP_PAGE_KEYWORD) {
+                                settings::INDEX_PAGE_KEYWORD.to_string()
+                            } else {
+                                stem_str.to_string()
                             }
-                        },
+                        }
                         None => {
                             red_ln!("Error getting file stem");
                             continue;
@@ -378,7 +372,6 @@ fn compile(
                 .unwrap()
                 .to_string(),
             data_type: e.data_type.to_owned(),
-            is_const: false,
         })
         .collect();
 
@@ -429,7 +422,7 @@ fn compile(
             }
             None => {}
         };
-        html_config.page_dist_url.push_str("../");
+        html_config.page_root_url.push_str("../");
     }
 
     let (module_output, js_exports, css_exports, wat) = web_parser::parse(

@@ -22,8 +22,13 @@ mod parsers {
     pub mod collections;
     mod create_scene_node;
     pub mod functions;
-    pub mod parse_expression;
+    mod expressions {
+        pub mod constant_folding;
+        pub mod eval_expression;
+        pub mod parse_expression;
+    }
     pub mod styles;
+    pub mod tuples;
     pub mod util;
     pub mod variables;
 }

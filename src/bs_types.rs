@@ -1,7 +1,13 @@
+use crate::{
+    parsers::ast_nodes::{AstNode, Node},
+    Token,
+};
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum DataType {
     Inferred, // Type is inferred, this only gets to the emitter stage if it will definitely be JS rather than WASM
-    Float,    // 32 bit
+    Float,
+    Int,
     Bool,
     True,
     False,
@@ -23,4 +29,34 @@ pub enum DataType {
     Tuple(Box<Vec<DataType>>), // Mixed types (fixed size)
 
     None, // Maybe only for function returns?
+}
+
+pub fn return_datatype(node: &AstNode) -> DataType {
+    match node {
+        AstNode::RuntimeExpression(_, datatype) => datatype.clone(),
+        AstNode::Literal(token) => match token {
+            Token::FloatLiteral(_) => DataType::Float,
+            Token::IntLiteral(_) => DataType::Int,
+            Token::StringLiteral(_) => DataType::String,
+            Token::BoolLiteral(value) => {
+                if *value {
+                    DataType::True
+                } else {
+                    DataType::False
+                }
+            }
+            _ => DataType::Inferred,
+        },
+        AstNode::VarReference(_, datatype) | AstNode::ConstReference(_, datatype) => {
+            datatype.clone()
+        }
+        AstNode::Tuple(nodes, _) => {
+            let mut types: Vec<DataType> = Vec::new();
+            for node in nodes {
+                types.push(node.get_type());
+            }
+            DataType::Tuple(Box::new(types))
+        }
+        _ => DataType::Inferred,
+    }
 }

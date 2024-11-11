@@ -2,40 +2,71 @@
 [header: [title: Styles]]
 [main: 
 
+You can create your own styles in Beanstalk using the HTML library type 'Style'.
+
+The html basic library that starts with any new beanstalk html project will contain many basic styles that you can use.
+
+[code:
+
+    red = Style(
+        tag_type: "span",
+        css: "color: red;",
+        compatibility: All,
+        nested_scene_behaviour: {
+            force_wrap: false,
+            disallow_children: false
+        },
+        wrappers: {
+            before: "",
+            after: ""
+        },
+        content_mode: Normal,
+        inlining_rules: 0
+    )
+]
+
 Structure of a style:
 
 ## Tag type
-This is what HTML tag the style will use. This is important for accessibility and for setting some default behaviour.
+This is what HTML tag the style will use by default. 
+This is important for accessibility and for setting some default behaviour.
+
+Default value = span
 
 ## CSS
-The CSS that will be applied to the tag. This can be individual CSS properties, or CSS classes.
+The CSS that will be applied to the tag. 
+This can be individual CSS properties, or CSS classes.
 
 ## Events
-Events that can be performed on the scene. These are things like 'on click'.
+Events that can be performed on the scene. 
+These are things like 'on click'.
 
 ## Actions
-Actions that are triggered by an event. This could be something like 'swap' or 'hide'. An event must be defined before an action can be defined.
+Actions that are triggered by an event. This could be something like 'swap' or 'hide'. 
+An event must be defined before an action can be defined.
 
 ## Compatibility: 
 Does this style work with other styles? Can be:
 - All
-- Self (define how the style changes when this style is used multiple times)
-- None
-- List of compatible tags (will need specific logic to handle what happens and how the tags will be wrapped)
+- None (can't be used with any other styles)
+- Collection of compatible tags (will need specific logic to handle what happens and how the tags will be wrapped)
 
 ## Nested Scene Behaviour
-Defines what happens to child scenes placed inside this style. This can involve forcing a style wrapper around all of it's children.
+Defines what happens to child scenes placed inside this style. 
+This can involve forcing an extra style wrapper around all of it's children.
+Or even disallow children entierly.
 
-## Wrapper
-Does this style need to be wrapped in a parent style, and what should that style be?
+## Wrappers
+Does this style need to be wrapped in more tags outiside of it's tag type?
 
 ## Content Mode
 The content of the scene may instead be used for properties such as becoming the 'alt' tag for media.
 - Normal
 - Alt
 
-## Newline Rule
-Will this style inline itself with other instances of the same style? (like a p tag)
-
+## Inlining Rules
+0: Will it never inline itself and always break out of the current p tag?
+1: Or will it be like headings and break after one newline?
+2: Will this style inline itself with p tags before it on after a newline?
 
 ]

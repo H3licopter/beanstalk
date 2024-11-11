@@ -20,6 +20,7 @@ pub enum Token {
 
     // Module Import/Export
     Import,
+    Use,
     Export,
 
     // HTML project compiler directives
@@ -30,9 +31,12 @@ pub enum Token {
     JS(String),  // JS codeblock
     CSS(String), // CSS codeblock
 
-    // Basics
-    Settings, // bs keyword
-    Print,    // io keyword
+    // Standard Library (eventually)
+    Settings,
+    Print,
+    Math,
+
+    // Comments
     Comment(String),
     MultilineComment(String),
     DocComment(String),
@@ -129,6 +133,8 @@ pub enum Token {
     End,
     When,
     Defer,
+    Assert,
+    Copy,
 
     // Scenes
     ParentScene,

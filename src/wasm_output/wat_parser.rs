@@ -1,5 +1,43 @@
-use crate::{bs_types::DataType, parsers::ast_nodes::AstNode, Token};
+use crate::{bs_types::DataType, parsers::ast_nodes::AstNode, settings::BS_VAR_PREFIX, Token};
 use colour::red_ln;
+
+pub fn new_wat_var(
+    id: &String,
+    expr: &AstNode,
+    datatype: &DataType,
+    wat: &mut String,
+    wat_global_initilisation: &mut String,
+) {
+    match datatype {
+        DataType::Float => {
+            wat.push_str(&format!(
+                "
+                \n(global ${BS_VAR_PREFIX}{id} (export \"{BS_VAR_PREFIX}{id}\") (mut f64) (f64.const 0))
+                \n(func (export \"get_{BS_VAR_PREFIX}{id}\") (result f64) (global.get ${BS_VAR_PREFIX}{id}))",
+            ));
+
+            wat_global_initilisation.push_str(&format!(
+                "(global.set ${BS_VAR_PREFIX}{id} {})",
+                expression_to_wat(&expr)
+            ));
+        }
+        DataType::Int => {
+            wat.push_str(&format!(
+                "
+                \n(global ${BS_VAR_PREFIX}{id} (export \"{BS_VAR_PREFIX}{id}\") (mut i64) (i64.const 0))
+                \n(func (export \"get_{BS_VAR_PREFIX}{id}\") (result i64) (global.get ${BS_VAR_PREFIX}{id}))",
+            ));
+
+            wat_global_initilisation.push_str(&format!(
+                "(global.set ${BS_VAR_PREFIX}{id} {})",
+                expression_to_wat(&expr)
+            ));
+        }
+        _ => {
+            red_ln!("Unsupported datatype found in WAT var creation");
+        }
+    }
+}
 
 pub fn expression_to_wat(expr: &AstNode) -> String {
     let mut wat = String::new();
@@ -18,6 +56,9 @@ pub fn expression_to_wat(expr: &AstNode) -> String {
             Token::FloatLiteral(value) => {
                 wat.push_str(&format!("\n(f64.const {})", value.to_string()));
             }
+            Token::IntLiteral(value) => {
+                wat.push_str(&format!("\n(i64.const {})", value.to_string()));
+            }
             _ => {
                 red_ln!("unknown literal found in expression");
             }
@@ -25,7 +66,7 @@ pub fn expression_to_wat(expr: &AstNode) -> String {
 
         _ => {
             red_ln!(
-                "Non-expression / Literal AST node given to expression_to_js: {:?}",
+                "Invalid AST node given to expression_to_wat (wat parser): {:?}",
                 expr
             );
         }
@@ -51,7 +92,7 @@ fn float_expr_to_wat(nodes: &Vec<AstNode>) -> String {
             }
 
             AstNode::VarReference(name, _) | AstNode::ConstReference(name, _) => {
-                wat.push_str(&format!(" global.get $v{name}"));
+                wat.push_str(&format!(" global.get ${BS_VAR_PREFIX}{name}"));
             }
 
             AstNode::BinaryOperator(op, _) => {

@@ -1,6 +1,6 @@
 [Navbar]
 
-[header center: [title 1: BEANSTALK SCENES]]
+[header center: [title(1): BEANSTALK SCENES]]
 
 [main:
 Beanstalk has its own templating language. These are called scenes.
@@ -31,7 +31,7 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
     which by default will add a main tag to the HTML and wrap the content in a centered container.
 
     # A Heading
-    Some text that has a [link "example.com": link] inside it.
+    Some text that has a [link("example.com"): link] inside it.
 
     A constant variable from the code inserted into the scene: [ constant ].
 
@@ -46,19 +46,19 @@ Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, yo
 [code:
     [head_of_element: content of element that renders as text (markdown / more templates) {string : "this is a code block inside of the scene body, that is scoped to the scene"} ]
 
-    [img "images/meme.jpg", alt "meme"]
+    [img("images/meme.jpg"), alt("meme")]
 
     # A Cool Section
     [section #scene_id:
-        [ reactiveVariable ]
-        [link "example.com/page": here's a link!]
+        [ reactive_variable ]
+        [link("example.com/page"): here's a link!]
     ]
 
-    [ for text in text_array: 
+    [ loop text in text_array: 
         [ text ]
     ]
 
-    [table 2:
+    [table(2):
         [: Heading 1] [: Heading 2]
         [: text] [: text]
     ] 
@@ -79,7 +79,7 @@ By default, beanstalk uses rem for all units by default. This will continue to b
 More keywords will be added and more documentation about the aruments you can pass into the styles will be added as the compiler is developed and design desisions are slowly solidified.
 
 ### Style
-[table 2:
+[table(2):
     [: Property] [: Description]
 
     [: bg] [: Changes the background color of the element (will eventually just be passed a style argument such as a color and will automatically make those style changes to the background)]
@@ -90,7 +90,7 @@ More keywords will be added and more documentation about the aruments you can pa
 ]
 
 ### Layout
-[table 2:
+[table(2):
     [: Property] [: Description]
 
     [: pad] [: The padding around the element]
@@ -109,7 +109,7 @@ More keywords will be added and more documentation about the aruments you can pa
 ]
 
 ### Interactive 
-[table 2:
+[table(2):
     [: Property] [: Description]
 
     [: link] [: link (anchor tag)]
@@ -122,7 +122,7 @@ More keywords will be added and more documentation about the aruments you can pa
 ]
 
 ### Media
-[table 2:
+[table(2):
     [: Property] [: Description]
 
     [: img] [: An image element ]
@@ -133,7 +133,7 @@ More keywords will be added and more documentation about the aruments you can pa
 
 ### HTTP 
 These are directly from the HTMX library and will be the same keywords, but without the leading 'hx-' prefix. More to be added soon!
-[table 2:
+[table(2):
     [: Property] [: Description]
 
     [: get] [: ]
@@ -142,7 +142,7 @@ These are directly from the HTMX library and will be the same keywords, but with
 ]
 
 ### Other
-[table 2: 
+[table(2): 
     [: Property] [: Description]
 
     [: ignore] [: Creates a comment, but does not add it to the final output]
@@ -153,10 +153,11 @@ These are directly from the HTMX library and will be the same keywords, but with
 Variables and expressions are typecast into strings when put into a scene. This is the behaviour of all the numerical types and most of the string types. There are some exceptions to how other types are handled by scenes.
 
 ### Booleans
-Booleans in a scenehead will conditonally hide or show itself based on the value of the boolean. If the boolean is true, the scene and it's children will be shown, if false, it will be hidden.
+Booleans in a scenehead will conditonally hide or show itself based on the value of the boolean. 
+If the boolean is true, the scene and it's children will be shown, if false, it will be hidden.
 
 [code:
-    logged_in := false
+    logged_in = false
 
     -- Scene is hidden
     [if not logged_in:
@@ -165,24 +166,10 @@ Booleans in a scenehead will conditonally hide or show itself based on the value
 ]
 
 ### Errors
-If an error is added to a scene, it will be displayed in the console, rather than injected into the scene. This usually means that the variable with the error has reverted to its default value, which will be shown.
+If an error is added to a scene, it will be displayed in the console, rather than injected into the scene. 
+This usually means that the variable with the error has reverted to its default value, which will be shown.
 
 [red size(0.85): *This behaviour is an uncertain part of the design, tuples that contain errors might be better completely hidden from the scene rather than a zero value being shown.*]
 
-### Reactive Variables
-Variables can be made reactive in a scene by being appended with a tilde. The variable will update whenever the value of the variable changes. Variables without the tilde will only update if the scene is re-rendered.
-
-[code:
-    variable_that_changes := "hello"
-
-    -- Variable becomes reactive in this scene
-    [ ~variable_that_changes ]
-
-    -- Non-reactive variable
-    [ variable_that_changes ]
-
-    -- This will update the string in the first scene, but not the second
-    variable_that_changes := "world"
-]
 
 [Footer]

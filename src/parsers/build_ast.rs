@@ -1,7 +1,7 @@
 use super::{
     ast_nodes::{AstNode, Reference},
     create_scene_node::new_scene,
-    parse_expression::create_expression,
+    expressions::parse_expression::create_expression,
     variables::create_new_var_or_ref,
 };
 use crate::{bs_types::DataType, Token};

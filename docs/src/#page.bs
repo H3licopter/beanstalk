@@ -5,9 +5,11 @@
 ][main:
 
 ## What is Beanstalk?
-This website was created using Beanstalk! It's an open source, strongly typed language that compiles to HTML, CSS and Web Assembly (and some necessary Javascript).
+This website was created using Beanstalk! 
+It's an open source, strongly typed language that compiles to HTML, CSS and Web Assembly (and some necessary Javascript).
 
-Beanstalk has it's own unique, modern syntax that allows it to replace boilerplate and frameworks with a fresh sensible language.
+The documentation is currently more a collection of evolving design ideas and notes on the language as it's being developed. 
+Most of the language is still in the planning stages and not yet implemented.
 
 ## Documentation
 [red size(0.85): 
@@ -18,9 +20,10 @@ Beanstalk has it's own unique, modern syntax that allows it to replace boilerpla
 - [link "./docs/scenes": Introduction to scenes]
 - [link "./docs/control-flow": Control Flow]
 - [link "./docs/collections": Collections]
-- [link "./docs/choices": Choices]
+- [link "./docs/types-and-tuples": Types and Tuples]
 - [link "./docs/functions": Functions]
 - [link "./docs/errors": Error Handling]
+- [link "./docs/embedding-js": Embedding JS]
 
 More documentation to be added soon!
 

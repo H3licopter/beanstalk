@@ -30,32 +30,58 @@
                 word-spacing: 0.5rem;
                 margin: 1.5rem 0 1.4rem 0;
                 line-height: 3.7rem;
-            }</style></head><body><span class="Navbar"></span><header class="container"><b class="bs-title-0 " style=""  >Styles</b></header><main class="container"><p>Structure of a style:
+            }</style></head><body><span class="Navbar"></span><header class="container"><b class="bs-title-0 " style=""  >Styles</b></header><main class="container"><p>You can create your own styles in Beanstalk using the HTML library type 'Style'.
+</p><p>The html basic library that starts with any new beanstalk html project will contain many basic styles that you can use.
+</p><pre><code>
+    red = Style(
+        tag_type: "span",
+        css: "color: red;",
+        compatibility: All,
+        nested_scene_behaviour: {
+            force_wrap: false,
+            disallow_children: false
+        },
+        wrappers: {
+            before: "",
+            after: ""
+        },
+        content_mode: Normal,
+        inlining_rules: 0
+    )
+</code></pre><p>Structure of a style:
 </p><h2>Tag type
-</h2><p>This is what HTML tag the style will use. This is important for accessibility and for setting some default behaviour.
+</h2><p>This is what HTML tag the style will use by default. 
+</p><span>This is important for accessibility and for setting some default behaviour.
+</span><p>Default value = span
 </p><h2>CSS
-</h2><p>The CSS that will be applied to the tag. This can be individual CSS properties, or CSS classes.
-</p><h2>Events
-</h2><p>Events that can be performed on the scene. These are things like 'on click'.
-</p><h2>Actions
-</h2><p>Actions that are triggered by an event. This could be something like 'swap' or 'hide'. An event must be defined before an action can be defined.
-</p><h2>Compatibility: 
+</h2><p>The CSS that will be applied to the tag. 
+</p><span>This can be individual CSS properties, or CSS classes.
+</span><h2>Events
+</h2><p>Events that can be performed on the scene. 
+</p><span>These are things like 'on click'.
+</span><h2>Actions
+</h2><p>Actions that are triggered by an event. This could be something like 'swap' or 'hide'. 
+</p><span>An event must be defined before an action can be defined.
+</span><h2>Compatibility: 
 </h2><p>Does this style work with other styles? Can be:
 </p><li><span>All
-</span></li><li><span>Self (define how the style changes when this style is used multiple times)
-</span></li><li><span>None
-</span></li><li><span>List of compatible tags (will need specific logic to handle what happens and how the tags will be wrapped)
+</span></li><li><span>None (can't be used with any other styles)
+</span></li><li><span>Collection of compatible tags (will need specific logic to handle what happens and how the tags will be wrapped)
 </span></li><h2>Nested Scene Behaviour
-</h2><p>Defines what happens to child scenes placed inside this style. This can involve forcing a style wrapper around all of it's children.
-</p><h2>Wrapper
-</h2><p>Does this style need to be wrapped in a parent style, and what should that style be?
+</h2><p>Defines what happens to child scenes placed inside this style. 
+</p><span>This can involve forcing an extra style wrapper around all of it's children.
+</span><span>Or even disallow children entierly.
+</span><h2>Wrappers
+</h2><p>Does this style need to be wrapped in more tags outiside of it's tag type?
 </p><h2>Content Mode
 </h2><p>The content of the scene may instead be used for properties such as becoming the 'alt' tag for media.
 </p><li><span>Normal
 </span></li><li><span>Alt
-</span></li><h2>Newline Rule
-</h2><p>Will this style inline itself with other instances of the same style? (like a p tag)
-</p></main>
+</span></li><h2>Inlining Rules
+</h2><p>0: Will it never inline itself and always break out of the current p tag?
+</p><span>1: Or will it be like headings and break after one newline?
+</span><span>2: Will this style inline itself with p tags before it on after a newline?
+</span></main>
 <script type="module">  const bs_Navbar = `<nav style="background-color:rgba(100, 220, 50, 0.03);" class="bs-nav-1 "  ><ul><li><a href="/" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;const bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./styles.wasm")).then((obj)=>{
