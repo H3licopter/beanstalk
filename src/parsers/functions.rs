@@ -16,7 +16,13 @@ pub fn create_function(
 ) -> AstNode {
     /*
         funcName fn(arg type, arg2 type = default_value) -> returnType:
-            // Function body
+            -- Function body
+        end
+
+        No return value   
+
+        func fn():
+            -- Function body
         end
     */
 
@@ -58,6 +64,8 @@ pub fn create_function(
 
     let return_type = if return_types.len() == 1 {
         return_types[0].to_owned()
+    } else if return_types.len() < 1 {
+        DataType::None
     } else {
         DataType::Tuple(Box::new(return_types))
     };
@@ -65,7 +73,7 @@ pub fn create_function(
     // The function ends with the 'end' keyword
     let function_body = new_ast(
         tokens.to_vec(),
-        *i,
+        i,
         token_line_numbers,
         arg_refs,
         &return_type,

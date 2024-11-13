@@ -35,7 +35,7 @@ mod parsers {
 mod html_output {
     pub mod colors;
     mod dom_hooks;
-    mod generate_html;
+    pub mod generate_html;
     pub mod js_parser;
     pub mod web_parser;
 }

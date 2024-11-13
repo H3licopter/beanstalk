@@ -1,6 +1,5 @@
 use colour::{blue_ln, cyan_ln, green_ln, grey_ln, red_ln};
 use colour::{blue_ln_bold, dark_grey_ln, dark_yellow_ln, green_ln_bold, yellow_ln_bold};
-use regex::Regex;
 
 use crate::bs_types::DataType;
 use crate::html_output::web_parser;
@@ -52,7 +51,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     // Create AST
     yellow_ln_bold!("CREATING AST\n");
     let (ast, _var_declarations) =
-        parsers::build_ast::new_ast(tokens, 0, &token_line_numbers, Vec::new(), &DataType::None);
+        parsers::build_ast::new_ast(tokens, &mut 0, &token_line_numbers, Vec::new(), &DataType::None);
 
     for node in &ast {
         match node {
@@ -78,40 +77,47 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     }
 
     yellow_ln_bold!("\nCREATING HTML OUTPUT\n");
-    let (html_output, js_exports, css_exports, wat) = web_parser::parse(
+    let parser_output = web_parser::parse(
         ast,
-        get_html_config(),
+        &get_html_config(),
         false,
-        "test".to_string(),
+        "test",
         false,
-        String::new(),
+        &String::new(),
     );
-    for export in js_exports {
+    for export in parser_output.exported_js {
         println!("JS EXPORTS:");
         println!("{:?}", export.module_path);
     }
-    println!("CSS EXPORTS: {}", css_exports);
+    println!("CSS EXPORTS: {}", parser_output.exported_css);
+    
+    let all_parsed_wasm = &format!("(module {}(func (export \"set_wasm_globals\"){}))", &parser_output.wat, parser_output.wat_globals);
+    println!("WAT: {}", all_parsed_wasm);
 
-    println!("WAT: {}", wat);
+    /*
+    
+        // Print the HTML output
+        // Create a regex to match the content between the <main> and </main> tags
+        let re = Regex::new(r"(?s)<body>(.*?)</body>").unwrap();
 
-    // Print the HTML output
-    // Create a regex to match the content between the <main> and </main> tags
-    let re = Regex::new(r"(?s)<body>(.*?)</body>").unwrap();
+        // Extract the content between the <main> and </main> tags
+        let main_content = re
+            .captures(&html_output)
+            .and_then(|cap| cap.get(1))
+            .map_or("", |m| m.as_str());
 
-    // Extract the content between the <main> and </main> tags
-    let main_content = re
-        .captures(&html_output)
-        .and_then(|cap| cap.get(1))
-        .map_or("", |m| m.as_str());
+        // Create a regex to match HTML tags
+        let re_tags = Regex::new(r"(</?\w+[^>]*>)").unwrap();
 
-    // Create a regex to match HTML tags
-    let re_tags = Regex::new(r"(</?\w+[^>]*>)").unwrap();
+        // Insert a newline before each HTML tag
+        let formatted_content = re_tags.replace_all(main_content, "\n$1");
 
-    // Insert a newline before each HTML tag
-    let formatted_content = re_tags.replace_all(main_content, "\n$1");
+        // Print the formatted content
+        println!("\n\n{}", formatted_content);
+    
+    */
 
-    // Print the formatted content
-    println!("\n\n{}", formatted_content);
+
 
     dev_server::start_dev_server("test_output".to_string())?;
 

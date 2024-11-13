@@ -3,7 +3,6 @@ use std::path::Path;
 use super::{
     colors::get_color,
     dom_hooks::{generate_dom_update_js, DOMUpdate},
-    generate_html::create_html_boilerplate,
     js_parser::{collection_to_js, expression_to_js},
 };
 use crate::{
@@ -21,21 +20,31 @@ use crate::{
 };
 use colour::red_ln;
 
+pub struct ParserOutput {
+    pub html: String,
+    pub js: String,
+    pub css: String,
+    pub page_title: String,
+    pub exported_js: Vec<ExportedJS>,
+    pub exported_css: String,
+    pub wat: String,
+    pub wat_globals: String,
+}
+
 // Parse ast into valid JS, HTML and CSS
 pub fn parse(
     ast: Vec<AstNode>,
-    config: HTMLMeta,
+    config: &HTMLMeta,
     release_build: bool,
-    module_path: String,
+    module_path: &str,
     is_global: bool,
-    imported_css: String,
-) -> (String, Vec<ExportedJS>, String, String) {
+    imported_css: &String,
+) -> ParserOutput {
     let mut js = generate_dom_update_js(DOMUpdate::InnerHTML).to_string();
-    let mut wasm_fn_id: usize = 0;
-    let mut wat = String::from("(module\n");
-    let mut wat_global_initilisation = String::from("\n(func (export \"set_wasm_globals\") ");
+    let mut wat = String::new();
+    let mut wat_global_initilisation = String::new();
     let mut html = String::new();
-    let mut css = imported_css;
+    let mut css = imported_css.to_owned();
     let mut page_title = String::new();
     let mut exp_id: usize = 0;
 
@@ -67,8 +76,7 @@ pub fn parse(
                     &mut exp_id,
                     &mut Vec::new(),
                     &mut wat,
-                    &mut wasm_fn_id,
-                    &config,
+                    config,
                 ));
             }
             AstNode::Title(value) => {
@@ -95,7 +103,7 @@ pub fn parse(
                         if is_exported {
                             exported_js.push(ExportedJS {
                                 js: var_dec,
-                                module_path: Path::new(&module_path).join(id),
+                                module_path: Path::new(module_path).join(id),
                                 global: is_global,
                                 data_type: data_type.to_owned(),
                             });
@@ -120,8 +128,7 @@ pub fn parse(
                                     &mut exp_id,
                                     &mut Vec::new(),
                                     &mut wat,
-                                    &mut wasm_fn_id,
-                                    &config,
+                                    config,
                                 );
                                 css.push_str(&created_css);
 
@@ -138,7 +145,7 @@ pub fn parse(
                                 if is_exported {
                                     exported_js.push(ExportedJS {
                                         js: var_dec,
-                                        module_path: Path::new(&module_path).join(id),
+                                        module_path: Path::new(module_path).join(id),
                                         global: is_global,
                                         data_type: data_type.to_owned(),
                                     });
@@ -221,21 +228,72 @@ pub fn parse(
             }
 
             AstNode::Function(name, args, body, is_exported, return_type) => {
+                let mut arg_names = Vec::new();
+                for arg in args {
+                    match arg {
+                        AstNode::FunctionArg(name, _, default_value) => {
+                            let default_arg = match default_value {
+                                Some(node) => {
+                                    match *node {
+                                        AstNode::Literal(token) => {
+                                            match token {
+                                                Token::StringLiteral(value) 
+                                                | Token::RawStringLiteral(value) 
+                                                | Token::PathLiteral(value) => {
+                                                    &format!("=\"{value}\"")
+                                                }
+                                                Token::IntLiteral(value) => {
+                                                    &format!("={value}")
+                                                }
+                                                Token::FloatLiteral(value) => {
+                                                    &format!("={value}")
+                                                }
+                                                Token::BoolLiteral(value) => {
+                                                    &format!("={value}")
+                                                }
+                                                _=> {
+                                                    red_ln!("Compiler Error: invalid literal given as a default value");
+                                                    ""
+                                                }
+                                            }
+                                        }
+                                        _=> {
+                                            ""
+                                        }
+                                    }
+                                }
+                                None => {
+                                    ""
+                                }
+                            };
+
+                            arg_names.push(format!("{name}{default_arg},"));
+                        }
+                        _ => {
+                            red_ln!("Compiler Error: Invalid node found instead of function arg: {:?} on line: {}", arg, 0);
+                        }
+                    }
+                }
+
+                let func_body = parse(body, config, release_build, module_path, false, imported_css);
                 let func = format!(
                     "{}function {BS_VAR_PREFIX}{name}({:?}){{\n{:?}\n}}",
                     if is_exported { "export " } else { "" },
-                    args, // NEED TO PARSE ARGUMENTS
-                    body
+                    arg_names,
+                    func_body.js
                 );
+
                 if is_exported {
                     exported_js.push(ExportedJS {
                         js: func.to_owned(),
-                        module_path: Path::new(&module_path).join(name),
+                        module_path: Path::new(module_path).join(name),
                         global: is_global,
                         data_type: DataType::Function(Box::new(return_type)),
                     });
                 }
                 js.push_str(&func);
+                wat.push_str(&func_body.wat);
+                wat_global_initilisation.push_str(&func_body.wat_globals);
             }
             AstNode::Print(ref expr) => {
                 js.push_str(&format!("console.log({});", expression_to_js(&expr)));
@@ -267,16 +325,16 @@ pub fn parse(
         page_title += &(" | ".to_owned() + &config.site_title.clone());
     }
 
-    wat.push_str(&format!("{}))", &wat_global_initilisation));
-
-    let html = create_html_boilerplate(config, release_build)
-        .replace("page-template", &html)
-        .replace("@page-css", &css)
-        .replace("page-title", &page_title)
-        .replace("//js", &js)
-        .replace("wasm-module-name", &module_path);
-
-    (html, exported_js, exported_css, wat)
+    ParserOutput {
+        html,
+        js,
+        css,
+        page_title,
+        exported_js,
+        exported_css,
+        wat,
+        wat_globals: wat_global_initilisation,
+    }
 }
 
 struct SceneTag {
@@ -302,7 +360,6 @@ pub fn parse_scene(
     exp_id: &mut usize,
     positions: &mut Vec<f64>,
     wasm_module: &mut String,
-    wasm_fn_id: &mut usize,
     config: &HTMLMeta,
 ) -> String {
     let mut html = String::new();
@@ -845,7 +902,6 @@ pub fn parse_scene(
                     exp_id,
                     &mut Vec::new(),
                     wasm_module,
-                    wasm_fn_id,
                     config,
                 );
 

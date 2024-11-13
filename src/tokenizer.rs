@@ -628,7 +628,7 @@ fn keyword_or_variable(
     );
 }
 
-// Checking if the variable name it valid
+// Checking if the variable name is valid
 fn is_valid_identifier(s: &str) -> bool {
     // Check if the string is a valid identifier (variable name)
     s.chars()

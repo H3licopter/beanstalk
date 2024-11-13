@@ -3,7 +3,7 @@ use colour::red_ln;
 use crate::settings::HTMLMeta;
 use std::fs;
 
-pub fn create_html_boilerplate(meta_tags: HTMLMeta, release_build: bool) -> String {
+pub fn create_html_boilerplate(meta_tags: &HTMLMeta, release_build: bool) -> String {
     let mut boilerplate = String::new();
 
     // Add basic HTML boilerplate to output

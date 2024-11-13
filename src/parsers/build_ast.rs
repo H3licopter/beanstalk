@@ -10,25 +10,26 @@ use std::path::PathBuf;
 
 pub fn new_ast(
     tokens: Vec<Token>,
-    start_index: usize,
+    i: &mut usize,
     token_line_numbers: &Vec<u32>,
     mut variable_declarations: Vec<Reference>,
     return_type: &DataType,
+
+     // AST         Imports
 ) -> (Vec<AstNode>, Vec<AstNode>) {
     let mut ast = Vec::new();
     let mut imports = Vec::new();
-    let mut i = start_index;
     let mut exported: bool = false;
     let mut needs_to_return = return_type != &DataType::None;
 
-    while i < tokens.len() {
-        match &tokens[i] {
+    while *i < tokens.len() {
+        match &tokens[*i] {
             Token::Comment(value) => {
                 ast.push(AstNode::Comment(value.clone()));
             }
             Token::Import => {
-                i += 1;
-                match &tokens[i] {
+                *i += 1;
+                match &tokens[*i] {
                     // Module path that will have all it's exports dumped into the module
                     Token::StringLiteral(value) => {
                         imports.push(AstNode::Use(PathBuf::from(value.clone())));
@@ -36,16 +37,16 @@ pub fn new_ast(
                     _ => {
                         ast.push(AstNode::Error(
                             "Import must have a valid path as a argument".to_string(),
-                            token_line_numbers[i],
+                            token_line_numbers[*i] ,
                         ));
                     }
                 }
             }
             Token::SceneHead | Token::ParentScene => {
-                let starting_line_number = &token_line_numbers[i];
+                let starting_line_number = &token_line_numbers[*i] ;
                 ast.push(new_scene(
                     &tokens,
-                    &mut i,
+                    i,
                     &ast,
                     starting_line_number,
                     &variable_declarations,
@@ -61,13 +62,11 @@ pub fn new_ast(
                     name,
                     &mut variable_declarations,
                     &tokens,
-                    &mut i,
+                    i,
                     exported,
                     &ast,
                     token_line_numbers,
                 ));
-
-                i += 1;
             }
             Token::Export => {
                 exported = true;
@@ -76,30 +75,30 @@ pub fn new_ast(
                 ast.push(AstNode::JS(value.clone()));
             }
             Token::Title => {
-                i += 1;
-                match &tokens[i] {
+                *i += 1;
+                match &tokens[*i]  {
                     Token::StringLiteral(value) => {
                         ast.push(AstNode::Title(value.clone()));
                     }
                     _ => {
                         ast.push(AstNode::Error(
                             "Title must have a valid string as a argument".to_string(),
-                            token_line_numbers[i],
+                            token_line_numbers[*i] ,
                         ));
                     }
                 }
             }
 
             Token::Date => {
-                i += 1;
-                match &tokens[i] {
+                *i += 1;
+                match &tokens[*i]  {
                     Token::StringLiteral(value) => {
                         ast.push(AstNode::Date(value.clone()));
                     }
                     _ => {
                         ast.push(AstNode::Error(
                             "Date must have a valid string as a argument".to_string(),
-                            token_line_numbers[i],
+                            token_line_numbers[*i] ,
                         ));
                     }
                 }
@@ -110,12 +109,12 @@ pub fn new_ast(
             }
 
             Token::Print => {
-                i += 1;
-                let inside_brackets = &tokens[i] == &Token::OpenParenthesis;
-                let starting_line_number = &token_line_numbers[i];
+                *i += 1;
+                let inside_brackets = &tokens[*i]  == &Token::OpenParenthesis;
+                let starting_line_number = &token_line_numbers[*i] ;
                 ast.push(AstNode::Print(Box::new(create_expression(
                     &tokens,
-                    &mut i,
+                    i,
                     false,
                     &ast,
                     starting_line_number,
@@ -128,13 +127,13 @@ pub fn new_ast(
             Token::DeadVarible(name) => {
                 // Remove entire declaration or scope of variable declaration
                 // So don't put any dead code into the AST
-                skip_dead_code(&tokens, &mut i);
+                skip_dead_code(&tokens, i);
                 ast.push(AstNode::Error(
                     format!(
                         "Dead Variable Declaration. Variable is never used or declared: {}",
                         name
                     ),
-                    token_line_numbers[i - 1],
+                    token_line_numbers[*i - 1],
                 ));
             }
 
@@ -142,17 +141,17 @@ pub fn new_ast(
                 if !needs_to_return {
                     ast.push(AstNode::Error(
                         "Return statement used in function that doesn't return a value".to_string(),
-                        token_line_numbers[i],
+                        token_line_numbers[*i] ,
                     ));
                 }
 
                 needs_to_return = false;
-                i += 1;
+                *i += 1;
 
-                let starting_line_number = &token_line_numbers[i];
+                let starting_line_number = &token_line_numbers[*i] ;
                 let return_value = create_expression(
                     &tokens,
-                    &mut i,
+                    i,
                     false,
                     &ast,
                     starting_line_number,
@@ -163,32 +162,37 @@ pub fn new_ast(
 
                 ast.push(AstNode::Return(Box::new(return_value)));
 
-                i -= 1;
+                *i -= 1;
             }
 
             // TOKEN END SHOULD NEVER BE AT TOP LEVEL
             // This is to break out of blocks only
             // There should be a way to handle this to throw a syntax error if 'end' is used at the top level
-            Token::EOF | Token::End => {
+            Token::EOF => {
+                break;
+            }
+
+            Token::End => {
+                *i += 1;
                 break;
             }
 
             // Or stuff that hasn't been implemented yet
             _ => {
                 ast.push(AstNode::Error(
-                    format!("Compiler Error: Token not recognised by AST parser when creating AST: {:?}", &tokens[i]).to_string(),
-                    token_line_numbers[i - 1],
+                    format!("Compiler Error: Token not recognised by AST parser when creating AST: {:?}", &tokens[*i] ).to_string(),
+                    token_line_numbers[*i - 1],
                 ));
             }
         }
 
-        i += 1;
+        *i += 1;
     }
 
     if needs_to_return {
         ast.push(AstNode::Error(
             "Function does not return a value".to_string(),
-            token_line_numbers[i - 1],
+            token_line_numbers[*i - 1],
         ));
     }
 

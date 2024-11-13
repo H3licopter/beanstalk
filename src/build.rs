@@ -1,4 +1,5 @@
 use crate::bs_types::DataType;
+use crate::html_output::generate_html::create_html_boilerplate;
 use crate::html_output::web_parser;
 use crate::parsers::ast_nodes::{AstNode, Reference};
 use crate::settings::{get_default_config, get_html_config, Config};
@@ -385,7 +386,7 @@ fn compile(
     let time = Instant::now();
 
     let (ast, imports) =
-        parsers::build_ast::new_ast(tokens, 0, &token_line_numbers, globals, &DataType::None);
+        parsers::build_ast::new_ast(tokens, &mut 0, &token_line_numbers, globals, &DataType::None);
 
     print!("AST created in: ");
     green_ln!("{:?}", time.elapsed());
@@ -425,20 +426,29 @@ fn compile(
         html_config.page_root_url.push_str("../");
     }
 
-    let (module_output, js_exports, css_exports, wat) = web_parser::parse(
+    let parser_output = web_parser::parse(
         ast,
-        html_config,
+        &html_config,
         release_build,
-        file_name.to_string(),
+        file_name,
         output.global,
-        exported_css.to_string(),
+        exported_css,
     );
+
+    // Add HTML boilerplate
+    let module_output = create_html_boilerplate(&html_config, release_build)
+        .replace("page-template", &parser_output.html)
+        .replace("@page-css", &parser_output.css)
+        .replace("page-title", &parser_output.page_title)
+        .replace("//js", &parser_output.js)
+        .replace("wasm-module-name", file_name);
 
     print!("HTML/CSS/WAT/JS generated in: ");
     green_ln!("{:?}", time.elapsed());
     let time = Instant::now();
 
-    let wasm = match parse_str(&wat) {
+    let all_parsed_wasm = &format!("(module {}(func (export \"set_wasm_globals\"){}))", &parser_output.wat, parser_output.wat_globals);
+    let wasm = match parse_str(all_parsed_wasm) {
         Ok(wasm) => wasm,
         Err(e) => {
             red_ln!("Error parsing wat to wasm: {:?}", e);
@@ -449,8 +459,8 @@ fn compile(
     print!("WAT parsed to WASM in: ");
     green_ln!("{:?}", time.elapsed());
 
-    exported_js.extend(js_exports);
-    exported_css.push_str(&css_exports);
+    exported_js.extend(parser_output.exported_js);
+    exported_css.push_str(&parser_output.exported_css);
 
     Ok((module_output, wasm, import_requests))
 }

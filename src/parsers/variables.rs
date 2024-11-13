@@ -59,7 +59,7 @@ pub fn new_variable(
         &Token::FunctionKeyword => {
             *i += 1;
             return create_function(
-                name.to_string(),
+                name.to_owned(),
                 tokens,
                 i,
                 is_exported,
@@ -183,6 +183,7 @@ pub fn new_variable(
             );
         }
     }
+
 
     // Check if a type of collection / tuple has been created
     // Or whether it is a literal or expression
