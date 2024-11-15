@@ -12,7 +12,7 @@ pub fn create_function(
     is_exported: bool,
     ast: &Vec<AstNode>,
     token_line_numbers: &Vec<u32>,
-    variable_declarations: &Vec<Reference>,
+    variable_declarations: &mut Vec<Reference>,
 ) -> AstNode {
     /*
         funcName fn(arg type, arg2 type = default_value) -> returnType:
@@ -27,7 +27,7 @@ pub fn create_function(
     */
 
     // get args (tokens should currently be at the open parenthesis)
-    let (args, arg_refs) =
+    let (_, arg_refs) =
         match parse_args(tokens, i, ast, token_line_numbers, variable_declarations) {
             Ok(args) => args,
             Err(err) => {
@@ -70,17 +70,23 @@ pub fn create_function(
         DataType::Tuple(Box::new(return_types))
     };
 
+    variable_declarations.push(Reference {
+        name: name.to_owned(),
+        data_type: DataType::Function(Box::new(arg_refs.clone()), Box::new(return_type.clone())),
+    });
+
     // The function ends with the 'end' keyword
     let function_body = new_ast(
         tokens.to_vec(),
         i,
         token_line_numbers,
-        arg_refs,
+        arg_refs.clone(),
         &return_type,
+        false,
     )
     .0;
 
-    AstNode::Function(name, args, function_body, is_exported, return_type)
+    AstNode::Function(name, arg_refs, function_body, is_exported, return_type)
 }
 
 fn parse_args(
@@ -89,9 +95,8 @@ fn parse_args(
     ast: &Vec<AstNode>,
     token_line_numbers: &Vec<u32>,
     variable_declarations: &Vec<Reference>,
-) -> Result<(Vec<AstNode>, Vec<Reference>), &'static str> {
-    let mut args = Vec::<AstNode>::new();
-    let mut arg_refs = Vec::<Reference>::new();
+) -> Result<Vec<Reference>, &'static str> {
+    let mut args = Vec::<Reference>::new();
 
     // Check if there are arguments
     let mut open_parenthesis = 0;
@@ -163,15 +168,10 @@ fn parse_args(
                     )));
                 }
 
-                args.push(AstNode::FunctionArg(
-                    arg_name.to_owned(),
-                    data_type.to_owned(),
-                    default_value,
-                ));
-
-                arg_refs.push(Reference {
+                args.push(Reference {
                     name: arg_name.to_owned(),
-                    data_type,
+                    data_type: data_type.to_owned(),
+                    default_value,
                 });
 
                 next_in_list = false;
@@ -193,7 +193,7 @@ fn parse_args(
         return Err("Wrong number of parenthesis used when declaring function arguments");
     }
 
-    return Ok((args, arg_refs));
+    return Ok(args);
 }
 
 fn parse_return_type(tokens: &Vec<Token>, i: &mut usize) -> Result<Vec<DataType>, &'static str> {

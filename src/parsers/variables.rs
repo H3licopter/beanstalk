@@ -3,7 +3,7 @@ use crate::{bs_types::DataType, Token};
 use super::{
     ast_nodes::{AstNode, Node, Reference},
     collections::new_collection,
-    expressions::parse_expression::create_expression,
+    expressions::parse_expression::{create_expression, get_args},
     functions::create_function,
 };
 
@@ -19,6 +19,26 @@ pub fn create_new_var_or_ref(
     let is_const = name.to_uppercase() == *name;
 
     if let Some(var) = variable_declarations.iter().find(|v| v.name == *name) {
+        match var.data_type { 
+            DataType::Function(ref argument_refs, ref return_type) => {
+                // Parse arguments passed into the function
+                let args = match get_args(tokens, i, ast, &token_line_numbers[*i], variable_declarations, argument_refs) {
+                    Some(args) => args,
+
+                    // Returning None here means no brackets, which means it's just a reference to the function
+                    None => {
+                        return AstNode::VarReference(var.name.to_owned(), var.data_type.to_owned());
+                    }
+                };
+
+                return AstNode::FunctionCall(
+                    name.to_owned(),
+                    Box::new(args),
+                    *return_type.to_owned(),
+                );
+            }
+            _ => {},
+        }
         if is_const {
             return AstNode::ConstReference(var.name.to_owned(), var.data_type.to_owned());
         }

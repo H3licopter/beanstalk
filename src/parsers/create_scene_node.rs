@@ -2,7 +2,7 @@ use colour::red_ln;
 
 use super::{
     ast_nodes::{AstNode, Reference},
-    expressions::parse_expression::{check_if_arg, create_expression},
+    expressions::parse_expression::{get_args, create_expression},
     styles::{Action, Style, Tag},
     util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
 };
@@ -43,20 +43,16 @@ pub fn new_scene(
             }
 
             Token::Id => {
-                if !check_if_arg(tokens, &mut *i) {
-                    continue;
-                }
-
-                let eval_arg = create_expression(
-                    tokens,
-                    &mut *i,
-                    false,
-                    ast,
-                    token_line_number,
-                    &DataType::CoerseToString,
-                    inside_brackets,
-                    variable_declarations,
-                );
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "id".to_string(),
+                    data_type: DataType::String,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        continue;
+                    }
+                };
 
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::A(eval_arg));
@@ -67,20 +63,17 @@ pub fn new_scene(
             }
 
             Token::A => {
-                if !check_if_arg(tokens, &mut *i) {
-                    continue;
-                }
-
-                let eval_arg = create_expression(
-                    tokens,
-                    &mut *i,
-                    false,
-                    ast,
-                    token_line_number,
-                    &DataType::CoerseToString,
-                    inside_brackets,
-                    variable_declarations,
-                );
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "href".to_string(),
+                    data_type: DataType::String,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        continue;
+                    }
+                };
+                
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::A(eval_arg));
                 } else {
@@ -90,22 +83,16 @@ pub fn new_scene(
             }
 
             Token::Padding => {
-                let eval_arg;
-                // TODO: get a default padding value
-                if !check_if_arg(tokens, &mut *i) {
-                    eval_arg = AstNode::Literal(Token::FloatLiteral(1.5));
-                } else {
-                    eval_arg = create_expression(
-                        tokens,
-                        &mut *i,
-                        false,
-                        ast,
-                        token_line_number,
-                        &DataType::Inferred,
-                        inside_brackets,
-                        variable_declarations,
-                    );
-                }
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "padding".to_string(),
+                    data_type: DataType::Float,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        AstNode::Literal(Token::FloatLiteral(1.5))
+                    }
+                };
 
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::Padding(eval_arg));
@@ -116,23 +103,16 @@ pub fn new_scene(
             }
 
             Token::Margin => {
-                let eval_arg;
-
-                if !check_if_arg(tokens, &mut *i) {
-                    eval_arg = AstNode::Literal(Token::FloatLiteral(2.0));
-                } else {
-                    // Must be inferred as it could be a tuple
-                    eval_arg = create_expression(
-                        tokens,
-                        &mut *i,
-                        false,
-                        ast,
-                        token_line_number,
-                        &DataType::Inferred,
-                        inside_brackets,
-                        variable_declarations,
-                    );
-                }
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "margin".to_string(),
+                    data_type: DataType::Float,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        AstNode::Literal(Token::FloatLiteral(2.0))
+                    }
+                };
 
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::Margin(eval_arg));
@@ -144,19 +124,17 @@ pub fn new_scene(
 
             // For positioning inside a flex container / grid
             Token::Order => {
-                if !check_if_arg(tokens, &mut *i) {
-                    continue;
-                }
-                let eval_arg = create_expression(
-                    tokens,
-                    &mut *i,
-                    false,
-                    ast,
-                    token_line_number,
-                    &DataType::Float,
-                    inside_brackets,
-                    variable_declarations,
-                );
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "order".to_string(),
+                    data_type: DataType::Float,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        continue;
+                    }
+                };
+
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::Order(eval_arg));
                 } else {
@@ -165,20 +143,16 @@ pub fn new_scene(
             }
 
             Token::BG => {
-                if !check_if_arg(tokens, &mut *i) {
-                    continue;
-                }
-                // TO DO: Accept color names and hex values
-                let eval_arg = create_expression(
-                    tokens,
-                    &mut *i,
-                    false,
-                    ast,
-                    token_line_number,
-                    &DataType::Inferred,
-                    inside_brackets,
-                    variable_declarations,
-                );
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "style".to_string(),
+                    data_type: DataType::Style,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        continue;
+                    }
+                };
 
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::BackgroundColor(eval_arg));
@@ -189,21 +163,18 @@ pub fn new_scene(
 
             // Colours
             Token::Rgb | Token::Hsl => {
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "color".to_string(),
+                    data_type: DataType::String,
+                }];
                 let color_type = token.to_owned();
-                if !check_if_arg(tokens, &mut *i) {
-                    continue;
-                }
-                // TO DO: Accept color names and hex values
-                let eval_arg = create_expression(
-                    tokens,
-                    &mut *i,
-                    false,
-                    ast,
-                    token_line_number,
-                    &DataType::Inferred,
-                    inside_brackets,
-                    variable_declarations,
-                );
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        continue;
+                    }
+                };
+
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::TextColor(eval_arg, color_type));
                 } else {
@@ -219,29 +190,26 @@ pub fn new_scene(
             | Token::White
             | Token::Black => {
                 let color_type = token.to_owned();
-                if check_if_arg(tokens, &mut *i) {
-                    // TO DO: Accept color names and hex values
-                    let eval_arg = create_expression(
-                        tokens,
-                        &mut *i,
-                        false,
-                        ast,
-                        token_line_number,
-                        &DataType::Inferred,
-                        inside_brackets,
-                        variable_declarations,
-                    );
-                    if check_if_comptime_value(&eval_arg) {
-                        scene_styles.push(Style::TextColor(eval_arg, color_type));
-                    } else {
-                        // Need to add JS DOM hooks to change text color at runtime.
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "shade".to_string(),
+                    data_type: DataType::Float,
+                }];
+                match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => {
+                        if check_if_comptime_value(&arg) {
+                            scene_styles.push(Style::TextColor(arg, color_type));
+                        } else {
+                            // Need to add JS DOM hooks to change text color at runtime.
+                        }
+                    },
+                    None => {
+                        scene_styles.push(Style::TextColor(
+                            AstNode::Literal(Token::FloatLiteral(0.0)),
+                            color_type,
+                        ));
+                        continue;
                     }
-                } else {
-                    scene_styles.push(Style::TextColor(
-                        AstNode::Literal(Token::FloatLiteral(0.0)),
-                        color_type,
-                    ));
-                }
+                };
             }
 
             Token::Center => {
@@ -249,24 +217,21 @@ pub fn new_scene(
             }
 
             Token::Size => {
-                if check_if_arg(tokens, &mut *i) {
-                    let eval_arg = create_expression(
-                        tokens,
-                        &mut *i,
-                        false,
-                        ast,
-                        token_line_number,
-                        &DataType::Inferred,
-                        inside_brackets,
-                        variable_declarations,
-                    );
-                    if check_if_comptime_value(&eval_arg) {
-                        scene_styles.push(Style::Size(eval_arg));
-                    } else {
-                        // Need to add JS DOM hooks to change text size at runtime.
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "size".to_string(),
+                    data_type: DataType::Float,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        red_ln!("Error: Size must have an argument");
+                        continue;
                     }
+                };
+                if check_if_comptime_value(&eval_arg) {
+                    scene_styles.push(Style::Size(eval_arg));
                 } else {
-                    red_ln!("Error: Size must have an argument");
+                    // Need to add JS DOM hooks to change text size at runtime.
                 }
             }
 
@@ -279,22 +244,16 @@ pub fn new_scene(
             }
 
             Token::Table => {
-                let eval_arg;
-                // Default to 1 if no argument is provided
-                if !check_if_arg(tokens, &mut *i) {
-                    eval_arg = AstNode::Literal(Token::FloatLiteral(1.0));
-                } else {
-                    eval_arg = create_expression(
-                        tokens,
-                        &mut *i,
-                        false,
-                        ast,
-                        token_line_number,
-                        &DataType::Inferred,
-                        inside_brackets,
-                        variable_declarations,
-                    );
-                }
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "columns".to_string(),
+                    data_type: DataType::Float,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        AstNode::Literal(Token::FloatLiteral(1.0))
+                    }
+                };
 
                 match eval_arg {
                     AstNode::Literal(literal_token) => match literal_token {
@@ -315,16 +274,17 @@ pub fn new_scene(
             }
 
             Token::Img => {
-                let eval_arg = create_expression(
-                    tokens,
-                    &mut *i,
-                    false,
-                    ast,
-                    token_line_number,
-                    &DataType::String,
-                    inside_brackets,
-                    variable_declarations,
-                );
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "src".to_string(),
+                    data_type: DataType::String,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        continue;
+                    }
+                };
+
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Img(eval_arg));
                 } else {
@@ -334,54 +294,17 @@ pub fn new_scene(
                 }
             }
 
-            Token::Alt => {
-                let eval_arg: AstNode = create_expression(
-                    tokens,
-                    &mut *i,
-                    false,
-                    ast,
-                    token_line_number,
-                    &DataType::String,
-                    inside_brackets,
-                    variable_declarations,
-                );
-                if check_if_comptime_value(&eval_arg) {
-                    match eval_arg {
-                        AstNode::Literal(token) => match token {
-                            Token::StringLiteral(value) => {
-                                scene_styles.push(Style::Alt(value.clone()));
-                            }
-                            _ => {
-                                scene.push(AstNode::Error(
-                                    "Wrong datatype provided for alt".to_string(),
-                                    token_line_number.to_owned(),
-                                ));
-                            }
-                        },
-                        _ => {
-                            scene.push(AstNode::Error(
-                                "No string provided for alt".to_string(),
-                                token_line_number.to_owned(),
-                            ));
-                        }
-                    }
-                } else {
-                    // Need to add JS DOM hooks to change href at runtime.
-                    red_ln!("Can't add alt attribute to scene head at runtime (yet)");
-                }
-            }
-
             Token::Video => {
-                let eval_arg = create_expression(
-                    tokens,
-                    &mut *i,
-                    false,
-                    ast,
-                    token_line_number,
-                    &DataType::String,
-                    inside_brackets,
-                    variable_declarations,
-                );
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "src".to_string(),
+                    data_type: DataType::String,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        continue;
+                    }
+                };
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Video(eval_arg));
                 } else {
@@ -391,16 +314,16 @@ pub fn new_scene(
             }
 
             Token::Audio => {
-                let eval_arg = create_expression(
-                    tokens,
-                    &mut *i,
-                    false,
-                    ast,
-                    token_line_number,
-                    &DataType::String,
-                    inside_brackets,
-                    variable_declarations,
-                );
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "src".to_string(),
+                    data_type: DataType::String,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        continue;
+                    }
+                };
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Audio(eval_arg));
                 } else {
@@ -426,51 +349,6 @@ pub fn new_scene(
                     inside_brackets,
                     variable_declarations,
                 ));
-            }
-
-            Token::Button => {
-                if !check_if_arg(tokens, &mut *i) {
-                    scene_tags.push(Tag::Button(AstNode::Literal(Token::FloatLiteral(0.0))));
-                } else {
-                    let eval_arg = create_expression(
-                        tokens,
-                        &mut *i,
-                        false,
-                        ast,
-                        token_line_number,
-                        &DataType::Inferred,
-                        inside_brackets,
-                        variable_declarations,
-                    );
-                    if check_if_comptime_value(&eval_arg) {
-                        scene_tags.push(Tag::Button(eval_arg));
-                    } else {
-                        // Need to add JS DOM hooks to change href at runtime.
-                        scene_tags.push(Tag::Button(eval_arg));
-                    }
-                }
-            }
-            Token::Click => {
-                if !check_if_arg(tokens, &mut *i) {
-                    continue;
-                } else {
-                    let eval_arg = create_expression(
-                        tokens,
-                        &mut *i,
-                        false,
-                        ast,
-                        token_line_number,
-                        &DataType::Inferred,
-                        inside_brackets,
-                        variable_declarations,
-                    );
-                    if check_if_comptime_value(&eval_arg) {
-                        scene_actions.push(Action::Click(eval_arg));
-                    } else {
-                        // Need to add JS DOM hooks to change href at runtime.
-                        scene_actions.push(Action::Click(eval_arg));
-                    }
-                }
             }
 
             Token::Comma | Token::Newline | Token::Empty => {}
@@ -500,22 +378,17 @@ pub fn new_scene(
             }
 
             Token::Nav => {
-                let eval_arg;
-                // TODO: get a default margin value
-                if !check_if_arg(tokens, &mut *i) {
-                    eval_arg = AstNode::Literal(Token::FloatLiteral(0.0));
-                } else {
-                    eval_arg = create_expression(
-                        tokens,
-                        &mut *i,
-                        false,
-                        ast,
-                        token_line_number,
-                        &DataType::Inferred,
-                        inside_brackets,
-                        variable_declarations,
-                    );
-                }
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "style".to_string(),
+                    data_type: DataType::String,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        AstNode::Literal(Token::FloatLiteral(0.0))
+                    }
+                };
+
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Nav(eval_arg));
                 } else {
@@ -525,22 +398,16 @@ pub fn new_scene(
             }
 
             Token::Title => {
-                let eval_arg;
-                // TODO: get a default margin value
-                if !check_if_arg(tokens, &mut *i) {
-                    eval_arg = AstNode::Literal(Token::FloatLiteral(0.0));
-                } else {
-                    eval_arg = create_expression(
-                        tokens,
-                        &mut *i,
-                        false,
-                        ast,
-                        token_line_number,
-                        &DataType::Float,
-                        inside_brackets,
-                        variable_declarations,
-                    );
-                }
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "title".to_string(),
+                    data_type: DataType::String,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        AstNode::Literal(Token::FloatLiteral(0.0))
+                    }
+                };
 
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Title(eval_arg));
@@ -564,16 +431,18 @@ pub fn new_scene(
             }
 
             Token::Redirect => {
-                let eval_arg = create_expression(
-                    tokens,
-                    &mut *i,
-                    false,
-                    ast,
-                    token_line_number,
-                    &DataType::String,
-                    true,
-                    variable_declarations,
-                );
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "href".to_string(),
+                    data_type: DataType::String,
+                }];
+                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                    Some(arg) => arg,
+                    None => {
+                        red_ln!("Error: Redirect must have an argument");
+                        continue;
+                    }
+                };
+
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::Redirect(eval_arg));
                 } else {

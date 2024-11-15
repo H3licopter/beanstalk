@@ -29,6 +29,7 @@ pub struct ParserOutput {
     pub exported_css: String,
     pub wat: String,
     pub wat_globals: String,
+    pub errored: bool,
 }
 
 // Parse ast into valid JS, HTML and CSS
@@ -47,6 +48,7 @@ pub fn parse(
     let mut css = imported_css.to_owned();
     let mut page_title = String::new();
     let mut exp_id: usize = 0;
+    let mut errored = false;
 
     let mut exported_js: Vec<ExportedJS> = Vec::new();
     let mut exported_css = String::new();
@@ -152,6 +154,7 @@ pub fn parse(
                                 }
                             }
                             _ => {
+                                errored = true;
                                 red_ln!("Error: Scene expression must be a scene in HTML parser");
                                 continue;
                             }
@@ -200,6 +203,7 @@ pub fn parse(
                                     ));
                                 }
                                 _ => {
+                                    errored = true;
                                     red_ln!(
                                         "Unsupported datatype found in tuple declaration: {:?}",
                                         datatype
@@ -252,6 +256,7 @@ pub fn parse(
                                                     &format!("={value}")
                                                 }
                                                 _=> {
+                                                    errored = true;
                                                     red_ln!("Compiler Error: invalid literal given as a default value");
                                                     ""
                                                 }
@@ -270,6 +275,7 @@ pub fn parse(
                             arg_names.push(format!("{name}{default_arg},"));
                         }
                         _ => {
+                            errored = true;
                             red_ln!("Compiler Error: Invalid node found instead of function arg: {:?} on line: {}", arg, 0);
                         }
                     }
@@ -288,7 +294,7 @@ pub fn parse(
                         js: func.to_owned(),
                         module_path: Path::new(module_path).join(name),
                         global: is_global,
-                        data_type: DataType::Function(Box::new(return_type)),
+                        data_type: DataType::Function(Box::new(), Box::new(return_type)),
                     });
                 }
                 js.push_str(&func);
@@ -302,6 +308,7 @@ pub fn parse(
                 // Comments are not added to the final output (Atm). Maybe there will be some documentation thing eventually.
             }
             AstNode::Error(err, line_number) => {
+                errored = true;
                 red_ln!("Error on Line {}: - {}", line_number, err);
             }
             // DIRECT INSERTION OF JS / CSS / HTML into page
@@ -313,6 +320,7 @@ pub fn parse(
             }
 
             _ => {
+                errored = true;
                 red_ln!(
                     "unknown AST node found when parsing AST in web parser: {:?}",
                     node
@@ -334,6 +342,7 @@ pub fn parse(
         exported_css,
         wat,
         wat_globals: wat_global_initilisation,
+        errored,
     }
 }
 

@@ -14,6 +14,7 @@ pub fn new_ast(
     token_line_numbers: &Vec<u32>,
     mut variable_declarations: Vec<Reference>,
     return_type: &DataType,
+    module_scope: bool,
 
      // AST         Imports
 ) -> (Vec<AstNode>, Vec<AstNode>) {
@@ -28,6 +29,14 @@ pub fn new_ast(
                 ast.push(AstNode::Comment(value.clone()));
             }
             Token::Import => {
+                if !module_scope {
+                    red_ln!("Error: Import found outside of module scope");
+                    ast.push(AstNode::Error(
+                        "Import found outside of module scope".to_string(),
+                        token_line_numbers[*i],
+                    ));
+                }
+
                 *i += 1;
                 match &tokens[*i] {
                     // Module path that will have all it's exports dumped into the module
@@ -43,6 +52,14 @@ pub fn new_ast(
                 }
             }
             Token::SceneHead | Token::ParentScene => {
+                if !module_scope {
+                    red_ln!("Error: Scene Head or Parent Scene found outside of module scope");
+                    ast.push(AstNode::Error(
+                        "Scene literal found outside of module scope".to_string(),
+                        token_line_numbers[*i],
+                    ));
+                }
+
                 let starting_line_number = &token_line_numbers[*i] ;
                 ast.push(new_scene(
                     &tokens,
@@ -52,6 +69,7 @@ pub fn new_ast(
                     &variable_declarations,
                 ));
             }
+
             Token::ModuleStart(_) => {
                 // In future, need to structure into code blocks
             }
@@ -138,6 +156,13 @@ pub fn new_ast(
             }
 
             Token::Return => {
+                if module_scope {
+                    ast.push(AstNode::Error(
+                        "Return statement used outside of function".to_string(),
+                        token_line_numbers[*i],
+                    ));
+                }
+
                 if !needs_to_return {
                     ast.push(AstNode::Error(
                         "Return statement used in function that doesn't return a value".to_string(),
@@ -205,7 +230,18 @@ fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {
 
     *i += 1;
     match tokens.get(*i).unwrap_or(&Token::EOF) {
-        Token::Assign | Token::Colon => {
+        Token::TypeKeyword(_) => {
+            *i += 1;
+            match tokens.get(*i).unwrap_or(&Token::EOF) {
+                Token::Assign => {
+                    *i += 1;
+                }
+                _ => {
+                    return;
+                }
+            }
+        }
+        Token::Assign => {
             *i += 1;
         }
         Token::Newline => {
@@ -222,34 +258,23 @@ fn skip_dead_code(tokens: &Vec<Token>, i: &mut usize) {
     while let Some(token) = tokens.get(*i) {
         match token {
             Token::OpenParenthesis => {
-                *i += 1;
                 open_parenthesis += 1;
             }
             Token::CloseParenthesis => {
-                *i += 1;
-
-                if open_parenthesis < 1 {
-                    red_ln!("Error: Closing parenthesis without opening parenthesis in dead variable code");
-                    return;
-                }
                 open_parenthesis -= 1;
-                if open_parenthesis == 0 {
-                    break;
-                }
             }
             Token::Newline => {
-                *i += 1;
                 if open_parenthesis < 1 {
                     return;
                 }
             }
-            Token::EOF => {
+            Token::EOF | Token::End => {
                 break;
             }
-            _ => {
-                *i += 1;
-            }
+            _ => {}
         }
+
+        *i += 1;
     }
 }
 

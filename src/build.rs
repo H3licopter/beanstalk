@@ -355,7 +355,7 @@ fn compile(
         red_ln!("Error: File name is empty");
         return Err(Box::new(std::io::Error::new(
             std::io::ErrorKind::Other,
-            "Error getting file name when compiling file. String was empty or file stem was None",
+            "Error getting file name when compiling file. File name is empty",
         )));
     }
 
@@ -386,7 +386,7 @@ fn compile(
     let time = Instant::now();
 
     let (ast, imports) =
-        parsers::build_ast::new_ast(tokens, &mut 0, &token_line_numbers, globals, &DataType::None);
+        parsers::build_ast::new_ast(tokens, &mut 0, &token_line_numbers, globals, &DataType::None, true);
 
     print!("AST created in: ");
     green_ln!("{:?}", time.elapsed());
@@ -434,6 +434,13 @@ fn compile(
         output.global,
         exported_css,
     );
+
+    if parser_output.errored {
+        return Err(Box::new(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Did not compile file: {} due to errors", file_name),
+        )));
+    }
 
     // Add HTML boilerplate
     let module_output = create_html_boilerplate(&html_config, release_build)

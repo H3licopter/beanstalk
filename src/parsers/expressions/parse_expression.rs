@@ -418,55 +418,28 @@ pub fn create_expression(
     );
 }
 
-fn _check_literal(
-    value: Token,
-    type_declaration: &DataType,
-    current_type: &mut DataType,
-    line_number: u32,
-) -> AstNode {
-    if type_declaration == &DataType::CoerseToString {
-        return AstNode::Literal(value);
-    }
-    match value {
-        Token::FloatLiteral(_) => {
-            if type_declaration == &DataType::Inferred {
-                *current_type = DataType::Float;
-            } else if type_declaration != &DataType::Float {
-                return AstNode::Error(
-                    "Error Mixing types. You must explicitly convert types to use them in the same expression".to_string(),
-                    line_number
-                );
-            }
-            AstNode::Literal(value)
-        }
-        Token::StringLiteral(_) => {
-            if type_declaration == &DataType::Inferred {
-                *current_type = DataType::String;
-            } else if type_declaration != &DataType::String {
-                return AstNode::Error(
-                    "Error Mixing types. You must explicitly convert types to use them in the same expression".to_string(),
-                    line_number
-                );
-            }
-
-            AstNode::Literal(value)
-        }
-        _ => AstNode::Error("Invalid Literal (check_literal)".to_string(), line_number),
-    }
-}
-
-pub fn check_if_arg(tokens: &Vec<Token>, i: &mut usize) -> bool {
+pub fn get_args(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, token_line_number: &u32, variable_declarations: &Vec<Reference>, argument_refs: &Vec<Reference>) -> Option<AstNode> {
     if *i >= tokens.len() {
-        return false;
+        return None;
     }
+
+    // TO DO: Check the argument refs, if there are multiple, pass in a tuple of the correct types
+
+    // Check if the current token is an open bracket
     match &tokens[*i] {
-        // Check if open bracket, literal or prefixed unary operator
-        Token::OpenParenthesis
-        | Token::Negative
-        | Token::StringLiteral(_)
-        | Token::BoolLiteral(_)
-        | Token::RawStringLiteral(_)
-        | Token::FloatLiteral(_) => true,
-        _ => false,
+        // Check if open bracket
+        Token::OpenParenthesis => {
+            Some(create_expression(
+                tokens,
+                &mut *i,
+                false,
+                ast,
+                token_line_number,
+                data_type,
+                true,
+                variable_declarations,
+            ))
+        },
+        _ => None,
     }
 }

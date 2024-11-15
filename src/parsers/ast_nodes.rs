@@ -6,10 +6,11 @@ use crate::{
     Token,
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Reference {
     pub name: String,
     pub data_type: DataType,
+    pub default_value: Option<Box<AstNode>>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -29,8 +30,7 @@ pub enum AstNode {
     Return(Box<AstNode>),
 
     // Basics
-    Function(String, Vec<AstNode>, Vec<AstNode>, bool, DataType), // Function name, Args, Body, Public, return types
-    FunctionArg(String, DataType, Option<Box<AstNode>>),          // Arg name, Type, default value
+    Function(String, Vec<Reference>, Vec<AstNode>, bool, DataType), // Function name, Args, Body, Public, return types
     Expression(Vec<AstNode>, u32), // Expression that can contain mixed types, line number
     RuntimeExpression(Vec<AstNode>, DataType), //Expression, Result type
 
@@ -45,7 +45,7 @@ pub enum AstNode {
     VarReference(String, DataType),
     ConstReference(String, DataType),
     JSStringReference(String),
-    FunctionCall(String, Box<AstNode>), // variable name, arguments
+    FunctionCall(String, Box<AstNode>, DataType),   // Function name, arguments (can be a tuple of arguments), return type
 
     // Accessing fields
     CollectionAccess(String, usize, DataType), // Name, Index, Type

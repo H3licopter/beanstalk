@@ -1,5 +1,5 @@
 use crate::{
-    parsers::ast_nodes::{AstNode, Node},
+    parsers::ast_nodes::{AstNode, Node, Reference},
     Token,
 };
 
@@ -24,7 +24,9 @@ pub enum DataType {
     Choice,
     Type,
 
-    Function(Box<DataType>), // Return types
+    Style,
+
+    Function(Box<Vec<Reference>>, Box<DataType>), // Arguments, Return type
 
     Tuple(Box<Vec<DataType>>), // Mixed types (fixed size)
 
