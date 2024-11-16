@@ -27,7 +27,7 @@ pub fn create_function(
     */
 
     // get args (tokens should currently be at the open parenthesis)
-    let (_, arg_refs) =
+    let arg_refs =
         match parse_args(tokens, i, ast, token_line_numbers, variable_declarations) {
             Ok(args) => args,
             Err(err) => {
@@ -73,6 +73,7 @@ pub fn create_function(
     variable_declarations.push(Reference {
         name: name.to_owned(),
         data_type: DataType::Function(Box::new(arg_refs.clone()), Box::new(return_type.clone())),
+        default_value: None,
     });
 
     // The function ends with the 'end' keyword
@@ -230,8 +231,6 @@ fn parse_return_type(tokens: &Vec<Token>, i: &mut usize) -> Result<Vec<DataType>
             }
         }
     }
-
-    assert!(tokens[*i] == Token::Colon);
 
     if open_parenthesis != 0 {
         return Err("Wrong number of parenthesis used when declaring return type");

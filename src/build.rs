@@ -6,6 +6,8 @@ use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::Token;
 use crate::{parsers, settings};
+use crate::html_output::dom_hooks::{generate_dom_update_js, DOMUpdate};
+
 use colour::{blue_ln, dark_cyan_ln, dark_yellow_ln, green_ln, print_bold, print_ln_bold, red_ln};
 use std::error::Error;
 use std::ffi::OsStr;
@@ -373,6 +375,7 @@ fn compile(
                 .unwrap()
                 .to_string(),
             data_type: e.data_type.to_owned(),
+            default_value: None,
         })
         .collect();
 
@@ -443,11 +446,12 @@ fn compile(
     }
 
     // Add HTML boilerplate
+    let all_js = format!("{}\n{}", generate_dom_update_js(DOMUpdate::InnerHTML), parser_output.js);
     let module_output = create_html_boilerplate(&html_config, release_build)
         .replace("page-template", &parser_output.html)
         .replace("@page-css", &parser_output.css)
         .replace("page-title", &parser_output.page_title)
-        .replace("//js", &parser_output.js)
+        .replace("//js", &all_js)
         .replace("wasm-module-name", file_name);
 
     print!("HTML/CSS/WAT/JS generated in: ");

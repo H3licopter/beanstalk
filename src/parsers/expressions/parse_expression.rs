@@ -178,6 +178,7 @@ pub fn create_expression(
                                     }
                                 }
                             }
+
                             DataType::Collection(inner_types) => {
                                 // Check if this is a collection access
                                 if let Some(Token::Dot) = tokens.get(*i + 1) {
@@ -216,6 +217,44 @@ pub fn create_expression(
                                         );
                                     }
                                 }
+                            }
+
+                            DataType::Function(argument_types,  return_type) => {
+                                // FUNCTION CALLS
+                                match get_args(
+                                    tokens,
+                                    i,
+                                    ast,
+                                    starting_line_number,
+                                    variable_declarations,
+                                    argument_types,
+                                ) {
+                                    Some(args) => {
+                                        if **return_type != current_type
+                                            && current_type != DataType::CoerseToString
+                                        {
+                                            return AstNode::Error(
+                                                format!(
+                                                    "Function '{}' returns type {:?}, but used in an expression of type {:?}",
+                                                    var.name, return_type, data_type
+                                                ),
+                                                starting_line_number.to_owned(),
+                                            );
+                                        }
+        
+                                        expression.push(AstNode::FunctionCall(
+                                            var.name.to_owned(),
+                                            Box::new(args),
+                                            *return_type.clone(),
+                                        ));
+        
+                                        *i += 1;
+                                        continue;
+                                    },
+
+                                    // Just a reference to a function
+                                    None => {},
+                                };
                             }
                             _ => {}
                         }
@@ -418,21 +457,41 @@ pub fn create_expression(
     );
 }
 
+// RETURNING NONE MEANS NOT A FUNCTION CALL -> JUST A REFERENCE
 pub fn get_args(tokens: &Vec<Token>, i: &mut usize, ast: &Vec<AstNode>, token_line_number: &u32, variable_declarations: &Vec<Reference>, argument_refs: &Vec<Reference>) -> Option<AstNode> {
+    *i += 1;
+    
     if *i >= tokens.len() {
         return None;
     }
 
     // TO DO: Check the argument refs, if there are multiple, pass in a tuple of the correct types
+    let data_type = if argument_refs.len() > 1 {
+        // Create tuple of the argument types
+        &DataType::Tuple(Box::new(
+            argument_refs
+                .iter()
+                .map(|arg| arg.data_type.to_owned())
+                .collect()
+            ))
+    } else if argument_refs.len() == 1 {
+        &argument_refs[0].data_type.to_owned()
+    } else {
+        &DataType::None
+    };
 
     // Check if the current token is an open bracket
+    // This can be passed an empty tuple
+    // So hopefully there will be a type error,
+    // if more than 0 arguments are passed in the case of a function call with 0 args
+    // Will probably be faster to check specifically for the empty tuple case before parsing in the future.
     match &tokens[*i] {
         // Check if open bracket
         Token::OpenParenthesis => {
             Some(create_expression(
                 tokens,
                 &mut *i,
-                false,
+                true,
                 ast,
                 token_line_number,
                 data_type,

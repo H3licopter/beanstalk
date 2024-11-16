@@ -102,6 +102,7 @@ pub fn new_variable(
                     variable_declarations.push(Reference {
                         name: name.to_owned(),
                         data_type: data_type.to_owned(),
+                        default_value: None,
                     });
 
                     return create_zero_value_var(
@@ -146,19 +147,8 @@ pub fn new_variable(
     match &tokens[*i] {
         // Check if this is a COLLECTION
         Token::OpenCurly => {
-            // New struct declaration
-            // var_name : {}
             if is_const {
-                let start_line_number = &token_line_numbers[*i];
-                variable_declarations.push(Reference {
-                    name: name.to_owned(),
-                    data_type: DataType::Struct,
-                });
-                return AstNode::Struct(
-                    name.to_string(),
-                    Box::new(new_collection(tokens, i, ast, start_line_number)),
-                    is_exported,
-                );
+                // Make a read only collection
             }
 
             // Dynamic Collection literal
@@ -170,6 +160,7 @@ pub fn new_variable(
                     variable_declarations.push(Reference {
                         name: name.to_owned(),
                         data_type: DataType::Collection(Box::new(collection_type.to_owned())),
+                        default_value: None,
                     });
                     return AstNode::VarDeclaration(
                         name.to_string(),
@@ -294,6 +285,7 @@ fn create_var_node(
     variable_declarations.push(Reference {
         name: var_name.to_owned(),
         data_type: data_type.to_owned(),
+        default_value: None,
     });
 
     if is_const {

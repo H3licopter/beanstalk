@@ -116,11 +116,78 @@ pub fn expression_to_js(expr: &AstNode) -> String {
             js.push_str(&format!("[{}]", combine_vec_to_js(values)));
         }
 
+        AstNode::FunctionCall(name, arguments, _) => {
+            js.push_str(&function_call_to_js(name, *arguments.to_owned()));
+        }
+
         _ => {
             red_ln!("Invalid AST node given to expression_to_js: {:?}", expr);
         }
     }
 
+    js
+}
+
+pub fn create_reference_in_js(name: &String, data_type: &DataType) -> String {
+    match data_type {
+        DataType::String
+        | DataType::Scene
+        | DataType::Inferred
+        | DataType::CoerseToString => {
+            format!("uInnerHTML(\"{name}\", {BS_VAR_PREFIX}{name});")
+        }
+        _ => {
+            format!(
+                "uInnerHTML(\"{name}\", wsx.get_{BS_VAR_PREFIX}{name}());"
+            )
+        }
+    }
+}
+
+pub fn function_call_to_js(name: &String, argument: AstNode) -> String {
+    let mut js = format!("{BS_VAR_PREFIX}{name}(");
+
+    match argument {
+        AstNode::Empty => {}
+        AstNode::Literal(token) => {
+            match token {
+                Token::StringLiteral(value) => {
+                    js.push_str(&format!("\"{}\",", value));
+                }
+                Token::FloatLiteral(value) => {
+                    js.push_str(&format!("{},", value));
+                }
+                Token::IntLiteral(value) => {
+                    js.push_str(&format!("{},", value));
+                }
+                Token::BoolLiteral(value) => {
+                    js.push_str(&format!("{},", value));
+                }
+                _ => {}
+            }
+        }
+        AstNode::CollectionAccess(collection_name, index_accessed, _)
+        | AstNode::TupleAccess(collection_name, index_accessed, _) => {
+            js.push_str(&format!("{collection_name}[{index_accessed}],"));
+        }
+        AstNode::RuntimeExpression(expr, data_type) => {
+            js.push_str(&format!("{},", expression_to_js(&AstNode::RuntimeExpression(
+                expr.clone(),
+                data_type.to_owned(),
+            ))));
+        }
+        AstNode::VarReference(name, _) | AstNode::ConstReference(name, _) => {
+            js.push_str(&format!("{},", name));
+        }
+        AstNode::FunctionCall(function_name, args, _) => {
+            js.push_str(&function_call_to_js(&function_name, *args));
+        }
+        _ => {
+            red_ln!("Web Parser Error: Invalid argument type for function call: {:?}", argument);
+        }
+    }
+
+    js.push_str(") ");
     js
 }
 

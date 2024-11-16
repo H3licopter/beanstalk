@@ -96,6 +96,7 @@ pub fn evaluate_expression(
                     }
 
                     AstNode::VarReference(_, data_type)
+                    | AstNode::FunctionCall(_, _, data_type)
                     | AstNode::TupleAccess(_, _, data_type)
                     | AstNode::CollectionAccess(_, _, data_type) => {
                         if current_type == DataType::Inferred {

@@ -2,8 +2,7 @@ use std::path::Path;
 
 use super::{
     colors::get_color,
-    dom_hooks::{generate_dom_update_js, DOMUpdate},
-    js_parser::{collection_to_js, expression_to_js},
+    js_parser::{collection_to_js, create_reference_in_js, expression_to_js, function_call_to_js},
 };
 use crate::{
     bs_css::get_bs_css,
@@ -41,7 +40,7 @@ pub fn parse(
     is_global: bool,
     imported_css: &String,
 ) -> ParserOutput {
-    let mut js = generate_dom_update_js(DOMUpdate::InnerHTML).to_string();
+    let mut js = String::new();
     let mut wat = String::new();
     let mut wat_global_initilisation = String::new();
     let mut html = String::new();
@@ -232,60 +231,52 @@ pub fn parse(
             }
 
             AstNode::Function(name, args, body, is_exported, return_type) => {
-                let mut arg_names = Vec::new();
-                for arg in args {
-                    match arg {
-                        AstNode::FunctionArg(name, _, default_value) => {
-                            let default_arg = match default_value {
-                                Some(node) => {
-                                    match *node {
-                                        AstNode::Literal(token) => {
-                                            match token {
-                                                Token::StringLiteral(value) 
-                                                | Token::RawStringLiteral(value) 
-                                                | Token::PathLiteral(value) => {
-                                                    &format!("=\"{value}\"")
-                                                }
-                                                Token::IntLiteral(value) => {
-                                                    &format!("={value}")
-                                                }
-                                                Token::FloatLiteral(value) => {
-                                                    &format!("={value}")
-                                                }
-                                                Token::BoolLiteral(value) => {
-                                                    &format!("={value}")
-                                                }
-                                                _=> {
-                                                    errored = true;
-                                                    red_ln!("Compiler Error: invalid literal given as a default value");
-                                                    ""
-                                                }
-                                            }
-                                        }
-                                        _=> {
-                                            ""
-                                        }
-                                    }
+                let mut arg_names = String::new();
+                for arg in &args {
+                    let unboxed_default = match &arg.default_value {
+                        Some(ref boxed_value) => {
+                            &**boxed_value
+                        }
+                        _ => &AstNode::Empty,
+                    };
+
+                    let default_arg = match unboxed_default {
+                        AstNode::Literal(token) => {
+                            match token {
+                                Token::StringLiteral(value) 
+                                | Token::RawStringLiteral(value) 
+                                | Token::PathLiteral(value) => {
+                                    &format!("=\"{value}\"")
                                 }
-                                None => {
+                                Token::IntLiteral(value) => {
+                                    &format!("={value}")
+                                }
+                                Token::FloatLiteral(value) => {
+                                    &format!("={value}")
+                                }
+                                Token::BoolLiteral(value) => {
+                                    &format!("={value}")
+                                }
+                                _=> {
+                                    errored = true;
+                                    red_ln!("Compiler Error: invalid literal given as a default value");
                                     ""
                                 }
-                            };
-
-                            arg_names.push(format!("{name}{default_arg},"));
+                            }
                         }
                         _ => {
-                            errored = true;
-                            red_ln!("Compiler Error: Invalid node found instead of function arg: {:?} on line: {}", arg, 0);
+                            ""
                         }
-                    }
+                    };
+
+                    arg_names.push_str(&format!("{name}{default_arg},"));
+
                 }
 
                 let func_body = parse(body, config, release_build, module_path, false, imported_css);
                 let func = format!(
-                    "{}function {BS_VAR_PREFIX}{name}({:?}){{\n{:?}\n}}",
+                    "{}function {BS_VAR_PREFIX}{name}({arg_names}){{{}}}",
                     if is_exported { "export " } else { "" },
-                    arg_names,
                     func_body.js
                 );
 
@@ -294,23 +285,26 @@ pub fn parse(
                         js: func.to_owned(),
                         module_path: Path::new(module_path).join(name),
                         global: is_global,
-                        data_type: DataType::Function(Box::new(), Box::new(return_type)),
+                        data_type: DataType::Function(Box::new(args), Box::new(return_type)),
                     });
                 }
                 js.push_str(&func);
                 wat.push_str(&func_body.wat);
                 wat_global_initilisation.push_str(&func_body.wat_globals);
             }
+
+            AstNode::FunctionCall(name, arguments, _) => {
+                js.push_str(&function_call_to_js(&name, *arguments.to_owned()));
+            }
+
+            AstNode::Return(ref expr) => {
+                js.push_str(&format!("return {};", expression_to_js(&expr)));
+            }
             AstNode::Print(ref expr) => {
                 js.push_str(&format!("console.log({});", expression_to_js(&expr)));
             }
-            AstNode::Comment(_) => {
-                // Comments are not added to the final output (Atm). Maybe there will be some documentation thing eventually.
-            }
-            AstNode::Error(err, line_number) => {
-                errored = true;
-                red_ln!("Error on Line {}: - {}", line_number, err);
-            }
+
+
             // DIRECT INSERTION OF JS / CSS / HTML into page
             AstNode::JS(js_string) => {
                 js.push_str(&js_string);
@@ -319,6 +313,13 @@ pub fn parse(
                 css.push_str(&css_string);
             }
 
+            // Ignored
+            AstNode::Comment(_) => {}
+
+            AstNode::Error(err, line_number) => {
+                errored = true;
+                red_ln!("Error on Line {}: - {}", line_number, err);
+            }
             _ => {
                 errored = true;
                 red_ln!(
@@ -992,6 +993,16 @@ pub fn parse_scene(
             }
 
             // STUFF THAT IS INSIDE SCENE HEAD THAT NEEDS TO BE PASSED INTO SCENE BODY
+            AstNode::FunctionCall(ref name, ref arguments, _) => {
+                html.push_str(&format!("<span class=\"{name}\"></span>"));
+                if !module_references.contains(&node) {
+                    module_references.push(node.to_owned());
+                    js.push_str(&format!(
+                        "uInnerHTML(\"{name}\",{});",
+                        &function_call_to_js(name, *arguments.to_owned()
+                    )));
+                }
+            }
             AstNode::VarReference(ref name, ref data_type)
             | AstNode::ConstReference(ref name, ref data_type) => {
                 // Create a span in the HTML with a class that can be referenced by JS
@@ -1001,12 +1012,6 @@ pub fn parse_scene(
                 if !module_references.contains(&node) {
                     module_references.push(node.to_owned());
                     match &data_type {
-                        DataType::String
-                        | DataType::Scene
-                        | DataType::Inferred
-                        | DataType::CoerseToString => {
-                            js.push_str(&format!("uInnerHTML(\"{name}\", {BS_VAR_PREFIX}{name});"));
-                        }
                         DataType::Tuple(items) => {
                             // Automatically unpack all items in the tuple into the scene
                             let mut elements = String::new();
@@ -1019,9 +1024,7 @@ pub fn parse_scene(
                             js.push_str(&format!("uInnerHTML(\"{name}\", [{elements}]);"));
                         }
                         _ => {
-                            js.push_str(&format!(
-                                "uInnerHTML(\"{name}\", wsx.get_{BS_VAR_PREFIX}{name}());"
-                            ));
+                            js.push_str(&create_reference_in_js(name, data_type));
                         }
                     }
                 }
@@ -1035,14 +1038,6 @@ pub fn parse_scene(
                     module_references.push(node.to_owned());
 
                     match &data_type {
-                        DataType::String
-                        | DataType::Scene
-                        | DataType::Inferred
-                        | DataType::CoerseToString => {
-                            js.push_str(&format!(
-                                "uInnerHTML(\"{name}\", {BS_VAR_PREFIX}{name}[{index}]);"
-                            ));
-                        }
                         DataType::Tuple(items) => {
                             // Automatically unpack all items in the tuple into the scene
                             let mut elements = String::new();
@@ -1056,9 +1051,7 @@ pub fn parse_scene(
                             js.push_str(&format!("uInnerHTML(\"{name}\", [{elements}]);"));
                         }
                         _ => {
-                            js.push_str(&format!(
-                                "uInnerHTML(\"{name}\", {BS_VAR_PREFIX}{name}[{index}]);"
-                            ));
+                            js.push_str(&create_reference_in_js(name, data_type));
                         }
                     }
                 }
@@ -1118,7 +1111,7 @@ pub fn parse_scene(
             }
             AstNode::Literal(token) => match token {
                 Token::StringLiteral(value) | Token::RawStringLiteral(value) => {
-                    js_string = format!("'{}'", value);
+                    js_string = format!("\"{}\"", value);
                 }
                 Token::FloatLiteral(value) => {
                     js_string = value.to_string();
