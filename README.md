@@ -16,12 +16,12 @@
   <p>⚠️ The design and direction of the language is still subject to change overtime</p>
 
   <h1>
-    <a href="https://h3licopter.github.io/beanstalk">
+    <a href="https://nyejames.github.io/beanstalk">
       Documentation
     </a>
   </h1>
   <p>The docs were created entirely using Beanstalk. The output of the compiler is directly pushed to Github pages.</p>
-  <a href="https://github.com/H3licopter/beanstalk-plugin">Language support / syntax highlighting plugin for Visual Studio / VSCode can be found here</a>
+  <a href="https://github.com/nyejames/beanstalk-plugin">Language support / syntax highlighting plugin for Visual Studio / VSCode can be found here</a>
 
 </div>
 <br>
@@ -33,8 +33,7 @@ Beanstalk is a compiled programming language which outputs HTML, CSS and WASM/JS
 With fast compile times and built in hot-reloading, Beanstalk is designed to feel like a scripting language with all the power of being compiled.
 
 ### Scenes
-
-It's core syntax idea is using scenes, which are a declarative syntax built into an otherwise procedural language.
+Beanstalk's core syntax idea is using scenes, which are a declarative syntax built into an otherwise procedural language.
 
 Scenes can be used to create content, styling and basic logic all in one place.
 

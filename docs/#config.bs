@@ -11,7 +11,7 @@ use @libraries/basic-html
     html_settings: (
         site_title: "Website Title",
         page_description: "Website Description",
-        site_url: "https://h3licopter.github.io/beanstalk/",
+        site_url: "https://nyejames.github.io/beanstalk/",
         page_url: "",
         page_og_title: "",
         page_og_description: "",

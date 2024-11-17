@@ -48,18 +48,16 @@ pub fn new_tuple(
                 // Get the datatype of this tuple item
                 let item_data_type = match data_type {
                     DataType::Inferred => &DataType::Inferred,
-                    DataType::Tuple(inner_types) => {
-                        match inner_types.get(items.len()) {
-                            Some(data_type) => data_type,
-                            None => {
-                                return AstNode::Error(
-                                    "Too many items in tuple".to_string(),
-                                    starting_line_number.to_owned(),
-                                );
-                            }
+                    DataType::Tuple(inner_types) => match inner_types.get(items.len()) {
+                        Some(data_type) => data_type,
+                        None => {
+                            return AstNode::Error(
+                                "Too many items in tuple".to_string(),
+                                starting_line_number.to_owned(),
+                            );
                         }
-                    }
-                    _=> {
+                    },
+                    _ => {
                         return AstNode::Error(
                             "Invalid datatype for tuple".to_string(),
                             starting_line_number.to_owned(),

@@ -30,24 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BASIC BEANSTALK SYNTAX</b></div></header><main class="container"><h1>Language Design Goals
-</h1><p>The Beanstalk is designed to be:
-</p><h3>Simple and Concide
-</h3><p>Minimal keywords and symbols to reduce cognitive load and syntax noise. 
-</p><span>One way to do things where possible. 
-</span><span>Beanstalk trades expressiveness for readibility and simplicity.
-</span><span>As little boilerplate as possible. 
-</span><span>Safe type inferance and batteries included core language features to reduce the amount of code you need to write for simple tasks.
-</span><h3>Easy to debug and resistant to runtime errors
-</h3><p>Strong compile time checks that mean you never forget to handle an error, use the wrong type, or struggle to find the source of a bug.
-</p><h3>Seemless syntax for declaritive programming
-</h3><p>Scenes provide a very clean and concide way to describe the structure of a webpage or UI (or any other declaritive structure in the future).
-</p><span>Having a declaritive syntax inside the language itself makes it easy to reason about desgining UI and visual components.
-</span><h3>Fast compile times
-</h3><p>Being a compiled language, Beanstalk should have very fast compile times. 
-</p><span>The compiler is written in Rust and is designed to be fast and efficient. 
-</span><span>With built in hot reloading you should see changes to your code and UI designes almost instantly for fast iteration.
-</span><h1>Style Guide
+            }.bs-0 > * {color:inherit;}</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BASIC BEANSTALK SYNTAX</b></div></header><main class="container"><h1>Style Guide
 </h1><p>The style guide is:
 </p><li><span>snake_case for variables, collections, styles and scenes
 </span></li><li><span>Upper_Snake_Case for types and primatives
@@ -154,7 +137,7 @@
     height = (3m * 2m)cm
     -- result is 500
 </code></pre></main><span class="Footer"></span>
-<script type="module">  let bs_Navbar = `<nav style="background-color:rgba(100,220,50,0.03);" class="bs-nav-1 "  ><ul><li><a href="https://h3licopter.github.io/beanstalk" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=https://h3licopter.github.io/beanstalk/images/default.png style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;let bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
+<script type="module">  let bs_Navbar = `<nav style="background-color:rgba(100,220,50,0.03);" class="bs-nav-1 "  ><ul><li><a href="https://nyejames.github.io/beanstalk" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=https://nyejames.github.io/beanstalk/images/default.webp style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;let bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;
   WebAssembly.instantiateStreaming(fetch("./basics.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();function uInnerHTML(id,update){

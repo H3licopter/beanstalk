@@ -4,7 +4,8 @@ use crate::{
     bs_types::DataType,
     parsers::{
         ast_nodes::{AstNode, Reference},
-        create_scene_node::new_scene, tuples::new_tuple,
+        create_scene_node::new_scene,
+        tuples::new_tuple,
     },
     Token,
 };
@@ -30,8 +31,19 @@ pub fn create_expression(
 
     if inside_brackets {
         *i += 1;
-        if match data_type {&DataType::Tuple(_) => true, _ => false} {
-            return new_tuple(None, tokens, i, data_type, ast, starting_line_number, variable_declarations)
+        if match data_type {
+            &DataType::Tuple(_) => true,
+            _ => false,
+        } {
+            return new_tuple(
+                None,
+                tokens,
+                i,
+                data_type,
+                ast,
+                starting_line_number,
+                variable_declarations,
+            );
         }
     }
 
@@ -103,7 +115,10 @@ pub fn create_expression(
 
                 if inside_brackets {
                     return new_tuple(
-                        Some(AstNode::Expression(expression, starting_line_number.to_owned())),
+                        Some(AstNode::Expression(
+                            expression,
+                            starting_line_number.to_owned(),
+                        )),
                         tokens,
                         i,
                         &DataType::Inferred,
@@ -471,18 +486,16 @@ pub fn get_args(
     // Will probably be faster to check specifically for the empty tuple case before parsing in the future.
     match &tokens[*i] {
         // Check if open bracket
-        Token::OpenParenthesis => {
-            Some(create_expression(
-                tokens,
-                &mut *i,
-                false,
-                ast,
-                token_line_number,
-                data_type,
-                true,
-                variable_declarations
-            ))
-        }
+        Token::OpenParenthesis => Some(create_expression(
+            tokens,
+            &mut *i,
+            false,
+            ast,
+            token_line_number,
+            data_type,
+            true,
+            variable_declarations,
+        )),
         _ => None,
     }
 }
@@ -503,7 +516,7 @@ fn check_if_valid_type(data_type: &DataType, accepted_type: &DataType) -> bool {
                 data_type
             );
             false
-        },
+        }
         _ => {
             if data_type == accepted_type {
                 true
