@@ -1039,10 +1039,10 @@ pub fn parse_scene(
                                 idx += 1;
                             }
 
-                            js.push_str(&format!("uInnerHTML(\"{name}\", [{elements}]);"));
+                            js.push_str(&format!("uInnerHTML(\"{name}\",[{elements}]);"));
                         }
                         _ => {
-                            js.push_str(&create_reference_in_js(name, data_type));
+                            js.push_str(&format!("uInnerHTML(\"{name}\",{BS_VAR_PREFIX}{name}[{index}]);"));
                         }
                     }
                 }

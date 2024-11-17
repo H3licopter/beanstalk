@@ -21,18 +21,17 @@ pub fn create_expression(
     inside_tuple: bool,
     ast: &Vec<AstNode>,
     starting_line_number: &u32,
-    data_type: &DataType,
+    data_type: &mut DataType,
     inside_brackets: bool,
     variable_declarations: &Vec<Reference>,
 ) -> AstNode {
     let mut expression = Vec::new();
-    let mut current_type = data_type.to_owned();
     let number_union = DataType::Union(Box::new(vec![DataType::Int, DataType::Float]));
 
     if inside_brackets {
         *i += 1;
         if match data_type {
-            &DataType::Tuple(_) => true,
+            DataType::Tuple(_) => true,
             _ => false,
         } {
             return new_tuple(
@@ -81,7 +80,7 @@ pub fn create_expression(
                     false,
                     ast,
                     starting_line_number,
-                    &DataType::Inferred,
+                    data_type,
                     true,
                     variable_declarations,
                 );
@@ -114,14 +113,16 @@ pub fn create_expression(
                 *i += 1;
 
                 if inside_brackets {
+                    let eval_first_expr = evaluate_expression(
+                        AstNode::Expression(expression, starting_line_number.to_owned()),
+                        data_type,
+                        ast,
+                    );
                     return new_tuple(
-                        Some(AstNode::Expression(
-                            expression,
-                            starting_line_number.to_owned(),
-                        )),
+                        Some(eval_first_expr),
                         tokens,
                         i,
-                        &DataType::Inferred,
+                        data_type,
                         ast,
                         starting_line_number,
                         variable_declarations,
@@ -140,8 +141,8 @@ pub fn create_expression(
                 match var {
                     Some(var) => {
                         // If this expression is inferring it's type from the expression
-                        if current_type == DataType::Inferred {
-                            current_type = var.data_type.to_owned();
+                        if *data_type == DataType::Inferred {
+                            *data_type = var.data_type.to_owned();
                         }
 
                         // Check if this is a tuple/type/collection that is being accessed by a dot
@@ -170,7 +171,7 @@ pub fn create_expression(
                                         // Check the accessed item in the tuple is the same type as the expression
                                         // Or let it through if this expression is being coerced to a string
                                         let tuple_item_type = &inner_types[idx];
-                                        if !check_if_valid_type(&tuple_item_type, &current_type) {
+                                        if !check_if_valid_type(&tuple_item_type,data_type) {
                                             return AstNode::Error(
                                                 format!(
                                                     "Tuple item from '{}' is of type {:?}, but used in an expression of type {:?}",
@@ -203,7 +204,7 @@ pub fn create_expression(
                                 // Check if this is a collection access
                                 if let Some(Token::Dot) = tokens.get(*i + 1) {
                                     // Make sure the type of the collection is the same as the type of the expression
-                                    if !check_if_valid_type(&inner_types, &current_type) {
+                                    if !check_if_valid_type(&inner_types, data_type) {
                                         return AstNode::Error(
                                             format!(
                                                 "Collection '{}' is of type {:?}, but used in an expression of type {:?}",
@@ -250,7 +251,7 @@ pub fn create_expression(
                                     argument_types,
                                 ) {
                                     Some(args) => {
-                                        if !check_if_valid_type(&return_type, &current_type) {
+                                        if !check_if_valid_type(&return_type, data_type) {
                                             return AstNode::Error(
                                                 format!(
                                                     "Function '{}' returns type {:?}, but used in an expression of type {:?}",
@@ -279,7 +280,7 @@ pub fn create_expression(
 
                         // If the variables type is known and not the same as the type of the expression
                         // Return a type error
-                        if !check_if_valid_type(&var.data_type, &current_type) {
+                        if !check_if_valid_type(&var.data_type, data_type) {
                             return AstNode::Error(
                                 format!(
                                     "Variable {} is of type {:?}, but used in an expression of type {:?}",
@@ -312,7 +313,7 @@ pub fn create_expression(
 
             // Check if is a literal
             Token::FloatLiteral(mut float) => {
-                if !check_if_valid_type(&DataType::Float, &current_type) {
+                if !check_if_valid_type(&DataType::Float, data_type) {
                     return AstNode::Error(
                         "Float literal used in non-float expression".to_string(),
                         starting_line_number.to_owned(),
@@ -325,7 +326,7 @@ pub fn create_expression(
                 expression.push(AstNode::Literal(Token::FloatLiteral(float)));
             }
             Token::IntLiteral(int) => {
-                if !check_if_valid_type(&DataType::Int, &current_type) {
+                if !check_if_valid_type(&DataType::Int, data_type) {
                     return AstNode::Error(
                         "Int literal used in non-integer expression".to_string(),
                         starting_line_number.to_owned(),
@@ -339,7 +340,7 @@ pub fn create_expression(
                 }
             }
             Token::StringLiteral(string) => {
-                if !check_if_valid_type(&DataType::String, &current_type) {
+                if !check_if_valid_type(&DataType::String, data_type) {
                     return AstNode::Error(
                         "String literal used in non-string expression".to_string(),
                         starting_line_number.to_owned(),
@@ -351,7 +352,7 @@ pub fn create_expression(
             // Scenes - Create a new scene node
             // Maybe scenes can be added together like strings
             Token::SceneHead | Token::ParentScene => {
-                if !check_if_valid_type(&DataType::Scene, &current_type) {
+                if !check_if_valid_type(&DataType::Scene, data_type) {
                     return AstNode::Error(
                         "Scene used in non-scene expression".to_string(),
                         starting_line_number.to_owned(),
@@ -371,7 +372,7 @@ pub fn create_expression(
                 expression.push(AstNode::BinaryOperator(token.to_owned(), 1));
             }
             Token::Subtract => {
-                if !check_if_valid_type(&number_union, &current_type) {
+                if !check_if_valid_type(&number_union, data_type) {
                     return AstNode::Error(
                         "Subtraction used in non-numerical expression".to_string(),
                         starting_line_number.to_owned(),
@@ -380,7 +381,7 @@ pub fn create_expression(
                 expression.push(AstNode::BinaryOperator(token.to_owned(), 1));
             }
             Token::Multiply => {
-                if !check_if_valid_type(&number_union, &current_type) {
+                if !check_if_valid_type(&number_union,  data_type) {
                     return AstNode::Error(
                         "Multiplication used in non-numerical expression".to_string(),
                         starting_line_number.to_owned(),
@@ -389,7 +390,7 @@ pub fn create_expression(
                 expression.push(AstNode::BinaryOperator(token.to_owned(), 2));
             }
             Token::Divide => {
-                if !check_if_valid_type(&number_union, &current_type) {
+                if !check_if_valid_type(&number_union, data_type) {
                     return AstNode::Error(
                         "Division used in non-numerical expression".to_string(),
                         starting_line_number.to_owned(),
@@ -398,7 +399,7 @@ pub fn create_expression(
                 expression.push(AstNode::BinaryOperator(token.to_owned(), 2));
             }
             Token::Modulus => {
-                if !check_if_valid_type(&number_union, &current_type) {
+                if !check_if_valid_type(&number_union,  data_type) {
                     return AstNode::Error(
                         "Modulus used in non-numerical expression".to_string(),
                         starting_line_number.to_owned(),
@@ -465,18 +466,18 @@ pub fn get_args(
     }
 
     // TO DO: Check the argument refs, if there are multiple, pass in a tuple of the correct types
-    let data_type = if argument_refs.len() > 1 {
+    let mut data_type = if argument_refs.len() > 1 {
         // Create tuple of the argument types
-        &DataType::Tuple(Box::new(
+        DataType::Tuple(Box::new(
             argument_refs
                 .iter()
                 .map(|arg| arg.data_type.to_owned())
                 .collect(),
         ))
     } else if argument_refs.len() == 1 {
-        &argument_refs[0].data_type.to_owned()
+        argument_refs[0].data_type.to_owned()
     } else {
-        &DataType::None
+        DataType::None
     };
 
     // Check if the current token is an open bracket
@@ -492,7 +493,7 @@ pub fn get_args(
             false,
             ast,
             token_line_number,
-            data_type,
+            &mut data_type,
             true,
             variable_declarations,
         )),
@@ -500,9 +501,12 @@ pub fn get_args(
     }
 }
 
-fn check_if_valid_type(data_type: &DataType, accepted_type: &DataType) -> bool {
+fn check_if_valid_type(data_type: &DataType, accepted_type: &mut DataType) -> bool {
     match accepted_type {
-        DataType::Inferred => true,
+        DataType::Inferred => {
+            *accepted_type = data_type.to_owned();
+            true
+        }
         DataType::CoerseToString => true,
         DataType::Union(types) => {
             for t in &**types {

@@ -496,10 +496,10 @@ pub fn new_scene(
                 scene.push(create_expression(
                     tokens,
                     &mut *i,
-                    true,
+                    false,
                     &ast,
                     token_line_number,
-                    &DataType::CoerseToString,
+                    &mut DataType::CoerseToString,
                     inside_brackets,
                     variable_declarations,
                 ));

@@ -189,7 +189,7 @@ pub fn new_ast(
                     false,
                     &ast,
                     starting_line_number,
-                    return_type,
+                    &mut return_type.to_owned(),
                     false,
                     &variable_declarations,
                 );

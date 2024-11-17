@@ -1,7 +1,7 @@
 use crate::{bs_types::DataType, Token};
 
 use super::{
-    ast_nodes::{AstNode, Node, Reference},
+    ast_nodes::{AstNode, Reference},
     collections::new_collection,
     expressions::parse_expression::{create_expression, get_args},
     functions::create_function,
@@ -80,7 +80,7 @@ pub fn new_variable(
     is_const: bool,
 ) -> AstNode {
     *i += 1;
-    let mut data_type = &DataType::Inferred;
+    let mut data_type = DataType::Inferred;
 
     match &tokens[*i] {
         // Type is inferred
@@ -101,7 +101,7 @@ pub fn new_variable(
 
         // Has a type declaration
         &Token::TypeKeyword(ref type_keyword) => {
-            data_type = type_keyword;
+            data_type = type_keyword.to_owned();
             *i += 1;
 
             match &tokens[*i] {
@@ -116,7 +116,7 @@ pub fn new_variable(
                     });
 
                     return create_zero_value_var(
-                        data_type.to_owned(),
+                        data_type,
                         name.to_string(),
                         is_exported,
                     );
@@ -163,20 +163,19 @@ pub fn new_variable(
 
             // Dynamic Collection literal
             let start_line_number = &token_line_numbers[*i];
-            let collection = new_collection(tokens, i, ast, start_line_number);
+            let collection = new_collection(tokens, i, ast, start_line_number, &mut data_type);
             match collection {
-                AstNode::Collection(_, ref data_type) => {
-                    let collection_type = data_type.to_owned();
+                AstNode::Collection(..) => {
                     variable_declarations.push(Reference {
                         name: name.to_owned(),
-                        data_type: DataType::Collection(Box::new(collection_type.to_owned())),
+                        data_type: data_type.to_owned(),
                         default_value: None,
                     });
                     return AstNode::VarDeclaration(
                         name.to_string(),
                         Box::new(collection),
                         is_exported,
-                        DataType::Collection(Box::new(collection_type)),
+                        data_type,
                         false,
                     );
                 }
@@ -198,7 +197,7 @@ pub fn new_variable(
                 false,
                 &ast,
                 start_line_number,
-                data_type,
+                &mut data_type,
                 false,
                 &variable_declarations,
             );
@@ -236,14 +235,7 @@ pub fn new_variable(
                 variable_declarations,
             );
         }
-        AstNode::Tuple(ref values, _) => {
-            let mut tuple_data_type = Vec::new();
-            for value in values {
-                tuple_data_type.push(value.get_type());
-            }
-
-            let data_type = DataType::Tuple(Box::new(tuple_data_type));
-
+        AstNode::Tuple(..) => {
             return create_var_node(
                 is_const,
                 name.to_string(),
@@ -253,7 +245,7 @@ pub fn new_variable(
                 variable_declarations,
             );
         }
-        AstNode::Scene(_, _, _, _) => {
+        AstNode::Scene(..) => {
             return create_var_node(
                 is_const,
                 name.to_string(),

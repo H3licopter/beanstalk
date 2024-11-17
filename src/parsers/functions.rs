@@ -139,7 +139,7 @@ fn parse_args(
                 // Check if there is a type keyword
                 *i += 1;
 
-                let data_type = match &tokens[*i] {
+                let mut data_type = match &tokens[*i] {
                     Token::TypeKeyword(data_type) => data_type.to_owned(),
                     _ => {
                         return Err("Expected type keyword after argument name");
@@ -162,7 +162,7 @@ fn parse_args(
                         true,
                         ast,
                         &token_line_numbers[*i],
-                        &data_type,
+                        &mut data_type,
                         false,
                         variable_declarations,
                     )));

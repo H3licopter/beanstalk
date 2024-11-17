@@ -6,9 +6,12 @@ pub fn new_collection(
     i: &mut usize,
     ast: &Vec<AstNode>,
     starting_line_number: &u32,
+    collection_type: &mut DataType,
 ) -> AstNode {
     let mut items: Vec<AstNode> = Vec::new();
-    let collection_type = DataType::Collection(Box::new(DataType::Inferred));
+    if *collection_type == DataType::Inferred {
+        *collection_type = DataType::Collection(Box::new(DataType::Inferred));
+    }
 
     // Should always start with current token being an open scope
     // So skip to first value
@@ -28,7 +31,7 @@ pub fn new_collection(
                     true,
                     ast,
                     starting_line_number,
-                    &collection_type,
+                    collection_type,
                     tokens[*i] == Token::OpenParenthesis,
                     &Vec::new(),
                 ));
@@ -38,7 +41,7 @@ pub fn new_collection(
         *i += 1;
     }
 
-    AstNode::Collection(items, collection_type)
+    AstNode::Collection(items, collection_type.to_owned())
 }
 
 // TO DO: new_struct
