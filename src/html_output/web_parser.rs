@@ -28,18 +28,17 @@ pub struct ParserOutput {
     pub exported_css: String,
     pub wat: String,
     pub wat_globals: String,
-    pub errored: bool,
 }
 
 // Parse ast into valid JS, HTML and CSS
-pub fn parse(
+pub fn parse<'a>(
     ast: Vec<AstNode>,
-    config: &HTMLMeta,
+    config: &'a HTMLMeta,
     release_build: bool,
-    module_path: &str,
+    module_path: &'a str,
     is_global: bool,
-    imported_css: &String,
-) -> ParserOutput {
+    imported_css: &'a String,
+) -> Result<ParserOutput, String> {
     let mut js = String::new();
     let mut wat = String::new();
     let mut wat_global_initilisation = String::new();
@@ -47,7 +46,6 @@ pub fn parse(
     let mut css = imported_css.to_owned();
     let mut page_title = String::new();
     let mut exp_id: usize = 0;
-    let mut errored = false;
 
     let mut exported_js: Vec<ExportedJS> = Vec::new();
     let mut exported_css = String::new();
@@ -153,9 +151,7 @@ pub fn parse(
                                 }
                             }
                             _ => {
-                                errored = true;
-                                red_ln!("Error: Scene expression must be a scene in HTML parser");
-                                continue;
+                                return Err("Error: Scene declaration must be a scene".to_string());
                             }
                         };
                     }
@@ -202,11 +198,10 @@ pub fn parse(
                                     ));
                                 }
                                 _ => {
-                                    errored = true;
-                                    red_ln!(
+                                    return Err(format!(
                                         "Unsupported datatype found in tuple declaration: {:?}",
                                         datatype
-                                    );
+                                    ));
                                 }
                             }
                             index += 1;
@@ -247,9 +242,7 @@ pub fn parse(
                             Token::FloatLiteral(value) => &format!("={value}"),
                             Token::BoolLiteral(value) => &format!("={value}"),
                             _ => {
-                                errored = true;
-                                red_ln!("Compiler Error: invalid literal given as a default value");
-                                ""
+                                return Err("Error: invalid literal given as a default value".to_string());
                             }
                         },
                         _ => "",
@@ -258,14 +251,19 @@ pub fn parse(
                     arg_names.push_str(&format!("{BS_VAR_PREFIX}{}{default_arg},", arg.name));
                 }
 
-                let func_body = parse(
+                let func_body = match parse(
                     body,
                     config,
                     release_build,
                     module_path,
                     false,
                     imported_css,
-                );
+                ) {
+                    Ok(output) => output,
+                    Err(e) => {
+                        return Err(format!("Error parsing function body: {:?}", e));
+                    }
+                };
                 let func = format!(
                     "{}function {BS_VAR_PREFIX}{name}({arg_names}){{{}}}",
                     if is_exported { "export " } else { "" },
@@ -308,15 +306,10 @@ pub fn parse(
             AstNode::Comment(_) => {}
 
             AstNode::Error(err, line_number) => {
-                errored = true;
-                red_ln!("Error on Line {}: - {}", line_number, err);
+                return Err(format!("Error on Line {}: - {}", line_number, err));
             }
             _ => {
-                errored = true;
-                red_ln!(
-                    "unknown AST node found when parsing AST in web parser: {:?}",
-                    node
-                );
+                return Err(format!("Unknown AST node found when parsing AST in web parser: {:?}", node));
             }
         }
     }
@@ -325,7 +318,7 @@ pub fn parse(
         page_title += &(" | ".to_owned() + &config.site_title.clone());
     }
 
-    ParserOutput {
+    Ok(ParserOutput {
         html,
         js,
         css,
@@ -334,8 +327,7 @@ pub fn parse(
         exported_css,
         wat,
         wat_globals: wat_global_initilisation,
-        errored,
-    }
+    })
 }
 
 struct SceneTag {

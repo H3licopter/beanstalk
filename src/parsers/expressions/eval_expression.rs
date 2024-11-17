@@ -67,7 +67,10 @@ pub fn evaluate_expression(
                             }
                         }
                         _ => {
-                            red_ln!("Compiler error: (Eval Expression) Wrong literal type found in expression");
+                            return AstNode::Error(
+                                "unsupported literal type found in expression".to_string(),
+                                line_number,
+                            );
                         }
                     },
 
@@ -177,9 +180,9 @@ pub fn evaluate_expression(
                     }
 
                     _ => {
-                        red_ln!(
-                            "unknown AST node found in expression when evaluating expression: {:?}",
-                            node
+                        return AstNode::Error(
+                            "unsupported AST node found in expression".to_string(),
+                            line_number,
                         );
                     }
                 }
@@ -205,7 +208,10 @@ pub fn evaluate_expression(
             return AstNode::Tuple(simplified_expression, line_number);
         }
         _ => {
-            red_ln!("Compiler Bug: No Expression to Evaluate - eval expression passed wrong AST node: {:?}", expr);
+            return AstNode::Error(
+                format!("Compiler Bug: No Expression to Evaluate - eval expression passed wrong AST node: {:?}", expr),
+                0,
+            );
         }
     }
 
@@ -263,11 +269,17 @@ fn concat_scene(simplified_expression: &mut Vec<AstNode>) -> AstNode {
                     v4.append(vec4);
                 }
                 _ => {
-                    red_ln!("Compiler Bug: Cannot evaluate scene expression at compile time. Compiler should be creating a runtime scene expression");
+                    return AstNode::Error(
+                        "Compiler Bug: Cannot evaluate scene expression at compile time. Compiler should be creating a runtime scene expression".to_string(),
+                        0,
+                    );
                 }
             },
             _ => {
-                red_ln!("Compiler Bug: Cannot evaluate scene expression at compile time. Compiler should be creating a runtime scene expression");
+                return AstNode::Error(
+                    "Compiler Bug: Cannot evaluate scene expression at compile time. Compiler should be creating a runtime scene expression".to_string(),
+                    0,
+                );
             }
         }
     }
@@ -298,7 +310,10 @@ fn concat_strings(simplified_expression: &mut Vec<AstNode>) -> AstNode {
                 previous_node_is_plus = true;
             }
             _ => {
-                red_ln!("Compiler Bug: Cannot evaluate string expression at compile time. Compiler should be creating a runtime string expression");
+                return AstNode::Error(
+                    "Compiler Bug: Cannot evaluate string expression at compile time. Compiler should be creating a runtime string expression".to_string(),
+                    0,
+                );
             }
         }
     }

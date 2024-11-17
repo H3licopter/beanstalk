@@ -83,14 +83,20 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
     }
 
     yellow_ln_bold!("\nCREATING HTML OUTPUT\n");
-    let parser_output = web_parser::parse(
+    let parser_output = match web_parser::parse(
         ast,
         &get_html_config(),
         false,
         "test",
         false,
         &String::new(),
-    );
+    ) {
+        Ok(output) => output,
+        Err(e) => {
+            red_ln!("Failed to Compile due to Error: \n\n{:?}", e);
+            return Err(e.into());
+        }
+    };
     for export in parser_output.exported_js {
         println!("JS EXPORTS:");
         println!("{:?}", export.module_path);

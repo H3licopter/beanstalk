@@ -303,10 +303,10 @@ pub fn create_expression(
                         };
                     }
                     None => {
-                        expression.push(AstNode::Error(
+                        return AstNode::Error(
                             format!("Variable {} not found in scope", name),
                             starting_line_number.to_owned(),
-                        ));
+                        );
                     }
                 }
             }
@@ -432,13 +432,13 @@ pub fn create_expression(
             }
 
             _ => {
-                expression.push(AstNode::Error(
+                return AstNode::Error(
                     format!(
                         "Invalid Expression: {:?}, must be assigned with a valid datatype",
                         token
                     ),
                     starting_line_number.to_owned(),
-                ));
+                );
             }
         }
 

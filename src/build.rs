@@ -435,21 +435,20 @@ fn compile(
         html_config.page_root_url.push_str("../");
     }
 
-    let parser_output = web_parser::parse(
+    let parser_output = match web_parser::parse(
         ast,
         &html_config,
         release_build,
         file_name,
         output.global,
         exported_css,
-    );
-
-    if parser_output.errored {
-        return Err(Box::new(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Did not compile file: {} due to errors", file_name),
-        )));
-    }
+    ) {
+        Ok(output) => output,
+        Err(e) => {
+            red_ln!("Failed to Compile due to Error: \n\n{:?}", e);
+            return Err(e.into());
+        }
+    };
 
     // Add HTML boilerplate
     let all_js = format!(

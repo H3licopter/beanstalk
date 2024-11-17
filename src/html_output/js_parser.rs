@@ -37,18 +37,9 @@ pub fn expression_to_js(expr: &AstNode) -> String {
                         }
                     }
 
-                    AstNode::CollectionAccess(name, index, data_type)
-                    | AstNode::TupleAccess(name, index, data_type) => {
-                        // If it's a string, it will just be pure JS, no WASM
-
-                        // CURRENTLY WORKS AS TUPLES DON'T SUPPORT NAMED ARGS YET,
-                        // so it's all just accessing an array or struct by number
-                        match data_type {
-                            DataType::String | DataType::Scene => {
-                                js.push_str(&format!(" {BS_VAR_PREFIX}{name}_{index}"))
-                            }
-                            _ => js.push_str(&format!(" wsx.get_{BS_VAR_PREFIX}{name}_{index}")),
-                        }
+                    AstNode::CollectionAccess(name, index, _)
+                    | AstNode::TupleAccess(name, index, _) => {
+                        js.push_str(&format!("{BS_VAR_PREFIX}{name}[{index}]"));
                     }
 
                     AstNode::BinaryOperator(op, _) => match op {

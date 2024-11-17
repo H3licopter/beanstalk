@@ -1,5 +1,3 @@
-use colour::red_ln;
-
 use super::{
     ast_nodes::{AstNode, Reference},
     expressions::parse_expression::{create_expression, get_args},
@@ -347,8 +345,10 @@ pub fn new_scene(
                 ) {
                     Some(arg) => arg,
                     None => {
-                        red_ln!("Error: Size must have an argument");
-                        continue;
+                        return AstNode::Error(
+                            "Size must have a valid argument".to_string(),
+                            token_line_number.to_owned(),
+                        );
                     }
                 };
                 if check_if_comptime_value(&eval_arg) {
@@ -393,11 +393,17 @@ pub fn new_scene(
                             scene_tags.push(Tag::Table(value as u32));
                         }
                         _ => {
-                            red_ln!("Incorrect arguments passed into table declaration");
+                            return AstNode::Error(
+                                "Incorrect arguments passed into table declaration".to_string(),
+                                token_line_number.to_owned(),
+                            );
                         }
                     },
                     _ => {
-                        red_ln!("Incorrect arguments passed into table declaration");
+                        return AstNode::Error(
+                            "Incorrect arguments passed into table declaration".to_string(),
+                            token_line_number.to_owned(),
+                        );
                     }
                 }
             }
@@ -426,8 +432,10 @@ pub fn new_scene(
                     scene_tags.push(Tag::Img(eval_arg));
                 } else {
                     // Need to add JS DOM hooks to change img src at runtime.
-                    red_ln!("Can't add img src attribute to scene head at runtime (yet)");
-                    scene_tags.push(Tag::Img(eval_arg));
+                    return AstNode::Error(
+                        "Img tag must have a comptime value for src (CURRENTLY)".to_string(),
+                        token_line_number.to_owned(),
+                    );
                 }
             }
 
@@ -612,8 +620,10 @@ pub fn new_scene(
                 ) {
                     Some(arg) => arg,
                     None => {
-                        red_ln!("Error: Redirect must have an argument");
-                        continue;
+                        return AstNode::Error(
+                            "Redirect must have a href argument".to_string(),
+                            token_line_number.to_owned(),
+                        );
                     }
                 };
 
@@ -626,7 +636,13 @@ pub fn new_scene(
             }
 
             _ => {
-                red_ln!("Invalid Token Used inside Scene Head: '{:?}'", token);
+                return AstNode::Error(
+                    format!(
+                        "Invalid Syntax Used Inside scene head when creating scene node. Token: {:?}",
+                        token
+                    ),
+                    token_line_number.to_owned(),
+                );
             }
         }
     }

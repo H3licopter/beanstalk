@@ -4,7 +4,7 @@ use super::{
     ast_nodes::{AstNode, Reference},
     expressions::parse_expression::create_expression,
 };
-use crate::{bs_types::DataType, Token};
+use crate::{bs_types::DataType, parsers::ast_nodes::Node, Token};
 
 // Assumes to have started after the the open parenthesis
 // Datatype must always be a tuple containing the data types of the items in the tuple
@@ -20,14 +20,16 @@ pub fn new_tuple(
     starting_line_number: &u32,
     variable_declarations: &Vec<Reference>,
 ) -> AstNode {
-    let mut items: Vec<AstNode> = match initial_value {
-        Some(node) => vec![node],
-        None => Vec::new(),
-    };
-
     let mut item_data_types = match data_type {
         DataType::Tuple(inner_types) => *inner_types.to_owned(),
         _ => Vec::new(),
+    };
+    let mut items: Vec<AstNode> = match initial_value {
+        Some(node) => {
+            item_data_types.push(node.get_type());
+            vec![node]
+        }
+        None => Vec::new(),
     };
 
     let mut next_item: bool = true;
