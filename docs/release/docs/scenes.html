@@ -32,12 +32,14 @@
                 line-height: 3.5rem;
             }.bs-0 > * {color:inherit;}</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BEANSTALK SCENES</b></div></header><main class="container"><p>Beanstalk has its own templating language. These are called scenes.
 </p><p>Scenes have two sections, the head and the body. 
-</p><p><strong><em>The head&nbsp;</em></strong></p><span>is used to define the styling and positioning of the scene.
-</span><strong><em>The body&nbsp;</em></strong><span>is used to define the content of the scene.
-</span><span>These two sections are separated by a colon.
-</span><span>Scenes are scoped using square brackets and have predefined keywords you use in the scene head that can change their behavior, content and styling. 
-</span><span>Inside the body of a scene, you can nest more scenes using square brackets. This allows you to create complex UIs and webpages, while writing mostly in a dialect of markdown.
-</span><h2>Beanstalk Markdown
+</p><h4>The head
+</h4><p>is used to define the styling and positioning of the scene.
+</p><h4>The body
+</h4><p>is used to define the content of the scene.
+</p><p>These two sections are separated by a colon.
+</p><p>Scenes are scoped using square brackets and have predefined keywords you use in the scene head that can change their behavior, content and styling. 
+</p><p>Inside the body of a scene, you can nest more scenes using square brackets. This allows you to create complex UIs and webpages, while writing mostly in a dialect of markdown.
+</p><h2>Beanstalk Markdown
 </h2><p>Beanstalk uses it's own flavour of markdown. Instead of writing any raw HTML, you can use the Beanstalk scene syntax to write your text content inside of a scene body. Beanstalk markdown supports the familiar heading, bold and italic syntax from most markdown parsers.
 </p><pre><code>    [main:
 
@@ -117,7 +119,8 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("Navbar", bs_Navbar);uInnerHTML("Footer", bs_Footer);
+            }
+uInnerHTML("Navbar", bs_Navbar);uInnerHTML("Footer", bs_Footer);
   ;});</script>
 </body>
 </html>

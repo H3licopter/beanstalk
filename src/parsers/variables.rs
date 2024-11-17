@@ -19,15 +19,25 @@ pub fn create_new_var_or_ref(
     let is_const = name.to_uppercase() == *name;
 
     if let Some(var) = variable_declarations.iter().find(|v| v.name == *name) {
-        match var.data_type { 
+        match var.data_type {
             DataType::Function(ref argument_refs, ref return_type) => {
                 // Parse arguments passed into the function
-                let args = match get_args(tokens, i, ast, &token_line_numbers[*i], variable_declarations, argument_refs) {
+                let args = match get_args(
+                    tokens,
+                    i,
+                    ast,
+                    &token_line_numbers[*i],
+                    variable_declarations,
+                    argument_refs,
+                ) {
                     Some(args) => args,
 
                     // Returning None here means no brackets, which means it's just a reference to the function
                     None => {
-                        return AstNode::VarReference(var.name.to_owned(), var.data_type.to_owned());
+                        return AstNode::VarReference(
+                            var.name.to_owned(),
+                            var.data_type.to_owned(),
+                        );
                     }
                 };
 
@@ -37,7 +47,7 @@ pub fn create_new_var_or_ref(
                     *return_type.to_owned(),
                 );
             }
-            _ => {},
+            _ => {}
         }
         if is_const {
             return AstNode::ConstReference(var.name.to_owned(), var.data_type.to_owned());
@@ -194,7 +204,6 @@ pub fn new_variable(
             );
         }
     }
-
 
     // Check if a type of collection / tuple has been created
     // Or whether it is a literal or expression

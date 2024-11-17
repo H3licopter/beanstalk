@@ -53,7 +53,7 @@ but instead of return types, you specify the properties of the type.
     :
         health += level * 10
 
-        -- This method is automatically exported
+        -- This method is automatically public
         damage fn(amount Int) -> ():
             health -= amount
             if health <= 0: dead = true
@@ -64,6 +64,6 @@ but instead of return types, you specify the properties of the type.
     player = Player("Bob", 20)
 
 ]
-]
 
+]
 [Footer]

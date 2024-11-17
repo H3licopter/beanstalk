@@ -1,4 +1,5 @@
 use crate::bs_types::DataType;
+use crate::html_output::dom_hooks::{generate_dom_update_js, DOMUpdate};
 use crate::html_output::generate_html::create_html_boilerplate;
 use crate::html_output::web_parser;
 use crate::parsers::ast_nodes::{AstNode, Reference};
@@ -6,7 +7,6 @@ use crate::settings::{get_default_config, get_html_config, Config};
 use crate::tokenizer;
 use crate::tokens::Token;
 use crate::{parsers, settings};
-use crate::html_output::dom_hooks::{generate_dom_update_js, DOMUpdate};
 
 use colour::{blue_ln, dark_cyan_ln, dark_yellow_ln, green_ln, print_bold, print_ln_bold, red_ln};
 use std::error::Error;
@@ -388,8 +388,14 @@ fn compile(
     green_ln!("{:?}", time.elapsed());
     let time = Instant::now();
 
-    let (ast, imports) =
-        parsers::build_ast::new_ast(tokens, &mut 0, &token_line_numbers, globals, &DataType::None, true);
+    let (ast, imports) = parsers::build_ast::new_ast(
+        tokens,
+        &mut 0,
+        &token_line_numbers,
+        globals,
+        &DataType::None,
+        true,
+    );
 
     print!("AST created in: ");
     green_ln!("{:?}", time.elapsed());
@@ -446,7 +452,11 @@ fn compile(
     }
 
     // Add HTML boilerplate
-    let all_js = format!("{}\n{}", generate_dom_update_js(DOMUpdate::InnerHTML), parser_output.js);
+    let all_js = format!(
+        "{}\n{}",
+        generate_dom_update_js(DOMUpdate::InnerHTML),
+        parser_output.js
+    );
     let module_output = create_html_boilerplate(&html_config, release_build)
         .replace("page-template", &parser_output.html)
         .replace("@page-css", &parser_output.css)
@@ -458,7 +468,10 @@ fn compile(
     green_ln!("{:?}", time.elapsed());
     let time = Instant::now();
 
-    let all_parsed_wasm = &format!("(module {}(func (export \"set_wasm_globals\"){}))", &parser_output.wat, parser_output.wat_globals);
+    let all_parsed_wasm = &format!(
+        "(module {}(func (export \"set_wasm_globals\"){}))",
+        &parser_output.wat, parser_output.wat_globals
+    );
     let wasm = match parse_str(all_parsed_wasm) {
         Ok(wasm) => wasm,
         Err(e) => {

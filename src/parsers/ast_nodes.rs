@@ -45,7 +45,7 @@ pub enum AstNode {
     VarReference(String, DataType),
     ConstReference(String, DataType),
     JSStringReference(String),
-    FunctionCall(String, Box<AstNode>, DataType),   // Function name, arguments (can be a tuple of arguments), return type
+    FunctionCall(String, Box<AstNode>, DataType), // Function name, arguments (can be a tuple of arguments), return type
 
     // Accessing fields
     CollectionAccess(String, usize, DataType), // Name, Index, Type

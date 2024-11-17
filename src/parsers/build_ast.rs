@@ -1,7 +1,7 @@
 use super::{
     ast_nodes::{AstNode, Reference},
     create_scene_node::new_scene,
-    expressions::parse_expression::create_expression,
+    expressions::parse_expression::{create_expression, get_args},
     variables::create_new_var_or_ref,
 };
 use crate::{bs_types::DataType, Token};
@@ -15,8 +15,7 @@ pub fn new_ast(
     mut variable_declarations: Vec<Reference>,
     return_type: &DataType,
     module_scope: bool,
-
-     // AST         Imports
+    // AST         Imports
 ) -> (Vec<AstNode>, Vec<AstNode>) {
     let mut ast = Vec::new();
     let mut imports = Vec::new();
@@ -46,7 +45,7 @@ pub fn new_ast(
                     _ => {
                         ast.push(AstNode::Error(
                             "Import must have a valid path as a argument".to_string(),
-                            token_line_numbers[*i] ,
+                            token_line_numbers[*i],
                         ));
                     }
                 }
@@ -60,7 +59,7 @@ pub fn new_ast(
                     ));
                 }
 
-                let starting_line_number = &token_line_numbers[*i] ;
+                let starting_line_number = &token_line_numbers[*i];
                 ast.push(new_scene(
                     &tokens,
                     i,
@@ -94,14 +93,14 @@ pub fn new_ast(
             }
             Token::Title => {
                 *i += 1;
-                match &tokens[*i]  {
+                match &tokens[*i] {
                     Token::StringLiteral(value) => {
                         ast.push(AstNode::Title(value.clone()));
                     }
                     _ => {
                         ast.push(AstNode::Error(
                             "Title must have a valid string as a argument".to_string(),
-                            token_line_numbers[*i] ,
+                            token_line_numbers[*i],
                         ));
                     }
                 }
@@ -109,14 +108,14 @@ pub fn new_ast(
 
             Token::Date => {
                 *i += 1;
-                match &tokens[*i]  {
+                match &tokens[*i] {
                     Token::StringLiteral(value) => {
                         ast.push(AstNode::Date(value.clone()));
                     }
                     _ => {
                         ast.push(AstNode::Error(
                             "Date must have a valid string as a argument".to_string(),
-                            token_line_numbers[*i] ,
+                            token_line_numbers[*i],
                         ));
                     }
                 }
@@ -127,19 +126,29 @@ pub fn new_ast(
             }
 
             Token::Print => {
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "src".to_string(),
+                    data_type: DataType::String,
+                    default_value: None,
+                }];
+                let line_number = token_line_numbers[*i];
+
+                // Move past the print keyword
                 *i += 1;
-                let inside_brackets = &tokens[*i]  == &Token::OpenParenthesis;
-                let starting_line_number = &token_line_numbers[*i] ;
-                ast.push(AstNode::Print(Box::new(create_expression(
+                let eval_arg = match get_args(
                     &tokens,
-                    i,
-                    false,
+                    &mut *i,
                     &ast,
-                    starting_line_number,
-                    &DataType::CoerseToString,
-                    inside_brackets,
+                    &line_number,
                     &variable_declarations,
-                ))));
+                    &required_args,
+                ) {
+                    Some(arg) => arg,
+                    None => {
+                        continue;
+                    }
+                };
+                ast.push(AstNode::Print(Box::new(eval_arg)));
             }
 
             Token::DeadVarible(name) => {
@@ -166,14 +175,14 @@ pub fn new_ast(
                 if !needs_to_return {
                     ast.push(AstNode::Error(
                         "Return statement used in function that doesn't return a value".to_string(),
-                        token_line_numbers[*i] ,
+                        token_line_numbers[*i],
                     ));
                 }
 
                 needs_to_return = false;
                 *i += 1;
 
-                let starting_line_number = &token_line_numbers[*i] ;
+                let starting_line_number = &token_line_numbers[*i];
                 let return_value = create_expression(
                     &tokens,
                     i,

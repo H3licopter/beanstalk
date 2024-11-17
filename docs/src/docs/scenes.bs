@@ -1,5 +1,4 @@
 [Navbar]
-
 [header center: [title(1): BEANSTALK SCENES]]
 
 [main:
@@ -7,11 +6,13 @@ Beanstalk has its own templating language. These are called scenes.
 
 Scenes have two sections, the head and the body. 
 
-***The head*** 
+#### The head
 is used to define the styling and positioning of the scene.
 
-***The body*** 
+#### The body
 is used to define the content of the scene.
+
+
 
 These two sections are separated by a colon.
 

@@ -5,26 +5,24 @@
 # Language Design Goals
 The Beanstalk is designed to be:
 
-### Simple
+### Simple and Concide
 Minimal keywords and symbols to reduce cognitive load and syntax noise. 
 One way to do things where possible. 
 Beanstalk trades expressiveness for readibility and simplicity.
+As little boilerplate as possible. 
+Safe type inferance and batteries included core language features to reduce the amount of code you need to write for simple tasks.
 
-### Concise
-As little boilerplate as possible. Safe type inferance and batteries included core language features to reduce the amount of code you need to write for simple tasks.
-
-### Strongly typed
-A small but powerful type system that is designed to be easy to use, understand and find errors in before runtime.
+### Easy to debug and resistant to runtime errors
+Strong compile time checks that mean you never forget to handle an error, use the wrong type, or struggle to find the source of a bug.
 
 ### Seemless syntax for declaritive programming
 Scenes provide a very clean and concide way to describe the structure of a webpage or UI (or any other declaritive structure in the future).
 Having a declaritive syntax inside the language itself makes it easy to reason about desgining UI and visual components.
 
-### Procedural
-The programming part of the language is designed to be procedural, with a focus on functions and data manipulation. It should be easy to reason about control flow and avoid complex state management.
-
 ### Fast compile times
-Being a compiled language, Beanstalk should have very fast compile times. The compiler is written in Rust and is designed to be fast and efficient. With built in hot reloading you should see changes to your code and UI designes almost instantly for fast iteration.
+Being a compiled language, Beanstalk should have very fast compile times. 
+The compiler is written in Rust and is designed to be fast and efficient. 
+With built in hot reloading you should see changes to your code and UI designes almost instantly for fast iteration.
 
 # Style Guide
 The style guide is:

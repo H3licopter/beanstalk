@@ -32,22 +32,22 @@
                 line-height: 3.5rem;
             }.bs-0 > * {color:inherit;}</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >BASIC BEANSTALK SYNTAX</b></div></header><main class="container"><h1>Language Design Goals
 </h1><p>The Beanstalk is designed to be:
-</p><h3>Simple
+</p><h3>Simple and Concide
 </h3><p>Minimal keywords and symbols to reduce cognitive load and syntax noise. 
 </p><span>One way to do things where possible. 
 </span><span>Beanstalk trades expressiveness for readibility and simplicity.
-</span><h3>Concise
-</h3><p>As little boilerplate as possible. Safe type inferance and batteries included core language features to reduce the amount of code you need to write for simple tasks.
-</p><h3>Strongly typed
-</h3><p>A small but powerful type system that is designed to be easy to use, understand and find errors in before runtime.
+</span><span>As little boilerplate as possible. 
+</span><span>Safe type inferance and batteries included core language features to reduce the amount of code you need to write for simple tasks.
+</span><h3>Easy to debug and resistant to runtime errors
+</h3><p>Strong compile time checks that mean you never forget to handle an error, use the wrong type, or struggle to find the source of a bug.
 </p><h3>Seemless syntax for declaritive programming
 </h3><p>Scenes provide a very clean and concide way to describe the structure of a webpage or UI (or any other declaritive structure in the future).
 </p><span>Having a declaritive syntax inside the language itself makes it easy to reason about desgining UI and visual components.
-</span><h3>Procedural
-</h3><p>The programming part of the language is designed to be procedural, with a focus on functions and data manipulation. It should be easy to reason about control flow and avoid complex state management.
-</p><h3>Fast compile times
-</h3><p>Being a compiled language, Beanstalk should have very fast compile times. The compiler is written in Rust and is designed to be fast and efficient. With built in hot reloading you should see changes to your code and UI designes almost instantly for fast iteration.
-</p><h1>Style Guide
+</span><h3>Fast compile times
+</h3><p>Being a compiled language, Beanstalk should have very fast compile times. 
+</p><span>The compiler is written in Rust and is designed to be fast and efficient. 
+</span><span>With built in hot reloading you should see changes to your code and UI designes almost instantly for fast iteration.
+</span><h1>Style Guide
 </h1><p>The style guide is:
 </p><li><span>snake_case for variables, collections, styles and scenes
 </span></li><li><span>Upper_Snake_Case for types and primatives
@@ -129,8 +129,8 @@
 </span><span>so all string expressions will compile to JS rather than Wasm.
 </span><p>Eventually this will be entirely manipulated in Wasm, allowing for different string types and faster string operations. For now, JS is fast enough.
 </p><table style=""  class="" ><thead><tr><th scope='col'>Type&nbsp;</th><th scope='col'>Description&nbsp;</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>string&nbsp;</td><td>UTF-16 (For JS compatibility)&nbsp;</td><td>""</td></tr><tr><td>error&nbsp;</td><td>Contains a special type of debug string detailing the error&nbsp;</td><td>"ERROR"</td></tr><tr><td>path&nbsp;</td><td><em>NOT YET SUPPORTED&nbsp;</em>Path to a file, must be specified as the type of the string. Will handle OS specific paths.&nbsp;</td><td>""</td></tr></tbody></table><h2>Collection Types
-</h2><table style=""  class="" ><thead><tr><th scope='col'>Type&nbsp;</th><th scope='col'>Description&nbsp;</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>Tuple&nbsp;</td><td>Any number of immutable items seperated by commas. See <a href="./collections" style="" class="" >Collections</a>&nbsp;for more information.&nbsp;</td><td>()</td></tr><tr><td>Collection&nbsp;</td><td>A blend between arrays and structs. See <a href="./collections" style="" class="" >Collections</a>&nbsp;for more information.&nbsp;</td><td>{}</td></tr><tr><td>choice&nbsp;</td><td>Rust style enums. To be implemented.&nbsp;</td><td>error</td></tr><tr><td>type&nbsp;</td><td>For generics and datatype related operations&nbsp;</td><td>error</td></tr></tbody></table><h2>Scene Types
-</h2><table style=""  class="" ><thead><tr><th scope='col'>Type&nbsp;</th><th scope='col'>Description&nbsp;</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>scene&nbsp;</td><td>The templating syntax of Beanstalk. See <a href="./scenes" style="" class="" >Scenes for more info!</a>&nbsp;</td><td>"[]" -&nbsp; an empty scene</td></tr></tbody></table><h1>Strings
+</h2><table style=""  class="" ><thead><tr><th scope='col'>Type&nbsp;</th><th scope='col'>Description&nbsp;</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>Tuple&nbsp;</td><td>Any number of immutable items seperated by commas. See <span id="exp0"></span><span>Collections</span>&nbsp;for more information.&nbsp;</td><td>()</td></tr><tr><td>Collection&nbsp;</td><td>A blend between arrays and structs. See <span id="exp1"></span><span>Collections</span>&nbsp;for more information.&nbsp;</td><td>{}</td></tr><tr><td>choice&nbsp;</td><td>Rust style enums. To be implemented.&nbsp;</td><td>error</td></tr><tr><td>type&nbsp;</td><td>For generics and datatype related operations&nbsp;</td><td>error</td></tr></tbody></table><h2>Scene Types
+</h2><table style=""  class="" ><thead><tr><th scope='col'>Type&nbsp;</th><th scope='col'>Description&nbsp;</th><th scope='col'>Zero Value</th></tr></thead><tbody><tr><td>scene&nbsp;</td><td>The templating syntax of Beanstalk. See <span id="exp2"></span><span>Scenes for more info!</span>&nbsp;</td><td>"[]" -&nbsp; an empty scene</td></tr></tbody></table><h1>Strings
 </h1><p>String is the keyword for string types in Beanstalk. Double quotes are automatically strings. 
 </p><pre><code>"Double quotes for a UTF-16 string literal"</code></pre><p>Backticks are used for RAW strings. To escape a backtick it must be preceded with a backslash \.
 </p><pre><code>"string literal with \{curly braces} in it that are escaped"</code></pre><pre><code>
@@ -163,7 +163,8 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("Navbar", bs_Navbar);uInnerHTML("Footer", bs_Footer);
+            }
+uInnerHTML("Navbar", bs_Navbar);document.getElementById('exp0').innerHTML="./collections";document.getElementById('exp1').innerHTML="./collections";document.getElementById('exp2').innerHTML="./scenes";uInnerHTML("Footer", bs_Footer);
   ;});</script>
 </body>
 </html>

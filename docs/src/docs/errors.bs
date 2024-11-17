@@ -1,43 +1,48 @@
 [Navbar]
 
-[header center: [title(1): ERROR HANDLING]]
+[header center: [title(1): ERROR HANDLING AND OPTIONALS]]
 [main:
 
 Errors are treated as values in Beanstalk, 
-any function that can return an error as one of its values must have its error handled.
+any function that can return an error must have its error handled.
 
-The ? operator is used to check if one of the values in a tuple is an error. 
+The ? operator is used to signify an option of a type or none.
+
+The ! operator is used to signify an option of an error or none.
+
+Both can be combined in the case that None, Error or a data type can be returned.
+
+You can also use these operators to unwrap a None or Error value. 
 If it is, the error can then be handled immediately on the same line, or in a new block using a colon.
 
-If you use a colon after the ? operator, you will need an end statement to close the scope. 
+If you use a colon after the ? or ! operator, you will need an end statement to close the scope. 
 Otherwise, you can handle it inline.
 
 [code:
-    func_call_that_can_return_an_error() ?:
+    func_call_that_can_return_an_error() !:
         -- Error handling code
     end
 
-    -- Passing the error up to the calling function
+    -- This function can return a String or None
     parent_func () -> string?:
-        return func_call_that_can_return_an_error()
+        return func_call_that_can_return_an_error() !:
+            print("Error: ", error)
+            return None
+        end
     end
 ]
 
 ## Using the ? operator
-These operators allow for very concise error handling and makes it easy to see where errors are being handled in the code.
-They also provide a way to avoid opening a new scope for every error check.
 
 [code:
-    -- Always returns a string even if an error is thrown by getNetworkRequest()
-    -- The program will print the error and continue with "example.com" as the value instead of the zero value and an error.
     getURL () -> string:
         return getNetworkRequest() ?:
-            print("Network Request Error: ", error, " Using default URL")
+            print("Network did not respond: Using default URL")
             return "example.com"
         end
     end
 
-    -- Returns a string or an error
+    -- Returns a string or None
     getURL () -> string?:
         return getNetworkRequest()
     end
@@ -47,8 +52,8 @@ They also provide a way to avoid opening a new scope for every error check.
 There are cases where you want to either catch unexpected state for debugging, 
 or prevent the program from continuing if a certain condition is not met or an error is thrown.
 
-For these cases the ! operator is used to mark functions that can panic explicitly at runtime.
-You can't use the panic keyword unless the function is marked with the ! operator.
+For these cases the panic is used to mark functions that can panic explicitly at runtime.
+You can't use the panic keyword unless the function has a panic as one if it's possible return values.
 
 You can also create asserts that will stop the program if a condition is not met. 
 These are removed by the compiler in release builds.
@@ -62,10 +67,11 @@ Effectively creating a runtime assertion.
     -- Runs the code in the block first
     assert(1 is not 1, "1 is not 1 uh oh")
 
-    function_that_can_panic fn(the_truth Bool) -> !:
+    function_that_can_panic fn(the_truth Bool) -> panic?:
         if the_truth is False: panic("The truth is not true")
         
         -- This code will not run if the_truth is false
+        return None
     end
 ]
 

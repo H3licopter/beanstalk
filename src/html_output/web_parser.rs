@@ -234,46 +234,38 @@ pub fn parse(
                 let mut arg_names = String::new();
                 for arg in &args {
                     let unboxed_default = match &arg.default_value {
-                        Some(ref boxed_value) => {
-                            &**boxed_value
-                        }
+                        Some(ref boxed_value) => &**boxed_value,
                         _ => &AstNode::Empty,
                     };
 
                     let default_arg = match unboxed_default {
-                        AstNode::Literal(token) => {
-                            match token {
-                                Token::StringLiteral(value) 
-                                | Token::RawStringLiteral(value) 
-                                | Token::PathLiteral(value) => {
-                                    &format!("=\"{value}\"")
-                                }
-                                Token::IntLiteral(value) => {
-                                    &format!("={value}")
-                                }
-                                Token::FloatLiteral(value) => {
-                                    &format!("={value}")
-                                }
-                                Token::BoolLiteral(value) => {
-                                    &format!("={value}")
-                                }
-                                _=> {
-                                    errored = true;
-                                    red_ln!("Compiler Error: invalid literal given as a default value");
-                                    ""
-                                }
+                        AstNode::Literal(token) => match token {
+                            Token::StringLiteral(value)
+                            | Token::RawStringLiteral(value)
+                            | Token::PathLiteral(value) => &format!("=\"{value}\""),
+                            Token::IntLiteral(value) => &format!("={value}"),
+                            Token::FloatLiteral(value) => &format!("={value}"),
+                            Token::BoolLiteral(value) => &format!("={value}"),
+                            _ => {
+                                errored = true;
+                                red_ln!("Compiler Error: invalid literal given as a default value");
+                                ""
                             }
-                        }
-                        _ => {
-                            ""
-                        }
+                        },
+                        _ => "",
                     };
 
-                    arg_names.push_str(&format!("{name}{default_arg},"));
-
+                    arg_names.push_str(&format!("{BS_VAR_PREFIX}{}{default_arg},", arg.name));
                 }
 
-                let func_body = parse(body, config, release_build, module_path, false, imported_css);
+                let func_body = parse(
+                    body,
+                    config,
+                    release_build,
+                    module_path,
+                    false,
+                    imported_css,
+                );
                 let func = format!(
                     "{}function {BS_VAR_PREFIX}{name}({arg_names}){{{}}}",
                     if is_exported { "export " } else { "" },
@@ -303,7 +295,6 @@ pub fn parse(
             AstNode::Print(ref expr) => {
                 js.push_str(&format!("console.log({});", expression_to_js(&expr)));
             }
-
 
             // DIRECT INSERTION OF JS / CSS / HTML into page
             AstNode::JS(js_string) => {
@@ -999,8 +990,8 @@ pub fn parse_scene(
                     module_references.push(node.to_owned());
                     js.push_str(&format!(
                         "uInnerHTML(\"{name}\",{});",
-                        &function_call_to_js(name, *arguments.to_owned()
-                    )));
+                        &function_call_to_js(name, *arguments.to_owned())
+                    ));
                 }
             }
             AstNode::VarReference(ref name, ref data_type)

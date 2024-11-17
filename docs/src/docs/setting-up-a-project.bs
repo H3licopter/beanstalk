@@ -1,11 +1,10 @@
 [Navbar]
-
 [header center: [title(1): PROJECT SETUP]]
 [main:
 ## The Compiler
 You currently have to compile the Beanstalk compiler yourself. The compiler is written in Rust. This will change once the compiler and language development is more stable.
 
-The compiler can be found on [link "https://github.com/H3licopter/beanstalk/": Github].
+The compiler can be found on [link("https://github.com/H3licopter/beanstalk/"): Github].
 
 ## Setting up a Project
 Running the command 'new html' followed by your directory path will create a new static HTML Beanstalk project in that directory. The path is relative to the current directory.
@@ -71,7 +70,7 @@ This will create a localhost server that will automatically reload the page when
 # File Paths
 Any index.bs files will become the main page of the folder they are in, so your main page will be index.bs in the root directory.
 
-*** ⚠️ The intention is to have a file-system based router built in [link "https://kit.svelte.dev/docs/routing": (similar to Svelte)] so there may be changed in file naming conventions and how the compiler handles those files in the future. ⚠️ ***
+*** ⚠️ The intention is to have a file-system based router built in [link("https://kit.svelte.dev/docs/routing"): (similar to Svelte)] so there may be changed in file naming conventions and how the compiler handles those files in the future. ⚠️ ***
 
 ]
 

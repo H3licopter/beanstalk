@@ -15,15 +15,15 @@ Most of the language is still in the planning stages and not yet implemented.
 [red size(0.85): 
     *Only a fraction of this documentation is implemented so far. It is being used as a design plan and notes on the vision for the language and to keep track of ideas.*
 ]
-- [link "./docs/setting-up-a-project": Setting up a project]
-- [link "./docs/basics": Basic Language Syntax ]
-- [link "./docs/scenes": Introduction to scenes]
-- [link "./docs/control-flow": Control Flow]
-- [link "./docs/collections": Collections]
-- [link "./docs/types-and-tuples": Types and Tuples]
-- [link "./docs/functions": Functions]
-- [link "./docs/errors": Error Handling]
-- [link "./docs/embedding-js": Embedding JS]
+- [link("./docs/setting-up-a-project"): Setting up a project]
+- [link("./docs/basics"): Basic Language Syntax ]
+- [link("./docs/scenes"): Introduction to scenes]
+- [link("./docs/control-flow"): Control Flow]
+- [link("./docs/collections"): Collections]
+- [link("./docs/types-and-tuples"): Types and Tuples]
+- [link("./docs/functions"): Functions]
+- [link("./docs/errors"): Error Handling and Option Types]
+- [link("./docs/embedding-js"): Embedding JS]
 
 More documentation to be added soon!
 
@@ -32,12 +32,12 @@ This is a work in progress site for Beanstalk documentation as it's being develo
 
 Beanstalk is in the early stages of development (it doesn't even have a version number yet!), the documentation is subject to frequent changes. The syntax and design of the language itself is still being iterated on and refined.
 
-The source code for this site on [link "https://github.com/H3licopter/beanstalk/tree/main/docs/src": Github]. You can view the [link "https://github.com/H3licopter/beanstalk/tree/main/docs/release": output of the Beanstalk compiler]!
+The source code for this site on [link("https://github.com/H3licopter/beanstalk/tree/main/docs/src"): Github]. You can view the [link("https://github.com/H3licopter/beanstalk/tree/main/docs/release"): output of the Beanstalk compiler]!
 
 ## Contributing
 If you are intersted in contributing, it's very early days, but if you want to contribute to the language, please get in touch.
 
-You can find the [link "./docs/roadmap": roadmap here].
+You can find the [link("./docs/roadmap"): roadmap here].
 
 ]
 

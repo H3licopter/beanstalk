@@ -34,12 +34,13 @@
 </p><p>Here is a list of current bugs, development goals and planned features.
 </p><h2>Current immediate task list
 </h2><li><span>Parsing tuples for reading the config file
-</span></li><li><span>Not always merging spans into previous P tags correctly
 </span></li><li><span>Finalise list of keywords and syntax
 </span></li><li><span>Finish implementing all math operators and brackets
 </span></li><li><span>get variables and mostly folded expressions working fully in WASM
-</span></li><li><span>EM tags not working correctly with newlines
 </span></li><li><span>Refactor compiler to be more modular and easier to work with for contributors
+</span></li><h2>Current Bugs
+</h2><p><em>Scenes</em></p><li><span>Emphasis and strong tags are not being parsed correctly for bullet points. Markdown parser needs some work.
+</span></li><li><span>Not always merging spans into previous P tags correctly
 </span></li><h2>Core Features Being Implemented
 </h2><li><span>Finish implementing Style system for scenes (separate from core language into library of keywords)
 </span></li><li><span>Tidy up Error reporting
@@ -47,17 +48,14 @@
 </span></li><li><span>If statements
 </span></li><li><span>Loops
 </span></li><li><span>Importing/exporting working fully
-</span></li><li><span>Functions and function calls working fully, including inside expressions
 </span></li><li><span>Scene reactivity and full component system
 </span></li><li><span>Importing HTML, CSS and JS libraries seemlessly into a BS project
 </span></li><li><span>Scoping and variable shadowing
 </span></li><li><span>Commit to final memory management strategy for the language
 </span></li><li><span>Compiler as a proper command line tool
-</span></li><h2>Current Bugs
-</h2><p><em>Scenes</em></p><li><span>Emphasis and strong tags are not being parsed correctly for bullet points. Markdown parser needs some work.
-</span></li><li><span>Scenes sometimes not nesting correctly and escaping it's parent scene.
 </span></li><h2>Future Design Plans and proposals
-</h2><li><span>Better Dev server with web sockets handling hot reloading (rather than the current janky system)
+</h2><li><span>Function references to be compile time evaluated if no brackets? (must have no captures)
+</span></li><li><span>Better Dev server with web sockets handling hot reloading (rather than the current janky system)
 </span></li><li><span>Server files and server side BS code (Using a Wasm runtime on the server)
 </span></li><h3>Reserved keywords for standard lib functions
 </h3><p>Beanstalk should be a very batteries included language, with a lot of standard library functions.
@@ -88,7 +86,8 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("Navbar", bs_Navbar);uInnerHTML("Footer", bs_Footer);
+            }
+uInnerHTML("Navbar", bs_Navbar);uInnerHTML("Footer", bs_Footer);
   ;});</script>
 </body>
 </html>

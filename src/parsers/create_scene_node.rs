@@ -2,7 +2,7 @@ use colour::red_ln;
 
 use super::{
     ast_nodes::{AstNode, Reference},
-    expressions::parse_expression::{get_args, create_expression},
+    expressions::parse_expression::{create_expression, get_args},
     styles::{Action, Style, Tag},
     util::{count_newlines_at_end_of_string, count_newlines_at_start_of_string},
 };
@@ -48,7 +48,14 @@ pub fn new_scene(
                     data_type: DataType::String,
                     default_value: None,
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
                     None => {
                         continue;
@@ -69,13 +76,20 @@ pub fn new_scene(
                     data_type: DataType::String,
                     default_value: None,
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
                     None => {
                         continue;
                     }
                 };
-                
+
                 if check_if_comptime_value(&eval_arg) {
                     scene_tags.push(Tag::A(eval_arg));
                 } else {
@@ -85,16 +99,43 @@ pub fn new_scene(
             }
 
             Token::Padding => {
-                let required_args: Vec<Reference> = vec![Reference {
-                    name: "padding".to_string(),
-                    data_type: DataType::Float,
-                    default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(1.5)))),
-                }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let required_args: Vec<Reference> = vec![
+                    Reference {
+                        name: "all".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(1.5)))),
+                    },
+                    Reference {
+                        name: "top".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(0.0)))),
+                    },
+                    Reference {
+                        name: "right".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(1.5)))),
+                    },
+                    Reference {
+                        name: "bottom".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(0.0)))),
+                    },
+                    Reference {
+                        name: "left".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(1.5)))),
+                    },
+                ];
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
-                    None => {
-                        AstNode::Literal(Token::FloatLiteral(1.5))
-                    }
+                    None => AstNode::Literal(Token::FloatLiteral(1.5)),
                 };
 
                 if check_if_comptime_value(&eval_arg) {
@@ -108,14 +149,19 @@ pub fn new_scene(
             Token::Margin => {
                 let required_args: Vec<Reference> = vec![Reference {
                     name: "margin".to_string(),
-                    data_type: DataType::Float,
+                    data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
                     default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(2.0)))),
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
-                    None => {
-                        AstNode::Literal(Token::FloatLiteral(2.0))
-                    }
+                    None => AstNode::Literal(Token::FloatLiteral(2.0)),
                 };
 
                 if check_if_comptime_value(&eval_arg) {
@@ -130,10 +176,17 @@ pub fn new_scene(
             Token::Order => {
                 let required_args: Vec<Reference> = vec![Reference {
                     name: "order".to_string(),
-                    data_type: DataType::Float,
+                    data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
                     default_value: None,
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
                     None => {
                         continue;
@@ -148,12 +201,36 @@ pub fn new_scene(
             }
 
             Token::BG => {
-                let required_args: Vec<Reference> = vec![Reference {
-                    name: "style".to_string(),
-                    data_type: DataType::Style,
-                    default_value: None,
-                }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let required_args: Vec<Reference> = vec![
+                    Reference {
+                        name: "red".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: None,
+                    },
+                    Reference {
+                        name: "green".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: None,
+                    },
+                    Reference {
+                        name: "blue".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: None,
+                    },
+                    Reference {
+                        name: "alpha".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(1.0)))),
+                    },
+                ];
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
                     None => {
                         continue;
@@ -169,19 +246,42 @@ pub fn new_scene(
 
             // Colours
             Token::Rgb | Token::Hsl => {
-                let required_args: Vec<Reference> = vec![Reference {
-                    name: "color".to_string(),
-                    data_type: DataType::String,
-                    default_value: None,
-                }];
+                let required_args: Vec<Reference> = vec![
+                    Reference {
+                        name: "red".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: None,
+                    },
+                    Reference {
+                        name: "green".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: None,
+                    },
+                    Reference {
+                        name: "blue".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: None,
+                    },
+                    Reference {
+                        name: "alpha".to_string(),
+                        data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
+                        default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(1.0)))),
+                    },
+                ];
                 let color_type = token.to_owned();
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
                     None => {
                         continue;
                     }
                 };
-
                 if check_if_comptime_value(&eval_arg) {
                     scene_styles.push(Style::TextColor(eval_arg, color_type));
                 } else {
@@ -199,17 +299,24 @@ pub fn new_scene(
                 let color_type = token.to_owned();
                 let required_args: Vec<Reference> = vec![Reference {
                     name: "shade".to_string(),
-                    data_type: DataType::Float,
+                    data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
                     default_value: None,
                 }];
-                match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => {
                         if check_if_comptime_value(&arg) {
                             scene_styles.push(Style::TextColor(arg, color_type));
                         } else {
                             // Need to add JS DOM hooks to change text color at runtime.
                         }
-                    },
+                    }
                     None => {
                         scene_styles.push(Style::TextColor(
                             AstNode::Literal(Token::FloatLiteral(0.0)),
@@ -227,10 +334,17 @@ pub fn new_scene(
             Token::Size => {
                 let required_args: Vec<Reference> = vec![Reference {
                     name: "size".to_string(),
-                    data_type: DataType::Float,
+                    data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
                     default_value: None,
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
                     None => {
                         red_ln!("Error: Size must have an argument");
@@ -255,14 +369,19 @@ pub fn new_scene(
             Token::Table => {
                 let required_args: Vec<Reference> = vec![Reference {
                     name: "columns".to_string(),
-                    data_type: DataType::Float,
+                    data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
                     default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(1.0)))),
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
-                    None => {
-                        AstNode::Literal(Token::FloatLiteral(1.0))
-                    }
+                    None => AstNode::Literal(Token::FloatLiteral(1.0)),
                 };
 
                 match eval_arg {
@@ -289,7 +408,14 @@ pub fn new_scene(
                     data_type: DataType::String,
                     default_value: None,
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
                     None => {
                         continue;
@@ -311,7 +437,14 @@ pub fn new_scene(
                     data_type: DataType::String,
                     default_value: None,
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
                     None => {
                         continue;
@@ -331,7 +464,14 @@ pub fn new_scene(
                     data_type: DataType::String,
                     default_value: None,
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
                     None => {
                         continue;
@@ -394,14 +534,19 @@ pub fn new_scene(
             Token::Nav => {
                 let required_args: Vec<Reference> = vec![Reference {
                     name: "style".to_string(),
-                    data_type: DataType::String,
+                    data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
                     default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(0.0)))),
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
-                    None => {
-                        AstNode::Literal(Token::FloatLiteral(0.0))
-                    }
+                    None => AstNode::Literal(Token::FloatLiteral(0.0)),
                 };
 
                 if check_if_comptime_value(&eval_arg) {
@@ -414,15 +559,20 @@ pub fn new_scene(
 
             Token::Title => {
                 let required_args: Vec<Reference> = vec![Reference {
-                    name: "title".to_string(),
-                    data_type: DataType::String,
+                    name: "size".to_string(),
+                    data_type: DataType::Union(Box::new(vec![DataType::Float, DataType::Int])),
                     default_value: Some(Box::new(AstNode::Literal(Token::FloatLiteral(0.0)))),
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
-                    None => {
-                        AstNode::Literal(Token::FloatLiteral(0.0))
-                    }
+                    None => AstNode::Literal(Token::FloatLiteral(0.0)),
                 };
 
                 if check_if_comptime_value(&eval_arg) {
@@ -452,7 +602,14 @@ pub fn new_scene(
                     data_type: DataType::String,
                     default_value: None,
                 }];
-                let eval_arg = match get_args(tokens, &mut *i, ast, token_line_number, variable_declarations, &required_args) {
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
                     Some(arg) => arg,
                     None => {
                         red_ln!("Error: Redirect must have an argument");

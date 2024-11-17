@@ -24,7 +24,6 @@ Here is a list of current bugs, development goals and planned features.
 - If statements
 - Loops
 - Importing/exporting working fully
-- Functions and function calls working fully, including inside expressions
 - Scene reactivity and full component system
 - Importing HTML, CSS and JS libraries seemlessly into a BS project
 - Scoping and variable shadowing
@@ -32,6 +31,7 @@ Here is a list of current bugs, development goals and planned features.
 - Compiler as a proper command line tool
 
 ## Future Design Plans and proposals
+- Function references to be compile time evaluated if no brackets? (must have no captures)
 - Better Dev server with web sockets handling hot reloading (rather than the current janky system)
 - Server files and server side BS code (Using a Wasm runtime on the server)
 

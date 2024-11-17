@@ -35,7 +35,7 @@
 </p><span>This will be a bit like Rust, but less explicit and easier to understand. 
 </span><p>The cost of this is more work for the compiler, and a higher chance of less optimal code being generated.
 </p><p>The intention is for the language to <strong>not&nbsp;</strong><span>have a garbage collector.
-</span></p><p>Failing this plan, either a model similar to <a href="https://verdagon.dev/blog/linear-types-borrowing" style="" class="" >Vale's Linear Types and Generational References</a>&nbsp;<span>will be used.
+</span></p><p>Failing this plan, either a model similar to <span id="exp0"></span><span>Vale's Linear Types and Generational References</span>&nbsp;<span>will be used.
 </span></p><p>Or just a GC with first class support for memory arenas if none of these ideas work out.
 </p><h2>Copying
 </h2><p>To copy a variable, you can use the copy keyword. This will create a new variable with the same value as the original.
@@ -129,7 +129,8 @@
                 for (let i = 0;i<es.length;i++) {
                   es[i].innerHTML=update
                 }
-            }uInnerHTML("Navbar", bs_Navbar);
+            }
+uInnerHTML("Navbar", bs_Navbar);document.getElementById('exp0').innerHTML="https://verdagon.dev/blog/linear-types-borrowing";
   ;});</script>
 </body>
 </html>

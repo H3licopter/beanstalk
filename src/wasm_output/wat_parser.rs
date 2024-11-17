@@ -75,9 +75,7 @@ pub fn expression_to_wat(expr: &AstNode) -> String {
     wat
 }
 
-pub fn _new_wat_function() {
-
-}
+pub fn _new_wat_function() {}
 
 fn float_expr_to_wat(nodes: &Vec<AstNode>) -> String {
     let mut wat: String = String::new();

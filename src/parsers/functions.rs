@@ -19,7 +19,7 @@ pub fn create_function(
             -- Function body
         end
 
-        No return value   
+        No return value
 
         func fn():
             -- Function body
@@ -27,13 +27,12 @@ pub fn create_function(
     */
 
     // get args (tokens should currently be at the open parenthesis)
-    let arg_refs =
-        match parse_args(tokens, i, ast, token_line_numbers, variable_declarations) {
-            Ok(args) => args,
-            Err(err) => {
-                return AstNode::Error(err.to_string(), token_line_numbers[*i]);
-            }
-        };
+    let arg_refs = match parse_args(tokens, i, ast, token_line_numbers, variable_declarations) {
+        Ok(args) => args,
+        Err(err) => {
+            return AstNode::Error(err.to_string(), token_line_numbers[*i]);
+        }
+    };
 
     *i += 1;
 

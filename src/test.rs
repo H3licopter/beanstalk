@@ -50,8 +50,14 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
     // Create AST
     yellow_ln_bold!("CREATING AST\n");
-    let (ast, _var_declarations) =
-        parsers::build_ast::new_ast(tokens, &mut 0, &token_line_numbers, Vec::new(), &DataType::None, true);
+    let (ast, _var_declarations) = parsers::build_ast::new_ast(
+        tokens,
+        &mut 0,
+        &token_line_numbers,
+        Vec::new(),
+        &DataType::None,
+        true,
+    );
 
     for node in &ast {
         match node {
@@ -90,12 +96,15 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
         println!("{:?}", export.module_path);
     }
     println!("CSS EXPORTS: {}", parser_output.exported_css);
-    
-    let all_parsed_wasm = &format!("(module {}(func (export \"set_wasm_globals\"){}))", &parser_output.wat, parser_output.wat_globals);
+
+    let all_parsed_wasm = &format!(
+        "(module {}(func (export \"set_wasm_globals\"){}))",
+        &parser_output.wat, parser_output.wat_globals
+    );
     println!("WAT: {}", all_parsed_wasm);
 
     /*
-    
+
         // Print the HTML output
         // Create a regex to match the content between the <main> and </main> tags
         let re = Regex::new(r"(?s)<body>(.*?)</body>").unwrap();
@@ -114,10 +123,8 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
 
         // Print the formatted content
         println!("\n\n{}", formatted_content);
-    
+
     */
-
-
 
     dev_server::start_dev_server("test_output".to_string())?;
 

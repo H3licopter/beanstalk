@@ -130,16 +130,11 @@ pub fn expression_to_js(expr: &AstNode) -> String {
 
 pub fn create_reference_in_js(name: &String, data_type: &DataType) -> String {
     match data_type {
-        DataType::String
-        | DataType::Scene
-        | DataType::Inferred
-        | DataType::CoerseToString => {
+        DataType::String | DataType::Scene | DataType::Inferred | DataType::CoerseToString => {
             format!("uInnerHTML(\"{name}\", {BS_VAR_PREFIX}{name});")
         }
         _ => {
-            format!(
-                "uInnerHTML(\"{name}\", wsx.get_{BS_VAR_PREFIX}{name}());"
-            )
+            format!("uInnerHTML(\"{name}\", wsx.get_{BS_VAR_PREFIX}{name}());")
         }
     }
 }
@@ -149,32 +144,33 @@ pub fn function_call_to_js(name: &String, argument: AstNode) -> String {
 
     match argument {
         AstNode::Empty => {}
-        AstNode::Literal(token) => {
-            match token {
-                Token::StringLiteral(value) => {
-                    js.push_str(&format!("\"{}\",", value));
-                }
-                Token::FloatLiteral(value) => {
-                    js.push_str(&format!("{},", value));
-                }
-                Token::IntLiteral(value) => {
-                    js.push_str(&format!("{},", value));
-                }
-                Token::BoolLiteral(value) => {
-                    js.push_str(&format!("{},", value));
-                }
-                _ => {}
+        AstNode::Literal(token) => match token {
+            Token::StringLiteral(value) => {
+                js.push_str(&format!("\"{}\",", value));
             }
-        }
+            Token::FloatLiteral(value) => {
+                js.push_str(&format!("{},", value));
+            }
+            Token::IntLiteral(value) => {
+                js.push_str(&format!("{},", value));
+            }
+            Token::BoolLiteral(value) => {
+                js.push_str(&format!("{},", value));
+            }
+            _ => {}
+        },
         AstNode::CollectionAccess(collection_name, index_accessed, _)
         | AstNode::TupleAccess(collection_name, index_accessed, _) => {
             js.push_str(&format!("{collection_name}[{index_accessed}],"));
         }
         AstNode::RuntimeExpression(expr, data_type) => {
-            js.push_str(&format!("{},", expression_to_js(&AstNode::RuntimeExpression(
-                expr.clone(),
-                data_type.to_owned(),
-            ))));
+            js.push_str(&format!(
+                "{},",
+                expression_to_js(&AstNode::RuntimeExpression(
+                    expr.clone(),
+                    data_type.to_owned(),
+                ))
+            ));
         }
         AstNode::VarReference(name, _) | AstNode::ConstReference(name, _) => {
             js.push_str(&format!("{},", name));
@@ -183,7 +179,10 @@ pub fn function_call_to_js(name: &String, argument: AstNode) -> String {
             js.push_str(&function_call_to_js(&function_name, *args));
         }
         _ => {
-            red_ln!("Web Parser Error: Invalid argument type for function call: {:?}", argument);
+            red_ln!(
+                "Web Parser Error: Invalid argument type for function call: {:?}",
+                argument
+            );
         }
     }
 
@@ -214,6 +213,7 @@ pub fn collection_to_js(collection: &AstNode) -> String {
             return combine_vec_to_js(nodes);
         }
         _ => {
+            red_ln!("Non-tuple AST node given to collection_to_js");
             return "".to_string();
         }
     }
