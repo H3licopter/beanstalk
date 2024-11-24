@@ -1,8 +1,7 @@
 use std::path::Path;
 
 use super::{
-    colors::get_color,
-    js_parser::{collection_to_js, create_reference_in_js, expression_to_js, function_call_to_js},
+    code_block_highlighting::highlight_code_block, colors::get_color, js_parser::{collection_to_js, create_reference_in_js, expression_to_js, function_call_to_js}
 };
 use crate::{
     bs_css::get_bs_css,
@@ -712,161 +711,156 @@ pub fn parse_scene(
 
     for node in scene {
         match node {
-            AstNode::Element(token) => {
-                match token {
-                    Token::Span(mut content) => {
-                        content = sanitise_content(&mut content);
+            AstNode::Span(mut content) => {
+                content = sanitise_content(&mut content);
 
-                        // Specical tags
-                        match scene_wrap.tag {
-                            Tag::Title(_) | Tag::List | Tag::A(_) | Tag::Button(_) => {
-                                html.push_str(&content.to_owned());
-                                continue;
-                            }
-                            _ => {}
-                        }
+                // Specical tags
+                match scene_wrap.tag {
+                    Tag::Title(_) | Tag::List | Tag::A(_) | Tag::Button(_) => {
+                        html.push_str(&content.to_owned());
+                        continue;
+                    }
+                    _ => {}
+                }
 
-                        match *parent_tag {
-                            Tag::P => {
-                                html.push_str(&format!("<span>{}</span>", content));
-                                if count_newlines_at_end_of_string(&content) > 0 {
-                                    *parent_tag = Tag::None;
-                                    html.push_str("</p>");
+                match *parent_tag {
+                    Tag::P => {
+                        html.push_str(&format!("<span>{}</span>", content));
+                        if count_newlines_at_end_of_string(&content) > 0 {
+                            *parent_tag = Tag::None;
+                            html.push_str("</p>");
 
-                                    // Find the last p tag in closing tags and remove it
-                                    let mut i = closing_tags.len();
-                                    while i > 0 {
-                                        i -= 1;
-                                        if closing_tags[i] == "</p>" {
-                                            closing_tags.remove(i);
-                                            break;
-                                        }
-                                    }
+                            // Find the last p tag in closing tags and remove it
+                            let mut i = closing_tags.len();
+                            while i > 0 {
+                                i -= 1;
+                                if closing_tags[i] == "</p>" {
+                                    closing_tags.remove(i);
+                                    break;
                                 }
                             }
+                        }
+                    }
+                    Tag::Heading | Tag::BulletPoint => {
+                        let newlines_at_start = count_newlines_at_start_of_string(&content);
+                        if newlines_at_start > 0 {
+                            // If newlines at start, break out of heading and add normal P tag instead
+                            html.push_str(&format!("<p>{}", content));
+                            closing_tags.push("</p>".to_string());
+                            *parent_tag = Tag::None;
+                        } else {
+                            html.push_str(&content);
+                            if count_newlines_at_end_of_string(&content) > 0 {
+                                html.push_str(&collect_closing_tags(&mut closing_tags));
+                                *parent_tag = Tag::None;
+                            }
+                        }
+                    }
+                    Tag::Table(_) | Tag::List | Tag::A(_) | Tag::Button(_) => {
+                        html.push_str(&content.to_owned());
+                    }
+                    _ => {
+                        html.push_str(&format!("<span>{}</span>", content));
+                    }
+                }
+            }
+
+            AstNode::P(mut content) => {
+                content = sanitise_content(&mut content);
+
+                match scene_wrap.tag {
+                    Tag::Img(_) | Tag::Video(_) => {
+                        scene_wrap
+                            .properties
+                            .push_str(&format!(" alt=\"{}\"", content));
+                    }
+                    Tag::Title(_) | Tag::List => {
+                        html.push_str(&content.to_owned());
+                        continue;
+                    }
+                    Tag::A(_) | Tag::Button(_) => {
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
+                        html.push_str(&content.to_owned());
+                    }
+                    _ => {
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
+                        match *parent_tag {
+                            Tag::P => {
+                                if count_newlines_at_start_of_string(content.as_str()) > 1 {
+                                    html.push_str("</p>");
+                                    html.push_str(&format!("<p>{}", content));
+                                } else {
+                                    html.push_str(&format!("<span>{}</span>", content));
+                                }
+                            }
+                            Tag::Table(_) | Tag::Nav(_) | Tag::List | Tag::Button(_) => {
+                                html.push_str(&content.to_owned());
+                            }
                             Tag::Heading | Tag::BulletPoint => {
-                                let newlines_at_start = count_newlines_at_start_of_string(&content);
+                                let newlines_at_start =
+                                    count_newlines_at_start_of_string(content.as_str());
                                 if newlines_at_start > 0 {
-                                    // If newlines at start, break out of heading and add normal P tag instead
+                                    for _ in 1..newlines_at_start {
+                                        html.push_str("<br>");
+                                    }
                                     html.push_str(&format!("<p>{}", content));
                                     closing_tags.push("</p>".to_string());
-                                    *parent_tag = Tag::None;
+                                    *parent_tag = Tag::P;
                                 } else {
-                                    html.push_str(&content);
-                                    if count_newlines_at_end_of_string(&content) > 0 {
-                                        html.push_str(&collect_closing_tags(&mut closing_tags));
+                                    html.push_str(&content.to_owned());
+                                    if count_newlines_at_end_of_string(content.as_str()) > 0
+                                    {
+                                        html.push_str(&collect_closing_tags(
+                                            &mut closing_tags,
+                                        ));
                                         *parent_tag = Tag::None;
                                     }
                                 }
                             }
-                            Tag::Table(_) | Tag::List | Tag::A(_) | Tag::Button(_) => {
-                                html.push_str(&content.to_owned());
-                            }
                             _ => {
-                                html.push_str(&format!("<span>{}</span>", content));
-                            }
-                        }
-                    }
-
-                    Token::P(mut content) => {
-                        content = sanitise_content(&mut content);
-
-                        match scene_wrap.tag {
-                            Tag::Img(_) | Tag::Video(_) => {
-                                scene_wrap
-                                    .properties
-                                    .push_str(&format!(" alt=\"{}\"", content));
-                            }
-                            Tag::Title(_) | Tag::List => {
-                                html.push_str(&content.to_owned());
-                                continue;
-                            }
-                            Tag::A(_) | Tag::Button(_) => {
-                                html.push_str(&collect_closing_tags(&mut closing_tags));
-                                html.push_str(&content.to_owned());
-                            }
-                            _ => {
-                                html.push_str(&collect_closing_tags(&mut closing_tags));
-                                match *parent_tag {
-                                    Tag::P => {
-                                        if count_newlines_at_start_of_string(content.as_str()) > 1 {
-                                            html.push_str("</p>");
-                                            html.push_str(&format!("<p>{}", content));
-                                        } else {
-                                            html.push_str(&format!("<span>{}</span>", content));
-                                        }
-                                    }
-                                    Tag::Table(_) | Tag::Nav(_) | Tag::List | Tag::Button(_) => {
-                                        html.push_str(&content.to_owned());
-                                    }
-                                    Tag::Heading | Tag::BulletPoint => {
-                                        let newlines_at_start =
-                                            count_newlines_at_start_of_string(content.as_str());
-                                        if newlines_at_start > 0 {
-                                            for _ in 1..newlines_at_start {
-                                                html.push_str("<br>");
-                                            }
-                                            html.push_str(&format!("<p>{}", content));
-                                            closing_tags.push("</p>".to_string());
-                                            *parent_tag = Tag::P;
-                                        } else {
-                                            html.push_str(&content.to_owned());
-                                            if count_newlines_at_end_of_string(content.as_str()) > 0
-                                            {
-                                                html.push_str(&collect_closing_tags(
-                                                    &mut closing_tags,
-                                                ));
-                                                *parent_tag = Tag::None;
-                                            }
-                                        }
-                                    }
-                                    _ => {
-                                        html.push_str(&format!("<p>{}", content));
-                                        if count_newlines_at_end_of_string(&content) > 0 {
-                                            html.push_str("</p>");
-                                            *parent_tag = Tag::None;
-                                        } else {
-                                            closing_tags.push("</p>".to_string());
-                                            *parent_tag = Tag::P;
-                                        }
-                                    }
+                                html.push_str(&format!("<p>{}", content));
+                                if count_newlines_at_end_of_string(&content) > 0 {
+                                    html.push_str("</p>");
+                                    *parent_tag = Tag::None;
+                                } else {
+                                    closing_tags.push("</p>".to_string());
+                                    *parent_tag = Tag::P;
                                 }
                             }
                         }
                     }
+                }
+            }
 
-                    Token::Pre(content) => {
-                        html.push_str(&collect_closing_tags(&mut closing_tags));
-                        html.push_str(&format!("<pre>{}", content));
-                        closing_tags.push("</pre>".to_string());
-                    }
+            AstNode::Pre(content) => {
+                html.push_str(&collect_closing_tags(&mut closing_tags));
+                html.push_str(&format!("<pre>{}", content));
+                closing_tags.push("</pre>".to_string());
+            }
 
-                    Token::Newline => {
-                        match *parent_tag {
-                            Tag::Table(_) | Tag::Nav(_) => {}
-                            _ => {
-                                html.push_str(&collect_closing_tags(&mut closing_tags));
-                                // if columns == 0 {
-                                //     html.push_str("<br>");
-                                // }
-                            }
-                        };
-                    }
-
-                    Token::CodeBlock(content) => {
-                        // Add the CSS for code highlighting
-                        if !codeblock_css_added {
-                            // css.push_str(&get_highlight_css());
-                            codeblock_css_added = true;
-                        }
-
-                        html.push_str(&collect_closing_tags(&mut closing_tags));
-                        html.push_str(&format!("<pre><code>{}</code></pre>", content));
-                    }
+            AstNode::Newline => {
+                match *parent_tag {
+                    Tag::Table(_) | Tag::Nav(_) => {}
                     _ => {
-                        red_ln!("Unknown token found in AST Element node: {:?}", token);
+                        html.push_str(&collect_closing_tags(&mut closing_tags));
+                        // if columns == 0 {
+                        //     html.push_str("<br>");
+                        // }
                     }
                 };
+            }
+
+            AstNode::CodeBlock(content,  language) => {
+                // Add the CSS for code highlighting
+                if !codeblock_css_added {
+                    css.push_str(get_bs_css("codeblock-0"));
+                    codeblock_css_added = true;
+                }
+
+                html.push_str(&collect_closing_tags(&mut closing_tags));
+
+                let highlighted_block = highlight_code_block(&content, &language);
+                html.push_str(&format!("<pre><code>{}</code></pre>", highlighted_block));
             }
 
             AstNode::Scene(

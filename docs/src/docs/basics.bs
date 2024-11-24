@@ -17,13 +17,13 @@ Comments use a double minus sign '--'.
 Multiline (block) comments use a triple minus (or more) to start and end the comment.
 
 [code: 
-    -- normal comment
+-- normal comment
 
-    ---
-    Multiline comment
+---
+Multiline comment
 
-    Woo
-    ---
+Woo
+---
 ]
 
 # Variables

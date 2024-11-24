@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="page-dist-url/site-favicons-folder-url/apple-touch-icon.png">
 <link rel="manifest"href="page-dist-url/site-favicons-folder-url/site.webmanifest">
 <link rel="stylesheet" href="page-dist-url/css/pico.min.css" />
-<style>@page-css</style></head><body>page-template
+<style>:root{color-scheme:light dark;}@page-css</style></head><body>page-template
 <script type="module">  //imports
   WebAssembly.instantiateStreaming(fetch("./wasm-module-name.wasm")).then((obj)=>{
     let wsx = obj.instance.exports;wsx.set_wasm_globals();//js

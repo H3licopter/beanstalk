@@ -39,7 +39,7 @@ Functions must always have a return type specified, even if it is an error.
     multipleReturns(5)
 
     -- Calling a function with named arguments
-    differentReturns(spicy: true)
+    differentReturns(spicy = true)
 ]
 
 [Footer]

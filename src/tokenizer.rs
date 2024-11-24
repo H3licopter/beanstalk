@@ -478,7 +478,6 @@ fn keyword_or_variable(
             "import" => return Token::Import,
             "use" => return Token::Use,
             "break" => return Token::Break,
-            "when" => return Token::When,
             "defer" => return Token::Defer,
             "in" => return Token::In,
             "as" => return Token::As,

@@ -1,22 +1,27 @@
-/* CLASSES FOR CODE HIGHLIGHTING INSIDE CODE BLOCKS */
+codeblock {
+  color: light-dark(#222222, #ddd);
+}
 .bs-code-comment {
-  color: #6a9955;
+  color: light-dark(#79bb4a, #838c86);
 }
 .bs-code-keyword {
-  color: #cc7832;
+  color: light-dark(#ad590e, #ea943e);
 }
 .bs-code-string {
-  color: #6a8759;
+  color: light-dark(#007130, #449515);
 }
 .bs-code-number {
-  color: #6897bb;
+  color: light-dark(#073f85, #6c99ec);
 }
 .bs-code-operator {
-  color: #d4d4d4;
+  color: light-dark(#2b476a, #9ec1ff);
 }
-.bs-code-identifier {
-  color: #9876aa;
+.bs-code-struct {
+  color: light-dark(#ac2187, #a17fbd);
 }
 .bs-code-type {
-  color: #4c8ea1;
+  color: light-dark(#0d8db3, #63bbd9);
+}
+.bs-code-parenthesis {
+  color: light-dark(#a6814e, #bcac52);
 }

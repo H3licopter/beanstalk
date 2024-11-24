@@ -1,28 +1,25 @@
 [Navbar]
-
 [header center: [title(1): CONTROL FLOW]]
 
 [main:
 ## If Statements
-If statements can be used as expressions or statements. 
+If statements can be used as expressions or statements.
 They can also be used for pattern matching, all with a similar syntax.
 
 [code:
     v = 1
-
     if v is not 1:
         print("nope")
     else
         print("yep")
     end
 
-    -- If as a match statement
+    -- If as an exhaustive match statement
     -- Use a colon after the 'is' keyword to start a block for matching
     if v is:
         0: print("nope")
         1: print("yep")
-    else: 
-        print("wat")
+        else: print("wat")
     end
 
     -- If as an expression
@@ -37,34 +34,48 @@ They can also be used for pattern matching, all with a similar syntax.
 ]
 
 # Loops
-Only 1 keyword for loops "loop". 
+Only 1 keyword for loops "for". 
 
 Using the "in" keyword, you can specify an integer, float or collection to iterate through or define a new integer, float or collection. 
 
 [code:
-    loop thing in things:
+    for thing in things:
         print(thing)
     end
 
-    loop c in collection_of_choices:
+    for c in collection_of_choices:
         if c is:
             cool: print(cool.value)
             else: print(cool.value)
         end
     end
 
-    loop -20 to big_number:
+    for -20 to big_number:
         print("hello")
     end
 
     -- reverse loop
-    loop n in big_number to smaller_number:
+    for n in big_number to smaller_number:
         print(n)
     end
 
-    loop item in collection:
+    for item in collection:
         print(item.index)
     end
+
+    -- Using a loop in a scene
+    names = {"Priya", "Sam", "Chad"}
+    [main:
+        [for name in names:
+            Name: [name]
+        ]
+    ]
+
+    --- scene looks like:
+    Name: Priya
+    Name: Sam
+    Name: Chad
+    ---
 ]
 
 [Footer]

@@ -7,10 +7,10 @@ Here is a list of current bugs, development goals and planned features.
 
 ## Current immediate task list
 - Parsing tuples for reading the config file
-- Finalise list of keywords and syntax
 - Finish implementing all math operators and brackets
-- get variables and mostly folded expressions working fully in WASM
-- Refactor compiler to be more modular and easier to work with for contributors
+- get variables and mostly folded expressions working fully
+- Tidy up Error reporting
+- Code blocks: wrap every token inside the pre in a span and give it a style based on the token type. get_next_token can be used for this.
 
 ## Current Bugs
 *Scenes*
@@ -19,7 +19,6 @@ Here is a list of current bugs, development goals and planned features.
 
 ## Core Features Being Implemented
 - Finish implementing Style system for scenes (separate from core language into library of keywords)
-- Tidy up Error reporting
 - Boolean expressions and operators
 - If statements
 - Loops

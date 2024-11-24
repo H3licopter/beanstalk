@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="./../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="./../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="./../css/pico.min.css" />
-<style>.bs-0 > * {color:inherit;}.bs-nav-1 {
+<style>:root{color-scheme:light dark;}.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
@@ -30,24 +30,23 @@
                 word-spacing: 0.5rem;
                 margin: 1.5rem 0 1.4rem 0;
                 line-height: 3.7rem;
-            }</style></head><body><span class="Navbar"></span><header class="container"><b class="bs-title-0 " style=""  >Styles</b></header><main class="container"><p>You can create your own styles in Beanstalk using the HTML library type 'Style'.
+            }codeblock{color:light-dark(#222,#ddd)}.bs-code-comment{color:light-dark(#759061,#838c86)}.bs-code-keyword{color:light-dark(#ad590e,#ea943e)}.bs-code-string{color:light-dark(#007130,#4fba11)}.bs-code-number{color:light-dark(#073f85,#96b5ed)}.bs-code-operator{color:light-dark(#2b476a,#9ec1ff)}.bs-code-struct{color:light-dark(#ac2187,#a17fbd)}.bs-code-type{color:light-dark(#0d8db3,#54c5d3)}.bs-code-parenthesis{color:light-dark(#ad7e0d,#bcac52)}</style></head><body><span class="Navbar"></span><header class="container"><b class="bs-title-0 " style=""  >Styles</b></header><main class="container"><p>You can create your own styles in Beanstalk using the HTML library type 'Style'.
 </p><p>The html basic library that starts with any new beanstalk html project will contain many basic styles that you can use.
-</p><pre><code>
-    red = Style(
-        tag_type: "span",
-        css: "color: red;",
-        compatibility: All,
-        nested_scene_behaviour: {
-            force_wrap: false,
-            disallow_children: false
-        },
-        wrappers: {
-            before: "",
-            after: ""
-        },
-        content_mode: Normal,
-        inlining_rules: 0
-    )
+</p><pre><code>red <span class='bs-code-operator'>=</span> Style<span class='bs-code-parenthesis'>(</span>
+   tag_type<span class='bs-code-operator'>:</span> <span class='bs-code-string'>"span"</span>,
+   css<span class='bs-code-operator'>:</span> <span class='bs-code-string'>"color: red;"</span>,
+   compatibility<span class='bs-code-operator'>:</span> All,
+   nested_scene_behaviour<span class='bs-code-operator'>:</span> <span class='bs-code-parenthesis'>{</span>
+       force_wrap<span class='bs-code-operator'>:</span> false,
+       disallow_children<span class='bs-code-operator'>:</span> false
+   <span class='bs-code-parenthesis'>}</span>,
+   wrappers<span class='bs-code-operator'>:</span> <span class='bs-code-parenthesis'>{</span>
+       before<span class='bs-code-operator'>:</span> <span class='bs-code-string'>""</span>,
+       after<span class='bs-code-operator'>:</span> <span class='bs-code-string'>""</span>
+   <span class='bs-code-parenthesis'>}</span>,
+   content_mode<span class='bs-code-operator'>:</span> Normal,
+   inlining_rules<span class='bs-code-operator'>:</span> <span class='bs-code-number'>0</span>
+<span class='bs-code-parenthesis'>)</span>
 </code></pre><p>Structure of a style:
 </p><h2>Tag type
 </h2><p>This is what HTML tag the style will use by default. 

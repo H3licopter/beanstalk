@@ -120,8 +120,8 @@ pub fn tokenize_markdown(
                         chars.next();
                         continue;
                     }
-                    // If there is a space or newline after the asterisk, cancel the em tag
-                    ' ' | '\n' => {
+                    // Cancel the em tag
+                    ch if ch.is_whitespace() => {
                         *current_char = *ch;
                         chars.next();
                         for _ in 0..strength {

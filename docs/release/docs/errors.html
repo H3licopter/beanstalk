@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="./../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="./../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="./../css/pico.min.css" />
-<style>.bs-0 > * {color:inherit;}.bs-nav-1 {
+<style>:root{color-scheme:light dark;}.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ERROR HANDLING AND OPTIONALS</b></div></header><main class="container"><p>Errors are treated as values in Beanstalk, 
+            }codeblock{color:light-dark(#222,#ddd)}.bs-code-comment{color:light-dark(#759061,#838c86)}.bs-code-keyword{color:light-dark(#ad590e,#ea943e)}.bs-code-string{color:light-dark(#007130,#4fba11)}.bs-code-number{color:light-dark(#073f85,#96b5ed)}.bs-code-operator{color:light-dark(#2b476a,#9ec1ff)}.bs-code-struct{color:light-dark(#ac2187,#a17fbd)}.bs-code-type{color:light-dark(#0d8db3,#54c5d3)}.bs-code-parenthesis{color:light-dark(#ad7e0d,#bcac52)}codeblock{color:light-dark(#222,#ddd)}.bs-code-comment{color:light-dark(#759061,#838c86)}.bs-code-keyword{color:light-dark(#ad590e,#ea943e)}.bs-code-string{color:light-dark(#007130,#4fba11)}.bs-code-number{color:light-dark(#073f85,#96b5ed)}.bs-code-operator{color:light-dark(#2b476a,#9ec1ff)}.bs-code-struct{color:light-dark(#ac2187,#a17fbd)}.bs-code-type{color:light-dark(#0d8db3,#54c5d3)}.bs-code-parenthesis{color:light-dark(#ad7e0d,#bcac52)}codeblock{color:light-dark(#222,#ddd)}.bs-code-comment{color:light-dark(#759061,#838c86)}.bs-code-keyword{color:light-dark(#ad590e,#ea943e)}.bs-code-string{color:light-dark(#007130,#4fba11)}.bs-code-number{color:light-dark(#073f85,#96b5ed)}.bs-code-operator{color:light-dark(#2b476a,#9ec1ff)}.bs-code-struct{color:light-dark(#ac2187,#a17fbd)}.bs-code-type{color:light-dark(#0d8db3,#54c5d3)}.bs-code-parenthesis{color:light-dark(#ad7e0d,#bcac52)}</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >ERROR HANDLING AND OPTIONALS</b></div></header><main class="container"><p>Errors are treated as values in Beanstalk, 
 </p><span>any function that can return an error must have its error handled.
 </span><p>The ? operator is used to signify an option of a type or none.
 </p><p>The ! operator is used to signify an option of an error or none.
@@ -39,29 +39,29 @@
 </p><span>If it is, the error can then be handled immediately on the same line, or in a new block using a colon.
 </span><p>If you use a colon after the ? or ! operator, you will need an end statement to close the scope. 
 </p><span>Otherwise, you can handle it inline.
-</span><pre><code>    func_call_that_can_return_an_error() !:
-        -- Error handling code
-    end
+</span><pre><code>func_call_that_can_return_an_error<span class='bs-code-parenthesis'>(</span><span class='bs-code-parenthesis'>)</span> <span class='bs-code-operator'>!</span><span class='bs-code-operator'>:</span>
+  <span class='bs-code-comment'> -- Error handling code</span>
+<span class='bs-code-keyword'>end</span>
 
-    -- This function can return a String or None
-    parent_func () -> string?:
-        return func_call_that_can_return_an_error() !:
-            print("Error: ", error)
-            return None
-        end
-    end
+<span class='bs-code-comment'>-- This function can return a String or None</span>
+parent_func <span class='bs-code-parenthesis'>(</span><span class='bs-code-parenthesis'>)</span><span class='bs-code-operator'>></span> string<span class='bs-code-operator'>?</span><span class='bs-code-operator'>:</span>
+   return func_call_that_can_return_an_error<span class='bs-code-parenthesis'>(</span><span class='bs-code-parenthesis'>)</span> <span class='bs-code-operator'>!</span><span class='bs-code-operator'>:</span>
+       print<span class='bs-code-parenthesis'>(</span><span class='bs-code-string'>"Error: "</span>, error<span class='bs-code-parenthesis'>)</span>
+       return None
+   end
+<span class='bs-code-keyword'>end</span>
 </code></pre><h2>Using the ? operator
-</h2><pre><code>    getURL () -> string:
-        return getNetworkRequest() ?:
-            print("Network did not respond: Using default URL")
-            return "example.com"
-        end
-    end
+</h2><pre><code>getURL <span class='bs-code-parenthesis'>(</span><span class='bs-code-parenthesis'>)</span><span class='bs-code-operator'>></span> string<span class='bs-code-operator'>:</span>
+   return getNetworkRequest<span class='bs-code-parenthesis'>(</span><span class='bs-code-parenthesis'>)</span> <span class='bs-code-operator'>?</span><span class='bs-code-operator'>:</span>
+       print<span class='bs-code-parenthesis'>(</span><span class='bs-code-string'>"Network did not respond: Using default URL"</span><span class='bs-code-parenthesis'>)</span>
+       return <span class='bs-code-string'>"example.com"</span>
+   end
+<span class='bs-code-keyword'>end</span>
 
-    -- Returns a string or None
-    getURL () -> string?:
-        return getNetworkRequest()
-    end
+<span class='bs-code-comment'>-- Returns a string or None</span>
+getURL <span class='bs-code-parenthesis'>(</span><span class='bs-code-parenthesis'>)</span><span class='bs-code-operator'>></span> string<span class='bs-code-operator'>?</span><span class='bs-code-operator'>:</span>
+   return getNetworkRequest<span class='bs-code-parenthesis'>(</span><span class='bs-code-parenthesis'>)</span>
+<span class='bs-code-keyword'>end</span>
 </code></pre><h2>Asserts and Panics
 </h2><p>There are cases where you want to either catch unexpected state for debugging, 
 </p><span>or prevent the program from continuing if a certain condition is not met or an error is thrown.
@@ -72,16 +72,16 @@
 </span><p>Functions that can panic at runtime should only be used in cases where the program should absolutely not continue if the function fails.
 </p><span>Such as if there is a high risk of undefined behaviour in a critical and complex part of a program.
 </span><span>Effectively creating a runtime assertion.
-</span><pre><code>    -- stops the program if 1 is not equal to 1
-    -- Runs the code in the block first
-    assert(1 is not 1, "1 is not 1 uh oh")
+</span><pre><code><span class='bs-code-comment'>-- stops the program if 1 is not equal to 1</span>
+<span class='bs-code-comment'>-- Runs the code in the block first</span>
+assert<span class='bs-code-parenthesis'>(</span><span class='bs-code-number'>1</span> is not <span class='bs-code-number'>1</span>, <span class='bs-code-string'>"1 is not 1 uh oh"</span><span class='bs-code-parenthesis'>)</span>
 
-    function_that_can_panic fn(the_truth Bool) -> panic?:
-        if the_truth is False: panic("The truth is not true")
-        
-        -- This code will not run if the_truth is false
-        return None
-    end
+function_that_can_panic fn<span class='bs-code-parenthesis'>(</span>the_truth Bool<span class='bs-code-parenthesis'>)</span><span class='bs-code-operator'>></span> panic<span class='bs-code-operator'>?</span><span class='bs-code-operator'>:</span>
+   if the_truth is False<span class='bs-code-operator'>:</span> panic<span class='bs-code-parenthesis'>(</span><span class='bs-code-string'>"The truth is not true"</span><span class='bs-code-parenthesis'>)</span>
+   
+  <span class='bs-code-comment'> -- This code will not run if the_truth is false</span>
+   return None
+<span class='bs-code-keyword'>end</span>
 </code></pre><span class="Footer"></span></main>
 <script type="module">  let bs_Navbar = `<nav style="background-color:rgba(100,220,50,0.03);" class="bs-nav-1 "  ><ul><li><a href="https://nyejames.github.io/beanstalk" style="color:hsla(0,0%,100%,1);padding:0rem;" class=" bs-0" ><img src=https://nyejames.github.io/beanstalk/images/default.webp style="width:10%;" class=""  /></a>&nbsp;</li></ul></nav>`;let bs_Footer = `<footer class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;padding:2rem 0rem 0rem 0rem ;"  class="" ><h3>&#127793;
 </h3></div></footer>`;

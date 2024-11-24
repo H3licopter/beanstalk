@@ -64,7 +64,7 @@ pub fn test_build() -> Result<(), Box<dyn Error>> {
             AstNode::Scene(_, _, _, _) => {
                 print_scene(node, 0);
             }
-            AstNode::Element(_) => {
+            AstNode::P(_) | AstNode::Span(_) => {
                 green_ln!("{:?}", node);
             }
             AstNode::Error(err, line) => {
@@ -163,14 +163,6 @@ fn print_scene(scene: &AstNode, scene_nesting_level: u32) {
                 match scene_node {
                     AstNode::Scene(_, _, _, _) => {
                         print_scene(scene_node, scene_nesting_level + 1);
-                    }
-                    AstNode::Element(token) => match token {
-                        Token::P(_) => {
-                            green_ln!("{}  {:?}", indentation, scene_node);
-                        }
-                        _ => {
-                            grey_ln!("{}  {:?}", indentation, scene_node);
-                        }
                     },
                     AstNode::Heading(_)
                     | AstNode::BulletPoint(_)

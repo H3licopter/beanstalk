@@ -18,7 +18,7 @@
 <link rel="apple-touch-icon"href="./../images/favicons/apple-touch-icon.png">
 <link rel="manifest"href="./../images/favicons/site.webmanifest">
 <link rel="stylesheet" href="./../css/pico.min.css" />
-<style>.bs-0 > * {color:inherit;}.bs-nav-1 {
+<style>:root{color-scheme:light dark;}.bs-0 > * {color:inherit;}.bs-nav-1 {
                 border-bottom-color: grey;
                 border-bottom-style: solid;
                 border-bottom-width: 1px;
@@ -30,7 +30,7 @@
                 word-spacing: 0.4rem;
                 margin: 1.3rem 0 1.2rem 0;
                 line-height: 3.5rem;
-            }.bs-0 > * {color:inherit;}.bs-1 > * {color:inherit;}</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><h2>The Compiler
+            }.bs-0 > * {color:inherit;}.bs-1 > * {color:inherit;}codeblock{color:light-dark(#222,#ddd)}.bs-code-comment{color:light-dark(#759061,#838c86)}.bs-code-keyword{color:light-dark(#ad590e,#ea943e)}.bs-code-string{color:light-dark(#007130,#4fba11)}.bs-code-number{color:light-dark(#073f85,#96b5ed)}.bs-code-operator{color:light-dark(#2b476a,#9ec1ff)}.bs-code-struct{color:light-dark(#ac2187,#a17fbd)}.bs-code-type{color:light-dark(#0d8db3,#54c5d3)}.bs-code-parenthesis{color:light-dark(#ad7e0d,#bcac52)}codeblock{color:light-dark(#222,#ddd)}.bs-code-comment{color:light-dark(#759061,#838c86)}.bs-code-keyword{color:light-dark(#ad590e,#ea943e)}.bs-code-string{color:light-dark(#007130,#4fba11)}.bs-code-number{color:light-dark(#073f85,#96b5ed)}.bs-code-operator{color:light-dark(#2b476a,#9ec1ff)}.bs-code-struct{color:light-dark(#ac2187,#a17fbd)}.bs-code-type{color:light-dark(#0d8db3,#54c5d3)}.bs-code-parenthesis{color:light-dark(#ad7e0d,#bcac52)}</style></head><body><span class="Navbar"></span><header class="container"><div style="display:flex;align-items:center;flex-direction:column;text-align:center;"  class="" ><b class="bs-title-1 " style=""  >PROJECT SETUP</b></div></header><main class="container"><h2>The Compiler
 </h2><p>You currently have to compile the Beanstalk compiler yourself. The compiler is written in Rust. This will change once the compiler and language development is more stable.
 </p><p>The compiler can be found on <a href="https://github.com/nyejames/beanstalk/" style="" class="" >Github</a><span>.
 </span></p><h2>Setting up a Project
@@ -58,9 +58,9 @@
 </h1><h3>Build
 </h3><p>The simpliest way to get the compiler to output some HTML is to use the <em>build&nbsp;</em><span>command.
 </span></p><p>While in the root directory of your project, where the config.bs file is, run the command <strong>build&nbsp;</strong><span>to compile your whole project.
-</span></p><pre><code>    $ build ./path_to_project
+</span></p><pre><code><span class='bs-code-operator'>$</span> build <span class='bs-code-number'>.</span><span class='bs-code-operator'>/</span>path_to_project
 </code></pre><p>If you specify a specific bs file, build will only compile that specific file and will output it into the same directory.
-</p><pre><code>    $ build ./path_to_project/src/index.bs
+</p><pre><code><span class='bs-code-operator'>$</span> build <span class='bs-code-number'>.</span><span class='bs-code-operator'>/</span>path_to_project<span class='bs-code-operator'>/</span>src<span class='bs-code-operator'>/</span>index.bs
 </code></pre><h3>Dev
 </h3><p>To create a development server with a watcher, run the command 'dev' in the root directory of your project. This is the main way to develop your HTML project.
 </p><p>This will create a localhost server that will automatically reload the page when you make changes to your bs files. The command line will give you a link to open in your browser.

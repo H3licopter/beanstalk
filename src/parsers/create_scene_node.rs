@@ -535,9 +535,48 @@ pub fn new_scene(
             Token::CodeKeyword => {
                 scene_tags.clear();
             }
+
             Token::CodeBlock(content) => {
-                scene.push(AstNode::Element(Token::CodeBlock(content.to_owned())));
+                let required_args: Vec<Reference> = vec![Reference {
+                    name: "language".to_string(),
+                    data_type: DataType::String,
+                    default_value: Some(Box::new(AstNode::Literal(Token::StringLiteral("bs".to_string())))),
+                }];
+                let eval_arg = match get_args(
+                    tokens,
+                    &mut *i,
+                    ast,
+                    token_line_number,
+                    variable_declarations,
+                    &required_args,
+                ) {
+                    Some(arg) => arg,
+                    None => {
+                        AstNode::Literal(Token::StringLiteral("bs".to_string()))
+                    }
+                };
+
+                if check_if_comptime_value(&eval_arg) {
+                    match eval_arg {
+                        AstNode::Literal(Token::StringLiteral(lang)) => {
+                            scene.push(AstNode::CodeBlock(content.to_owned(), lang));
+                        }
+                        _ => {
+                            return AstNode::Error(
+                                "Code block must have a string literal as a language argument"
+                                    .to_string(),
+                                token_line_number.to_owned(),
+                            );
+                        }
+                    }
+                } else {
+                    return AstNode::Error(
+                        "Code block must have a comptime value for it's language selection".to_string(),
+                        token_line_number.to_owned(),
+                    );
+                }
             }
+
 
             Token::Nav => {
                 let required_args: Vec<Reference> = vec![Reference {
@@ -669,9 +708,9 @@ pub fn new_scene(
 
             Token::P(content) => {
                 scene.push(if !check_if_inline(tokens, *i, &mut merge_next_p_line) {
-                    AstNode::Element(Token::P(content.clone()))
+                    AstNode::P(content.clone())
                 } else {
-                    AstNode::Element(Token::Span(content.clone()))
+                    AstNode::Span(content.clone())
                 });
             }
 
@@ -692,15 +731,11 @@ pub fn new_scene(
             }
 
             Token::RawStringLiteral(content) => {
-                scene.push(AstNode::Element(Token::Span(content.to_string())));
+                scene.push(AstNode::Span(content.to_string()));
             }
 
             Token::Pre(content) => {
-                scene.push(AstNode::Element(Token::Pre(content.to_string())));
-            }
-
-            Token::CodeBlock(content) => {
-                scene.push(AstNode::Element(Token::CodeBlock(content.to_string())));
+                scene.push(AstNode::Pre(content.to_string()));
             }
 
             // For templating values in scene heads in the body of scenes
@@ -712,7 +747,7 @@ pub fn new_scene(
             }
 
             Token::Newline => {
-                scene.push(AstNode::Element(Token::Newline));
+                scene.push(AstNode::Newline);
             }
 
             Token::Empty | Token::Colon => {}

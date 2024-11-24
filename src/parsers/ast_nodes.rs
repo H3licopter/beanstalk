@@ -2,8 +2,7 @@ use std::path::PathBuf;
 
 use super::styles::{Action, Style, Tag};
 use crate::{
-    bs_types::{return_datatype, DataType},
-    Token,
+    bs_types::{return_datatype, DataType}, Token
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -72,7 +71,13 @@ pub enum AstNode {
 
     // HTML
     Id(String),
-    Element(Token), // HTML element content
+    Span(String),
+    P(String),
+
+    Pre(String),
+    CodeBlock(String, String), // Code, Language
+    Newline,
+
     Heading(u8),
     BulletPoint(u8),
     Em(u8, String),

@@ -49,6 +49,8 @@ pub enum Token {
     StringLiteral(String),
     PathLiteral(String),
     FloatLiteral(f64),
+    IntLiteral(i64),
+    RuneLiteral(char),
     RawStringLiteral(String),
     BoolLiteral(bool),
 
@@ -56,10 +58,6 @@ pub enum Token {
     OpenCurly,  // {
     CloseCurly, // }
 
-    // Not yet supported
-    IntLiteral(i64),
-    RuneLiteral(char),
-    DecLiteral(f64), // Will eventually be some bignum type thing
 
     // Stucture of Syntax
     Newline,
@@ -131,7 +129,6 @@ pub enum Token {
     Continue, // Might also operate as a fallthrough operator
     Return,
     End,
-    When,
     Defer,
     Assert,
     Copy,
@@ -180,7 +177,7 @@ pub enum Token {
     Table,
     Center,
     CodeKeyword,
-    CodeBlock(String),
+    CodeBlock(String), // Content, Language
     Order,
     Blank,
     Hide,

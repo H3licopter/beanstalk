@@ -38,6 +38,7 @@ mod html_output {
     pub mod generate_html;
     pub mod js_parser;
     pub mod web_parser;
+    pub mod code_block_highlighting;
 }
 mod wasm_output {
     pub mod wasm_generator;
